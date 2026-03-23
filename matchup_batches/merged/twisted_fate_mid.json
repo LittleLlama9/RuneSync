@@ -1,0 +1,312 @@
+{
+  "Twisted Fate": {
+    "mid": {
+      "Swain": {
+        "difficulty": "hard",
+        "who_wins_early": "Swain",
+        "trading_pattern": "Swain has tankiness and CC early. Play safe, use W poke.",
+        "ability_to_dodge": "Swain E (Nevermove) — dodge sideways.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Protobelt, Level 6"
+        },
+        "early_game": "Play defensive. Swain dominates early.",
+        "mid_game": "Roam with ult. Use gold card for picks.",
+        "late_game": "You outscale with itemization and roams.",
+        "win_condition": "Get roaming lead before Swain becomes unkillable.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Twisted Fate outscales — your roam impact grows",
+        "jungle_gankable": true,
+        "positioning": "Keep distance with W. Use ult to roam."
+      },
+      "Sion": {
+        "difficulty": "hard",
+        "who_wins_early": "Sion",
+        "trading_pattern": "Sion has tankiness and all-in. Play safe with W poke.",
+        "ability_to_dodge": "Sion Q (Decimating Smash) — dodge sideways.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Sunfire, Level 6"
+        },
+        "early_game": "Play very safe. Sion dominates early.",
+        "mid_game": "Roam with ult. Use gold card for picks.",
+        "late_game": "He becomes tanky. Use your roams.",
+        "win_condition": "Roam before Sion becomes oppressive.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Sion outscales — his tankiness increases late",
+        "jungle_gankable": true,
+        "positioning": "Keep distance with W. Use ult to roam."
+      },
+      "Aurelion Sol": {
+        "difficulty": "hard",
+        "who_wins_early": "Aurelion Sol",
+        "trading_pattern": "Aurelion Sol pushes and roams better early. Farm defensively.",
+        "ability_to_dodge": "Aurelion Sol W (Expansion) — stay at range.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Level 6 (roams), Luden's"
+        },
+        "early_game": "Farm defensively. Aurelion Sol roams better early.",
+        "mid_game": "Both roam. Coordinate roams for picks.",
+        "late_game": "He outscales in roaming. Win through map control.",
+        "win_condition": "Coordinate roams better than him.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Aurelion Sol slightly favored — his roaming is stronger",
+        "jungle_gankable": true,
+        "positioning": "Keep distance with W. Use ult to roam."
+      },
+      "Naafiri": {
+        "difficulty": "hard",
+        "who_wins_early": "Naafiri",
+        "trading_pattern": "Naafiri has early burst. Play defensive with W poke.",
+        "ability_to_dodge": "Naafiri Q (Salvo) — step to side.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Youmuu's, Level 6"
+        },
+        "early_game": "Play safe. Naafiri dominates early.",
+        "mid_game": "Roam with ult before she gets kills.",
+        "late_game": "You outscale with roam impact.",
+        "win_condition": "Roam before Naafiri gets fed.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Twisted Fate outscales — your roaming improves late",
+        "jungle_gankable": false,
+        "positioning": "Keep distance with W. Use ult to roam."
+      },
+      "Fizz": {
+        "difficulty": "hard",
+        "who_wins_early": "Fizz",
+        "trading_pattern": "Fizz is melee with burst. Keep distance with W poke.",
+        "ability_to_dodge": "Fizz R (Chum) — move away from shark.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Protobelt, Level 6"
+        },
+        "early_game": "Play very safe. Fizz has strong all-in.",
+        "mid_game": "Roam when he's farming. Make picks.",
+        "late_game": "You outscale with roams.",
+        "win_condition": "Roam before Fizz gets kills.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Twisted Fate outscales — your roaming improves late",
+        "jungle_gankable": true,
+        "positioning": "Keep maximum distance. Use ult to roam."
+      },
+      "Twitch": {
+        "difficulty": "medium",
+        "who_wins_early": "Twitch",
+        "trading_pattern": "Twitch has poke from distance. Farm defensively with W.",
+        "ability_to_dodge": "Twitch E (Contaminate) — respect poison stacks.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Liandry's, Level 6"
+        },
+        "early_game": "Play defensively. Twitch has good poke.",
+        "mid_game": "Roam with ult. Make picks.",
+        "late_game": "Both scale. Roams determine outcome.",
+        "win_condition": "Roam and make picks before he scales.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Twitch slightly favored — his poke and roam are good",
+        "jungle_gankable": true,
+        "positioning": "Keep distance with W. Use ult to roam."
+      },
+      "Morgana": {
+        "difficulty": "medium",
+        "who_wins_early": "Morgana",
+        "trading_pattern": "Morgana has CC and poke. Farm carefully with W.",
+        "ability_to_dodge": "Morgana Q (Dark Binding) — dodge sideways.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Liandry's, Level 6"
+        },
+        "early_game": "Play defensively. Morgana has CC.",
+        "mid_game": "Roam with ult. Use gold card for picks.",
+        "late_game": "You outscale with roams.",
+        "win_condition": "Roam and make picks.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Twisted Fate outscales — your roaming improves late",
+        "jungle_gankable": true,
+        "positioning": "Keep distance with W. Use ult to roam."
+      },
+      "Akali": {
+        "difficulty": "medium",
+        "who_wins_early": "Akali",
+        "trading_pattern": "Akali is melee. Keep distance with W poke.",
+        "ability_to_dodge": "Akali E (Flip) — step back.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Protobelt, Level 6"
+        },
+        "early_game": "Play defensively. Akali has strong all-in.",
+        "mid_game": "Roam with ult. Make picks.",
+        "late_game": "You outscale with roams.",
+        "win_condition": "Roam before she gets kills.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Twisted Fate outscales — your roaming improves late",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Use ult to roam."
+      },
+      "Ziggs": {
+        "difficulty": "easy",
+        "who_wins_early": "Twisted Fate",
+        "trading_pattern": "Ziggs is weak early. Use W to poke and roam.",
+        "ability_to_dodge": "Ziggs Q (Bomb) — dodge sideways.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Abuse with W poke. Roam early.",
+        "mid_game": "Maintain pressure. Make picks.",
+        "late_game": "He outscales in waveclear. Finish before he controls.",
+        "win_condition": "Get roaming lead. Finish before he scales.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Ziggs outscales — his waveclear is oppressive late",
+        "jungle_gankable": true,
+        "positioning": "Use W to poke. Roam frequently."
+      },
+      "Kai'Sa": {
+        "difficulty": "easy",
+        "who_wins_early": "Twisted Fate",
+        "trading_pattern": "Kai'Sa is weak early. Use W poke and roam.",
+        "ability_to_dodge": "Kai'Sa Q (Icathian Diver) — respects her dash.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Muramana, Level 6"
+        },
+        "early_game": "Abuse with poke. Roam early.",
+        "mid_game": "Maintain pressure. Make picks.",
+        "late_game": "She outscales. Finish before she scales.",
+        "win_condition": "Get roaming lead. Finish before she scales.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Kai'Sa outscales — her scaling is superior",
+        "jungle_gankable": false,
+        "positioning": "Use W to poke. Roam frequently."
+      },
+      "Karma": {
+        "difficulty": "easy",
+        "who_wins_early": "Twisted Fate",
+        "trading_pattern": "Karma is weak early. Use W poke and roam.",
+        "ability_to_dodge": "Karma Q (Heavenly Wave) — dodge sideways.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Abuse with poke. Roam early.",
+        "mid_game": "Maintain pressure. Make picks.",
+        "late_game": "You outscale with roams.",
+        "win_condition": "Roam early and snowball.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Twisted Fate outscales — your roaming improves late",
+        "jungle_gankable": true,
+        "positioning": "Use W to poke. Roam frequently."
+      },
+      "Malphite": {
+        "difficulty": "easy",
+        "who_wins_early": "Twisted Fate",
+        "trading_pattern": "Malphite is weak early. Use W poke and roam.",
+        "ability_to_dodge": "Malphite Q (Seismic Shard) — dodge away.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Armguard, Level 6"
+        },
+        "early_game": "Abuse with poke. Roam early.",
+        "mid_game": "Maintain pressure. Make picks.",
+        "late_game": "He becomes tanky. Finish before oppressive.",
+        "win_condition": "Roam early and finish.",
+        "counter_items": ["Mercury's Treads", "Liandry's"],
+        "scaling": "Malphite outscales — his tankiness increases late",
+        "jungle_gankable": false,
+        "positioning": "Use W to poke. Roam frequently."
+      },
+      "Smolder": {
+        "difficulty": "easy",
+        "who_wins_early": "Twisted Fate",
+        "trading_pattern": "Smolder is very weak early. Spam W and roam.",
+        "ability_to_dodge": "Smolder Q (Breath) — dodge away.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Liandry's, Level 13"
+        },
+        "early_game": "Dominate with poke. Roam heavily.",
+        "mid_game": "Maintain roam pressure.",
+        "late_game": "He outscales. Finish before 2-3 items.",
+        "win_condition": "Get roaming lead. Finish early.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Smolder significantly outscales — you need major lead",
+        "jungle_gankable": false,
+        "positioning": "Use W aggressively. Roam constantly."
+      },
+      "Azir": {
+        "difficulty": "easy",
+        "who_wins_early": "Twisted Fate",
+        "trading_pattern": "Azir is weak early. Use W poke and roam.",
+        "ability_to_dodge": "Azir soldiers have limited early range.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Abuse with poke. Roam early.",
+        "mid_game": "Maintain pressure. Make picks.",
+        "late_game": "He outscales. Finish before control.",
+        "win_condition": "Roam early. Finish before Azir scales.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Azir outscales — his teamfight control improves late",
+        "jungle_gankable": false,
+        "positioning": "Use W to poke. Roam frequently."
+      },
+      "Seraphine": {
+        "difficulty": "medium",
+        "who_wins_early": "Even",
+        "trading_pattern": "Seraphine has utility similar to you. Trade when abilities down.",
+        "ability_to_dodge": "Seraphine E (Surround Sound) — dodge by stepping away.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Mirror her playstyle. Both farm similarly.",
+        "mid_game": "Both roam. Coordinate for picks.",
+        "late_game": "Both scale similarly. Roams determine outcome.",
+        "win_condition": "Roam and make picks.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Even — both scale at similar rates",
+        "jungle_gankable": true,
+        "positioning": "Use W to poke. Roam frequently."
+      },
+      "Orianna": {
+        "difficulty": "medium",
+        "who_wins_early": "Even",
+        "trading_pattern": "Orianna has poke and control. Trade when ball is far.",
+        "ability_to_dodge": "Orianna Q (Command: Attack) — dodge by stepping back.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Archangel's, Level 6"
+        },
+        "early_game": "Mirror her playstyle. Both farm similarly.",
+        "mid_game": "Both roam. Coordinate for picks.",
+        "late_game": "She outscales slightly. Use roams.",
+        "win_condition": "Roam and make picks.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Orianna slightly favored — her teamfight control is superior",
+        "jungle_gankable": true,
+        "positioning": "Use W to poke. Keep away from her ball."
+      },
+      "Ahri": {
+        "difficulty": "medium",
+        "who_wins_early": "Even",
+        "trading_pattern": "Ahri has mobility similar to you. Trade when Q down.",
+        "ability_to_dodge": "Ahri Q (Orb of Deception) — dodge by stepping sideways.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Mirror her playstyle. Both have early roam.",
+        "mid_game": "Both roam. Coordinate for picks.",
+        "late_game": "Both scale similarly. Roams determine outcome.",
+        "win_condition": "Roam and make picks.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Ahri slightly favored — her mobility is higher",
+        "jungle_gankable": true,
+        "positioning": "Use W to poke. Use ult to roam."
+      }
+    }
+  }
+}

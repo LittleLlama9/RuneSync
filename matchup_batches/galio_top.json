@@ -1,0 +1,348 @@
+{
+  "Galio": {
+    "top": {
+      "Darius": {
+        "difficulty": "medium",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Darius Q bleed is oppressive. Your W shield and tankiness help. Trade with Q poke.",
+        "ability_to_dodge": "His Q outer ring bleed — walk at him to avoid. Your W shields damage.",
+        "power_spikes": {
+          "you": "Level 3 (W shield), Hollow Radiance",
+          "enemy": "Level 6 (R execute), Stridebreaker"
+        },
+        "early_game": "Darius dominates early. Use W to shield. Don't extend far.",
+        "mid_game": "Your tankiness and W scale. His ult is deadly — avoid low HP.",
+        "late_game": "You outscale through tankiness and CC. He struggles vs grouped.",
+        "win_condition": "Use W to shield. Scale into tankiness. Group for fights.",
+        "counter_items": ["Hollow Radiance", "Plated Steelcaps"],
+        "scaling": "You outscale through tankiness and CC.",
+        "jungle_gankable": false,
+        "positioning": "Use W defensively. Trade Q poke. Teamfight grouped."
+      },
+      "Garen": {
+        "difficulty": "easy",
+        "who_wins_early": "Galio",
+        "trading_pattern": "Garen Q silence dominates close. Your W shield negates it. Trade with Q poke.",
+        "ability_to_dodge": "His Q silence wind-up — move away. Your W shields damage.",
+        "power_spikes": {
+          "you": "Level 3 (W shield), Hollow Radiance",
+          "enemy": "Level 6 (R execute), Sunfire Aegis"
+        },
+        "early_game": "Trade with Q poke. Use W to shield. He scales but you do too.",
+        "mid_game": "Both scale into tankiness. Your W is useful. Trade around cooldowns.",
+        "late_game": "Even — both scale as tanks.",
+        "win_condition": "Trade Q poke early. Use W to shield. Group for fights.",
+        "counter_items": ["Hollow Radiance", "Plated Steelcaps"],
+        "scaling": "Even — both scale as tanks.",
+        "jungle_gankable": false,
+        "positioning": "Trade Q poke. Use W defensively. Teamfight grouped."
+      },
+      "Fiora": {
+        "difficulty": "medium",
+        "who_wins_early": "Fiora",
+        "trading_pattern": "Fiora's parry negates your damage. Your W shield helps. Trade with Q from range.",
+        "ability_to_dodge": "Her parry W — trade from range before she parries.",
+        "power_spikes": {
+          "you": "Level 3 (W shield), Hollow Radiance",
+          "enemy": "Level 3 (parry), Trinity Force"
+        },
+        "early_game": "Fiora's parry is oppressive. Trade Q from range only.",
+        "mid_game": "Your tankiness scales. Her split push is strong. Group for fights.",
+        "late_game": "You outscale through tankiness. Fiora struggles grouped.",
+        "win_condition": "Trade Q from range. Use W to shield. Group for fights.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Trade Q from range. Use W defensively. Group for fights."
+      },
+      "Jax": {
+        "difficulty": "hard",
+        "who_wins_early": "Jax",
+        "trading_pattern": "Jax's dueling is oppressive. Your W shield and tankiness help. Play around cooldowns.",
+        "ability_to_dodge": "His E stun counter — don't trade into it.",
+        "power_spikes": {
+          "you": "Level 3 (W shield)", "Hollow Radiance",
+          "enemy": "Level 6 (E stun), Trinity Force"
+        },
+        "early_game": "Jax dominates early. Use W to shield. Don't trade.",
+        "mid_game": "Your tankiness scales. His dueling is strong. Group for fights.",
+        "late_game": "You outscale through tankiness. Jax struggles grouped.",
+        "win_condition": "Use W to shield. Avoid trading. Group for teamfights.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use W defensively. Avoid E range. Group for fights."
+      },
+      "Riven": {
+        "difficulty": "hard",
+        "who_wins_early": "Riven",
+        "trading_pattern": "Riven's combo is oppressive. Your W shield and tankiness help. Play safe.",
+        "ability_to_dodge": "Her Q dash combo — use W to shield the burst.",
+        "power_spikes": {
+          "you": "Level 3 (W shield)", "Hollow Radiance",
+          "enemy": "Level 1 (combo), Trinity Force"
+        },
+        "early_game": "Riven's burst dominates. Use W to shield. Don't trade.",
+        "mid_game": "Your tankiness scales. Her split push is strong. Group for fights.",
+        "late_game": "You outscale through tankiness. Riven struggles grouped.",
+        "win_condition": "Use W to shield. Avoid her. Group for teamfights.",
+        "counter_items": ["Plated Steelcaps", "Hollow Radiance"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use W defensively. Avoid combo. Group for fights."
+      },
+      "Aatrox": {
+        "difficulty": "medium",
+        "who_wins_early": "Aatrox",
+        "trading_pattern": "Aatrox Q range is massive. Your W shield and Q poke help. Trade around cooldowns.",
+        "ability_to_dodge": "His Q skillshots — trade from distance.",
+        "power_spikes": {
+          "you": "Level 3 (W shield)", "Hollow Radiance",
+          "enemy": "Level 1 (Q damage), Goliath Cleaver"
+        },
+        "early_game": "Aatrox Q dominates. Use W to shield. Trade Q from range.",
+        "mid_game": "Your tankiness scales. His all-in is strong. Group for fights.",
+        "late_game": "You outscale through tankiness. He falls off.",
+        "win_condition": "Trade Q from range. Use W to shield. Group for fights.",
+        "counter_items": ["Hollow Radiance", "Plated Steelcaps"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Trade Q from range. Use W defensively. Group for fights."
+      },
+      "Mordekaiser": {
+        "difficulty": "hard",
+        "who_wins_early": "Mordekaiser",
+        "trading_pattern": "Mordekaiser's all-in is oppressive. Your W shield helps. Play safe.",
+        "ability_to_dodge": "His E pull — use W to shield when he pulls.",
+        "power_spikes": {
+          "you": "Level 3 (W shield)", "Hollow Radiance",
+          "enemy": "Level 1 (all-in), Trinity Force"
+        },
+        "early_game": "Mordekaiser dominates. Use W to shield. Don't trade.",
+        "mid_game": "Your tankiness scales. His ult can isolate. Group for fights.",
+        "late_game": "You outscale through tankiness. He struggles grouped.",
+        "win_condition": "Use W to shield. Group for fights. Avoid 1v1.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use W defensively. Group for fights. Avoid duels."
+      },
+      "Nasus": {
+        "difficulty": "easy",
+        "who_wins_early": "Galio",
+        "trading_pattern": "Nasus has zero early game. Your Q poke and W shield dominate. Trade aggressively.",
+        "ability_to_dodge": "His W wither — use W to shield or trade back.",
+        "power_spikes": {
+          "you": "Level 1-6 (early dominance), Hollow Radiance",
+          "enemy": "Level 16+ (stacking), Iceborn Gauntlet"
+        },
+        "early_game": "Dominate with Q poke. Nasus is helpless. Build a lead.",
+        "mid_game": "Your lead carries. His stacking helps. Group for fights.",
+        "late_game": "His stacks scale. You outscale through tankiness. Group always.",
+        "win_condition": "Dominate early with Q. Build lead. Group for fights.",
+        "counter_items": ["Hollow Radiance", "Trinity Force"],
+        "scaling": "He outscales through stacks — you through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Poke aggressively early. Group for fights. Teamfight."
+      },
+      "Sion": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Sion's Q poke is strong. Your W shield and Q poke help. Trade around cooldowns.",
+        "ability_to_dodge": "His Q slow — your W shields damage.",
+        "power_spikes": {
+          "you": "Level 3 (W shield)", "Hollow Radiance",
+          "enemy": "Level 9 (Q cooldown), Hollow Radiance"
+        },
+        "early_game": "Trade Q for Q. Use W to shield.",
+        "mid_game": "Both scale into tankiness. Your W is useful. Trade around cooldowns.",
+        "late_game": "Even — both scale well. Your CC helps teamfights.",
+        "win_condition": "Trade Q and shield. Use W wisely. Group for fights.",
+        "counter_items": ["Hollow Radiance", "Plated Steelcaps"],
+        "scaling": "Even — both scale well.",
+        "jungle_gankable": true,
+        "positioning": "Trade Q and shield. Use W wisely. Teamfight grouped."
+      },
+      "Malphite": {
+        "difficulty": "medium",
+        "who_wins_early": "Malphite",
+        "trading_pattern": "Malphite is tanky but low damage. Your W shield helps. Trade with Q gradually.",
+        "ability_to_dodge": "His E shockwave — your W shields it.",
+        "power_spikes": {
+          "you": "Level 3 (W shield)", "Hollow Radiance",
+          "enemy": "Level 6 (R engage), Thornmail"
+        },
+        "early_game": "Malphite is hard to kill. Use W to shield. Trade Q gradually.",
+        "mid_game": "Both scale into tankiness. Your W is useful. Trade carefully.",
+        "late_game": "Even — both scale well. Teamfight is even.",
+        "win_condition": "Trade Q and shield. Use W wisely. Group for fights.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "Even — both scale well.",
+        "jungle_gankable": true,
+        "positioning": "Trade Q and shield. Use W wisely. Teamfight grouped."
+      },
+      "Kayle": {
+        "difficulty": "easy",
+        "who_wins_early": "Galio",
+        "trading_pattern": "Kayle's early range is limited. Your Q poke and W shield dominate. Trade aggressively.",
+        "ability_to_dodge": "Her R invincibility — don't commit when she ults.",
+        "power_spikes": {
+          "you": "Level 1-6 (early dominance)", "Hollow Radiance",
+          "enemy": "Level 11 (range extends), Nashor's Tooth"
+        },
+        "early_game": "Dominate with Q poke. Kayle's range is limited.",
+        "mid_game": "Her range extends. Your tankiness scales. Group for fights.",
+        "late_game": "She scales well. You outscale through tankiness.",
+        "win_condition": "Dominate early with Q. Build lead. Group for fights.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "Even — both scale well late game.",
+        "jungle_gankable": true,
+        "positioning": "Trade Q aggressively early. Group for fights."
+      },
+      "Yorick": {
+        "difficulty": "medium",
+        "who_wins_early": "Yorick",
+        "trading_pattern": "Yorick's ghouls are oppressive. Your W shield and Q poke help. Trade from range.",
+        "ability_to_dodge": "His E cage — move sideways. Use W to shield if caught.",
+        "power_spikes": {
+          "you": "Level 3 (W shield)", "Hollow Radiance",
+          "enemy": "Level 6 (R maiden), Trinity Force"
+        },
+        "early_game": "Yorick's ghouls zone you. Trade Q from range. Use W wisely.",
+        "mid_game": "Your tankiness scales. His maiden is strong. Group for fights.",
+        "late_game": "You outscale through tankiness. Avoid 1v1s.",
+        "win_condition": "Trade Q from range. Use W wisely. Group for fights.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Trade Q from range. Use W wisely. Group for fights."
+      },
+      "Illaoi": {
+        "difficulty": "medium",
+        "who_wins_early": "Illaoi",
+        "trading_pattern": "Illaoi's E test is devastating. Your W shield and tankiness help. Play safe.",
+        "ability_to_dodge": "Her E tentacle test — move away from her.",
+        "power_spikes": {
+          "you": "Level 3 (W shield)", "Hollow Radiance",
+          "enemy": "Level 6 (R spawns), Sunfire Aegis"
+        },
+        "early_game": "Illaoi's tentacles zone you. Use W to shield. Avoid E.",
+        "mid_game": "Your tankiness scales. Her tentacles zone. Trade carefully.",
+        "late_game": "You outscale through tankiness. Avoid tentacles.",
+        "win_condition": "Use W to shield. Avoid E test. Group for fights.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use W defensively. Avoid E test. Group for fights."
+      },
+      "Camille": {
+        "difficulty": "hard",
+        "who_wins_early": "Camille",
+        "trading_pattern": "Camille's E hook is oppressive. Your W shield helps. Play safe.",
+        "ability_to_dodge": "Her E hook — use W to shield when she hooks.",
+        "power_spikes": {
+          "you": "Level 3 (W shield)", "Hollow Radiance",
+          "enemy": "Level 3 (E hook), Trinity Force"
+        },
+        "early_game": "Camille dominates. Use W to shield. Don't trade.",
+        "mid_game": "Your tankiness scales. Her dueling is strong. Group for fights.",
+        "late_game": "You outscale through tankiness. Camille struggles grouped.",
+        "win_condition": "Use W to shield. Avoid her. Group for teamfights.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use W defensively. Avoid E. Group for fights."
+      },
+      "Olaf": {
+        "difficulty": "medium",
+        "who_wins_early": "Olaf",
+        "trading_pattern": "Olaf's Q slow is oppressive. Your W shield helps. Trade around cooldowns.",
+        "ability_to_dodge": "His Q axe slow — use W to shield when he pokes.",
+        "power_spikes": {
+          "you": "Level 3 (W shield)", "Hollow Radiance",
+          "enemy": "Level 1 (Q slow), Trinity Force"
+        },
+        "early_game": "Olaf's poke dominates. Use W to shield. Trade around cooldowns.",
+        "mid_game": "Your tankiness scales. His R makes him unkiteable. Group for fights.",
+        "late_game": "You outscale through tankiness. Avoid his ult.",
+        "win_condition": "Use W to shield. Trade around cooldowns. Group for fights.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use W defensively. Trade around cooldowns. Group for fights."
+      },
+      "Ornn": {
+        "difficulty": "hard",
+        "who_wins_early": "Ornn",
+        "trading_pattern": "Ornn's W brittle is oppressive. Your W shield helps. Play safe.",
+        "ability_to_dodge": "His E charge — use W to shield when he charges.",
+        "power_spikes": {
+          "you": "Level 3 (W shield)", "Hollow Radiance",
+          "enemy": "Level 6 (R knockup), Sunfire Aegis"
+        },
+        "early_game": "Ornn dominates. Use W to shield. Don't trade.",
+        "mid_game": "Your tankiness scales. His tankiness improves. Trade carefully.",
+        "late_game": "You outscale through tankiness. His upgrades are annoying.",
+        "win_condition": "Use W to shield. Group for fights. Avoid extended.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use W defensively. Avoid E. Group for fights."
+      },
+      "Maokai": {
+        "difficulty": "medium",
+        "who_wins_early": "Maokai",
+        "trading_pattern": "Maokai's W pull is strong. Your W shield helps. Play around cooldowns.",
+        "ability_to_dodge": "His W pull — use W to shield when he pulls.",
+        "power_spikes": {
+          "you": "Level 3 (W shield)", "Hollow Radiance",
+          "enemy": "Level 6 (R CC chain), Liandry's"
+        },
+        "early_game": "Maokai's poke is strong. Use W to shield. Trade around cooldowns.",
+        "mid_game": "Your tankiness scales. His tankiness improves. Trade carefully.",
+        "late_game": "Even — both scale well. Teamfight is even.",
+        "win_condition": "Use W to shield. Trade around cooldowns. Group for fights.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "Even — both scale well.",
+        "jungle_gankable": true,
+        "positioning": "Use W defensively. Trade around cooldowns. Group for fights."
+      },
+      "Gnar": {
+        "difficulty": "medium",
+        "who_wins_early": "Gnar",
+        "trading_pattern": "Gnar's poke from range is oppressive. Your W shield and Q poke help. Trade around cooldowns.",
+        "ability_to_dodge": "His E hop — use W to shield if he approaches.",
+        "power_spikes": {
+          "you": "Level 3 (W shield)", "Hollow Radiance",
+          "enemy": "Level 1 (ranged poke), Trinity Force"
+        },
+        "early_game": "Gnar's ranged poke dominates. Use W to shield. Trade Q carefully.",
+        "mid_game": "Your tankiness scales. His mega form is scary. Group for fights.",
+        "late_game": "You outscale through tankiness. Avoid mega.",
+        "win_condition": "Trade Q and shield. Avoid mega form. Group for fights.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use W defensively. Trade Q. Avoid mega form."
+      },
+      "Volibear": {
+        "difficulty": "hard",
+        "who_wins_early": "Volibear",
+        "trading_pattern": "Volibear's W bite is oppressive. Your W shield helps. Play safe.",
+        "ability_to_dodge": "His R storm dive — use W to shield when he dives.",
+        "power_spikes": {
+          "you": "Level 3 (W shield)", "Hollow Radiance",
+          "enemy": "Level 6 (R engage), Trinity Force"
+        },
+        "early_game": "Volibear dominates. Use W to shield. Don't trade.",
+        "mid_game": "Your tankiness scales. His tankiness improves. Trade carefully.",
+        "late_game": "You outscale through tankiness. Avoid his all-in.",
+        "win_condition": "Use W to shield. Group for fights. Avoid extended.",
+        "counter_items": ["Hollow Radiance", "Plated Steelcaps"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": false,
+        "positioning": "Use W defensively. Group for fights. Respect W."
+      }
+    }
+  }
+}

@@ -1,0 +1,366 @@
+{
+  "Riven": {
+    "top": {
+      "Mordekaiser": {
+        "difficulty": "hard",
+        "who_wins_early": "Mordekaiser",
+        "trading_pattern": "Mordekaiser has higher base stats and burst at level 3+. His E pull is devastating. You can't fight his all-in early.",
+        "ability_to_dodge": "His E pull — move perpendicular when he casts. Stay at range to avoid his gravity zone.",
+        "power_spikes": {
+          "you": "Level 5 (full kit), Trinity Force",
+          "enemy": "Level 3 (E pull + burst), Trinity Force"
+        },
+        "early_game": "Play safe and farm. Mordekaiser outbursts you early. Avoid extended trades.",
+        "mid_game": "Your burst and mobility improve. Look for side lane opportunities. Avoid grouped fights.",
+        "late_game": "You're a better split pusher. His ult is dangerous grouped. Never let him ult you in teamfights.",
+        "win_condition": "Survive early. Roam and split push. Use your mobility to avoid his ult.",
+        "counter_items": ["Plated Steelcaps", "Mercury's Treads"],
+        "scaling": "Even — both scale as split pushers with different win conditions.",
+        "jungle_gankable": true,
+        "positioning": "Stay at range to minimize E pull. Don't extend into river."
+      },
+      "Renekton": {
+        "difficulty": "hard",
+        "who_wins_early": "Renekton",
+        "trading_pattern": "Renekton's empowered abilities with Fury outburst you early. His W stun is devastating. Play around Fury cycles.",
+        "ability_to_dodge": "His empowered W stun — move perpendicular to avoid. If stunned, he combos you.",
+        "power_spikes": {
+          "you": "Level 5 (full kit), Trinity Force",
+          "enemy": "Level 3 (Fury combo spike), Trinity Force"
+        },
+        "early_game": "Renekton's Fury cycles are too strong. Play safe and farm. Avoid fighting at level 3.",
+        "mid_game": "Your split push improves. Look for side lane opportunities. Avoid grouped fights.",
+        "late_game": "You're a better split pusher late. His early advantage diminishes.",
+        "win_condition": "Survive early. Roam and split push. Avoid grouped fights.",
+        "counter_items": ["Plated Steelcaps", "Mercury's Treads"],
+        "scaling": "You outscale late — Renekton is early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Move perpendicular to his W. Trade when his Fury is low."
+      },
+      "Sett": {
+        "difficulty": "hard",
+        "who_wins_early": "Sett",
+        "trading_pattern": "Sett's tankiness and W all-in are oppressive. His grit slam burst is devastating. You can't fight his all-in early.",
+        "ability_to_dodge": "His W grit slam — move away when he builds grit. It stuns and deals massive damage.",
+        "power_spikes": {
+          "you": "Level 5 (full kit), Trinity Force",
+          "enemy": "Level 2 (all-in spike), Trinity Force"
+        },
+        "early_game": "Sett's all-in is too strong early. Play safe and farm. Avoid extended trades.",
+        "mid_game": "Your burst improves. Look for combo opportunities. Avoid grouped fights.",
+        "late_game": "You're a better split pusher. His tankiness is still relevant.",
+        "win_condition": "Survive early. Roam and split push. Avoid grouped fights.",
+        "counter_items": ["Plated Steelcaps", "Trinity Force"],
+        "scaling": "You outscale late — Sett is early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Move away when his grit builds. Trade when W is down."
+      },
+      "Jax": {
+        "difficulty": "hard",
+        "who_wins_early": "even",
+        "trading_pattern": "Jax Q-AA burst wins short trades. His E counter-strike stun is devastating. Trade when his E is down.",
+        "ability_to_dodge": "His E counter-strike — back away when he jumps. He stuns if counter triggers.",
+        "power_spikes": {
+          "you": "Level 5 (full kit), Trinity Force",
+          "enemy": "Trinity Force completion (duelist god), Level 6"
+        },
+        "early_game": "Trade short when his E is down. Your combo is strong early.",
+        "mid_game": "His items help him scale. Your split push is strong. Avoid grouped fights.",
+        "late_game": "He outscales as a duelist. You're a split pusher. Never 1v1 him late.",
+        "win_condition": "Get a lead early. Roam and split push. Avoid his 1v1.",
+        "counter_items": ["Trinity Force", "Kaenic Rookern"],
+        "scaling": "Jax outscales as a duelist. You're a split pusher.",
+        "jungle_gankable": false,
+        "positioning": "Trade when his E is down. Don't let him scale."
+      },
+      "Malphite": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Malphite is tanky but low damage. Your burst is stronger. Look for combo windows.",
+        "ability_to_dodge": "His E shockwave — move away. It reduces armor but doesn't prevent your combos.",
+        "power_spikes": {
+          "you": "Level 3 (Q-AA-Q combo), Trinity Force",
+          "enemy": "Level 6 (R engage), Thornmail"
+        },
+        "early_game": "Trade hard with your Q combos. Malphite scales into a teamfight god. Dominate early.",
+        "mid_game": "His R engage is powerful. Look for side lane opportunities. Avoid grouped fights.",
+        "late_game": "He outscales as a teamfighter. You're a split pusher. Never group.",
+        "win_condition": "Get a lead early. Roam and split push. Avoid grouped fights.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "Malphite outscales as a teamfighter. You're a split pusher.",
+        "jungle_gankable": true,
+        "positioning": "Trade hard early. Don't let him scale into teamfights."
+      },
+      "Kayle": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Kayle farms early with Q. She's weak to all-ins. Your combos destroy her early.",
+        "ability_to_dodge": "Her W healing — focus her down before she heals. Her range increases with levels.",
+        "power_spikes": {
+          "you": "Level 3 (Q-AA-Q combo), Trinity Force",
+          "enemy": "Level 6 (ult invulnerability), Level 11 (melee form)"
+        },
+        "early_game": "She's incredibly weak early. Your combos are devastating. You should kill her.",
+        "mid_game": "She scales with items. Your split push is strong. Avoid grouped fights.",
+        "late_game": "She outscales dramatically. You must win early.",
+        "win_condition": "Kill her early. Get a lead. Roam and split push.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "Kayle outscales dramatically. You must win early.",
+        "jungle_gankable": true,
+        "positioning": "Rush her early with combos. Don't let her scale."
+      },
+      "Sejuani": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Sejuani is tanky but slow. Your burst is stronger. Look for combo windows.",
+        "ability_to_dodge": "Her R stun — move sideways to avoid her engage. It stuns and deals damage.",
+        "power_spikes": {
+          "you": "Level 3 (Q-AA-Q combo), Trinity Force",
+          "enemy": "Level 6 (R engage), Thornmail"
+        },
+        "early_game": "Trade hard with your combos. She's tanky but has lower damage.",
+        "mid_game": "Her R engage is powerful grouped. Look for side lane opportunities.",
+        "late_game": "She outscales as a tank. You're a split pusher. Avoid grouped fights.",
+        "win_condition": "Get a lead early. Roam and split push. Avoid grouped fights.",
+        "counter_items": ["Trinity Force", "Adaptive Helm"],
+        "scaling": "Sejuani outscales as a tank. You're a split pusher.",
+        "jungle_gankable": true,
+        "positioning": "Trade hard early. Avoid her R engage grouped."
+      },
+      "Varus": {
+        "difficulty": "medium",
+        "who_wins_early": "Varus",
+        "trading_pattern": "Varus pokes with Q and applies on-hit stacks. His poke is safe from range. Trade when Q is down.",
+        "ability_to_dodge": "His R chain reaction — dodge by moving sideways. If hit, the chain spreads.",
+        "power_spikes": {
+          "you": "Level 3 (Q-AA-Q combo), Trinity Force",
+          "enemy": "Level 2 (poke spike), Manamune"
+        },
+        "early_game": "Varus outpokes. Your combos are strong when you land them. Look for openings.",
+        "mid_game": "Your split push is strong. His poke is still relevant. Avoid grouped fights.",
+        "late_game": "He outscales as a poke champion. You're a split pusher. Avoid grouped fights.",
+        "win_condition": "Get a lead early. Roam and split push. Avoid grouped fights.",
+        "counter_items": ["Mercury's Treads", "Trinity Force"],
+        "scaling": "Varus outscales as a poke champion. You're a split pusher.",
+        "jungle_gankable": true,
+        "positioning": "Dodge his Q by moving sideways. Rush him when possible."
+      },
+      "Vayne": {
+        "difficulty": "medium",
+        "who_wins_early": "Vayne",
+        "trading_pattern": "Vayne's range and tumble let her kite. She applies true damage slowly. Extended trades favor her.",
+        "ability_to_dodge": "Her E condemn stun — move away from walls. Never stand near walls.",
+        "power_spikes": {
+          "you": "Level 3 (Q-AA-Q combo), Trinity Force",
+          "enemy": "Trinity Force (scaling), Level 6"
+        },
+        "early_game": "Vayne is weak early. Your combos are strong. Look for kills early.",
+        "mid_game": "She scales with items. Your split push is strong. Avoid grouped fights.",
+        "late_game": "She outscales as a hypercarry. You must win early.",
+        "win_condition": "Kill her early. Get a lead. Roam and split push.",
+        "counter_items": ["Plated Steelcaps", "Trinity Force"],
+        "scaling": "Vayne outscales as a hypercarry. You must win early.",
+        "jungle_gankable": true,
+        "positioning": "Stay away from walls. Rush her early."
+      },
+      "Teemo": {
+        "difficulty": "medium",
+        "who_wins_early": "Teemo",
+        "trading_pattern": "Teemo pokes from range safely. He's invisible in shrooms. Your combos are strong but hard to execute.",
+        "ability_to_dodge": "His Q blind — move unpredictably. When blinded, you can't combo.",
+        "power_spikes": {
+          "you": "Level 3 (Q-AA-Q combo), Trinity Force",
+          "enemy": "Level 1 (poke), Nashor's Tooth"
+        },
+        "early_game": "Teemo pokes safely. Your combos are strong but risky. Look for kill windows.",
+        "mid_game": "Your split push is strong. His shrooms are annoying. Avoid grouped fights.",
+        "late_game": "He splits and shrooms. You're a better split pusher. Avoid grouped fights.",
+        "win_condition": "Look for early kill windows. Roam and split push. Avoid shrooms.",
+        "counter_items": ["Mercury's Treads", "Adaptive Helm"],
+        "scaling": "You outscale through split push. Teemo through shrooms.",
+        "jungle_gankable": true,
+        "positioning": "Rush him when possible. Avoid shrooms and poke."
+      },
+      "Darius": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Darius Q outer ring applies bleed. Extended trades favor him. Trade short when Q is down.",
+        "ability_to_dodge": "His Q bleed — walk at him to avoid outer ring. Your combos burst him fast.",
+        "power_spikes": {
+          "you": "Level 3 (Q-AA-Q combo), Trinity Force",
+          "enemy": "Level 6 (R execute), Stridebreaker"
+        },
+        "early_game": "Trade short when his Q is down. Your combos are strong.",
+        "mid_game": "Your split push is strong. His ult execute is dangerous. Avoid grouped fights.",
+        "late_game": "He outscales slightly. You're a split pusher. Avoid grouped fights.",
+        "win_condition": "Get a lead early. Roam and split push. Avoid grouped fights.",
+        "counter_items": ["Trinity Force", "Plated Steelcaps"],
+        "scaling": "Darius outscales slightly. You're a split pusher.",
+        "jungle_gankable": false,
+        "positioning": "Walk at him to avoid Q outer ring. Trade when Q is down."
+      },
+      "Aatrox": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Aatrox Q swings deal high damage and heal him. Your burst matches his. Trade when Q is down.",
+        "ability_to_dodge": "His Q swings — dodge by moving perpendicular. Avoid standing in swings.",
+        "power_spikes": {
+          "you": "Level 3 (Q-AA-Q combo), Trinity Force",
+          "enemy": "Level 3 (Q swing combo), Goredrinker"
+        },
+        "early_game": "Trade hard when his Q is down. Your combos are strong.",
+        "mid_game": "Your split push is strong. His healing is strong. Avoid grouped fights.",
+        "late_game": "Even — both scale through items.",
+        "win_condition": "Get a lead early. Roam and split push. Trade when Q is down.",
+        "counter_items": ["Trinity Force", "Adaptive Helm"],
+        "scaling": "Even — both scale through items.",
+        "jungle_gankable": true,
+        "positioning": "Dodge his Q swings by moving sideways. Trade when Q is down."
+      },
+      "Gwen": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Gwen has short range but burst damage. Your range advantage helps. Trade when her abilities are down.",
+        "ability_to_dodge": "Her E snip — move sideways to dodge. She locks you into a small zone.",
+        "power_spikes": {
+          "you": "Level 3 (Q-AA-Q combo), Trinity Force",
+          "enemy": "Trinity Force completion (all-in spike), Level 6"
+        },
+        "early_game": "Trade hard when her abilities are down. Your combos are strong.",
+        "mid_game": "Your split push is strong. Her items help her scale. Avoid grouped fights.",
+        "late_game": "She outscales as a split pusher. You're equal. Depends on game flow.",
+        "win_condition": "Get a lead early. Roam and split push. Trade when abilities are down.",
+        "counter_items": ["Trinity Force", "Adaptive Helm"],
+        "scaling": "Gwen outscales slightly as a split pusher. You're equal.",
+        "jungle_gankable": true,
+        "positioning": "Trade when her abilities are down. Avoid her snip zone."
+      },
+      "Sion": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Sion has high poke Q. Your burst combos are stronger. Look for combo windows.",
+        "ability_to_dodge": "His Q poke — move left or right to dodge. Back away from the charge.",
+        "power_spikes": {
+          "you": "Level 3 (Q-AA-Q combo), Trinity Force",
+          "enemy": "Level 6 (R engage), Hollow Radiance"
+        },
+        "early_game": "Trade hard with your combos. Sion's poke is manageable.",
+        "mid_game": "Your split push is strong. His teamfight is powerful. Avoid grouped fights.",
+        "late_game": "He outscales as a tank. You're a split pusher. Avoid grouped fights.",
+        "win_condition": "Get a lead early. Roam and split push. Trade when possible.",
+        "counter_items": ["Trinity Force", "Adaptive Helm"],
+        "scaling": "Sion outscales as a tank. You're a split pusher.",
+        "jungle_gankable": true,
+        "positioning": "Trade hard early. Avoid his Q by moving sideways."
+      },
+      "K'Sante": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "K'Sante has strong poke and all-in. His E engage is powerful. Trade when abilities are down.",
+        "ability_to_dodge": "His E lunge — move sideways when charging. His R pulls you into him.",
+        "power_spikes": {
+          "you": "Level 3 (Q-AA-Q combo), Trinity Force",
+          "enemy": "Level 2 (poke spike), Trinity Force"
+        },
+        "early_game": "Trade hard when his abilities are down. Your combos are strong.",
+        "mid_game": "Your split push is strong. His engage is powerful. Avoid grouped fights.",
+        "late_game": "He outscales as a tank. You're a split pusher. Avoid grouped fights.",
+        "win_condition": "Get a lead early. Roam and split push. Trade when abilities are down.",
+        "counter_items": ["Trinity Force", "Plated Steelcaps"],
+        "scaling": "K'Sante outscales as a tank. You're a split pusher.",
+        "jungle_gankable": true,
+        "positioning": "Trade when his abilities are down. Avoid his E lunge."
+      },
+      "Gnar": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Gnar mini-form pokes early. Mega all-in is oppressive. Trade hard when he's mini.",
+        "ability_to_dodge": "His mega transformation — brace for impact. His R knockback is strong.",
+        "power_spikes": {
+          "you": "Level 3 (Q-AA-Q combo), Trinity Force",
+          "enemy": "Mega transformation (all-in spike), Trinity Force"
+        },
+        "early_game": "Trade hard when he's mini. Your combos are strong early.",
+        "mid_game": "Your split push is strong. His form cycling is unpredictable. Avoid grouped fights.",
+        "late_game": "He outscales as a teamfighter. You're a split pusher. Avoid grouped fights.",
+        "win_condition": "Get a lead early. Target him when mini. Roam and split push.",
+        "counter_items": ["Trinity Force", "Adaptive Helm"],
+        "scaling": "Gnar outscales as a teamfighter. You're a split pusher.",
+        "jungle_gankable": true,
+        "positioning": "Target him when mini. Avoid when mega. Trade when weakened."
+      },
+      "Shen": {
+        "difficulty": "easy",
+        "who_wins_early": "even",
+        "trading_pattern": "Shen's E taunt is annoying but your combos burst him. Play around his E cooldown.",
+        "ability_to_dodge": "His E taunt — move perpendicular to his charge. Back away when he walks forward.",
+        "power_spikes": {
+          "you": "Level 3 (Q-AA-Q combo), Trinity Force",
+          "enemy": "Level 6 (R teamfight presence), Hollow Radiance"
+        },
+        "early_game": "Trade hard when his E is down. Your combos are strong.",
+        "mid_game": "Your split push is strong. His ult helps his team. Avoid grouped fights.",
+        "late_game": "You're both split-push focused. Even matchup late.",
+        "win_condition": "Get a lead early. Roam and split push. Trade when E is down.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "Even — both scale as split pushers.",
+        "jungle_gankable": true,
+        "positioning": "Trade when E is down. Move perpendicular to avoid taunt."
+      },
+      "Ornn": {
+        "difficulty": "easy",
+        "who_wins_early": "even",
+        "trading_pattern": "Ornn is tanky but slow. Your combos burst him. Look for combo windows.",
+        "ability_to_dodge": "His R volcanic rupture — move sideways. It doesn't prevent your combos.",
+        "power_spikes": {
+          "you": "Level 3 (Q-AA-Q combo), Trinity Force",
+          "enemy": "Level 6 (R engage), Level 11 (upgrades)"
+        },
+        "early_game": "Trade hard with your combos. Ornn's damage is low early.",
+        "mid_game": "Your split push is strong. His upgrades help him scale. Avoid grouped fights.",
+        "late_game": "He outscales as a tank. You're a split pusher. Avoid grouped fights.",
+        "win_condition": "Get a lead early. Roam and split push. Trade hard early.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "Ornn outscales as a tank. You're a split pusher.",
+        "jungle_gankable": true,
+        "positioning": "Trade hard early. Don't let him scale."
+      },
+      "Yasuo": {
+        "difficulty": "easy",
+        "who_wins_early": "even",
+        "trading_pattern": "Yasuo dashes through minions with E. Your range advantage helps. Trade hard when E is down.",
+        "ability_to_dodge": "His E-Q combo chain — move away from minions. Windwall blocks your projectiles.",
+        "power_spikes": {
+          "you": "Level 3 (Q-AA-Q combo), Trinity Force",
+          "enemy": "Level 2 (E harass spike), Trinity Force"
+        },
+        "early_game": "Trade hard when his E is down. Your combos are strong.",
+        "mid_game": "Your split push is strong. His split push is relevant. Avoid grouped fights.",
+        "late_game": "He outscales as a split pusher. You're equal. Depends on game flow.",
+        "win_condition": "Get a lead early. Roam and split push. Trade when E is down.",
+        "counter_items": ["Trinity Force", "Plated Steelcaps"],
+        "scaling": "Even — both scale as split pushers.",
+        "jungle_gankable": true,
+        "positioning": "Stay away from minions to prevent E dashes. Trade when E is down."
+      },
+      "Fiora": {
+        "difficulty": "skill_matchup",
+        "who_wins_early": "even",
+        "trading_pattern": "Fiora parries your Q. She dashes in with Q. Play around her Riposte carefully.",
+        "ability_to_dodge": "Her Riposte — bait it with a fake ability, then go in for real. She blocks burst if predictable.",
+        "power_spikes": {
+          "you": "Level 3 (Q-AA-Q combo), Trinity Force",
+          "enemy": "Trinity Force completion (1v1 god), Level 3"
+        },
+        "early_game": "Trade hard but don't be predictable. Fiora is dangerous but beatable.",
+        "mid_game": "Your split push is strong. She splits well but you match. Fight when favorable.",
+        "late_game": "She's a better 1v1 duelist. You can still split push and duel if ahead.",
+        "win_condition": "Get a lead early. Unpredictable combos. Roam and split push.",
+        "counter_items": ["Trinity Force", "Plated Steelcaps"],
+        "scaling": "Fiora outscales as a duelist. You must stay ahead.",
+        "jungle_gankable": false,
+        "positioning": "Be unpredictable with your combos. Don't overextend alone."
+      }
+    }
+  }
+}

@@ -1,0 +1,330 @@
+{
+  "Renekton": {
+    "top": {
+      "Singed": {
+        "difficulty": "hard",
+        "who_wins_early": "Singed",
+        "trading_pattern": "Singed's poison damage is relentless. He runs from your combos easily with W. You can't catch him.",
+        "ability_to_dodge": "His R slow + W run — avoid chasing him into poison pools. He kites endlessly.",
+        "power_spikes": {
+          "you": "Level 3 (Fury combo), Trinity Force",
+          "enemy": "Rylai's Crystal Scepter (kite tool), Level 6"
+        },
+        "early_game": "Singed proxies and runs. Your combo doesn't work against kiting. Play safe.",
+        "mid_game": "His Rylai's slows you. Your all-in is less effective. Teamfight instead of chasing.",
+        "late_game": "He outscales through kiting. You can't catch him. Stick to grouped fights.",
+        "win_condition": "Group for teamfights. Never chase him alone. Force grouped fights.",
+        "counter_items": ["Plated Steelcaps", "Trinity Force"],
+        "scaling": "Singed outscales through kiting. You're early-game focused.",
+        "jungle_gankable": false,
+        "positioning": "Don't chase him endlessly. Fight around teamfights and objectives."
+      },
+      "Vayne": {
+        "difficulty": "hard",
+        "who_wins_early": "Vayne",
+        "trading_pattern": "Vayne's range and tumble let her kite from your combos. She applies true damage slowly.",
+        "ability_to_dodge": "Her E condemn stun — move away from walls. She'll condemn you into walls for stun.",
+        "power_spikes": {
+          "you": "Level 3 (Fury combo), Trinity Force",
+          "enemy": "Trinity Force (scaling), Level 6"
+        },
+        "early_game": "Vayne is weak early but kites well. Your combo is strong but hard to land. Play safe.",
+        "mid_game": "Her items accelerate scaling. Your combo is still relevant. Teamfight instead of dueling.",
+        "late_game": "She's a hypercarry late. You can't duel. Group and protect your team.",
+        "win_condition": "Kill her early. Get a lead. Teamfight grouped with numbers advantage.",
+        "counter_items": ["Plated Steelcaps", "Trinity Force"],
+        "scaling": "Vayne outscales as a hypercarry. Win early.",
+        "jungle_gankable": true,
+        "positioning": "Stay away from walls. Rush her early to combo."
+      },
+      "Illaoi": {
+        "difficulty": "hard",
+        "who_wins_early": "Illaoi",
+        "trading_pattern": "Illaoi's E spirit grab deals massive damage with tentacles. She outbursts you early.",
+        "ability_to_dodge": "Her E spirit grab — dodge by moving sideways. If hit, you fight at massive disadvantage.",
+        "power_spikes": {
+          "you": "Level 3 (Fury combo), Trinity Force",
+          "enemy": "Level 6 (R tentacles), Hollow Radiance"
+        },
+        "early_game": "Illaoi is strong early. Play around her E. Avoid extended trades.",
+        "mid_game": "Her tentacles are still oppressive. Your combo helps but is risky. Teamfight grouped.",
+        "late_game": "She outscales through tentacles. You can't duel her. Force grouped fights.",
+        "win_condition": "Survive early. Avoid her E completely. Teamfight grouped.",
+        "counter_items": ["Trinity Force", "Plated Steelcaps"],
+        "scaling": "Illaoi outscales through tentacles. You're early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Space from tentacles. Avoid her E completely."
+      },
+      "Teemo": {
+        "difficulty": "hard",
+        "who_wins_early": "Teemo",
+        "trading_pattern": "Teemo pokes safely from range with Q. His shrooms punish extended trades. Play around vision.",
+        "ability_to_dodge": "His Q blind — move unpredictably. When blinded, you can't combo.",
+        "power_spikes": {
+          "you": "Level 3 (Fury combo), Trinity Force",
+          "enemy": "Level 1 (poke), Nashor's Tooth"
+        },
+        "early_game": "Teemo pokes safely. Your combo is strong but risky to execute. Play safe early.",
+        "mid_game": "His shrooms are everywhere. Your combo is still relevant. Teamfight grouped.",
+        "late_game": "He splits and shrooms. You combo better in teamfights. Never let him split.",
+        "win_condition": "Avoid shrooms. Look for early kill windows. Teamfight grouped.",
+        "counter_items": ["Mercury's Treads", "Adaptive Helm"],
+        "scaling": "You outscale through teamfight combos. Teemo through split push.",
+        "jungle_gankable": true,
+        "positioning": "Rush him to combo when possible. Avoid shrooms."
+      },
+      "Aurora": {
+        "difficulty": "hard",
+        "who_wins_early": "Aurora",
+        "trading_pattern": "Aurora's Q poke and dive damage are strong early. Her projectiles are hard to dodge.",
+        "ability_to_dodge": "Her R engage — move perpendicular to avoid. It stuns and deals damage.",
+        "power_spikes": {
+          "you": "Level 3 (Fury combo), Trinity Force",
+          "enemy": "Level 2 (poke spike), Manamune"
+        },
+        "early_game": "Aurora's poke is strong. Your combo is good but risky. Play safe early.",
+        "mid_game": "Her items help scaling. Your combo is still relevant. Teamfight instead of dueling.",
+        "late_game": "She outscales through ranged damage. You're weaker late. Group for fights.",
+        "win_condition": "Survive early. Look for combo windows. Teamfight grouped.",
+        "counter_items": ["Adaptive Helm", "Mercury's Treads"],
+        "scaling": "Aurora outscales through ranged damage. You're early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Rush her to combo when possible. Don't let her poke safely."
+      },
+      "Cassiopeia": {
+        "difficulty": "hard",
+        "who_wins_early": "Cassiopeia",
+        "trading_pattern": "Cassiopeia's Q poison and poke are relentless. Her range outclasses you early.",
+        "ability_to_dodge": "Her R petrify — move sideways to avoid. It stuns instantly.",
+        "power_spikes": {
+          "you": "Level 3 (Fury combo), Trinity Force",
+          "enemy": "Level 2 (poke spike), Rylai's"
+        },
+        "early_game": "Cassiopeia outpokes and outzones you. Play safe and minimize trades.",
+        "mid_game": "Your combo is still relevant. Her range and poke are oppressive. Teamfight instead of dueling.",
+        "late_game": "She outscales through poke and kiting. You're weaker late. Group for fights.",
+        "win_condition": "Survive early. Look for combo windows. Teamfight grouped.",
+        "counter_items": ["Mercury's Treads", "Adaptive Helm"],
+        "scaling": "Cassiopeia outscales through range and poke. You're early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Rush her to combo when possible. Don't let her poke safely."
+      },
+      "Yasuo": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Yasuo dashes through minions with E to harass. His windwall blocks your abilities. Play around it.",
+        "ability_to_dodge": "His E-Q combo chain — move away from minions. Windwall blocks your Q.",
+        "power_spikes": {
+          "you": "Level 3 (Fury combo), Trinity Force",
+          "enemy": "Level 2 (E harass spike), Trinity Force"
+        },
+        "early_game": "Yasuo dashes and harasses. Your combo is strong. Trade hard when his E is down.",
+        "mid_game": "Your combo is powerful grouped. His split push is relevant. Teamfight instead of dueling.",
+        "late_game": "Yasuo scales as a split pusher. You scale as a teamfighter. Group for fights.",
+        "win_condition": "Get a lead early. Teamfight grouped. Use R combo in teamfights.",
+        "counter_items": ["Plated Steelcaps", "Trinity Force"],
+        "scaling": "Even — both scale in different directions.",
+        "jungle_gankable": true,
+        "positioning": "Stay away from minions to prevent E dashes. Trade when E is down."
+      },
+      "Riven": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Riven's Q-AA-Q combos are strong. Your empowered abilities match hers. Trade when her abilities are down.",
+        "ability_to_dodge": "Her R — when she uses it, position away. It grants range and damage.",
+        "power_spikes": {
+          "you": "Level 3 (Fury combo), Trinity Force",
+          "enemy": "Level 1-2 (combo damage), Trinity Force"
+        },
+        "early_game": "Riven is strong early. Your combo matches her. Trade hard when her abilities are down.",
+        "mid_game": "Your combo is powerful grouped. Her split push is relevant. Teamfight instead of dueling.",
+        "late_game": "Riven scales as a split pusher. You scale as a teamfighter. Group for fights.",
+        "win_condition": "Get a lead early. Teamfight grouped. Use R combo in fights.",
+        "counter_items": ["Plated Steelcaps", "Trinity Force"],
+        "scaling": "Riven scales slightly better early. You scale as a teamfighter.",
+        "jungle_gankable": true,
+        "positioning": "Trade when her abilities are down. Don't stand in a line."
+      },
+      "Aatrox": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Aatrox Q swings deal high damage and heal him. Your combo matches his. Trade when his Q is down.",
+        "ability_to_dodge": "His Q swings — dodge by moving perpendicular. Avoid standing in swings.",
+        "power_spikes": {
+          "you": "Level 3 (Fury combo), Trinity Force",
+          "enemy": "Level 3 (Q swing combo), Goredrinker"
+        },
+        "early_game": "Trade hard when his Q is down. Your combo is strong. Look for kills early.",
+        "mid_game": "Your combo is powerful grouped. His healing is strong. Teamfight instead of dueling.",
+        "late_game": "Aatrox scales through items. You scale as a teamfighter. Group for fights.",
+        "win_condition": "Get a lead early. Teamfight grouped. Use R combo in fights.",
+        "counter_items": ["Plated Steelcaps", "Trinity Force"],
+        "scaling": "Even — both scale through items and abilities.",
+        "jungle_gankable": true,
+        "positioning": "Dodge his Q swings by moving sideways. Trade when Q is down."
+      },
+      "Volibear": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Volibear E flip interrupts your combo. His W all-in is strong. Play around his engage.",
+        "ability_to_dodge": "His E flip — move perpendicular when charging. If flipped, he all-ins with W.",
+        "power_spikes": {
+          "you": "Level 3 (Fury combo), Trinity Force",
+          "enemy": "Level 3 (E engage spike), Hollow Radiance"
+        },
+        "early_game": "Volibear's engage is risky. Your combo is strong. Trade hard when his E is down.",
+        "mid_game": "Your combo is powerful grouped. His tankiness is high. Teamfight instead of dueling.",
+        "late_game": "He outscales as a tank. You scale as a teamfighter. Group for fights.",
+        "win_condition": "Get a lead early. Teamfight grouped. Use R combo in fights.",
+        "counter_items": ["Plated Steelcaps", "Trinity Force"],
+        "scaling": "Volibear outscales as a tank. You're early-game focused.",
+        "jungle_gankable": false,
+        "positioning": "Move perpendicular to his E. Trade when his E is down."
+      },
+      "Gnar": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Gnar mini-form pokes early. Mega all-in is oppressive. Trade hard when he's mini and weakened.",
+        "ability_to_dodge": "His mega transformation — brace for impact. His R knockback is strong.",
+        "power_spikes": {
+          "you": "Level 3 (Fury combo), Trinity Force",
+          "enemy": "Mega transformation (all-in spike), Trinity Force"
+        },
+        "early_game": "Trade hard when he's mini. Your combo is strong. Look for early kills.",
+        "mid_game": "Your combo is powerful grouped. His form cycling is unpredictable. Teamfight instead of dueling.",
+        "late_game": "He outscales as a teamfighter. You scale as a teamfighter. Group for fights.",
+        "win_condition": "Get a lead early. Target him when mini. Teamfight grouped.",
+        "counter_items": ["Plated Steelcaps", "Trinity Force"],
+        "scaling": "Even — both scale as teamfighters.",
+        "jungle_gankable": true,
+        "positioning": "Target him when mini. Avoid when mega. Trade when weakened."
+      },
+      "K'Sante": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "K'Sante has strong poke and all-in. His E engage is powerful. Trade when his abilities are down.",
+        "ability_to_dodge": "His E lunge — move sideways when charging. His R pulls you into him.",
+        "power_spikes": {
+          "you": "Level 3 (Fury combo), Trinity Force",
+          "enemy": "Level 2 (poke spike), Trinity Force"
+        },
+        "early_game": "Trade hard when his abilities are down. Your combo is strong. Look for early kills.",
+        "mid_game": "Your combo is powerful grouped. His engage is strong. Teamfight instead of dueling.",
+        "late_game": "He outscales through tanking. You scale as a teamfighter. Group for fights.",
+        "win_condition": "Get a lead early. Teamfight grouped. Use R combo in fights.",
+        "counter_items": ["Trinity Force", "Plated Steelcaps"],
+        "scaling": "K'Sante outscales as a tank. You're early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Move sideways to avoid his E. Trade when abilities are down."
+      },
+      "Ambessa": {
+        "difficulty": "medium",
+        "who_wins_early": "Ambessa",
+        "trading_pattern": "Ambessa's Q range and E engage are strong. Her ult is an execute tool. Play around her engage.",
+        "ability_to_dodge": "Her E charge — move sideways to avoid. It locks you into her combo range.",
+        "power_spikes": {
+          "you": "Level 3 (Fury combo), Trinity Force",
+          "enemy": "Level 2 (poke + engage), Trinity Force"
+        },
+        "early_game": "Ambessa is strong early. Your combo is good but risky. Play safe and trade carefully.",
+        "mid_game": "Your combo is powerful grouped. Her ult is an execute. Teamfight instead of dueling.",
+        "late_game": "She outscales through ult utility. You scale as a teamfighter. Group for fights.",
+        "win_condition": "Survive early. Look for combo windows. Teamfight grouped.",
+        "counter_items": ["Plated Steelcaps", "Trinity Force"],
+        "scaling": "Ambessa outscales through ult utility. You're early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Move sideways to avoid her E. Trade when her abilities are down."
+      },
+      "Darius": {
+        "difficulty": "easy",
+        "who_wins_early": "Renekton",
+        "trading_pattern": "Your empowered combo outdamages his Q outer ring. Trade hard with Fury stacks. When Fury is low, play safe.",
+        "ability_to_dodge": "His Q bleed — walk at him to avoid outer ring. Your empowered W prevents his poke.",
+        "power_spikes": {
+          "you": "Level 3 (Fury combo), Trinity Force",
+          "enemy": "Level 6 (R execute), Stridebreaker"
+        },
+        "early_game": "You outdamage him with Fury combos. Keep trading and maintain pressure.",
+        "mid_game": "Your combo is powerful grouped. His ult is dangerous. Teamfight instead of dueling.",
+        "late_game": "He outscales slightly through ult utility. You're a teamfighter. Group for fights.",
+        "win_condition": "Maintain Fury. Trade hard early. Teamfight grouped.",
+        "counter_items": ["Trinity Force", "Plated Steelcaps"],
+        "scaling": "Darius outscales slightly. You're early-game focused.",
+        "jungle_gankable": false,
+        "positioning": "Walk at him to deny Q outer ring. Trade when Fury is up."
+      },
+      "Garen": {
+        "difficulty": "easy",
+        "who_wins_early": "even",
+        "trading_pattern": "Your empowered combo outdamages his Judgment. Trade hard with Fury. When Fury is low, be careful.",
+        "ability_to_dodge": "His Q silence — when he winds up, back away. Your empowered abilities don't require abilities anyway.",
+        "power_spikes": {
+          "you": "Level 3 (Fury combo), Trinity Force",
+          "enemy": "Level 6 (R execute), Sunfire Aegis"
+        },
+        "early_game": "Trade hard with Fury combos. Maintain pressure. He scales to a tank later.",
+        "mid_game": "Your combo is powerful grouped. His ult is dangerous. Teamfight instead of dueling.",
+        "late_game": "He outscales through tanking. You're a teamfighter. Group for fights.",
+        "win_condition": "Maintain Fury. Trade hard early. Teamfight grouped.",
+        "counter_items": ["Trinity Force", "Plated Steelcaps"],
+        "scaling": "Garen outscales as a tank. You're early-game focused.",
+        "jungle_gankable": false,
+        "positioning": "Back away when he winds up Q. Trade when Fury is up."
+      },
+      "Malphite": {
+        "difficulty": "easy",
+        "who_wins_early": "even",
+        "trading_pattern": "Your empowered combo outdamages his tankiness early. Trade hard with Fury.",
+        "ability_to_dodge": "His E shockwave — move away. It reduces armor but doesn't stop your combo damage.",
+        "power_spikes": {
+          "you": "Level 3 (Fury combo), Trinity Force",
+          "enemy": "Level 6 (R engage), Thornmail"
+        },
+        "early_game": "Trade hard with Fury combos. You should dominate early.",
+        "mid_game": "Your combo is powerful. His R engage helps him scale. Teamfight grouped.",
+        "late_game": "He outscales as a tank. You're weaker late. Group for fights.",
+        "win_condition": "Maintain Fury. Trade hard early. Teamfight grouped.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "Malphite outscales as a tank. You're early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Trade hard when Fury is up. Don't let him scale into teamfights."
+      },
+      "Kayle": {
+        "difficulty": "easy",
+        "who_wins_early": "even",
+        "trading_pattern": "Your empowered combo destroys her early. She's incredibly weak to all-ins.",
+        "ability_to_dodge": "Her W healing — focus her down. Her range increases with levels.",
+        "power_spikes": {
+          "you": "Level 3 (Fury combo), Trinity Force",
+          "enemy": "Level 6 (ult invulnerability), Level 11 (melee form)"
+        },
+        "early_game": "She's incredibly weak early. Trade hard with Fury. You should kill her.",
+        "mid_game": "She scales with items. Your combo is still relevant. Teamfight instead of dueling.",
+        "late_game": "She outscales dramatically. You're weaker late. Group for fights.",
+        "win_condition": "Kill her early. Maintain Fury. Roam and group.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "Kayle outscales dramatically. You must win early.",
+        "jungle_gankable": true,
+        "positioning": "Rush her early. Don't let her scale."
+      },
+      "Jayce": {
+        "difficulty": "easy",
+        "who_wins_early": "even",
+        "trading_pattern": "Your empowered combo matches his burst. Trade hard with Fury when you catch him.",
+        "ability_to_dodge": "His gate shockwave — move sideways. His range form is safer.",
+        "power_spikes": {
+          "you": "Level 3 (Fury combo), Trinity Force",
+          "enemy": "Level 1 (poke form), Manamune"
+        },
+        "early_game": "Trade hard with Fury combos. Catch him when his abilities are down.",
+        "mid_game": "Your combo is powerful grouped. His poke is strong. Teamfight instead of dueling.",
+        "late_game": "He outscales through poke. You're weaker late. Group for fights.",
+        "win_condition": "Maintain Fury. Trade hard early. Teamfight grouped.",
+        "counter_items": ["Trinity Force", "Plated Steelcaps"],
+        "scaling": "Jayce outscales as a poke champion. You're early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Catch him when his abilities are down. Trade when Fury is up."
+      }
+    }
+  }
+}

@@ -1,0 +1,510 @@
+{
+  "Bard": {
+    "support": {
+      "Alistar": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Alistar trades with heal but Bard's Q can slow and setup ganks. Use chimes wisely.",
+        "ability_to_dodge": "Alistar E (Trample) — dodge by moving away, don't get caught in stun range.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, early chime stacks",
+          "enemy": "Level 6 with ultimate lockdown, completed Mandate"
+        },
+        "early_game": "Trade carefully and roam for chimes. Don't get all-in'd.",
+        "mid_game": "Both scale well. Bard's utility keeps pressure through roams.",
+        "late_game": "Alistar's lockdown is strong but Bard's portals and stun provide utility.",
+        "win_condition": "Collect chimes for scaling, setup vision plays, leverage stun in fights.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through utility",
+        "jungle_gankable": true,
+        "positioning": "Keep distance from his engage range. Use portals for escape."
+      },
+      "Bard": {
+        "difficulty": "skill_matchup",
+        "who_wins_early": "even",
+        "trading_pattern": "Mirror matchup where Q positioning and chime collection matter most.",
+        "ability_to_dodge": "Bard Q (Cosmic Binding) — dodge by moving sideways, don't stand near walls.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime stacks",
+          "enemy": "Same as you — scaling is identical"
+        },
+        "early_game": "Trade with Q positioning. Whoever collects more chimes wins.",
+        "mid_game": "Both scale identically. Team coordination determines advantage.",
+        "late_game": "Both have identical utility. Whoever lands Q better wins.",
+        "win_condition": "Better Q accuracy, more chime collection, superior roaming.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Perfectly even — identical in every way",
+        "jungle_gankable": true,
+        "positioning": "Mirror opponent's spacing. Use portals strategically."
+      },
+      "Blitzcrank": {
+        "difficulty": "easy",
+        "who_wins_early": "Bard",
+        "trading_pattern": "Bard's Q is safer than Blitzcrank's hook. Outpositions him early.",
+        "ability_to_dodge": "Blitzcrank Q (Rocket Grab) — stay behind minions, never overextend.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, early chime stacks",
+          "enemy": "Level 6 with ultimate mana battery, completed Mandate"
+        },
+        "early_game": "Dominate lane positioning. Don't give him hook attempts.",
+        "mid_game": "Leverage roams with chimes. He falls off compared to you.",
+        "late_game": "Bard outscales with utility and roaming advantage.",
+        "win_condition": "Avoid his hooks, roam for chimes and kills, scale better.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Bard heavily outscales — you roam better",
+        "jungle_gankable": false,
+        "positioning": "Stay behind minions. Use portals to reposition safely."
+      },
+      "Brand": {
+        "difficulty": "medium",
+        "who_wins_early": "Brand",
+        "trading_pattern": "Brand's poke beats Bard's early utility. Play safe and roam.",
+        "ability_to_dodge": "Brand Q (Sear) — dodge by moving sideways, don't stand still.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate burst"
+        },
+        "early_game": "Play safe against his poke. Focus on roaming for chimes.",
+        "mid_game": "Bard's utility catches up through chimes and roams.",
+        "late_game": "Bard's utility and roaming potential exceed Brand's utility.",
+        "win_condition": "Roam early for chimes, scale with team, leverage utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Bard outscales — roaming and chimes provide scaling",
+        "jungle_gankable": false,
+        "positioning": "Keep distance from his Q. Roam when safe to collect chimes."
+      },
+      "Janna": {
+        "difficulty": "hard",
+        "who_wins_early": "Janna",
+        "trading_pattern": "Janna's poke and disengage beat Bard's all-in potential. Play around her.",
+        "ability_to_dodge": "Janna Q (Howling Gale) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 6 with ultimate knockup, completed Mandate"
+        },
+        "early_game": "Play safe against her disengage. Focus on roaming.",
+        "mid_game": "Janna's utility is strong. Bard catches up through chimes.",
+        "late_game": "Both have powerful utilities. Whoever positions better wins.",
+        "win_condition": "Roam for chimes, avoid her disengage, leverage utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through utility",
+        "jungle_gankable": true,
+        "positioning": "Keep distance and avoid grouping. Roam to collect chimes."
+      },
+      "Karma": {
+        "difficulty": "medium",
+        "who_wins_early": "Karma",
+        "trading_pattern": "Karma's poke and speed beats Bard early. Roam and scale.",
+        "ability_to_dodge": "Karma Q (Inner Flame) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate damage"
+        },
+        "early_game": "Play safe against her poke. Roam for chimes early.",
+        "mid_game": "Both scale similarly through utility and poke.",
+        "late_game": "Bard's utility and roaming advantage lets him scale better.",
+        "win_condition": "Roam early, collect chimes, leverage superior late-game utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Bard slightly favored — roaming provides advantage",
+        "jungle_gankable": true,
+        "positioning": "Keep distance from her poke. Roam when safe."
+      },
+      "Lulu": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Both have strong utility and poke. Trade carefully and roam.",
+        "ability_to_dodge": "Lulu Q (Glitterlance) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 6 with ultimate poly, completed Mandate"
+        },
+        "early_game": "Trade with care. Focus on roaming for chimes.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Both have strong utility. Teamfight coordination matters.",
+        "win_condition": "Roam for chimes, leverage portals, execute utility well.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through utility",
+        "jungle_gankable": true,
+        "positioning": "Keep distance and roam. Use portals strategically."
+      },
+      "Maokai": {
+        "difficulty": "hard",
+        "who_wins_early": "Maokai",
+        "trading_pattern": "Maokai's poke and cc chain beat Bard early. Play safe and roam.",
+        "ability_to_dodge": "Maokai Q (Bramble Smash) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate cc"
+        },
+        "early_game": "Play safe against his poke and cc. Focus on roaming.",
+        "mid_game": "Maokai's utility is strong. Bard catches up through chimes.",
+        "late_game": "Both strong. Whoever lands cc better wins fights.",
+        "win_condition": "Roam for chimes, avoid his cc chain, leverage utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through utility",
+        "jungle_gankable": false,
+        "positioning": "Keep distance from his Q. Roam to scale with chimes."
+      },
+      "Nami": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Nami's poke and utility match Bard's. Trade carefully and roam.",
+        "ability_to_dodge": "Nami Q (Aqua Prison) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 6 with ultimate knockup, completed Mandate"
+        },
+        "early_game": "Trade carefully. Focus on roaming for chimes.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Both strong. Whoever positions better wins.",
+        "win_condition": "Roam for chimes, leverage portals, execute utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through utility",
+        "jungle_gankable": true,
+        "positioning": "Keep distance and roam. Use portals for positioning."
+      },
+      "Nautilus": {
+        "difficulty": "medium",
+        "who_wins_early": "Nautilus",
+        "trading_pattern": "Nautilus's cc and engage beat Bard early. Play safe and roam.",
+        "ability_to_dodge": "Nautilus Q (Dredge Line) — dodge by moving sideways, don't overextend.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 6 with ultimate root lockdown, completed Mandate"
+        },
+        "early_game": "Play safe from his cc. Focus on roaming for chimes.",
+        "mid_game": "Both scale similarly through utility and cc.",
+        "late_game": "Both strong. Bard's utility and roaming provide advantage.",
+        "win_condition": "Roam for chimes, avoid his cc, leverage portals.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Bard slightly favored — roaming and chimes scale better",
+        "jungle_gankable": false,
+        "positioning": "Keep distance from his Q. Roam to scale."
+      },
+      "Neeko": {
+        "difficulty": "medium",
+        "who_wins_early": "Neeko",
+        "trading_pattern": "Neeko's poke and root beat Bard early. Play safe and roam.",
+        "ability_to_dodge": "Neeko E (Tangle-Barbs) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate root"
+        },
+        "early_game": "Play safe from her cc. Roam for chimes.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Both strong. Bard's roaming provides advantage.",
+        "win_condition": "Roam for chimes, avoid her root, leverage utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Bard slightly favored — roaming scales better",
+        "jungle_gankable": false,
+        "positioning": "Keep distance from her E. Roam to collect chimes."
+      },
+      "Pantheon": {
+        "difficulty": "medium",
+        "who_wins_early": "Pantheon",
+        "trading_pattern": "Pantheon's all-in damage beats Bard early. Play safe and leverage roams.",
+        "ability_to_dodge": "Pantheon W (Aegis Assault) — dodge by moving away from his dash.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 2-3 with engage, Level 6 with ultimate gank"
+        },
+        "early_game": "Play safe from his all-in. Roam for chimes and advantage.",
+        "mid_game": "Bard's utility and roaming catches up.",
+        "late_game": "Bard outscales with utility and roaming.",
+        "win_condition": "Survive his engage, roam for chimes, leverage advantage.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Bard outscales — roaming and utility advantage",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and prepare to portal. Roam aggressively."
+      },
+      "Poppy": {
+        "difficulty": "hard",
+        "who_wins_early": "Poppy",
+        "trading_pattern": "Poppy's cc and engage beat Bard early. Play safe and roam.",
+        "ability_to_dodge": "Poppy E (Heroic Charge) — dodge by moving away from walls.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 2-3 with all-in, Level 6 with ultimate knock"
+        },
+        "early_game": "Play safe from her cc. Focus on roaming.",
+        "mid_game": "Both scale similarly through utility and cc.",
+        "late_game": "Both strong. Bard's roaming and utility provide advantage.",
+        "win_condition": "Roam for chimes, avoid her cc, leverage portals.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Bard slightly favored — roaming scales better",
+        "jungle_gankable": false,
+        "positioning": "Keep distance from walls. Roam to scale."
+      },
+      "Pyke": {
+        "difficulty": "hard",
+        "who_wins_early": "Pyke",
+        "trading_pattern": "Pyke's cc and hook beats Bard early. Play safe and roam.",
+        "ability_to_dodge": "Pyke Q (Bone Skewer) — dodge by moving sideways, stay behind minions.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 2-3 with all-in, Level 6 with ultimate execute"
+        },
+        "early_game": "Play safe from his hook. Roam for chimes.",
+        "mid_game": "Pyke's gold generation is strong but Bard catches up through utility.",
+        "late_game": "Bard's utility and roaming provide advantage.",
+        "win_condition": "Avoid his hook, roam for chimes, leverage utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Bard outscales — utility and roaming provide advantage",
+        "jungle_gankable": false,
+        "positioning": "Stay behind minions. Roam to collect chimes."
+      },
+      "Rakan": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Rakan's engage beats Bard but his Q setup cancels it. Trade carefully.",
+        "ability_to_dodge": "Rakan W (Grand Entrance) — dodge by moving away, don't get knocked.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 6 with ultimate engage, completed Mandate"
+        },
+        "early_game": "Trade carefully and roam. Watch for his engage attempts.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Both strong. Whoever engages better controls fights.",
+        "win_condition": "Roam for chimes, set up plays, leverage utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through utility",
+        "jungle_gankable": true,
+        "positioning": "Keep distance and prepare portals. Roam strategically."
+      },
+      "Renata": {
+        "difficulty": "medium",
+        "who_wins_early": "Renata",
+        "trading_pattern": "Renata's poke and root beat Bard early. Play safe and roam.",
+        "ability_to_dodge": "Renata W (Bailout) — position to avoid her root.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate revive"
+        },
+        "early_game": "Play safe from her poke. Roam for chimes.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Both strong. Bard's roaming provides slight advantage.",
+        "win_condition": "Roam for chimes, avoid her root, leverage utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through utility",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and roam. Use portals strategically."
+      },
+      "Seraphine": {
+        "difficulty": "medium",
+        "who_wins_early": "Seraphine",
+        "trading_pattern": "Seraphine's poke and root beat Bard early. Play safe and roam.",
+        "ability_to_dodge": "Seraphine E (Surround) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate damage"
+        },
+        "early_game": "Play safe from her poke. Focus on roaming.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Both strong. Bard's roaming provides advantage.",
+        "win_condition": "Roam for chimes, avoid her root, leverage utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through utility",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and roam. Use portals for safety."
+      },
+      "Sona": {
+        "difficulty": "easy",
+        "who_wins_early": "Bard",
+        "trading_pattern": "Bard's cc and setup beat Sona's early utility. Dominate lane.",
+        "ability_to_dodge": "Sona Q (Hymn of Valor) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 6 with ultimate cc, completed Mandate"
+        },
+        "early_game": "Dominate her early. Set up plays and roam.",
+        "mid_game": "Bard's roaming and utility keep him ahead.",
+        "late_game": "Bard outscales with roaming advantage.",
+        "win_condition": "Leverage early advantage, roam for chimes, build lead.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Bard outscales — roaming and chimes provide advantage",
+        "jungle_gankable": true,
+        "positioning": "Dominate space. Roam aggressively to collect chimes."
+      },
+      "Soraka": {
+        "difficulty": "medium",
+        "who_wins_early": "Soraka",
+        "trading_pattern": "Soraka's poke beats Bard early. Play safe and roam.",
+        "ability_to_dodge": "Soraka Q (Starcall) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate heal"
+        },
+        "early_game": "Play safe from her poke. Roam for chimes.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Soraka's healing scales well but Bard's roaming provides advantage.",
+        "win_condition": "Roam for chimes, avoid her poke, leverage utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through utility",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and roam. Use portals strategically."
+      },
+      "Tahm Kench": {
+        "difficulty": "hard",
+        "who_wins_early": "Tahm Kench",
+        "trading_pattern": "Tahm Kench's cc and eating beat Bard early. Play safe and roam.",
+        "ability_to_dodge": "Tahm Kench Q (Tongue Lash) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 1-2 with cc, Level 6 with ultimate roam"
+        },
+        "early_game": "Play safe from his cc. Focus on roaming.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Tahm Kench's eating and utility are strong. Bard's roaming helps.",
+        "win_condition": "Roam for chimes, avoid his cc, leverage utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through utility",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and roam. Use portals for escape."
+      },
+      "Taric": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Taric's stun and armor beat Bard's early utility. Trade carefully.",
+        "ability_to_dodge": "Taric E (Dazzle) — dodge by moving sideways, don't stand still.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 3-4 with stun, Level 6 with ultimate armor"
+        },
+        "early_game": "Trade carefully and roam. Watch for his stun.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Taric's ultimate armor is strong but Bard's roaming helps.",
+        "win_condition": "Roam for chimes, set up plays, leverage utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through utility",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and prepare portals. Roam strategically."
+      },
+      "Thresh": {
+        "difficulty": "easy",
+        "who_wins_early": "Bard",
+        "trading_pattern": "Bard's safer cc beats Thresh's hook. Outpositions him early.",
+        "ability_to_dodge": "Thresh Q (Death Sentence) — stay behind minions, don't overextend.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 2-3 with hook threat, Level 6 with ultimate cage"
+        },
+        "early_game": "Dominate positioning. Don't give him hook opportunities.",
+        "mid_game": "Leverage roams with chimes. Bard scales better.",
+        "late_game": "Bard's roaming and utility outscale Thresh.",
+        "win_condition": "Avoid his hooks, roam for chimes, build advantage.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Bard slightly favored — roaming provides advantage",
+        "jungle_gankable": false,
+        "positioning": "Stay behind minions. Use portals to reposition."
+      },
+      "Vel'Koz": {
+        "difficulty": "medium",
+        "who_wins_early": "Vel'Koz",
+        "trading_pattern": "Vel'Koz's poke and root beat Bard early. Play safe and roam.",
+        "ability_to_dodge": "Vel'Koz Q (Plasma Fission) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate knockup"
+        },
+        "early_game": "Play safe from his poke. Roam for chimes.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Bard's roaming and utility provide advantage.",
+        "win_condition": "Roam for chimes, avoid his poke, leverage utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Bard slightly favored — roaming scales better",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and roam. Use portals strategically."
+      },
+      "Xerath": {
+        "difficulty": "medium",
+        "who_wins_early": "Xerath",
+        "trading_pattern": "Xerath's poke beats Bard early. Play safe and roam.",
+        "ability_to_dodge": "Xerath Q (Arcanopulse) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate shots"
+        },
+        "early_game": "Play safe from his poke. Focus on roaming.",
+        "mid_game": "Both scale similarly through poke and utility.",
+        "late_game": "Bard's roaming and utility provide advantage.",
+        "win_condition": "Roam for chimes, avoid his poke, leverage utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale similarly",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and roam. Use portals for safety."
+      },
+      "Yuumi": {
+        "difficulty": "easy",
+        "who_wins_early": "Bard",
+        "trading_pattern": "Bard dominates Yuumi early. She provides no lane presence.",
+        "ability_to_dodge": "Yuumi Q (Prowling Projectile) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 6 with ultimate cc, attached to ADC"
+        },
+        "early_game": "Completely dominate. She has no lane pressure.",
+        "mid_game": "Bard's roaming and utility keep him far ahead.",
+        "late_game": "Bard outscales with roaming and utility.",
+        "win_condition": "Leverage lane dominance, roam for chimes, build massive lead.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Bard heavily outscales — Yuumi early/attach champion",
+        "jungle_gankable": true,
+        "positioning": "Dominate space. Roam aggressively to build lead."
+      },
+      "Zyra": {
+        "difficulty": "hard",
+        "who_wins_early": "Zyra",
+        "trading_pattern": "Zyra's poke and plants beat Bard early. Play safe and roam.",
+        "ability_to_dodge": "Zyra E (Rampant Growth) — dodge by moving around roots.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate knockup"
+        },
+        "early_game": "Play safe from her poke. Roam for chimes.",
+        "mid_game": "Both scale similarly through utility and cc.",
+        "late_game": "Both strong. Bard's roaming provides advantage.",
+        "win_condition": "Roam for chimes, avoid her plants and root, leverage utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through utility",
+        "jungle_gankable": false,
+        "positioning": "Keep distance from plants. Roam to collect chimes."
+      },
+      "Lux": {
+        "difficulty": "medium",
+        "who_wins_early": "Lux",
+        "trading_pattern": "Lux's poke and root beat Bard early. Play safe and roam.",
+        "ability_to_dodge": "Lux E (Lucent Singularity) — dodge by moving out of radius.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate laser"
+        },
+        "early_game": "Play safe from her poke. Roam for chimes.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Bard's roaming and utility provide advantage.",
+        "win_condition": "Roam for chimes, avoid her poke and root, leverage utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Bard slightly favored — roaming provides advantage",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and roam. Use portals strategically."
+      },
+      "Morgana": {
+        "difficulty": "medium",
+        "who_wins_early": "Morgana",
+        "trading_pattern": "Morgana's root and shield beat Bard early. Play safe and roam.",
+        "ability_to_dodge": "Morgana Q (Dark Binding) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with Magical Journey, chime scaling",
+          "enemy": "Level 6 with ultimate root, completed Mandate"
+        },
+        "early_game": "Play safe from her root. Roam for chimes.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Both strong. Bard's roaming provides advantage.",
+        "win_condition": "Roam for chimes, avoid her root, leverage utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through utility",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and roam. Use portals strategically."
+      }
+    }
+  }
+}

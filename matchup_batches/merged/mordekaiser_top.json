@@ -1,0 +1,402 @@
+{
+  "Mordekaiser": {
+    "top": {
+      "Cassiopeia": {
+        "difficulty": "hard",
+        "who_wins_early": "Cassiopeia",
+        "trading_pattern": "She outranges and outdamages you early. Avoid extended trades before level 3. Use E to gap close when she's overextended.",
+        "ability_to_dodge": "Her Q poison — it applies Conqueror stacks and slows. Back away from poison clouds and position to the side.",
+        "power_spikes": {
+          "you": "Level 3 (E all-in potential), Liandry's Torment second item",
+          "enemy": "Level 2 (Q+W poke spike), Rylai's Crystal Scepter (kite tool)"
+        },
+        "early_game": "Play around her Q cooldown. She has weak mobility pre-6. When her Q is down, look for E engages on her.",
+        "mid_game": "Shove and roam. If she gets Rylai's, it becomes much harder to catch her. Play around R windows.",
+        "late_game": "In teamfights, go around the team to catch her. Never let her land her full combo. One R pull wins fights.",
+        "win_condition": "Catch her overextended before she gets tankier. Avoid fighting in her poison clouds. Win early to prevent her scaling advantage.",
+        "counter_items": ["Mercury's Treads", "Force of Nature"],
+        "scaling": "Cassiopeia scales harder — she outranges and kites indefinitely. Win early or lose value.",
+        "jungle_gankable": true,
+        "positioning": "Stay behind minions to reduce Q damage. Avoid the center of fights where she can W fear."
+      },
+      "Galio": {
+        "difficulty": "hard",
+        "who_wins_early": "Galio",
+        "trading_pattern": "Galio outdamages early with Q+E burst. Short trades lose to his cooldowns. Trade when E is down.",
+        "ability_to_dodge": "His E taunt — dodge by running perpendicular to his charge. Never stand in a line with him at 2+ stacks of Comet Aegis.",
+        "power_spikes": {
+          "you": "Level 6 (ult zoning), Trinity Force",
+          "enemy": "Level 6 (R engage + W taunt combo), Hollow Radiance"
+        },
+        "early_game": "Don't fight his E-W combo. He's tanky but runs out of mana. Let him shove and gank early.",
+        "mid_game": "Post-6, track his ult. He's powerful in grouped fights but weak in side lanes. Pressure elsewhere.",
+        "late_game": "In teamfights, stay spread so his R isn't impactful. Your 1v1 is stronger — split and force him to match.",
+        "win_condition": "Get a lead early, roam with ult. Split push when he groups. Don't let him dictate teamfight positioning.",
+        "counter_items": ["Hollow Radiance", "Plated Steelcaps"],
+        "scaling": "Galio scales better — he has better teamfight utility. Win before midgame.",
+        "jungle_gankable": false,
+        "positioning": "Stay far from minion clumps to avoid E taunt hitbox. Hug walls to limit his charge angles."
+      },
+      "Naafiri": {
+        "difficulty": "hard",
+        "who_wins_early": "Naafiri",
+        "trading_pattern": "Naafiri has sustained poke with Q and threaded E. She outdamages short trades. Extended trades favor you slightly post-3.",
+        "ability_to_dodge": "Her E threading — it splits after hitting a target. Back away when you see it lock on. Don't fight when she has Passive stacked.",
+        "power_spikes": {
+          "you": "Level 5 (E full range), Trinity Force",
+          "enemy": "Level 1-2 (high poke), Manamune (wave clear)"
+        },
+        "early_game": "Play safe into her poke spam. Minion waves block some threading. At level 3, if you land E, you win the trade.",
+        "mid_game": "Shove and roam. Naafiri needs to be mobile. Pin her into side lanes where she has less escape.",
+        "late_game": "1v1 is in your favor if she's isolated. Protect squishy carries in teamfights from her threading.",
+        "win_condition": "Survive poke, hit level 3 E, and trade when her passive is down. Roam to generate pressure elsewhere.",
+        "counter_items": ["Hollow Radiance", "Kaenic Rookern"],
+        "scaling": "Even with different win conditions. You win drawn 1v1s; she wins skirmishes.",
+        "jungle_gankable": true,
+        "positioning": "Stay behind minion lines to block threading. Space from walls to limit her rotation paths."
+      },
+      "Rumble": {
+        "difficulty": "hard",
+        "who_wins_early": "Rumble",
+        "trading_pattern": "Rumble wins all-ins with Overheat Q. Short trades go to him. Fight when his Overheat is on cooldown.",
+        "ability_to_dodge": "His Harpoon (Q) — move to the side when charging. Avoid standing near walls where he's trapped.",
+        "power_spikes": {
+          "you": "Level 5 (E pull range), Liandry's Torment",
+          "enemy": "Overheat window (massive damage), Rylai's Crystal Scepter"
+        },
+        "early_game": "Let him push. His Overheat cooldown is your window to fight. Don't let him zone you entirely; farm safely.",
+        "mid_game": "Teamfight around his ult cooldown. His E-Ult is devastatingin tight spaces. Spread out and fight in open areas.",
+        "late_game": "Avoid his E-Ult zoning in chokes. Split push — he can't duel you 1v1 when Overheat is down.",
+        "win_condition": "Wait for Overheat cooldown, all-in. Roam to side lanes. Win through side lane pressure.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "Even — both scale well with AP. Rumble has better teamfight through E-Ult.",
+        "jungle_gankable": true,
+        "positioning": "Hug side walls to limit his Harpoon angles. Stand in minion clusters for poke mitigation."
+      },
+      "Darius": {
+        "difficulty": "medium",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Darius wins extended trades at close range. Short trades favor you slightly. Avoid his Q outer ring entirely.",
+        "ability_to_dodge": "His Q bleed — walk at him or away from the outer ring. Standing in the ring is a death sentence.",
+        "power_spikes": {
+          "you": "Level 5 (E pull), Trinity Force",
+          "enemy": "Level 6 (R execute), Stridebreaker"
+        },
+        "early_game": "Don't fight in his Q spin. Run at him to avoid outer ring damage. Trade short at level 1-2.",
+        "mid_game": "Your ult is safer in teamfights. Darius needs to land R to reset. Kite away and ult into him.",
+        "late_game": "He scales better into full builds. Stick to fights where ult resets are valuable. Don't 1v1 him if ahead.",
+        "win_condition": "Avoid his Q outer ring, build HP. Use ult to lock him down. Win through roaming and map pressure.",
+        "counter_items": ["Plated Steelcaps", "Kaenic Rookern"],
+        "scaling": "Darius outscales mid-to-late. Win early, roam, don't let him stack passive.",
+        "jungle_gankable": false,
+        "positioning": "Walk at him to deny Q outer ring. Don't extend into the lane without vision."
+      },
+      "Garen": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Garen Q silence shuts down your combo. Trade short before he gets Q. After he Q's, you win the trade back.",
+        "ability_to_dodge": "His Q silence — when you see him wind up, back away immediately. Silence prevents E usage completely.",
+        "power_spikes": {
+          "you": "Level 5 (E range extension), Liandry's Torment",
+          "enemy": "Level 6 (R execute), Sunfire Aegis"
+        },
+        "early_game": "He's stronger in short trades because of Q silence. Play around minions for poke. Trade after he uses Q.",
+        "mid_game": "He needs to chase with W. Your E pull outranges his engage. In teamfights, position to ult his backline.",
+        "late_game": "Garen outscales — Sunfire + Judgment combo is oppressive. Win through teamfight ult impact, not drawn fights.",
+        "win_condition": "Trade after his Q is down. Shove and roam with ult. Never sit in his Judgment radius in teamfights.",
+        "counter_items": ["Plated Steelcaps", "Adaptive Helm"],
+        "scaling": "Garen slightly ahead — he has better AOE teamfight. You scale through ult utility.",
+        "jungle_gankable": false,
+        "positioning": "Hug minions to reduce distance Garen can Q you from. Back away when Q winds up."
+      },
+      "Fiora": {
+        "difficulty": "medium",
+        "who_wins_early": "Fiora",
+        "trading_pattern": "Fiora parries your burst with W. Play around it by faking E. Extended trades favor her due to Vitals.",
+        "ability_to_dodge": "Her Riposte (W) — bait it with a fake E, then E for real. She blocks your damage if you're predictable.",
+        "power_spikes": {
+          "you": "Level 6 (R engage), Hollow Radiance",
+          "enemy": "Trinity Force completion (one-shot potential), Level 3"
+        },
+        "early_game": "Don't spam E — she'll Riposte it. Play around minions. She can dash away with Q, so short trades are risky.",
+        "mid_game": "She duels better but ult groups fights. In teamfights with your team, you win. Isolated 1v1s lose to Vitals.",
+        "late_game": "She's an assassin in late game. Protect your team in grouped fights. Your tankiness wins fights with allies.",
+        "win_condition": "Team fight only. Never isolated duel. Ult into enemy team. Win through teamfight 5v5.",
+        "counter_items": ["Kaenic Rookern", "Plated Steelcaps"],
+        "scaling": "Fiora scales better — she's a split push god late game. Stick to teamfights.",
+        "jungle_gankable": false,
+        "positioning": "Juke her Q with sideways movement. Don't overextend without vision for jungle."
+      },
+      "Aatrox": {
+        "difficulty": "medium",
+        "who_wins_early": "Aatrox",
+        "trading_pattern": "Aatrox Q has range and healing. Short trades favor him. After he whiffs a Q swing, trade back hard.",
+        "ability_to_dodge": "His Q swings — they have 3 charges with healing on hit. Dodge by moving perpendicular to his swings.",
+        "power_spikes": {
+          "you": "Level 5 (E range), Trinity Force",
+          "enemy": "Level 6 (R revive utility), Goredrinker"
+        },
+        "early_game": "Let him push. He's stronger early. When his Q is on cooldown, look for E pulls. Play around minions for spacing.",
+        "mid_game": "Aatrox teamfights well with his E range. Your ult is better in chaotic fights. Focus positioning over raw damage.",
+        "late_game": "He scales through items. Your teamfight ult is stronger. Pin him down in team fights.",
+        "win_condition": "Farm safely, look for E pulls after his Q cooldown. Win through teamfights, not side lane duels.",
+        "counter_items": ["Plated Steelcaps", "Kaenic Rookern"],
+        "scaling": "Even — both scale well. Aatrox has better healing; you have better teamfight lockdown.",
+        "jungle_gankable": true,
+        "positioning": "Space far from minion clumps to avoid his full Q combo. Don't over-extend toward river."
+      },
+      "Illaoi": {
+        "difficulty": "medium",
+        "who_wins_early": "Illaoi",
+        "trading_pattern": "Illaoi deals massive single-target damage with tentacles. Short trades go to her. Play around tentacle spawns.",
+        "ability_to_dodge": "Her E spirit grab — dodge by moving sideways. If hit, you fight at massive disadvantage with tentacle damage.",
+        "power_spikes": {
+          "you": "Level 5 (E range), Hollow Radiance",
+          "enemy": "Level 6 (R tentacles everywhere), Hollow Radiance"
+        },
+        "early_game": "Play around tentacle spawns. They tick damage. After she hits E, back away and disengage completely.",
+        "mid_game": "Avoid her E in fights. If you're caught, ult back and disengage. Teamfight with your team; don't 1v1.",
+        "late_game": "She's a duelist god. Only teamfight when ahead or with a numbers advantage. Don't isolate.",
+        "win_condition": "Get ahead early, teamfight when grouped. Avoid E completely. Never fight near walls with many tentacles.",
+        "counter_items": ["Kaenic Rookern", "Plated Steelcaps"],
+        "scaling": "Illaoi outscales — she's a better duelist. You need team fights.",
+        "jungle_gankable": true,
+        "positioning": "Space far from tentacles. Don't fight near walls. Back away immediately when you see E cast."
+      },
+      "Jax": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Jax Q-AA burst wins short trades. Extended trades are more even. Trade when his E is on cooldown.",
+        "ability_to_dodge": "His E counter-strike — when he jumps at you with E up, back away. He stuns you if the counter triggers.",
+        "power_spikes": {
+          "you": "Level 6 (R damage amp), Trinity Force",
+          "enemy": "Trinity Force completion (OP duelist), Level 6"
+        },
+        "early_game": "Play short trades, not extended. When Jax E is down, look for aggressive trades. Back off when he walks forward aggressively.",
+        "mid_game": "He duels better with items. Your ult is better grouped. Teamfight instead of 1v1.",
+        "late_game": "Jax is a hypercarry duelist. You can't 1v1. Stick to teamfights with ult advantage.",
+        "win_condition": "Win teamfights, not duels. Ult into his team. Roam before he gets Trinity Force.",
+        "counter_items": ["Hollow Radiance", "Plated Steelcaps"],
+        "scaling": "Jax outscales into a duelist monster. You need teamfights.",
+        "jungle_gankable": false,
+        "positioning": "Don't let him get in melee range without ult available. Space when he walks up aggressively."
+      },
+      "Shen": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Shen's E taunt interrupts your combo. Short burst trades lose to his W tankiness. Trade at range when E is down.",
+        "ability_to_dodge": "His E taunt — move perpendicular to his charge. Never stand in his charge path. The taunt duration is long.",
+        "power_spikes": {
+          "you": "Level 5 (E pull), Liandry's Torment",
+          "enemy": "Level 6 (R teamfight presence), Hollow Radiance"
+        },
+        "early_game": "Play around his E taunt. When it's down, you can trade. He's tanky — don't expect short trades to do much.",
+        "mid_game": "Post-6, he splits with R up. Track his ult. Teamfight when his ult is down. He's weak in side lanes 1v1.",
+        "late_game": "He's a split-pushing tank. Your ult is stronger in team fights. Force fights when he's pinned.",
+        "win_condition": "Force teamfights when his ult is down. Punish his split push. Win through 5v4 scenarios.",
+        "counter_items": ["Kaenic Rookern", "Hollow Radiance"],
+        "scaling": "Even — different roles. He scales as a split pusher; you as a teamfighter.",
+        "jungle_gankable": true,
+        "positioning": "Avoid walking into narrow passages where his E can freely taunt. Space from minion clusters."
+      },
+      "Urgot": {
+        "difficulty": "hard",
+        "who_wins_early": "Urgot",
+        "trading_pattern": "Urgot's W auto attacks and E fear win early. Long-range poke with Q. He dominates lane pressure.",
+        "ability_to_dodge": "His E fear + grab — dodge by moving sideways. If grabbed, you're dead. Back away when he walks forward.",
+        "power_spikes": {
+          "you": "Level 6 (ult zoning), Hollow Radiance",
+          "enemy": "Level 2 (W passive up), Manamune (wave clear)"
+        },
+        "early_game": "He pokes harder with Q. His W auto-attacking is too much damage. Play safe, farm, and avoid all-ins.",
+        "mid_game": "His R execute scales fast. Post-6, never sit below 40% HP. Your ult is safer but less damaging.",
+        "late_game": "He outscales you in poke damage and teamfight security with R. Stick to grouped fights, avoid isolating.",
+        "win_condition": "Survive early, group for teamfights. Avoid extending. Let him misposition, then ult into him.",
+        "counter_items": ["Mercury's Treads", "Kaenic Rookern"],
+        "scaling": "Urgot outscales — his R execute is oppressive. You need teamfights.",
+        "jungle_gankable": false,
+        "positioning": "Stay far from walls to avoid E fear/grab. Don't extend without vision."
+      },
+      "Vayne": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Vayne's range advantage lets her kite. Tumble let's her reposition. E you into wall for condemn stun.",
+        "ability_to_dodge": "Her E condemn — move away from walls so she can't stun you. If near a wall, she will condemn you.",
+        "power_spikes": {
+          "you": "Level 5 (E pull), Liandry's Torment",
+          "enemy": "Trinity Force (late game win condition), Level 6"
+        },
+        "early_game": "She's weak early. Pressure and look for kills before her scaling. All-in when her E is on cooldown.",
+        "mid_game": "She starts scaling with items. Teamfight instead of 1v1. Your ult zoning is superior.",
+        "late_game": "Vayne is a hypercarry late. You can't duel. Protect your backline from her; use your ult to zone.",
+        "win_condition": "Abuse early weakness with aggression. Win before Trinity Force. Teamfight with numbers advantage.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "Vayne outscales dramatically — she's a late-game monster. Win early or lose.",
+        "jungle_gankable": true,
+        "positioning": "Never fight near walls. Distance yourself from them. Don't extend alone."
+      },
+      "Varus": {
+        "difficulty": "medium",
+        "who_wins_early": "Varus",
+        "trading_pattern": "Varus pokes with Q and applies on-hit stacks. He outdamages short trades early. Trade when Q is on cooldown.",
+        "ability_to_dodge": "His R chain reaction — dodge by moving to the side. If hit, the chain spreads and roots you.",
+        "power_spikes": {
+          "you": "Level 5 (E range), Trinity Force",
+          "enemy": "Level 2 (poke spike), Manamune"
+        },
+        "early_game": "Play safe into his Q poke. He applies stacks for AP scaling or AD burst. At level 3, trade when Q is down.",
+        "mid_game": "His R is devastating in teamfights. Stay spread. Your ult is safer for engagement.",
+        "late_game": "He scales as a poke/control mage. Your tankiness and ult are stronger. Teamfight, don't duel.",
+        "win_condition": "Survive poke, hit level 3+ for all-ins. Teamfight grouped. Force him into bad R positions.",
+        "counter_items": ["Kaenic Rookern", "Mercury's Treads"],
+        "scaling": "Even with different win conditions. Varus pokes; you teamfight. Stalemate late game.",
+        "jungle_gankable": true,
+        "positioning": "Space wide from allies to reduce R chain hits. Don't let him stack you easily."
+      },
+      "Yasuo": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Yasuo dashes through minions with E to harass. Short trades are even. Long fights let you ult-lock him.",
+        "ability_to_dodge": "His E-Q combo chain — move away from minions so he can't dash to you. Windwall blocks your projectile effects.",
+        "power_spikes": {
+          "you": "Level 5 (E range), Liandry's Torment",
+          "enemy": "Level 2 (E spam harass), Trinity Force"
+        },
+        "early_game": "Stand far from minions to prevent E dashes. When his E is down, trade hard. He scales but wins early.",
+        "mid_game": "Your ult is stronger grouped. Teamfight with your team. He splitpushes well but loses in 5v5s.",
+        "late_game": "Yasuo is an assassin split pusher. You're a teamfight tank. Stick to grouped fights.",
+        "win_condition": "Minimize minion damage early. Teamfight grouped. Ult him when he dashes in.",
+        "counter_items": ["Plated Steelcaps", "Hollow Radiance"],
+        "scaling": "Even — Yasuo splits, you teamfight. Depends on game flow.",
+        "jungle_gankable": true,
+        "positioning": "Space from minion waves. Don't feed him E stack resets. Back away when he dashes toward you."
+      },
+      "Yone": {
+        "difficulty": "medium",
+        "who_wins_early": "Yone",
+        "trading_pattern": "Yone Q-E harass deals heavy damage. His E soul tether lets him reposition. Trade short when his E is down.",
+        "ability_to_dodge": "His R spirit dive — dodge by running perpendicular. He marks you with charged Q; avoid full rotation.",
+        "power_spikes": {
+          "you": "Level 5 (E pull), Trinity Force",
+          "enemy": "Level 2 (harass spike), Trinity Force"
+        },
+        "early_game": "Yone's poke is strong. His E gives safety. Play defensive early. At level 3+, trade around his abilities.",
+        "mid_game": "He scales fast with items. Teamfight instead of 1v1. Your ult is safer for engagement.",
+        "late_game": "Yone is a late-game duelist/split pusher. Stick to teamfights. Don't isolate.",
+        "win_condition": "Survive early, teamfight grouped. Roam to generate pressure. Win through coordination.",
+        "counter_items": ["Plated Steelcaps", "Hollow Radiance"],
+        "scaling": "Yone outscales — he's a split pusher with late-game power. You scale as a teamfighter.",
+        "jungle_gankable": true,
+        "positioning": "Space from his Q-E combo path. Don't extend into river. Trade when E is on cooldown."
+      },
+      "Malphite": {
+        "difficulty": "easy",
+        "who_wins_early": "even",
+        "trading_pattern": "Malphite is tanky but low damage early. You outdamage him. All-in when his E is on cooldown.",
+        "ability_to_dodge": "His E shockwave — move away from him when he winds up. It doesn't slow but reduces armor.",
+        "power_spikes": {
+          "you": "Level 3 (E all-in), Liandry's Torment",
+          "enemy": "Level 6 (R ult teamfight), Thornmail"
+        },
+        "early_game": "He's a weak early laner. All-in him at level 2-3. He scales to teamfight god but is killable now.",
+        "mid_game": "Post-6, his R is powerful in grouped fights. Your ult is stronger. Teamfight instead of dueling.",
+        "late_game": "He's a teamfight god; you're even. Stick to grouped fights. Don't 1v1.",
+        "win_condition": "Kill him early before scaling. All-in at level 2-3. Roam with ult.",
+        "counter_items": ["Hollow Radiance", "Liandry's Torment"],
+        "scaling": "Malphite scales better as a teamfighter. You need early kills.",
+        "jungle_gankable": true,
+        "positioning": "Don't stand clumped for his R. Space for teamfight efficiency."
+      },
+      "Kayle": {
+        "difficulty": "easy",
+        "who_wins_early": "even",
+        "trading_pattern": "Kayle farms early with Q. She's weak in short trades. All-in her when she walks up carelessly.",
+        "ability_to_dodge": "Her W healing — it heals her and gives movespeed. Focus her down before she heals herself back up.",
+        "power_spikes": {
+          "you": "Level 3 (E engage), Liandry's Torment",
+          "enemy": "Level 6 (ult invulnerability), Level 11 (melee range R)"
+        },
+        "early_game": "She's incredibly weak early. All-in at level 1-3. Deny her farm. She scales to a monster if allowed to farm.",
+        "mid_game": "She gets her melee form at 11. Post-11, she outscales you. Win before then.",
+        "late_game": "Full build Kayle beats you. You need to win before her power spikes.",
+        "win_condition": "Abuse her early weakness relentlessly. Don't let her farm for free. Get a lead.",
+        "counter_items": ["Hollow Radiance", "Liandry's Torment"],
+        "scaling": "Kayle outscales dramatically — she becomes unkillable late. You must win early.",
+        "jungle_gankable": true,
+        "positioning": "Stay close to kill her. Don't let her farm safely at range."
+      },
+      "Ornn": {
+        "difficulty": "easy",
+        "who_wins_early": "even",
+        "trading_pattern": "Ornn is tanky but slow early. You outdamage short trades. All-in when his W is down.",
+        "ability_to_dodge": "His R volcanic rupture — move sideways to avoid knockback. If hit, it interrupts your combo.",
+        "power_spikes": {
+          "you": "Level 3 (E engage), Liandry's Torment",
+          "enemy": "Level 6 (R engage tool), Level 11 (item upgrades)"
+        },
+        "early_game": "He's weak to early all-ins. Pressure heavily. All-in at level 2-3.",
+        "mid_game": "He scales with items and upgrades. Your ult is still stronger grouped. Teamfight.",
+        "late_game": "He's a tanky support-like teammate. You're an engager. Stick to teamfights.",
+        "win_condition": "Kill him early. All-in at level 2-3. Don't let him scale up with free farm.",
+        "counter_items": ["Liandry's Torment", "Hollow Radiance"],
+        "scaling": "Ornn scales well as a tanky support. You scale as a teamfighter.",
+        "jungle_gankable": true,
+        "positioning": "Get close for all-ins. Don't let him kite freely. Force fights when he's extended."
+      },
+      "Teemo": {
+        "difficulty": "easy",
+        "who_wins_early": "Teemo",
+        "trading_pattern": "Teemo pokes with Q from range. He's untargetable briefly. Short trades go to you. Rush him at level 2-3.",
+        "ability_to_dodge": "His Q blind — it hits you at range, avoid by moving unpredictably. He blinded, all-in his next trade.",
+        "power_spikes": {
+          "you": "Level 3 (E all-in), Adaptive Helm",
+          "enemy": "Level 1 (Q poke), Nashor's Tooth"
+        },
+        "early_game": "He pokes safely. All-in him hard at level 2-3. He scales to a late-game monster if farm-heavy.",
+        "mid_game": "He's weak in grouped fights. Teamfight when you have numbers. His split push is weak to teamfights.",
+        "late_game": "He outscales as a split pusher. Force grouped fights before that. Don't let him split.",
+        "win_condition": "All-in him early. Don't let him scale to split-push phase. Teamfight grouped.",
+        "counter_items": ["Adaptive Helm", "Hollow Radiance"],
+        "scaling": "Teemo outscales as a split pusher. You need early kills.",
+        "jungle_gankable": true,
+        "positioning": "Rush him; don't let him kite. Run him down at level 2-3."
+      },
+      "Rumble": {
+        "difficulty": "medium",
+        "who_wins_early": "Rumble",
+        "trading_pattern": "Rumble wins early with Overheat Q. Long range, high damage. Trade when Overheat is on cooldown.",
+        "ability_to_dodge": "His Q harpoon — move sideways. Overheat window is your trade time.",
+        "power_spikes": {
+          "you": "Level 5 (E range), Trinity Force",
+          "enemy": "Overheat passive (all-in damage), Rylai's"
+        },
+        "early_game": "Play safe into Overheat spam. Trade when Q is down. Farm and wait for scaling window.",
+        "mid_game": "Teamfight instead of 1v1. His E-Ult is devastating grouped. Spread out.",
+        "late_game": "He outscales through Overheat playstyle. Stick to teamfights with good positioning.",
+        "win_condition": "Survive early, teamfight grouped. Win through team coordination, not raw dueling.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "Rumble outscales through Overheat spam. You need teamfights.",
+        "jungle_gankable": true,
+        "positioning": "Space from clumps for E-Ult positioning. Trade when Overheat is down."
+      },
+      "Gnar": {
+        "difficulty": "medium",
+        "who_wins_early": "Gnar",
+        "trading_pattern": "Gnar mini-range let's him poke. Mega Gnar all-in is oppressive. Trade when he's mini and E is down.",
+        "ability_to_dodge": "His mega transformation — brace for impact when he's about to transform. His R knockback hurts.",
+        "power_spikes": {
+          "you": "Level 5 (E range), Liandry's Torment",
+          "enemy": "Mega transformation (all-in damage), Trinity Force"
+        },
+        "early_game": "Mini Gnar pokes early. Mega is scary. Play safe around his transformation timer. All-in mini.",
+        "mid_game": "Mega Gnar teamfights well. Your ult is safer. Fight when he's mini form.",
+        "late_game": "He's a scaling teamfighter. You're equal. Depends on teamfight positioning.",
+        "win_condition": "All-in him when mini. Avoid mega form all-ins. Teamfight grouped.",
+        "counter_items": ["Hollow Radiance", "Plated Steelcaps"],
+        "scaling": "Even — both scale as teamfighters.",
+        "jungle_gankable": true,
+        "positioning": "Target him when mini. Avoid when mega. Space from his R knockback."
+      }
+    }
+  }
+}

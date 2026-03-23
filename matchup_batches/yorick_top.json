@@ -1,0 +1,348 @@
+{
+  "Yorick": {
+    "top": {
+      "Darius": {
+        "difficulty": "medium",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Darius Q bleed is oppressive. Your ghouls and cage control spacing. Trade with ghouls.",
+        "ability_to_dodge": "His Q outer ring bleed — use cage to deny his spacing.",
+        "power_spikes": {
+          "you": "Level 3 (cage), Trinity Force",
+          "enemy": "Level 6 (R execute), Stridebreaker"
+        },
+        "early_game": "Darius dominates early. Use cage and ghouls to zone. Don't extend.",
+        "mid_game": "Your ghouls and maiden scale. His ult is deadly — avoid low HP.",
+        "late_game": "You outscale through maiden and split push. He struggles 1v1 vs maiden.",
+        "win_condition": "Use cage to zone. Summon maiden when needed. Split push late.",
+        "counter_items": ["Trinity Force", "Plated Steelcaps"],
+        "scaling": "You outscale through maiden and split push.",
+        "jungle_gankable": false,
+        "positioning": "Use cage to zone. Control ghouls. Split push."
+      },
+      "Garen": {
+        "difficulty": "easy",
+        "who_wins_early": "Yorick",
+        "trading_pattern": "Garen Q silence doesn't affect your ghouls. Your cage and ghouls zone him. Trade with ghouls.",
+        "ability_to_dodge": "His Q silence wind-up — use cage to deny his approach.",
+        "power_spikes": {
+          "you": "Level 3 (cage), Trinity Force",
+          "enemy": "Level 6 (R execute), Sunfire Aegis"
+        },
+        "early_game": "Dominate with cage and ghouls. Garen can't close gap with cage.",
+        "mid_game": "Your ghouls and maiden control. His tankiness scales but you're stronger.",
+        "late_game": "You outscale through maiden and split push. He's weaker.",
+        "win_condition": "Dominate with cage and ghouls. Summon maiden. Split push.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "You outscale through maiden and split push.",
+        "jungle_gankable": false,
+        "positioning": "Use cage to zone. Control ghouls. Split push late."
+      },
+      "Fiora": {
+        "difficulty": "hard",
+        "who_wins_early": "Fiora",
+        "trading_pattern": "Fiora's parry blocks your ghouls' damage. Your cage helps but she's mobile. Trade carefully.",
+        "ability_to_dodge": "Her parry W — use cage to negate her engagement instead of ghouls.",
+        "power_spikes": {
+          "you": "Level 3 (cage), Trinity Force",
+          "enemy": "Level 3 (parry), Trinity Force"
+        },
+        "early_game": "Fiora dominates early. Use cage defensively. Ghouls don't help much.",
+        "mid_game": "Your maiden scales. Her split push is strong. Avoid 1v1s.",
+        "late_game": "You outscale through maiden. Avoid dueling her.",
+        "win_condition": "Use cage defensively. Summon maiden. Avoid her 1v1.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "You outscale through maiden.",
+        "jungle_gankable": true,
+        "positioning": "Use cage defensively. Summon maiden. Avoid duels."
+      },
+      "Jax": {
+        "difficulty": "hard",
+        "who_wins_early": "Jax",
+        "trading_pattern": "Jax's dueling and E stun are oppressive. Your cage helps but he still dominates. Use cage wisely.",
+        "ability_to_dodge": "His E stun counter — use cage to deny his engagement.",
+        "power_spikes": {
+          "you": "Level 3 (cage), Trinity Force",
+          "enemy": "Level 6 (E stun), Trinity Force"
+        },
+        "early_game": "Jax dominates early. Use cage defensively. Don't trade.",
+        "mid_game": "Your maiden scales. His dueling is still strong. Avoid extended 1v1.",
+        "late_game": "You outscale through maiden. Avoid dueling him.",
+        "win_condition": "Use cage defensively. Summon maiden. Avoid 1v1.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "You outscale through maiden.",
+        "jungle_gankable": true,
+        "positioning": "Use cage defensively. Summon maiden. Avoid duels."
+      },
+      "Riven": {
+        "difficulty": "hard",
+        "who_wins_early": "Riven",
+        "trading_pattern": "Riven's combo is fast and oppressive. Your ghouls help but she outduels you. Use cage.",
+        "ability_to_dodge": "Her Q dash combo — use cage to negate her engagement.",
+        "power_spikes": {
+          "you": "Level 3 (cage), Trinity Force",
+          "enemy": "Level 1 (combo), Trinity Force"
+        },
+        "early_game": "Riven's burst dominates. Use cage defensively. Don't trade.",
+        "mid_game": "Your maiden scales. Her split push is strong. Teamfight instead.",
+        "late_game": "You outscale through maiden and split. Riven struggles grouped.",
+        "win_condition": "Use cage defensively. Summon maiden. Split push late.",
+        "counter_items": ["Plated Steelcaps", "Trinity Force"],
+        "scaling": "You outscale through maiden and split.",
+        "jungle_gankable": true,
+        "positioning": "Use cage defensively. Summon maiden. Split push."
+      },
+      "Aatrox": {
+        "difficulty": "medium",
+        "who_wins_early": "Aatrox",
+        "trading_pattern": "Aatrox Q range is massive. Your cage and ghouls help. Trade with ghouls.",
+        "ability_to_dodge": "His Q skillshots — use cage to negate damage if he approaches.",
+        "power_spikes": {
+          "you": "Level 3 (cage), Trinity Force",
+          "enemy": "Level 1 (Q damage), Goliath Cleaver"
+        },
+        "early_game": "Aatrox Q dominates. Use cage to zone. Trade with ghouls.",
+        "mid_game": "Your ghouls and maiden scale. His all-in is strong but manageable.",
+        "late_game": "You outscale through maiden. He falls off.",
+        "win_condition": "Use cage to zone. Trade with ghouls. Summon maiden.",
+        "counter_items": ["Trinity Force", "Plated Steelcaps"],
+        "scaling": "You outscale through maiden.",
+        "jungle_gankable": true,
+        "positioning": "Use cage to zone. Trade with ghouls. Split push."
+      },
+      "Mordekaiser": {
+        "difficulty": "hard",
+        "who_wins_early": "Mordekaiser",
+        "trading_pattern": "Mordekaiser's all-in is oppressive. Your ghouls don't help much 1v1. Use cage.",
+        "ability_to_dodge": "His E pull — use cage to negate his approach.",
+        "power_spikes": {
+          "you": "Level 3 (cage), Trinity Force",
+          "enemy": "Level 1 (all-in), Trinity Force"
+        },
+        "early_game": "Mordekaiser dominates. Use cage defensively. Don't trade.",
+        "mid_game": "Your maiden scales. His ult can isolate you. Avoid 1v1s.",
+        "late_game": "You outscale through maiden. He struggles if grouped.",
+        "win_condition": "Use cage defensively. Summon maiden. Group for fights.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "You outscale through maiden.",
+        "jungle_gankable": true,
+        "positioning": "Use cage defensively. Summon maiden. Group for fights."
+      },
+      "Nasus": {
+        "difficulty": "easy",
+        "who_wins_early": "Yorick",
+        "trading_pattern": "Nasus has zero early game. Your ghouls zone him completely. Dominate early.",
+        "ability_to_dodge": "His W wither — use cage to negate his approach.",
+        "power_spikes": {
+          "you": "Level 1-6 (early dominance), Trinity Force",
+          "enemy": "Level 16+ (stacking), Iceborn Gauntlet"
+        },
+        "early_game": "Dominate with ghouls and cage. Nasus is helpless. Build a lead.",
+        "mid_game": "Your lead carries. His stacking helps him. Use maiden to duel.",
+        "late_game": "His stacks scale. You outscale through maiden and split.",
+        "win_condition": "Dominate early with ghouls. Build lead. Split push with maiden.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "He outscales through stacks — you through maiden.",
+        "jungle_gankable": true,
+        "positioning": "Zone with ghouls early. Split push with maiden late."
+      },
+      "Sion": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Sion's Q poke is strong. Your ghouls and cage help zone. Trade with ghouls.",
+        "ability_to_dodge": "His Q slow — use cage to negate his spacing.",
+        "power_spikes": {
+          "you": "Level 3 (cage), Trinity Force",
+          "enemy": "Level 9 (Q cooldown), Hollow Radiance"
+        },
+        "early_game": "Trade ghouls for Q poke. Use cage to zone.",
+        "mid_game": "Both scale into tankiness. Your ghouls help. Trade carefully.",
+        "late_game": "Even — both scale well. Your split push vs his teamfight.",
+        "win_condition": "Use cage to zone. Trade with ghouls. Split push late.",
+        "counter_items": ["Trinity Force", "Plated Steelcaps"],
+        "scaling": "Even — both scale well.",
+        "jungle_gankable": true,
+        "positioning": "Use cage to zone. Trade with ghouls. Split push."
+      },
+      "Malphite": {
+        "difficulty": "easy",
+        "who_wins_early": "Yorick",
+        "trading_pattern": "Malphite is weak early. Your ghouls dominate. Trade with ghouls aggressively.",
+        "ability_to_dodge": "His E shockwave — use cage to negate his tankiness.",
+        "power_spikes": {
+          "you": "Level 1-6 (early dominance), Trinity Force",
+          "enemy": "Level 6 (R engage), Thornmail"
+        },
+        "early_game": "Dominate with ghouls and cage. Malphite can't resist.",
+        "mid_game": "Your lead carries. His tankiness scales. Use maiden to split.",
+        "late_game": "Even — both scale well. Your split push matters.",
+        "win_condition": "Dominate early with ghouls. Build lead. Split push with maiden.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "Even — both scale well.",
+        "jungle_gankable": true,
+        "positioning": "Zone with ghouls early. Split push with maiden late."
+      },
+      "Kayle": {
+        "difficulty": "easy",
+        "who_wins_early": "Yorick",
+        "trading_pattern": "Kayle's early range is limited. Your ghouls zone her. Dominate early.",
+        "ability_to_dodge": "Her R invincibility — focus ghouls when she ults.",
+        "power_spikes": {
+          "you": "Level 1-6 (early dominance), Trinity Force",
+          "enemy": "Level 11 (range extends), Nashor's Tooth"
+        },
+        "early_game": "Dominate with ghouls. Kayle's range is limited early.",
+        "mid_game": "Her range extends. Your maiden scales. Split push instead.",
+        "late_game": "She scales well. You outscale through split push and maiden.",
+        "win_condition": "Dominate early with ghouls. Build lead. Split push late.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "Even — both scale well late game.",
+        "jungle_gankable": true,
+        "positioning": "Zone with ghouls early. Split push with maiden late."
+      },
+      "Trundle": {
+        "difficulty": "medium",
+        "who_wins_early": "Trundle",
+        "trading_pattern": "Trundle's pillar zones your ghouls. Your cage helps but his tankiness is strong. Trade with ghouls.",
+        "ability_to_dodge": "His pillar — use cage to negate his CC.",
+        "power_spikes": {
+          "you": "Level 3 (cage)", "Trinity Force",
+          "enemy": "Level 3 (pillar), Trinity Force"
+        },
+        "early_game": "Trundle's pillar is oppressive. Use cage to zone back. Trade with ghouls.",
+        "mid_game": "Your maiden scales. His tankiness improves. Trade carefully.",
+        "late_game": "You outscale through maiden and split. He struggles vs maiden.",
+        "win_condition": "Use cage to zone. Trade with ghouls. Summon maiden.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "You outscale through maiden.",
+        "jungle_gankable": true,
+        "positioning": "Use cage to zone. Trade with ghouls. Split push."
+      },
+      "Illaoi": {
+        "difficulty": "medium",
+        "who_wins_early": "Illaoi",
+        "trading_pattern": "Illaoi's E test is devastating. Your ghouls don't help. Use cage to negate.",
+        "ability_to_dodge": "Her E tentacle test — use cage to negate her combo.",
+        "power_spikes": {
+          "you": "Level 3 (cage), Trinity Force",
+          "enemy": "Level 6 (R spawns), Sunfire Aegis"
+        },
+        "early_game": "Illaoi's tentacles zone you. Use cage defensively. Avoid E test.",
+        "mid_game": "Your maiden scales. Her tentacles zone. Trade carefully.",
+        "late_game": "You outscale through maiden. Avoid tentacles.",
+        "win_condition": "Use cage to zone. Summon maiden. Split push late.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "You outscale through maiden.",
+        "jungle_gankable": true,
+        "positioning": "Use cage to zone. Summon maiden. Split push."
+      },
+      "Camille": {
+        "difficulty": "hard",
+        "who_wins_early": "Camille",
+        "trading_pattern": "Camille's E hook is oppressive. Your ghouls don't help. Use cage.",
+        "ability_to_dodge": "Her E hook — use cage to negate her engagement.",
+        "power_spikes": {
+          "you": "Level 3 (cage)", "Trinity Force",
+          "enemy": "Level 3 (E hook), Trinity Force"
+        },
+        "early_game": "Camille dominates. Use cage defensively. Don't trade.",
+        "mid_game": "Your maiden scales. Her dueling is strong. Avoid 1v1s.",
+        "late_game": "You outscale through maiden. Avoid dueling her.",
+        "win_condition": "Use cage defensively. Summon maiden. Avoid 1v1.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "You outscale through maiden.",
+        "jungle_gankable": true,
+        "positioning": "Use cage defensively. Summon maiden. Avoid duels."
+      },
+      "Olaf": {
+        "difficulty": "medium",
+        "who_wins_early": "Olaf",
+        "trading_pattern": "Olaf's Q slow is oppressive. Your ghouls and cage help zone. Trade with ghouls.",
+        "ability_to_dodge": "His Q axe slow — use cage to negate his approach.",
+        "power_spikes": {
+          "you": "Level 3 (cage), Trinity Force",
+          "enemy": "Level 1 (Q slow), Trinity Force"
+        },
+        "early_game": "Olaf's poke dominates. Use cage to zone. Trade with ghouls.",
+        "mid_game": "Your maiden scales. His R makes him unkiteable. Use cage wisely.",
+        "late_game": "You outscale through maiden. Avoid his ult.",
+        "win_condition": "Use cage to zone. Trade with ghouls. Summon maiden.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "You outscale through maiden.",
+        "jungle_gankable": true,
+        "positioning": "Use cage to zone. Trade with ghouls. Split push."
+      },
+      "Ornn": {
+        "difficulty": "hard",
+        "who_wins_early": "Ornn",
+        "trading_pattern": "Ornn's W brittle is oppressive. Your ghouls don't help much. Use cage.",
+        "ability_to_dodge": "His E charge — use cage to negate his engagement.",
+        "power_spikes": {
+          "you": "Level 3 (cage)", "Trinity Force",
+          "enemy": "Level 6 (R knockup), Sunfire Aegis"
+        },
+        "early_game": "Ornn dominates. Use cage defensively. Don't trade.",
+        "mid_game": "Your maiden scales. His tankiness improves. Trade carefully.",
+        "late_game": "You outscale through maiden. His upgrades are annoying but manageable.",
+        "win_condition": "Use cage defensively. Summon maiden. Split push late.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "You outscale through maiden.",
+        "jungle_gankable": true,
+        "positioning": "Use cage defensively. Summon maiden. Split push."
+      },
+      "Maokai": {
+        "difficulty": "medium",
+        "who_wins_early": "Maokai",
+        "trading_pattern": "Maokai's W pull and Q poke are strong. Your ghouls and cage help. Trade with ghouls.",
+        "ability_to_dodge": "His W pull — use cage to negate his approach.",
+        "power_spikes": {
+          "you": "Level 3 (cage)", "Trinity Force",
+          "enemy": "Level 6 (R CC chain), Liandry's"
+        },
+        "early_game": "Maokai's poke is strong. Use cage to zone. Trade with ghouls.",
+        "mid_game": "Your maiden scales. His tankiness improves. Trade carefully.",
+        "late_game": "Even — both scale well. Your split push vs his teamfight.",
+        "win_condition": "Use cage to zone. Trade with ghouls. Summon maiden.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "Even — both scale well.",
+        "jungle_gankable": true,
+        "positioning": "Use cage to zone. Trade with ghouls. Split push."
+      },
+      "Gnar": {
+        "difficulty": "medium",
+        "who_wins_early": "Gnar",
+        "trading_pattern": "Gnar's poke from range is oppressive. Your ghouls and cage help zone. Trade with ghouls.",
+        "ability_to_dodge": "His E hop — use cage to negate his engagement.",
+        "power_spikes": {
+          "you": "Level 3 (cage)", "Trinity Force",
+          "enemy": "Level 1 (ranged poke), Trinity Force"
+        },
+        "early_game": "Gnar's ranged poke dominates. Use cage to zone. Trade with ghouls.",
+        "mid_game": "Your maiden scales. His mega form is scary. Use maiden wisely.",
+        "late_game": "You outscale through maiden. Avoid mega form.",
+        "win_condition": "Use cage to zone. Trade with ghouls. Summon maiden.",
+        "counter_items": ["Trinity Force", "Hollow Radiance"],
+        "scaling": "You outscale through maiden.",
+        "jungle_gankable": true,
+        "positioning": "Use cage to zone. Trade with ghouls. Split push."
+      },
+      "Volibear": {
+        "difficulty": "hard",
+        "who_wins_early": "Volibear",
+        "trading_pattern": "Volibear's W bite is oppressive. Your ghouls don't help. Use cage.",
+        "ability_to_dodge": "His R storm dive — use cage to negate the impact.",
+        "power_spikes": {
+          "you": "Level 3 (cage)", "Trinity Force",
+          "enemy": "Level 6 (R engage), Trinity Force"
+        },
+        "early_game": "Volibear dominates. Use cage defensively. Don't trade.",
+        "mid_game": "Your maiden scales. His tankiness improves. Trade carefully.",
+        "late_game": "You outscale through maiden. Avoid his all-in.",
+        "win_condition": "Use cage defensively. Summon maiden. Split push late.",
+        "counter_items": ["Trinity Force", "Plated Steelcaps"],
+        "scaling": "You outscale through maiden.",
+        "jungle_gankable": false,
+        "positioning": "Use cage defensively. Summon maiden. Split push."
+      }
+    }
+  }
+}

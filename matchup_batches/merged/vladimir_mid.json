@@ -1,0 +1,348 @@
+{
+  "Vladimir": {
+    "mid": {
+      "Brand": {
+        "difficulty": "hard",
+        "who_wins_early": "Brand",
+        "trading_pattern": "Brand has stronger poke. Farm safely, avoid prolonged trades.",
+        "ability_to_dodge": "Brand Q — dodge by moving back.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Brand wins poke war early.",
+        "mid_game": "Use pool to escape. Scale with teamfights.",
+        "late_game": "You outscale with teamfight sustain.",
+        "win_condition": "Survive early, scale to late. Win through sustained teamfights.",
+        "counter_items": ["Mercury's Treads", "Spirit Visage"],
+        "scaling": "Vladimir outscales — your teamfight sustain dominates late",
+        "jungle_gankable": false,
+        "positioning": "Keep distance. Use pool for safety."
+      },
+      "Malzahar": {
+        "difficulty": "hard",
+        "who_wins_early": "Malzahar",
+        "trading_pattern": "Malzahar has sustained damage and CC. Play defensive.",
+        "ability_to_dodge": "Malzahar E (Swarm) — respect passive shield.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Liandry's, Level 6"
+        },
+        "early_game": "Play very defensively. Malzahar dominates sustained fights.",
+        "mid_game": "Use pool to escape his ult. Scale with team.",
+        "late_game": "You outscale with teamfight sustain.",
+        "win_condition": "Survive early, scale to late. Win through teamfights.",
+        "counter_items": ["Mercury's Treads", "Spirit Visage"],
+        "scaling": "Vladimir outscales — your sustain beats his damage",
+        "jungle_gankable": false,
+        "positioning": "Keep distance. Use pool to escape ult."
+      },
+      "Swain": {
+        "difficulty": "hard",
+        "who_wins_early": "Swain",
+        "trading_pattern": "Swain has tankiness and CC. Farm safely, avoid trades.",
+        "ability_to_dodge": "Swain E — dodge sideways.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Protobelt, Level 6"
+        },
+        "early_game": "Play defensively. Swain dominates early.",
+        "mid_game": "Use pool to escape. Scale with team.",
+        "late_game": "You outscale with sustained damage.",
+        "win_condition": "Survive early, scale to late. Win through teamfights.",
+        "counter_items": ["Mercury's Treads", "Spirit Visage"],
+        "scaling": "Vladimir outscales — your sustained damage beats his tankiness",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Use pool for safety."
+      },
+      "Aurelion Sol": {
+        "difficulty": "hard",
+        "who_wins_early": "Aurelion Sol",
+        "trading_pattern": "Aurelion Sol pushes and roams better. Farm safely.",
+        "ability_to_dodge": "Aurelion Sol W — stay at range.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Level 6 (roams), Liandry's"
+        },
+        "early_game": "Farm defensively. He roams better early.",
+        "mid_game": "Use pool defensively. Scale with team.",
+        "late_game": "You outscale with teamfight sustain.",
+        "win_condition": "Survive early, scale to late. Win through teamfights.",
+        "counter_items": ["Mercury's Treads", "Spirit Visage"],
+        "scaling": "Vladimir outscales — your sustain beats his roams late",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Use pool for defense."
+      },
+      "Zoe": {
+        "difficulty": "hard",
+        "who_wins_early": "Zoe",
+        "trading_pattern": "Zoe has poke and CC. Farm safely, avoid her Q.",
+        "ability_to_dodge": "Zoe Q (Paddle Star) — dodge by moving perpendicular.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Zoe has strong poke.",
+        "mid_game": "Use pool to escape. Scale with team.",
+        "late_game": "You outscale with sustained damage.",
+        "win_condition": "Survive early, scale to late. Win through teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Vladimir outscales — your sustain beats her burst late",
+        "jungle_gankable": false,
+        "positioning": "Keep distance. Use pool for defense."
+      },
+      "Mordekaiser": {
+        "difficulty": "medium",
+        "who_wins_early": "Even",
+        "trading_pattern": "Mordekaiser is melee. Farm at range, use Q poke.",
+        "ability_to_dodge": "Mordekaiser E (Metal Seismic) — dodge sideways.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Rylai's, Level 6"
+        },
+        "early_game": "Trade when he moves forward. Both scale.",
+        "mid_game": "Use pool defensively. Both scale.",
+        "late_game": "You outscale with sustained damage.",
+        "win_condition": "Survive early, scale to late. Win through teamfights.",
+        "counter_items": ["Mercury's Treads", "Spirit Visage"],
+        "scaling": "Vladimir outscales — your sustain beats his all-in late",
+        "jungle_gankable": true,
+        "positioning": "Keep distance with Q. Use pool for safety."
+      },
+      "Smolder": {
+        "difficulty": "easy",
+        "who_wins_early": "Vladimir",
+        "trading_pattern": "Smolder very weak early. Poke with Q and farm.",
+        "ability_to_dodge": "Smolder Q — dodge away.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Liandry's, Level 13"
+        },
+        "early_game": "Dominate with Q poke. Control lane.",
+        "mid_game": "Maintain pressure. Both scale.",
+        "late_game": "He outscales. Finish before 2-3 items.",
+        "win_condition": "Get early advantage. Finish before he scales.",
+        "counter_items": ["Mercury's Treads", "Spirit Visage"],
+        "scaling": "Smolder significantly outscales — you need major lead",
+        "jungle_gankable": false,
+        "positioning": "Spam Q early. Control lane."
+      },
+      "Azir": {
+        "difficulty": "medium",
+        "who_wins_early": "Vladimir",
+        "trading_pattern": "Azir weak early. Poke with Q and control.",
+        "ability_to_dodge": "Azir soldiers weak early.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Abuse with Q poke. Control lane.",
+        "mid_game": "Maintain pressure. Both scale.",
+        "late_game": "He outscales. Finish before control dominates.",
+        "win_condition": "Get early advantage. Finish before Azir scales.",
+        "counter_items": ["Mercury's Treads", "Spirit Visage"],
+        "scaling": "Azir outscales — his teamfight control is strong late",
+        "jungle_gankable": false,
+        "positioning": "Spam Q early. Control lane."
+      },
+      "Kog'Maw": {
+        "difficulty": "medium",
+        "who_wins_early": "Vladimir",
+        "trading_pattern": "Kog'Maw weak early. Poke with Q and farm.",
+        "ability_to_dodge": "Kog'Maw Q — dodge by moving away.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Nashors, Level 11"
+        },
+        "early_game": "Abuse with Q poke. Control lane.",
+        "mid_game": "Maintain pressure. Both scale.",
+        "late_game": "He outscales significantly. Finish before 2-3 items.",
+        "win_condition": "Get early advantage. Finish before he scales.",
+        "counter_items": ["Mercury's Treads", "Spirit Visage"],
+        "scaling": "Kog'Maw significantly outscales — you need major lead",
+        "jungle_gankable": true,
+        "positioning": "Spam Q early. Control lane."
+      },
+      "Zilean": {
+        "difficulty": "medium",
+        "who_wins_early": "Zilean",
+        "trading_pattern": "Zilean has poke and CC. Trade when abilities down.",
+        "ability_to_dodge": "Zilean Q — dodge by moving away.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Zilean has poke.",
+        "mid_game": "Use pool defensively. Both scale.",
+        "late_game": "You outscale with sustained damage.",
+        "win_condition": "Survive early, scale to late. Win through teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Vladimir outscales — your sustain beats his utility late",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Use pool for defense."
+      },
+      "Ahri": {
+        "difficulty": "medium",
+        "who_wins_early": "Ahri",
+        "trading_pattern": "Ahri has poke and mobility. Trade when Q down.",
+        "ability_to_dodge": "Ahri Q — dodge sideways.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Ahri has poke.",
+        "mid_game": "Use pool defensively. Both scale.",
+        "late_game": "You outscale with sustained damage.",
+        "win_condition": "Survive early, scale to late. Win through teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Vladimir outscales — your sustain beats her mobility",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Use pool for safety."
+      },
+      "Orianna": {
+        "difficulty": "medium",
+        "who_wins_early": "Orianna",
+        "trading_pattern": "Orianna has similar poke. Trade when ball far.",
+        "ability_to_dodge": "Orianna Q — dodge back.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Archangel's, Level 6"
+        },
+        "early_game": "Trade when ball is far. Both scale.",
+        "mid_game": "Both scale. Use pool defensively.",
+        "late_game": "You outscale with sustained damage.",
+        "win_condition": "Survive early, scale to late. Win through teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Vladimir outscales — your sustain beats her control",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Use pool for safety."
+      },
+      "Cassiopeia": {
+        "difficulty": "hard",
+        "who_wins_early": "Cassiopeia",
+        "trading_pattern": "Cassio has sustained poke. Trade carefully.",
+        "ability_to_dodge": "Cassiopeia W (Miasma) — walk around it.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Liandry's, Level 6"
+        },
+        "early_game": "Play defensively. Cassio has poke.",
+        "mid_game": "Use pool defensively. Both scale.",
+        "late_game": "She outscales slightly. Use pool to kite.",
+        "win_condition": "Survive early, scale to late. Win through teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Even — both scale at similar rates",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Use pool to kite."
+      },
+      "Anivia": {
+        "difficulty": "hard",
+        "who_wins_early": "Anivia",
+        "trading_pattern": "Anivia has poke and CC. Trade when Q down.",
+        "ability_to_dodge": "Anivia Q — dodge sideways.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Archangel's, Level 6"
+        },
+        "early_game": "Play defensively. Anivia has CC.",
+        "mid_game": "Use pool to escape. Scale with team.",
+        "late_game": "She outscales. Use pool to kite.",
+        "win_condition": "Survive early, scale to late. Win through teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Anivia outscales — her wall utility is strong",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Use pool for defense."
+      },
+      "Lux": {
+        "difficulty": "medium",
+        "who_wins_early": "Lux",
+        "trading_pattern": "Lux has range. Trade when E down.",
+        "ability_to_dodge": "Lux E — dodge back.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Lux has range.",
+        "mid_game": "Use pool defensively. Both scale.",
+        "late_game": "You outscale with sustained damage.",
+        "win_condition": "Survive early, scale to late. Win through teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Vladimir outscales — your sustain beats her range",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Use pool for safety."
+      },
+      "Seraphine": {
+        "difficulty": "medium",
+        "who_wins_early": "Seraphine",
+        "trading_pattern": "Seraphine has utility and poke. Trade when Q down.",
+        "ability_to_dodge": "Seraphine E — dodge away.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Seraphine has poke.",
+        "mid_game": "Use pool defensively. Both scale.",
+        "late_game": "You outscale with sustained damage.",
+        "win_condition": "Survive early, scale to late. Win through teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Vladimir outscales — your sustain beats her utility",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Use pool for safety."
+      },
+      "Ryze": {
+        "difficulty": "medium",
+        "who_wins_early": "Ryze",
+        "trading_pattern": "Ryze has poke. Trade when Q down.",
+        "ability_to_dodge": "Ryze Q — dodge sideways.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Ryze has poke.",
+        "mid_game": "Use pool defensively. Both scale.",
+        "late_game": "You outscale with sustained damage.",
+        "win_condition": "Survive early, scale to late. Win through teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Vladimir outscales — your sustain beats his control",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Use pool for safety."
+      },
+      "Syndra": {
+        "difficulty": "medium",
+        "who_wins_early": "Syndra",
+        "trading_pattern": "Syndra has poke and burst. Trade when Q down.",
+        "ability_to_dodge": "Syndra E — dodge by moving away.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Syndra has burst.",
+        "mid_game": "Use pool defensively. Both scale.",
+        "late_game": "You outscale with sustained damage.",
+        "win_condition": "Survive early, scale to late. Win through teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Vladimir outscales — your sustain beats her burst",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Use pool for safety."
+      },
+      "Zed": {
+        "difficulty": "hard",
+        "who_wins_early": "Zed",
+        "trading_pattern": "Zed has burst and mobility. Play defensive.",
+        "ability_to_dodge": "Zed W — back off when he clones.",
+        "power_spikes": {
+          "you": "Level 6 (escape), Protobelt",
+          "enemy": "Youmuu's, Level 6"
+        },
+        "early_game": "Play safe. Zed has strong burst.",
+        "mid_game": "Use pool to escape. Scale with team.",
+        "late_game": "You outscale with sustained damage.",
+        "win_condition": "Survive early, scale to late. Win through teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Vladimir outscales — your sustain beats his burst",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Use pool for safety."
+      }
+    }
+  }
+}

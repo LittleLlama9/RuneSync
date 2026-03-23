@@ -1,0 +1,402 @@
+{
+  "Sion": {
+    "top": {
+      "Riven": {
+        "difficulty": "hard",
+        "who_wins_early": "Riven",
+        "trading_pattern": "Riven's Q-AA-Q combos are fast and oppressive. Your Q is slow to charge. Avoid extended trades where she can land all her Q procs.",
+        "ability_to_dodge": "Her Q combo — space away and let her waste it. When she dashes in, back off immediately.",
+        "power_spikes": {
+          "you": "Level 9 (Q cooldown reduction), Hollow Radiance",
+          "enemy": "Level 1-2 (combo damage), Trinity Force"
+        },
+        "early_game": "Riven dominates early through burst damage. Play passive, farm under tower, and do not trade short. Use Q to farm safely.",
+        "mid_game": "Your Q scaling improves. Her split push is strong but teamfights favor you. Group for fights and let her overextend.",
+        "late_game": "You outscale through tankiness and teamfight utility. Riven becomes less relevant if fights are grouped.",
+        "win_condition": "Survive early safely. Scale into teamfights where your R and tankiness shine. Deny her side lane kills.",
+        "counter_items": ["Plated Steelcaps", "Hollow Radiance"],
+        "scaling": "You outscale late through tankiness — Riven early-focused.",
+        "jungle_gankable": true,
+        "positioning": "Stay back and farm. Avoid her combo range at all times. Play teamfights grouped."
+      },
+      "Singed": {
+        "difficulty": "hard",
+        "who_wins_early": "Singed",
+        "trading_pattern": "Singed's poison is relentless and he runs from your Q. His W flip denies your engagement. You can't catch him to trade.",
+        "ability_to_dodge": "His R slow and flip — never chase him solo. He runs away and turns it into a win.",
+        "power_spikes": {
+          "you": "Level 9 (Q cooldown), Hollow Radiance",
+          "enemy": "Rylai's Crystal Scepter (kiting tool), Level 6"
+        },
+        "early_game": "Singed proxies and kites. Your Q doesn't catch him. Play passive and farm safely from range.",
+        "mid_game": "Your Q scaling helps slightly. His Rylai's slows you. Avoid chasing and teamfight instead.",
+        "late_game": "He outscales through kiting ability. You outscale through pure tankiness. Focus teamfights with allies.",
+        "win_condition": "Survive early, farm passively without chasing. Scale into teamfights. Never duel him alone.",
+        "counter_items": ["Plated Steelcaps", "Hollow Radiance"],
+        "scaling": "He slightly outscales through kiting — you through raw tankiness.",
+        "jungle_gankable": false,
+        "positioning": "Don't chase him ever. Farm and stay grouped. Let teamfights happen, don't duel."
+      },
+      "Fiora": {
+        "difficulty": "hard",
+        "who_wins_early": "Fiora",
+        "trading_pattern": "Fiora's Q poke and parry deny your damage. Your Q is slow. She wins most trades through mobility and parry.",
+        "ability_to_dodge": "Her parry W — when she stands still to parry, move away. Your Q auto-hit is negated by it.",
+        "power_spikes": {
+          "you": "Level 9 (Q cooldown), Hollow Radiance",
+          "enemy": "Level 3 (mobility and parry), Trinity Force"
+        },
+        "early_game": "Fiora pokes safely and parries your damage. Play passive and don't extend trades.",
+        "mid_game": "Your Q scaling helps slightly. Her split push is oppressive. Avoid dueling her — teamfight instead.",
+        "late_game": "You outscale through tankiness and teamfight. Fiora excels in 1v1s but not grouped fights.",
+        "win_condition": "Farm passively early. Never trade into her parry. Group for fights and avoid duels.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "You outscale through teamfight superiority — Fiora through 1v1.",
+        "jungle_gankable": true,
+        "positioning": "Farm Q safely. Never trade into her parry. Stick to teamfights."
+      },
+      "Teemo": {
+        "difficulty": "medium",
+        "who_wins_early": "Teemo",
+        "trading_pattern": "Teemo pokes safely from range with autos and Q. Your Q is slow to charge. His shroom zone denies extended fights.",
+        "ability_to_dodge": "His Q blind — move unpredictably. When blinded you can't respond to his poke.",
+        "power_spikes": {
+          "you": "Level 9 (Q cooldown), Hollow Radiance",
+          "enemy": "Level 2 (early poke), Nashor's Tooth"
+        },
+        "early_game": "Teemo's poke is strong from safe range. Play passive and farm Q. Don't chase into shroom zones.",
+        "mid_game": "Your Q scaling helps. His shrooms zone teamfights. Group for fights and sweep shrooms.",
+        "late_game": "You outscale through teamfight impact and tankiness. Teemo becomes a split-push nuisance.",
+        "win_condition": "Farm Q early. Scale into teamfights. Control shroom spawns with sweepers and pinks.",
+        "counter_items": ["Mercury's Treads", "Adaptive Helm"],
+        "scaling": "You outscale through teamfight dominance — Teemo through split push.",
+        "jungle_gankable": true,
+        "positioning": "Farm Q safely from range. Avoid shroom zones. Play grouped for teamfights."
+      },
+      "Jayce": {
+        "difficulty": "medium",
+        "who_wins_early": "Jayce",
+        "trading_pattern": "Jayce's range form pokes safely. Your Q is slow. Play around his form cycling and his gate jump is quick.",
+        "ability_to_dodge": "His acceleration gate shockwave — move sideways. His melee form all-in is fast.",
+        "power_spikes": {
+          "you": "Level 9 (Q cooldown), Hollow Radiance",
+          "enemy": "Level 1 (range form), Manamune"
+        },
+        "early_game": "Jayce outpokes from range. Play passive and farm your Q without exposing yourself.",
+        "mid_game": "Your Q scaling helps. His poke remains relevant. Teamfight instead of dueling.",
+        "late_game": "You outscale through tankiness. Jayce remains a poke threat but falls off in teamfights.",
+        "win_condition": "Farm Q passively early. Scale into teamfights. Avoid extended poke trades.",
+        "counter_items": ["Plated Steelcaps", "Hollow Radiance"],
+        "scaling": "You outscale through tankiness — Jayce through poke damage.",
+        "jungle_gankable": true,
+        "positioning": "Farm Q safely. Hide behind minions. Teamfight grouped."
+      },
+      "Garen": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Garen Q silence doesn't affect you much. His Judgment is oppressive close range. Your Q outpokes from distance.",
+        "ability_to_dodge": "His Q wind-up silence — when he winds up, back away. He still gains speed but can't catch you easily.",
+        "power_spikes": {
+          "you": "Level 6 (Q spam with passive), Hollow Radiance",
+          "enemy": "Level 6 (R execute), Sunfire Aegis"
+        },
+        "early_game": "Trade with Q poke when he winds up Q. He scales to become a tankier threat.",
+        "mid_game": "Your Q scaling improves. His tankiness and Sunfire help him. Teamfight instead of dueling.",
+        "late_game": "Even — both scale as tankiness-focused teamfight champions.",
+        "win_condition": "Trade Q poke early when safe. Scale into teamfights. Group always.",
+        "counter_items": ["Plated Steelcaps", "Hollow Radiance"],
+        "scaling": "Even — both scale as tanks.",
+        "jungle_gankable": false,
+        "positioning": "Trade Q poke carefully. Back away when Q winds up. Teamfight grouped."
+      },
+      "Darius": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Darius Q outer ring applies bleed. Your Q outpokes at range. Trade when his Q is down, never into his range.",
+        "ability_to_dodge": "His Q bleed ring — walk at him to avoid outer ring. Stay close to negate his spacing.",
+        "power_spikes": {
+          "you": "Level 6 (Q spam), Hollow Radiance",
+          "enemy": "Level 6 (R execute resets), Stridebreaker"
+        },
+        "early_game": "Trade with Q poke when his Q is on cooldown. Walk into his range to negate his bleed distance.",
+        "mid_game": "Your Q scaling helps. His ult is deadly in duels. Avoid 1v1s and focus teamfights.",
+        "late_game": "Even — both have strong teamfight ults. Spacing matters.",
+        "win_condition": "Trade Q poke when safe. Scale into teamfights. Never duel him low.",
+        "counter_items": ["Plated Steelcaps", "Hollow Radiance"],
+        "scaling": "Even — both scale well.",
+        "jungle_gankable": false,
+        "positioning": "Trade Q poke from range. Walk into him to negate Q. Teamfight grouped."
+      },
+      "Malphite": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Malphite is tanky but low damage early. Your Q outpokes him. Trade gradually with Q to wear him down.",
+        "ability_to_dodge": "His E shockwave — move away. It reduces your armor but doesn't stop your Q.",
+        "power_spikes": {
+          "you": "Level 6 (Q spam with passive), Hollow Radiance",
+          "enemy": "Level 6 (R engage teamfight), Thornmail"
+        },
+        "early_game": "Trade with Q poke. Malphite scales to become a teamfight god. Don't let him free farm.",
+        "mid_game": "Your Q scaling helps. His R is powerful in grouped fights. Teamfight instead of dueling.",
+        "late_game": "Even — both scale as tankiness-focused teamfight champions.",
+        "win_condition": "Trade Q poke early. Scale into teamfights. Group for fights.",
+        "counter_items": ["Hollow Radiance", "Trinity Force"],
+        "scaling": "Even — both scale as tanks.",
+        "jungle_gankable": true,
+        "positioning": "Trade Q poke. Farm and scale. Teamfight grouped."
+      },
+      "Varus": {
+        "difficulty": "medium",
+        "who_wins_early": "Varus",
+        "trading_pattern": "Varus pokes with Q and applies on-hit stacks. His poke is safe from range. Your Q is slow.",
+        "ability_to_dodge": "His R chain reaction — dodge by moving sideways. If hit, it spreads and locks you down.",
+        "power_spikes": {
+          "you": "Level 9 (Q cooldown), Hollow Radiance",
+          "enemy": "Level 2 (poke spike), Manamune"
+        },
+        "early_game": "Varus outpokes from range. Play passive and farm your Q from safe distance.",
+        "mid_game": "Your Q scaling helps. His poke remains threatening. Teamfight instead of dueling.",
+        "late_game": "You outscale through tankiness. Varus remains a poke threat but less effective grouped.",
+        "win_condition": "Farm Q passively. Scale into teamfights. Avoid extended poke trades.",
+        "counter_items": ["Mercury's Treads", "Hollow Radiance"],
+        "scaling": "You outscale through tankiness — Varus through poke.",
+        "jungle_gankable": true,
+        "positioning": "Farm Q safely. Avoid his poke angles. Teamfight grouped."
+      },
+      "Ryze": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Ryze's poke is strong but manageable. Your Q scales well. Trade when his abilities are down.",
+        "ability_to_dodge": "His R teleport escape — move away when he channels. He can escape unfavorable fights.",
+        "power_spikes": {
+          "you": "Level 9 (Q cooldown), Hollow Radiance",
+          "enemy": "Level 3 (spell rotation), Liandry's"
+        },
+        "early_game": "Ryze's poke is manageable. Farm your Q and scale. Don't be aggressive.",
+        "mid_game": "Your Q scaling helps. His teleport gives him options. Teamfight instead of dueling.",
+        "late_game": "Even — both scale well into teamfights.",
+        "win_condition": "Farm Q passively. Scale into teamfights. Group for fights.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "Even — both scale well.",
+        "jungle_gankable": true,
+        "positioning": "Farm Q carefully. Avoid his poke angles. Teamfight grouped."
+      },
+      "Shen": {
+        "difficulty": "medium",
+        "who_wins_early": "Shen",
+        "trading_pattern": "Shen's E taunt is annoying. Your Q is slow. His W tankiness nullifies your poke effectiveness.",
+        "ability_to_dodge": "His E taunt — move perpendicular to his charge. Walk sideways to dodge the taunt.",
+        "power_spikes": {
+          "you": "Level 9 (Q cooldown), Hollow Radiance",
+          "enemy": "Level 6 (R presence), Hollow Radiance"
+        },
+        "early_game": "Shen is tanky with good engage. Play passive and farm your Q. Avoid his E.",
+        "mid_game": "Your Q scaling helps. His R helps with teamfights. Teamfight instead of dueling.",
+        "late_game": "Even — both scale as tanks with different utilities.",
+        "win_condition": "Farm Q passively. Scale into teamfights. Avoid his E taunt.",
+        "counter_items": ["Hollow Radiance", "Plated Steelcaps"],
+        "scaling": "Even — both scale as tanks.",
+        "jungle_gankable": true,
+        "positioning": "Farm Q carefully. Dodge his E taunt. Teamfight grouped."
+      },
+      "Aatrox": {
+        "difficulty": "hard",
+        "who_wins_early": "Aatrox",
+        "trading_pattern": "Aatrox's Q range is massive and deals heavy damage. Your Q is slow. He dominates trades early.",
+        "ability_to_dodge": "His Q skillshots — move sideways to dodge all 3. His Q is telegraphed but covers wide area.",
+        "power_spikes": {
+          "you": "Level 9 (Q cooldown), Hollow Radiance",
+          "enemy": "Level 1 (Q damage), Goliath Cleaver"
+        },
+        "early_game": "Aatrox outpokes and outdamages early. Play passive and farm Q. Don't extend.",
+        "mid_game": "Your Q scaling helps. His all-in is still strong. Teamfight instead of dueling.",
+        "late_game": "You outscale through pure tankiness. Aatrox falls off compared to teamfight tanks.",
+        "win_condition": "Farm Q passively early. Scale into teamfights. Never duel him.",
+        "counter_items": ["Plated Steelcaps", "Hollow Radiance"],
+        "scaling": "You outscale late through tankiness — Aatrox through damage.",
+        "jungle_gankable": true,
+        "positioning": "Farm Q safely. Dodge his Q skillshots. Teamfight grouped."
+      },
+      "Maokai": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Maokai's W pull and Q poke are strong. Your Q outpokes from range. Trade when his W is down.",
+        "ability_to_dodge": "His W pull — move away when he winds up. He has a channel before the pull.",
+        "power_spikes": {
+          "you": "Level 9 (Q cooldown), Hollow Radiance",
+          "enemy": "Level 6 (R CC chain), Liandry's"
+        },
+        "early_game": "Maokai has decent early poke. Farm your Q and trade when W is down.",
+        "mid_game": "Your Q scaling helps. His tankiness improves. Teamfight instead of dueling.",
+        "late_game": "Even — both scale as tankiness-focused teamfight champions.",
+        "win_condition": "Trade Q poke when W is down. Scale into teamfights. Group always.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "Even — both scale as tanks.",
+        "jungle_gankable": true,
+        "positioning": "Trade Q poke. Avoid his W pull. Teamfight grouped."
+      },
+      "Volibear": {
+        "difficulty": "medium",
+        "who_wins_early": "Volibear",
+        "trading_pattern": "Volibear's W bite and all-in are oppressive. Your Q is slow. He dominates close fights.",
+        "ability_to_dodge": "His R storm dive — move away from the impact zone. It deals massive damage and stuns.",
+        "power_spikes": {
+          "you": "Level 9 (Q cooldown), Hollow Radiance",
+          "enemy": "Level 6 (R engage), Trinity Force"
+        },
+        "early_game": "Volibear's all-in is strong. Play passive and farm Q from safe range.",
+        "mid_game": "Your Q scaling helps. His tankiness improves. Teamfight instead of dueling.",
+        "late_game": "You outscale through pure tankiness and teamfight utility. Volibear falls off.",
+        "win_condition": "Farm Q passively. Scale into teamfights. Never duel him.",
+        "counter_items": ["Plated Steelcaps", "Hollow Radiance"],
+        "scaling": "You outscale late through tankiness — Volibear through damage.",
+        "jungle_gankable": false,
+        "positioning": "Farm Q safely from range. Avoid his W range. Teamfight grouped."
+      },
+      "Nasus": {
+        "difficulty": "easy",
+        "who_wins_early": "Sion",
+        "trading_pattern": "Nasus has no early game. Your Q outpokes him heavily. Trade whenever you can early.",
+        "ability_to_dodge": "His W wither — when he points at you, walk perpendicular. It slows but doesn't stun.",
+        "power_spikes": {
+          "you": "Level 1-6 (full early dominance), Hollow Radiance",
+          "enemy": "Level 16+ (infinite stacking), Iceborn Gauntlet"
+        },
+        "early_game": "Dominate with Q poke and trades. Nasus has zero defense. Build a lead.",
+        "mid_game": "Your lead matters. His stacking helps him. Group for fights to avoid late-game 1v1.",
+        "late_game": "Even — his stacks make him scale. You outscale through teamfights.",
+        "win_condition": "Dominate early with Q poke. Build massive lead. Group for teamfights late.",
+        "counter_items": ["Hollow Radiance", "Trinity Force"],
+        "scaling": "He outscales through stacks — you through teamfights.",
+        "jungle_gankable": true,
+        "positioning": "Poke Q aggressively early. Group for fights late. Don't duel him super late."
+      },
+      "Ornn": {
+        "difficulty": "medium",
+        "who_wins_early": "Ornn",
+        "trading_pattern": "Ornn's W brittle status and E charge are oppressive. Your Q is slow. He wins close trades.",
+        "ability_to_dodge": "His E charge — move sideways. It deals damage and stuns.",
+        "power_spikes": {
+          "you": "Level 9 (Q cooldown), Hollow Radiance",
+          "enemy": "Level 6 (R knockup), Sunfire Aegis"
+        },
+        "early_game": "Ornn's all-in is strong. Play passive and farm Q. Don't extend.",
+        "mid_game": "Your Q scaling helps. His tankiness and brittle make him stronger. Teamfight instead of dueling.",
+        "late_game": "Even — both scale as teamfight tanks. His item upgrades are strong.",
+        "win_condition": "Farm Q passively. Scale into teamfights. Group always.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "Even — both scale as tanks.",
+        "jungle_gankable": true,
+        "positioning": "Farm Q carefully. Avoid his E charge. Teamfight grouped."
+      },
+      "Poppy": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Poppy's W zone and Q poke are decent. Your Q outpokes from range. Trade when W is down.",
+        "ability_to_dodge": "Her W zone — move out of it quickly. It prevents your dash and slows.",
+        "power_spikes": {
+          "you": "Level 9 (Q cooldown), Hollow Radiance",
+          "enemy": "Level 6 (R displacement), Sunfire Aegis"
+        },
+        "early_game": "Poppy has early poke but you can match with Q. Farm and trade safely.",
+        "mid_game": "Your Q scaling helps. Her tankiness improves. Teamfight instead of dueling.",
+        "late_game": "Even — both scale as tankiness-focused teamfight champions.",
+        "win_condition": "Trade Q poke when W is down. Scale into teamfights. Group always.",
+        "counter_items": ["Hollow Radiance", "Trinity Force"],
+        "scaling": "Even — both scale as tanks.",
+        "jungle_gankable": true,
+        "positioning": "Trade Q poke. Avoid her W zone. Teamfight grouped."
+      },
+      "Wukong": {
+        "difficulty": "hard",
+        "who_wins_early": "Wukong",
+        "trading_pattern": "Wukong's E dash combo is fast and oppressive. Your Q is slow. He wins early trades.",
+        "ability_to_dodge": "His E dash — move back when he dashes in. He can't auto after if you space well.",
+        "power_spikes": {
+          "you": "Level 9 (Q cooldown), Hollow Radiance",
+          "enemy": "Level 1 (E combo), Trinity Force"
+        },
+        "early_game": "Wukong's burst is strong. Play passive and farm Q. Don't extend.",
+        "mid_game": "Your Q scaling helps. His burst is still strong. Teamfight instead of dueling.",
+        "late_game": "You outscale through tankiness and teamfight. Wukong becomes less relevant.",
+        "win_condition": "Farm Q passively early. Scale into teamfights. Never duel him.",
+        "counter_items": ["Plated Steelcaps", "Hollow Radiance"],
+        "scaling": "You outscale late through tankiness — Wukong through damage.",
+        "jungle_gankable": true,
+        "positioning": "Farm Q safely. Space away from his E. Teamfight grouped."
+      },
+      "Kayle": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Kayle's Q poke and range are solid. Your Q outpokes. Trade when her cooldowns are down.",
+        "ability_to_dodge": "Her R invincibility — don't commit to fights when she ults. She heals and gains damage.",
+        "power_spikes": {
+          "you": "Level 9 (Q cooldown), Hollow Radiance",
+          "enemy": "Level 11 (range), Nashor's Tooth"
+        },
+        "early_game": "Kayle's range is limited. Farm your Q and trade when safe. She scales late hard.",
+        "mid_game": "Your Q scaling helps. Her range extends. Teamfight instead of dueling.",
+        "late_game": "She outscales through range and damage. You outscale through teamfight tankiness.",
+        "win_condition": "Trade Q poke early. Scale into teamfights. Avoid dueling her late.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "She slightly outscales through range — you through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Trade Q poke early. Avoid her range late. Teamfight grouped."
+      },
+      "Yorick": {
+        "difficulty": "medium",
+        "who_wins_early": "Yorick",
+        "trading_pattern": "Yorick's ghouls and cage are strong early. Your Q is slow. He wins trades through pet damage.",
+        "ability_to_dodge": "His E cage — move sideways to avoid it. It traps and amplifies his damage.",
+        "power_spikes": {
+          "you": "Level 9 (Q cooldown), Hollow Radiance",
+          "enemy": "Level 6 (R maiden), Trinity Force"
+        },
+        "early_game": "Yorick's ghouls are oppressive. Play passive and farm Q from safe range.",
+        "mid_game": "Your Q scaling helps. His maiden is strong. Teamfight instead of dueling.",
+        "late_game": "You outscale through teamfight impact. Yorick excels in 1v1 and split push.",
+        "win_condition": "Farm Q passively. Scale into teamfights. Group to avoid his 1v1.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "You outscale through teamfights — Yorick through 1v1.",
+        "jungle_gankable": true,
+        "positioning": "Farm Q safely. Avoid his cage. Teamfight grouped."
+      },
+      "Illaoi": {
+        "difficulty": "medium",
+        "who_wins_early": "Illaoi",
+        "trading_pattern": "Illaoi's E tentacle test is devastating. Your Q is slow. She wins if you get tested.",
+        "ability_to_dodge": "Her E tentacle test — move away from her quick. If hit, you take massive damage.",
+        "power_spikes": {
+          "you": "Level 9 (Q cooldown), Hollow Radiance",
+          "enemy": "Level 6 (R spawns), Sunfire Aegis"
+        },
+        "early_game": "Illaoi's tentacles zone you. Play passive and farm Q away from her.",
+        "mid_game": "Your Q scaling helps. Her tentacles zone teamfights. Avoid clustered fights.",
+        "late_game": "Even — both strong in grouped fights. Her tentacles vs your tankiness.",
+        "win_condition": "Farm Q passively. Scale into teamfights. Space from her tentacles.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "Even — both strong in grouped teamfights.",
+        "jungle_gankable": true,
+        "positioning": "Farm Q away from tentacles. Space from E test. Teamfight spaced out."
+      },
+      "Camille": {
+        "difficulty": "hard",
+        "who_wins_early": "Camille",
+        "trading_pattern": "Camille's Q and E are oppressive. Your Q is slow. She wins through mobility and dueling.",
+        "ability_to_dodge": "Her E hook — move away when she winds up. She dashes and stuns.",
+        "power_spikes": {
+          "you": "Level 9 (Q cooldown), Hollow Radiance",
+          "enemy": "Level 3 (E mobility), Trinity Force"
+        },
+        "early_game": "Camille's dueling is strong. Play passive and farm Q. Don't extend.",
+        "mid_game": "Your Q scaling helps. Her dueling is still strong. Teamfight instead of dueling.",
+        "late_game": "You outscale through teamfight tankiness. Camille excels in 1v1.",
+        "win_condition": "Farm Q passively. Scale into teamfights. Never duel her.",
+        "counter_items": ["Hollow Radiance", "Adaptive Helm"],
+        "scaling": "You outscale through teamfights — Camille through 1v1.",
+        "jungle_gankable": true,
+        "positioning": "Farm Q safely. Avoid her E hook. Teamfight grouped."
+      }
+    }
+  }
+}
