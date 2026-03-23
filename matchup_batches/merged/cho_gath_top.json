@@ -1,0 +1,510 @@
+{
+  "Cho'Gath": {
+    "top": {
+      "Aatrox": {
+        "difficulty": "medium",
+        "who_wins_early": "Aatrox",
+        "trading_pattern": "Farm safely with E poke from range. Land Q when he commits to his own Q combo — he's locked in animation and can't dodge. Don't trade without Q up.",
+        "ability_to_dodge": "Aatrox Q — his three-part Q has sweet spots at the edges; walk into his model to avoid the edge damage, or sidestep the narrow Q3 knockup.",
+        "power_spikes": {
+          "you": "Level 6 (Feast true damage execute), Hextech Rocketbelt",
+          "enemy": "Level 3 (full Q combo), Spear of Shojin"
+        },
+        "early_game": "He bullies you with Q poke. Farm with E and don't overextend. If he wastes his Q combo and misses sweet spots, punish with Q-W-auto. Your passive sustain keeps you healthy for safe farming.",
+        "mid_game": "You start winning. Your burst with R is massive and he can't sustain through true damage. Look for Q into W silence to deny his combo, then Feast when he's low.",
+        "late_game": "You outscale as a tank. Your R execute ignores his healing. In teamfights your Q knockup disrupts his entire team. Stack Feast on minions/objectives to become unkillable.",
+        "win_condition": "Survive lane, farm passively, and stack Feast. Post-6 you can kill him with a Q-W-R burst combo. Don't let him poke you below Feast execute range without retaliating.",
+        "counter_items": ["Plated Steelcaps", "Jak'Sho, The Protean"],
+        "scaling": "Cho'Gath favored — infinite health stacking and true damage execute outscale Aatrox's sustain-based kit",
+        "jungle_gankable": true,
+        "positioning": "Stay behind your minion wave to block his W chain. When he winds up Q, walk toward him to avoid the sweet spot zone rather than away from it."
+      },
+      "Darius": {
+        "difficulty": "hard",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Never let him get five passive stacks. Poke with E and farm from distance. If he pulls you with E, immediately Q under yourself and W to silence, then walk away.",
+        "ability_to_dodge": "Darius E — his Apprehend pull starts the death spiral; stay outside 535 range and only walk up when it's on cooldown.",
+        "power_spikes": {
+          "you": "Level 6 (Feast can contest his ult execute), Hextech Rocketbelt + Riftmaker",
+          "enemy": "Level 1 (passive stacking pressure), Trinity Force"
+        },
+        "early_game": "Very hard lane. He zones you off CS with passive threat. Farm with E and Q from max range. If pulled, Q-W immediately and walk away — never stay for extended trades.",
+        "mid_game": "You can start fighting back if even in gold. Your Q-W-R burst can kill him before he stacks passive. Rush Plated Steelcaps to reduce his auto damage.",
+        "late_game": "You outscale hard. He gets kited in teamfights while you're a massive frontline with AoE CC. Your Feast outdamages his Noxian Guillotine against tanks.",
+        "win_condition": "Don't feed him kills early. Farm safely and outscale. Your teamfight is infinitely better than his if you go even in lane.",
+        "counter_items": ["Plated Steelcaps", "Jak'Sho, The Protean", "Thornmail"],
+        "scaling": "Cho'Gath heavily favored — Darius falls off in teamfights while Cho'Gath becomes an unkillable CC machine",
+        "jungle_gankable": true,
+        "positioning": "Stay well outside his E range (535 units). Farm with E from safety. If he activates Ghost, immediately back off toward tower — you cannot outrun him without boots."
+      },
+      "Garen": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Poke him with E auto-attacks to prevent his passive regen. When he runs at you with Q, drop your own Q under yourself and W to silence him before he silences you.",
+        "ability_to_dodge": "Garen Q — his empowered auto silences you; W him first to silence him before he reaches you, canceling his engage.",
+        "power_spikes": {
+          "you": "Level 6 (Feast execute), Hextech Rocketbelt",
+          "enemy": "Level 6 (Demacian Justice execute), Stridebreaker"
+        },
+        "early_game": "Even lane. Your E poke prevents his passive regen. When he runs at you with Q, use W silence to cancel his engage. Farm normally and don't let him freely regen.",
+        "mid_game": "You match his sustain with passive and outburst him with Feast. His ult executes based on missing HP — don't sit at low HP thinking you're safe.",
+        "late_game": "You outscale. Your CC, true damage execute, and tank stats are more valuable in teamfights. He becomes a splitpusher but you're a better teamfighter.",
+        "win_condition": "Keep poking with E to deny passive regen. At level 6, the ult execute race favors you because yours deals true damage and scales with stacks.",
+        "counter_items": ["Thornmail", "Jak'Sho, The Protean"],
+        "scaling": "Cho'Gath favored — better teamfight CC and true damage scaling outvalue Garen's simple kit",
+        "jungle_gankable": true,
+        "positioning": "Keep attacking him periodically with E empowered autos to prevent his passive regen. Stand slightly behind minions so his Q run has a longer path."
+      },
+      "Mordekaiser": {
+        "difficulty": "hard",
+        "who_wins_early": "Mordekaiser",
+        "trading_pattern": "Dodge his E pull and poke with E. Don't let him auto-attack you three times — his passive deals heavy sustained magic damage. Short trades only, Q under yourself and walk away.",
+        "ability_to_dodge": "Mordekaiser E — Death's Grasp pull sets up his full combo; sidestep it and punish with Q while it's on cooldown.",
+        "power_spikes": {
+          "you": "Level 6 (Feast true damage ignores his shield), Hextech Rocketbelt",
+          "enemy": "Level 6 (Realm of Death steals your stats), Riftmaker"
+        },
+        "early_game": "He wins extended trades with passive DoT. Dodge his E and poke with your own E. Farm passively and don't let him proc passive three-hit. Short trades favor you if you land Q.",
+        "mid_game": "His Death Realm steals your stats which is devastating when you have Feast stacks. Consider rushing QSS to escape his ult. Your Q-W-R burst can kill him before he accumulates passive damage.",
+        "late_game": "His ult removing you from teamfights is a huge threat. Stay near carries so if he ults you, he loses access to the rest of your team. Build QSS if his R is the deciding factor.",
+        "win_condition": "Dodge his E, land your Q, and burst with R. Don't let him drag you into extended trades. QSS his ultimate if it's causing problems.",
+        "counter_items": ["Mercury's Treads", "Quicksilver Sash", "Force of Nature"],
+        "scaling": "Mordekaiser slightly favored — his Death Realm stat steal becomes more punishing as Cho'Gath stacks Feast",
+        "jungle_gankable": true,
+        "positioning": "Stay offset from his E line — it's a straight pull. Keep at E auto-attack range and don't walk into his passive proc range unless landing Q first."
+      },
+      "Sett": {
+        "difficulty": "medium",
+        "who_wins_early": "Sett",
+        "trading_pattern": "Poke with E and auto from range. When he walks at you, Q behind yourself to knock him up and W to silence, then walk away. Never stand in the center of his Haymaker.",
+        "ability_to_dodge": "Sett W — Haymaker center deals true damage; sidestep left or right to only take the reduced outer damage.",
+        "power_spikes": {
+          "you": "Level 6 (Feast burst), Hextech Rocketbelt",
+          "enemy": "Level 1-3 (high base stats), Stridebreaker"
+        },
+        "early_game": "He's stronger in melee early. Poke with E and farm. If he E pulls you, immediately Q under yourself and W to disengage. Don't let him build grit for a big Haymaker.",
+        "mid_game": "You start outscaling. Your burst combo deletes him before he can build grit. Land Q, W silence, and Feast — he dies before getting a big Haymaker off.",
+        "late_game": "You heavily outscale. He's a mediocre frontline while you're a massive tank with true damage execute. Your teamfight is far superior.",
+        "win_condition": "Survive early, farm safely, and burst him post-6. Don't let him build grit — short burst trades deny his Haymaker value.",
+        "counter_items": ["Plated Steelcaps", "Jak'Sho, The Protean"],
+        "scaling": "Cho'Gath heavily favored — Sett falls off hard while Cho'Gath becomes an unkillable frontline",
+        "jungle_gankable": true,
+        "positioning": "Always sidestep his Haymaker. When he E pulls you, don't panic — Q-W immediately and walk sideways out of his W center."
+      },
+      "Renekton": {
+        "difficulty": "hard",
+        "who_wins_early": "Renekton",
+        "trading_pattern": "Let him push into you and farm under tower. His empowered W stun is brutal — Q under yourself when he dashes in to trade knockup for stun.",
+        "ability_to_dodge": "Renekton W — empowered stun locks you down for a full combo; when you see him dash in with fury, immediately Q yourself and W to silence.",
+        "power_spikes": {
+          "you": "Level 6 (Feast execute), Hextech Rocketbelt",
+          "enemy": "Level 3 (empowered W + Q trade), Blade of the Ruined King"
+        },
+        "early_game": "He zones you hard. Watch his fury bar — empowered W is devastating. Farm with Q and E from range. Let him push and farm under tower where you're safer.",
+        "mid_game": "You outscale from here. He falls off and your Feast stacks make you unkillable. Start looking for all-ins when his fury is low.",
+        "late_game": "You massively outscale. He's a mediocre bruiser while you're a massive tank. Your teamfight CC is worth ten of his.",
+        "win_condition": "Survive lane without dying. You outscale him hard — just don't feed him early kills that let him snowball.",
+        "counter_items": ["Plated Steelcaps", "Warden's Mail", "Jak'Sho, The Protean"],
+        "scaling": "Cho'Gath massively favored — Renekton falls off a cliff while Cho'Gath scales infinitely",
+        "jungle_gankable": true,
+        "positioning": "Stay far back and farm with E. When he dashes in, Q under yourself immediately. Don't stand near low HP minions he can dash through."
+      },
+      "Jax": {
+        "difficulty": "easy",
+        "who_wins_early": "Cho'Gath",
+        "trading_pattern": "When Jax activates Counter Strike, don't auto him — use Q under him and W silence. Your abilities go through his E dodge. After stun ends, walk away.",
+        "ability_to_dodge": "Jax E — Counter Strike dodges your autos but NOT your Q or W; use abilities through his E and back off before the stun.",
+        "power_spikes": {
+          "you": "Level 6 (Feast true damage ignores his ult resistances), Hextech Rocketbelt",
+          "enemy": "Level 6 (ult resistances), Trinity Force"
+        },
+        "early_game": "You actually win this lane. Your Q goes through his Counter Strike and your E poke chunks him. When he jumps on you, Q under yourself, W silence, and walk away.",
+        "mid_game": "You outburst him with Feast. He can't dodge your true damage execute. Silence him with W when he jumps in to prevent his E recast.",
+        "late_game": "He outscales in pure 1v1 duels, but your teamfight is far superior. Group and use your AoE CC instead of trying to match him sidelane.",
+        "win_condition": "Bully him in lane with abilities that go through Counter Strike. Don't try to auto-attack trade — use Q and W exclusively.",
+        "counter_items": ["Plated Steelcaps", "Thornmail", "Jak'Sho, The Protean"],
+        "scaling": "Even — Jax outduels late but Cho'Gath teamfights better with CC and tankiness",
+        "jungle_gankable": true,
+        "positioning": "When he leaps onto you, immediately Q + W. Never auto-attack when his E is spinning. Walk away after landing abilities."
+      },
+      "Fiora": {
+        "difficulty": "hard",
+        "who_wins_early": "Fiora",
+        "trading_pattern": "Hug walls to hide vitals. Farm with E from range. If she lunges in, Q under yourself and W to silence — don't try to trade autos against her vital procs.",
+        "ability_to_dodge": "Fiora W — Riposte blocks everything including your Q knockup and Feast; bait it with Q first, then Feast after Riposte is down.",
+        "power_spikes": {
+          "you": "Level 6 (Feast burst), Hextech Rocketbelt + Riftmaker",
+          "enemy": "Level 1 (vital poke), Ravenous Hydra"
+        },
+        "early_game": "She bullies with vital procs. Stand against walls to deny vital spawns. Farm with E and Q from max range. Don't trade autos — she wins every auto trade.",
+        "mid_game": "She's a constant threat in duels. Never Feast predictably — she Ripostes it for a free stun. Bait W with Q, then R after it's down.",
+        "late_game": "She hard outscales in duels. Her Grand Challenge healing is massive. Don't try to match her sidelane. Group for teamfights where she's weaker.",
+        "win_condition": "Land Q-W silence into Feast when her Riposte is on cooldown. Force her to Riposte your Q, then Feast in the 24-second Riposte CD window.",
+        "counter_items": ["Plated Steelcaps", "Thornmail", "Warden's Mail"],
+        "scaling": "Fiora heavily favored — true damage vitals shred tanks and Grand Challenge makes her unkillable in duels",
+        "jungle_gankable": false,
+        "positioning": "Hug walls to deny vital procs on exposed sides. Stand at max E range and poke. Never use Feast when her Riposte is available."
+      },
+      "Ornn": {
+        "difficulty": "hard",
+        "who_wins_early": "Ornn",
+        "trading_pattern": "He outtrades you with Brittle passive. Dodge his Q pillar and avoid standing near it when he W's for the Brittle proc. Farm safely and don't engage unless his W is down.",
+        "ability_to_dodge": "Ornn W — Bellows Breath applies Brittle which amplifies his next auto; dodge sideways out of the flame cone and avoid the Brittle proc auto.",
+        "power_spikes": {
+          "you": "Level 6 (Feast execute), Hextech Rocketbelt",
+          "enemy": "Level 13+ (item upgrades), Sunfire Cape"
+        },
+        "early_game": "He outtrades you surprisingly hard with Brittle procs. Play safe and farm. Dodge his Q-W combo. Your Q is your best trading tool — land it when he walks up.",
+        "mid_game": "Both are tanks but he provides item upgrades for his team. Push for objectives before his team gets upgraded items. Your R execute helps in neutral objectives.",
+        "late_game": "He outscales through item upgrades. His R is a massive teamfight engage. Try to end before his team gets all upgrades. Dodge his R in teamfights — it's game-changing.",
+        "win_condition": "Go even in lane and look for picks with Q-W-R burst. His value scales with game time through item upgrades, so push for early objectives.",
+        "counter_items": ["Mercury's Treads", "Force of Nature"],
+        "scaling": "Ornn heavily favored — item upgrades for the whole team make him the best scaling tank in the game",
+        "jungle_gankable": true,
+        "positioning": "Stand away from his Q pillar — he combos W through it for Brittle. Dodge sideways out of his W cone."
+      },
+      "Camille": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "When she E hookshots toward you, drop Q where she'll land. Your Q-W combo catches her post-dash before she can follow up. Silence denies her Q2 true damage hit.",
+        "ability_to_dodge": "Camille E — Hookshot stun; place Q on her landing spot to knock her up before she can combo you.",
+        "power_spikes": {
+          "you": "Level 6 (Feast execute), Hextech Rocketbelt",
+          "enemy": "Level 6 (Hextech Ultimatum lockdown), Trinity Force"
+        },
+        "early_game": "Even lane. Respect her passive shield when it's up. When she hookshots in, Q her landing spot and W silence. She can't combo you if silenced.",
+        "mid_game": "Her R locks you in place — be careful near walls where she can corner you. Your burst with Feast can catch her off-guard if she overstays.",
+        "late_game": "She outscales in sidelane. Group for teamfights where your AoE CC is more impactful. Her R isolating you can be problematic, but your tankiness makes you survive it.",
+        "win_condition": "Catch her with Q-W silence when she commits to hookshot. Feast her when she's locked in melee range. Don't try to match her sidelane late.",
+        "counter_items": ["Plated Steelcaps", "Jak'Sho, The Protean", "Thornmail"],
+        "scaling": "Camille favored — her true damage and split push outvalue Cho'Gath in side lanes",
+        "jungle_gankable": true,
+        "positioning": "Keep distance from walls so her hookshot travel is longer and easier to react to. Q her landing spot every time she commits."
+      },
+      "Gnar": {
+        "difficulty": "medium",
+        "who_wins_early": "Gnar",
+        "trading_pattern": "Farm safely against Mini Gnar — he kites you. When he transforms to Mega, respect his R near walls but you can trade into him since he's melee and slower.",
+        "ability_to_dodge": "Mega Gnar R — stay away from walls when his rage is full so his ult can't slam you into terrain for the stun.",
+        "power_spikes": {
+          "you": "Level 6 (Feast burst on Mini Gnar), Hextech Rocketbelt",
+          "enemy": "Level 6 (Mega Gnar R), Black Cleaver"
+        },
+        "early_game": "Mini Gnar kites you endlessly. Take Doran's Shield and farm. When he wastes boomerang, walk up for an E trade. Track his rage bar — he's vulnerable during Mini form.",
+        "mid_game": "You can one-shot Mini Gnar with Q-W-R combo. Wait for Mega to time out and burst him in Mini form. He's squishy and your combo deletes him.",
+        "late_game": "Mega Gnar teamfight is one of the best. Avoid grouping near walls. Your own teamfight is strong — use Q on clumped enemies and Feast priority targets.",
+        "win_condition": "Burst Mini Gnar with Q-W-R when Mega form is on cooldown. He's squishy in Mini and your full combo one-shots.",
+        "counter_items": ["Mercury's Treads", "Force of Nature"],
+        "scaling": "Even — both are strong teamfighters with different strengths; Mega Gnar engage vs Cho'Gath sustain and execute",
+        "jungle_gankable": true,
+        "positioning": "Never fight near walls when his rage is full. Track his rage bar and engage when Mega is unavailable."
+      },
+      "Irelia": {
+        "difficulty": "medium",
+        "who_wins_early": "Irelia",
+        "trading_pattern": "Don't fight her with full passive stacks. Q under yourself when she dashes in. W silence prevents her from using Q to dash and E to stun. Without her combo she's helpless.",
+        "ability_to_dodge": "Irelia Q — her Bladesurge dash resets on kills; don't stand near dying minions or she'll build a dash highway into you.",
+        "power_spikes": {
+          "you": "Level 6 (Feast burst on her squishy base stats), Hextech Rocketbelt",
+          "enemy": "Level 4-5 (full passive stacking), Blade of the Ruined King"
+        },
+        "early_game": "Respect her stacked passive. Farm safely and don't let her build a dash chain through your minions. W silence shuts down her entire combo.",
+        "mid_game": "Your silence is her worst nightmare. Q-W-R burst kills her fast since she's squishy despite being in melee. Time Feast for when her W damage reduction is down.",
+        "late_game": "Both scale decently. Your silence and knockup shut down her dive. In teamfights, save Q-W for when she dashes into your backline.",
+        "win_condition": "Silence her when she commits and she can't dash, stun, or damage reduce. Feast her during W downtime.",
+        "counter_items": ["Plated Steelcaps", "Warden's Mail", "Jak'Sho, The Protean"],
+        "scaling": "Even — Irelia is a strong duelist but Cho'Gath's silence shuts down her kit in teamfights",
+        "jungle_gankable": false,
+        "positioning": "Stand away from dying minions so she can't dash through them to reach you. When she commits with E stun, buffer Q on yourself."
+      },
+      "Nasus": {
+        "difficulty": "easy",
+        "who_wins_early": "Cho'Gath",
+        "trading_pattern": "Punish his stacking with Q knockup and E poke. Zone him off CS whenever your Q is available. Your R stacking outpaces his if you deny him farm.",
+        "ability_to_dodge": "Nasus W — Wither slow is crippling; rush Mercury's Treads and use Q-W from range rather than trying to auto-attack him through the slow.",
+        "power_spikes": {
+          "you": "Level 6 (Feast stacking begins), Hextech Rocketbelt",
+          "enemy": "Level 6 (R stat boost + stacking threshold), 200+ stacks + Sheen"
+        },
+        "early_game": "Bully him off CS. Your Q interrupts his stacking and your E poke is free damage. He can't fight back early — zone him completely.",
+        "mid_game": "Keep denying him. Your Feast stacks grow while his Q stacks stay low. Push tower and roam when he's too weak to contest.",
+        "late_game": "If he's stacked, his Wither + Q hurts. But your true damage execute and tankiness match his. In teamfights your AoE CC is more useful than his single-target damage.",
+        "win_condition": "Deny his stacks early and outscale with Feast. You both want to scale, but you scale faster if you bully him properly.",
+        "counter_items": ["Mercury's Treads", "Thornmail"],
+        "scaling": "Even — both scale infinitely, but Cho'Gath's Feast is unconditional while Nasus needs to farm Q stacks",
+        "jungle_gankable": true,
+        "positioning": "Stand between Nasus and the dying minion wave. Zone him off every last hit with Q threat."
+      },
+      "Riven": {
+        "difficulty": "easy",
+        "who_wins_early": "even",
+        "trading_pattern": "Q under yourself when she dashes in. W silence cancels her entire combo — she can't Q, E, or R while silenced. She's helpless without her ability chain.",
+        "ability_to_dodge": "Riven Q3 — the third Q knockup is her key engage tool; Q under yourself or walk backward to dodge it.",
+        "power_spikes": {
+          "you": "Level 6 (Feast burst), Hextech Rocketbelt",
+          "enemy": "Level 6 (Wind Slash execute), Eclipse"
+        },
+        "early_game": "You counter her. W silence prevents her from comboing. When she dashes in, Q under yourself, W silence, auto with E, and walk away. She can't do anything while silenced.",
+        "mid_game": "You hard-counter her. She can't combo through your silence. Look for Q-W-R kills when she overextends.",
+        "late_game": "She has high CDR combos but your silence still shuts her down. In teamfights, save W for when she dives your backline.",
+        "win_condition": "Silence her every time she engages. Without her ability chain, Riven is a minion. Feast her when she's locked out of abilities.",
+        "counter_items": ["Plated Steelcaps", "Thornmail", "Jak'Sho, The Protean"],
+        "scaling": "Cho'Gath favored — silence completely negates Riven's ability-dependent kit at every stage of the game",
+        "jungle_gankable": false,
+        "positioning": "When she Q3's onto you, immediately W. The silence locks her out of E shield, second R, and further Q casts."
+      },
+      "Yasuo": {
+        "difficulty": "easy",
+        "who_wins_early": "Cho'Gath",
+        "trading_pattern": "Your Q goes through his Wind Wall. Silence him with W when he dashes in. He can't dash, windwall, or ult while silenced. Your E poke shreds him.",
+        "ability_to_dodge": "Yasuo E — he dashes through minions to dodge Q; place Q slightly behind where he's dashing to, not on his current position.",
+        "power_spikes": {
+          "you": "Level 6 (Feast kills through his shield), Hextech Rocketbelt",
+          "enemy": "Level 6 (R combo off tornado), Infinity Edge"
+        },
+        "early_game": "You counter Yasuo hard. Your Q-W silence shuts down his entire kit. When he dashes in, Q-W and auto with E. His windwall doesn't block any of your abilities.",
+        "mid_game": "Continue bullying. He can't fight you. Your silence removes his ability to dash and windwall. Feast him when he overextends.",
+        "late_game": "He outscales with crit but your CC still shuts him down. In teamfights, save Q-W for when he dashes into your team.",
+        "win_condition": "Silence him in every trade. Your abilities bypass windwall. He literally cannot play the game when silenced.",
+        "counter_items": ["Plated Steelcaps", "Thornmail", "Warden's Mail"],
+        "scaling": "Yasuo slightly favored late — his crit scaling outpaces tank builds, but your CC still disrupts him in teamfights",
+        "jungle_gankable": true,
+        "positioning": "Fight away from minion waves to limit his E dashing. Place Q where he's dashing to, not where he currently is."
+      },
+      "K'Sante": {
+        "difficulty": "medium",
+        "who_wins_early": "Cho'Gath",
+        "trading_pattern": "Dodge his Q3 dash and punish with your own Q-W combo. He's weak early and your poke chunks him. Respect his ult form — he trades tankiness for damage.",
+        "ability_to_dodge": "K'Sante Q3 — his dash knockup is his main engage; sidestep it and he has no follow-up.",
+        "power_spikes": {
+          "you": "Level 6 (Feast stacking), Hextech Rocketbelt",
+          "enemy": "Level 6 (ult form burst), Iceborn Gauntlet"
+        },
+        "early_game": "You win early. His damage is low and your E poke plus Q knockup zone him. Dodge his Q3 and punish with a full combo.",
+        "mid_game": "Respect his ult form — he deals much more damage but is squishier. Feast him during ult form when he has less health.",
+        "late_game": "Both are tanks but your true damage execute is more impactful. His utility increases but your Q-W teamfight CC is comparable.",
+        "win_condition": "Bully him early and stack Feast. When he ults into his damage form, that's your window to Feast — he's squishier.",
+        "counter_items": ["Plated Steelcaps", "Thornmail"],
+        "scaling": "Even — both are strong tanks with CC; K'Sante has more mobility while Cho'Gath has more burst",
+        "jungle_gankable": true,
+        "positioning": "Sidestep his Q3 and immediately punish. When he ults and becomes squishy, that's your Feast window."
+      },
+      "Sion": {
+        "difficulty": "easy",
+        "who_wins_early": "Cho'Gath",
+        "trading_pattern": "Interrupt his Q charge with your own Q knockup. He's a tank you can freely poke with E and combo with Q-W. Your Feast outscales his health stacking.",
+        "ability_to_dodge": "Sion Q — cancel his Decimating Smash charge with your Q knockup before it completes.",
+        "power_spikes": {
+          "you": "Level 6 (Feast stacking rivalry), Hextech Rocketbelt",
+          "enemy": "Level 6 (R engage), Sunfire Cape + Titanic Hydra"
+        },
+        "early_game": "Free lane. Your Q interrupts his Q charge every time. Poke with E and combo freely. He can't threaten you at all.",
+        "mid_game": "Continue dominating. Stack Feast and outpace his health stacking. You win the tank vs tank matchup because of true damage execute.",
+        "late_game": "Battle of the scaling tanks. Your Feast true damage wins the health war. In teamfights, both have good CC but your execute is more impactful for securing kills.",
+        "win_condition": "Stack Feast and deny his farm. You both scale but your true damage execute gives you the edge in the tank mirror.",
+        "counter_items": ["Mercury's Treads", "Jak'Sho, The Protean"],
+        "scaling": "Cho'Gath slightly favored — true damage Feast execute outscales Sion's raw health stacking",
+        "jungle_gankable": true,
+        "positioning": "Stay near him to interrupt Q charges. Don't let him fully channel from fog of war. Sidestep his R charge path."
+      },
+      "Dr. Mundo": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Dodge his Q cleavers and poke with E. Don't try extended trades — he out-regens you. Burst him with Q-W-R combo when he's at Feast execute range.",
+        "ability_to_dodge": "Dr. Mundo Q — his cleaver slow; sidestep it and he loses his poke and engage setup.",
+        "power_spikes": {
+          "you": "Level 6 (Feast true damage ignores his regen), Hextech Rocketbelt",
+          "enemy": "Level 6 (R regen), Spirit Visage + Warmog's"
+        },
+        "early_game": "Even lane. Dodge his Q and poke with E. His passive regen is annoying. Farm up and wait for level 6 where your Feast execute cuts through his healing.",
+        "mid_game": "Your Feast true damage is one of the best tools against his regen. Wait for him to ult and burn through HP, then Feast when he drops to execute range.",
+        "late_game": "He becomes extremely tanky. Your Feast is still relevant because it's true damage. In teamfights, focus his carries — Mundo just soaks damage.",
+        "win_condition": "Feast's true damage is the key. Wait for execute range and ignore his healing. Don't try to poke him down — he regens it all.",
+        "counter_items": ["Thornmail", "Jak'Sho, The Protean"],
+        "scaling": "Even — both are unkillable tanks; Cho'Gath's true damage execute is the deciding factor",
+        "jungle_gankable": true,
+        "positioning": "Sidestep his Q cleavers. Farm passively and wait for Feast execute range. Don't chase him through his R regen."
+      },
+      "Urgot": {
+        "difficulty": "hard",
+        "who_wins_early": "Urgot",
+        "trading_pattern": "Dodge his E flip at all costs. If he flips you, you eat all his shotgun knees. Poke with Q from max range and E from safety. Don't walk into flip range.",
+        "ability_to_dodge": "Urgot E — Disdain flip sets up his full damage rotation; sidestep it and punish while it's on a long cooldown.",
+        "power_spikes": {
+          "you": "Level 6 (Feast execute contests his R execute), Hextech Rocketbelt",
+          "enemy": "Level 9 (all shotgun knees active), Black Cleaver"
+        },
+        "early_game": "Respect his E flip. If it lands, you eat massive damage from his passive shotgun knees. Farm from range with Q and E. Don't walk into his engage range.",
+        "mid_game": "He's a strong brawler. Your Feast execute and his Fear Beyond Death compete — make sure you Feast first before he chains you with R.",
+        "late_game": "He shreds tanks with percent health damage. Your Feast stacks make you tankier but his passive scales against you. Focus on teamfight CC rather than dueling him.",
+        "win_condition": "Dodge his E and poke from range. Your Q-W-R burst can kill him if you avoid his flip. Don't sit below 25% HP or his R chains you.",
+        "counter_items": ["Plated Steelcaps", "Thornmail", "Jak'Sho, The Protean"],
+        "scaling": "Urgot slightly favored — his percent health damage scales against Cho'Gath's health stacking",
+        "jungle_gankable": true,
+        "positioning": "Stay outside his E range and poke with Q. If he flips you, Q-W immediately and disengage — don't try to fight while surrounded by his shotgun knees."
+      },
+      "Ambessa": {
+        "difficulty": "medium",
+        "who_wins_early": "Ambessa",
+        "trading_pattern": "She's mobile with passive dashes. Land Q when she commits to a trade — she has to walk up to auto-attack. W silence stops her dash chains.",
+        "ability_to_dodge": "Ambessa R — her ult dash engage; flash or Q under yourself to knock her up when she arrives.",
+        "power_spikes": {
+          "you": "Level 6 (Feast burst), Hextech Rocketbelt",
+          "enemy": "Level 6 (R engage), Trinity Force"
+        },
+        "early_game": "She's aggressive with short dashes. Farm safely and punish when she overextends. Your Q-W combo catches her mid-dash.",
+        "mid_game": "You start matching her. Your tankiness and silence neutralize her dash-heavy playstyle. Feast when she overcommits.",
+        "late_game": "Both are decent teamfighters. Your CC and tankiness are more consistent while she's more mobile. Save W for her dive attempts.",
+        "win_condition": "Silence her when she dashes in. Without her passive dashes she can't trade effectively. Feast her when she overextends.",
+        "counter_items": ["Plated Steelcaps", "Jak'Sho, The Protean"],
+        "scaling": "Even — both have strong teamfight presence with different strengths",
+        "jungle_gankable": true,
+        "positioning": "Let her come to you. When she dashes in, Q her landing spot and W silence to cancel her follow-up dashes."
+      },
+      "Volibear": {
+        "difficulty": "hard",
+        "who_wins_early": "Volibear",
+        "trading_pattern": "He runs you down early. Q under yourself when he charges at you with his Q stun. Silence him with W to deny his E shield. Farm from distance.",
+        "ability_to_dodge": "Volibear Q — Thundering Smash stun; Q under yourself when he runs at you to knock him up before he reaches you.",
+        "power_spikes": {
+          "you": "Level 6 (Feast burst), Hextech Rocketbelt + Riftmaker",
+          "enemy": "Level 6 (R tower disable + HP), Nashor's Tooth"
+        },
+        "early_game": "He's stronger in melee. Q under yourself when he charges and W silence to deny his combo. Don't let him auto-stack his passive. Farm from range with E.",
+        "mid_game": "He can tower dive you with R. Be careful when low HP under tower — his ult disables it. Back off or have your jungler nearby.",
+        "late_game": "You outscale. He falls off while your Feast stacks and teamfight CC become more valuable. Group and play front-to-back.",
+        "win_condition": "Survive his early aggression and outscale. Your Q-W combo disrupts his engage pattern. Don't let him freely tower dive you.",
+        "counter_items": ["Plated Steelcaps", "Thornmail", "Jak'Sho, The Protean"],
+        "scaling": "Cho'Gath favored — Volibear falls off while Cho'Gath scales infinitely with Feast stacks",
+        "jungle_gankable": true,
+        "positioning": "When he runs at you with Q, place your own Q between you and him. The knockup interrupts his charge before he reaches you."
+      },
+      "Yorick": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Your Q AoE clears his ghouls fast. W silence prevents him from commanding Maiden. If trapped in his W cage, auto the nearest wall — it takes 4 hits to break.",
+        "ability_to_dodge": "Yorick W — Dark Procession cage; auto-attack the wall to break out or use Q-W to kill ghouls while trapped.",
+        "power_spikes": {
+          "you": "Level 6 (Feast stacking), Hextech Rocketbelt",
+          "enemy": "Level 6 (Maiden of the Mist), Trinity Force"
+        },
+        "early_game": "Even lane. Your Q AoE clears his ghouls efficiently. Don't let him land E on you — ghouls jump to the target. If he traps you in W, auto the walls out.",
+        "mid_game": "Respect Maiden damage. He split pushes hard. Match his push or roam for teamfights where your CC is more valuable.",
+        "late_game": "He takes towers extremely fast. Match his split or force teamfights. Your teamfight is much stronger but he'll take your base if left alone.",
+        "win_condition": "Clear his ghouls with Q AoE and deny his E landing. Don't fight him surrounded by Maiden and ghouls. Force teamfights where he's weaker.",
+        "counter_items": ["Thornmail", "Jak'Sho, The Protean"],
+        "scaling": "Yorick slightly favored — his split push with Maiden is nearly impossible to match",
+        "jungle_gankable": true,
+        "positioning": "Kill ghouls with Q before fighting Yorick directly. If he lands E, ghouls jump to you — dodge E at all costs."
+      },
+      "Jayce": {
+        "difficulty": "hard",
+        "who_wins_early": "Jayce",
+        "trading_pattern": "Take Doran's Shield and Second Wind. Farm under tower with E and Q. He pokes you down from range but can't kill you if you don't walk into his Q+E combo.",
+        "ability_to_dodge": "Jayce Q+E — Shock Blast through Acceleration Gate deals massive poke; stand behind minions to block it.",
+        "power_spikes": {
+          "you": "Level 6 (Feast burst on his squishy build), Hextech Rocketbelt",
+          "enemy": "Level 1-3 (ranged bully), Muramana"
+        },
+        "early_game": "He pokes you hard. Take Doran's Shield, Second Wind, and farm with E from safety. Don't walk up for CS when his Q+E is ready.",
+        "mid_game": "Once you have items, you can burst him. He's squishy and your Q-W-R combo one-shots him. Look for a Flash-R when he oversteps.",
+        "late_game": "You hard outscale. He's a squishy ranged champion who can't survive your burst. One Feast and he's gone.",
+        "win_condition": "Survive lane and scale. Post-Rocketbelt you can flash-R combo him for a guaranteed kill. He's squishy and you have true damage.",
+        "counter_items": ["Mercury's Treads", "Hexdrinker", "Force of Nature"],
+        "scaling": "Cho'Gath heavily favored — Jayce falls off while Cho'Gath's true damage execute one-shots him late",
+        "jungle_gankable": true,
+        "positioning": "Stand behind minions to block his Q+E poke. When he switches to hammer form, that's your window to Q-W-R him."
+      },
+      "Tryndamere": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Poke with E and farm. When he spins in, Q under yourself and W silence — he can't auto-attack effectively while silenced. Back off when his ult is up.",
+        "ability_to_dodge": "Tryndamere R — Undying Rage; when he ults, walk away for 5 seconds. Your Feast does NOT work during his ult immunity.",
+        "power_spikes": {
+          "you": "Level 6 (Feast execute after his R ends), Hextech Rocketbelt",
+          "enemy": "Level 6 (R unkillable for 5 sec), Kraken Slayer"
+        },
+        "early_game": "Trade evenly. His early crits are RNG. Farm safely and use Q-W when he engages. Don't gamble on all-ins when he has fury — his crits hurt.",
+        "mid_game": "He splits hard. Match him or force teamfights. Your Q-W silence denies his auto-attack DPS. Save Feast for AFTER his R expires.",
+        "late_game": "He outduels you in split push. Group for teamfights where your CC makes him useless. Never try to solo him late.",
+        "win_condition": "Disengage when he ults, re-engage after 5 seconds and Feast. In teamfights, your CC completely shuts him down.",
+        "counter_items": ["Plated Steelcaps", "Warden's Mail", "Thornmail"],
+        "scaling": "Tryndamere favored in duels — his ult and crit scaling make split pushing uncontestable; Cho'Gath favored in teamfights",
+        "jungle_gankable": true,
+        "positioning": "When he ults, immediately disengage. Count to 5, then re-engage and Feast. Never Feast into his Undying Rage."
+      },
+      "Poppy": {
+        "difficulty": "easy",
+        "who_wins_early": "Cho'Gath",
+        "trading_pattern": "She's short range. Farm with E poke and Q knockup. She can't reach you without dashing, and her W only blocks dashes — which you don't have.",
+        "ability_to_dodge": "Poppy E — she charges at you to slam into a wall; don't stand near walls or she gets a free stun.",
+        "power_spikes": {
+          "you": "Level 6 (Feast stacking), Hextech Rocketbelt",
+          "enemy": "Level 6 (R displacement), Sunfire Cape"
+        },
+        "early_game": "You win. She can't engage on you effectively — your Q zones her, your W silences her combo, and her W dash-block is useless against you since you have no dashes.",
+        "mid_game": "Continue dominating. She's a tank but your Feast true damage chunks her. Her anti-dash W is completely wasted in this matchup.",
+        "late_game": "Both are tanks but your execute and damage are higher. Her R can displace you in teamfights but she can't kill you.",
+        "win_condition": "Stay away from walls to deny her E stun. Farm and scale — her W is a dead ability against you.",
+        "counter_items": ["Mercury's Treads", "Jak'Sho, The Protean"],
+        "scaling": "Cho'Gath favored — Poppy's key anti-mobility tool is worthless against Cho'Gath's immobile kit",
+        "jungle_gankable": true,
+        "positioning": "Stay away from walls at all times. If she can't stun you with E wall slam, she has very limited trading power."
+      },
+      "Kayle": {
+        "difficulty": "easy",
+        "who_wins_early": "Cho'Gath",
+        "trading_pattern": "Bully her pre-6. Q-W-E combo whenever she walks up to CS. She's melee until level 6 and useless in trades. Zone her completely.",
+        "ability_to_dodge": "Kayle R — her ult makes her invulnerable; wait out the 2-3 seconds of invulnerability then Feast immediately after it ends.",
+        "power_spikes": {
+          "you": "Level 1-5 (total lane dominance), Hextech Rocketbelt",
+          "enemy": "Level 6 (becomes ranged), Level 11 (waves on auto), Level 16 (permanent range + waves)"
+        },
+        "early_game": "Destroy her. She's melee and pathetic early. Q-W-E every time she walks forward. Freeze near your tower and zone her off all CS and XP.",
+        "mid_game": "She's getting stronger. Push her in and roam to impact the map before she reaches level 11. Don't let her free-farm.",
+        "late_game": "She massively outscales everyone. If she reaches level 16, she's a ranged hypercarry. End the game or she wins. Feast her if you can catch her without ult.",
+        "win_condition": "Crush her early, deny XP, and end the game before level 16. Every CS you deny delays her apocalyptic scaling.",
+        "counter_items": ["Hextech Rocketbelt", "Dead Man's Plate"],
+        "scaling": "Kayle massively favored — she becomes a ranged hypercarry at level 16 that no tank can survive against",
+        "jungle_gankable": true,
+        "positioning": "Stand between her and the minion wave. Zone her off every CS and XP point early."
+      },
+      "Malphite": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "His Q poke hurts with Comet. Pop his passive shield with an auto then combo with Q-W-E. Don't waste abilities into his shield — break it first.",
+        "ability_to_dodge": "Malphite R — Unstoppable Force is fast; flash sideways if you see him winding up. There's a brief animation before the dash.",
+        "power_spikes": {
+          "you": "Level 6 (Feast stacking), Hextech Rocketbelt",
+          "enemy": "Level 6 (R engage combo), Iceborn Gauntlet"
+        },
+        "early_game": "Even lane. Break his passive shield before committing abilities. His Q poke is annoying but your passive sustain keeps you healthy. Farm and stack.",
+        "mid_game": "Tank vs tank. He can't kill you and you can't easily kill him. Both scale for teamfights. Focus on stacking Feast on minions and objectives.",
+        "late_game": "His R is a better teamfight engage but your sustained damage and execute are more valuable. Both are strong — focus on positioning.",
+        "win_condition": "Farm, stack Feast, and match his teamfight presence. Break his shield before comboing. Neither dies in lane — it's a scaling race.",
+        "counter_items": ["Mercury's Treads", "Force of Nature"],
+        "scaling": "Even — both are strong teamfight tanks with different strengths; Malphite has better engage, Cho'Gath has better sustained threat",
+        "jungle_gankable": true,
+        "positioning": "Break his passive shield with an auto before using abilities. Stand behind minions so his Q targeting favors a minion path."
+      },
+      "Singed": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Do NOT chase him. Q where he's running toward and W silence him. Your E poke hits from range without chasing. Farm and wait for Feast execute range.",
+        "ability_to_dodge": "Singed E — Fling throws you behind him into poison; never walk into melee range. Hit Q and W from max range only.",
+        "power_spikes": {
+          "you": "Level 6 (Feast to punish his proxying), Hextech Rocketbelt",
+          "enemy": "Level 2 (proxy farming), Rylai's Crystal Scepter"
+        },
+        "early_game": "Don't chase him. Ever. Stand in lane, farm with E and Q, and let him come to you. If he proxies, freeze under your tower and wait for your jungler.",
+        "mid_game": "He roams and proxies. You can't chase him. Focus on stacking Feast and impacting teamfights. Your AoE CC is very strong against his team.",
+        "late_game": "His teamfight is annoying but your CC is better. Q his team when they follow his poison trail. Feast whoever he flings into your team.",
+        "win_condition": "Don't chase. Farm, scale, and outperform in teamfights. You're a better frontline tank than he is.",
+        "counter_items": ["Mercury's Treads", "Force of Nature"],
+        "scaling": "Cho'Gath slightly favored — more reliable teamfight CC and true damage execute",
+        "jungle_gankable": false,
+        "positioning": "Stand your ground. Q where he's running. Never follow him into poison trail."
+      }
+    }
+  }
+}

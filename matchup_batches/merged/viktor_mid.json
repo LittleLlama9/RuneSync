@@ -1,0 +1,348 @@
+{
+  "Viktor": {
+    "mid": {
+      "Xerath": {
+        "difficulty": "hard",
+        "who_wins_early": "Xerath",
+        "trading_pattern": "Xerath outranges. Farm safely, poke with E.",
+        "ability_to_dodge": "Xerath Q — dodge perpendicular.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Farm defensively. Xerath ranges dominate.",
+        "mid_game": "Poke with E. Scale with team.",
+        "late_game": "You outscale with upgrades.",
+        "win_condition": "Survive early, upgrade Hexcore, burst in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Viktor outscales — Hexcore upgrades beat poke",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm safely."
+      },
+      "Ziggs": {
+        "difficulty": "medium",
+        "who_wins_early": "Ziggs",
+        "trading_pattern": "Ziggs has range advantage. Farm with E.",
+        "ability_to_dodge": "Ziggs Q — dodge sideways.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Farm defensively. Ziggs pushes better.",
+        "mid_game": "Poke with E. Scale with team.",
+        "late_game": "You outscale with upgrades.",
+        "win_condition": "Survive early, upgrade Hexcore, burst in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Viktor outscales — upgrades beat his waveclear",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm safely."
+      },
+      "Aurelion Sol": {
+        "difficulty": "hard",
+        "who_wins_early": "Aurelion Sol",
+        "trading_pattern": "Aurelion Sol pushes and roams better. Farm safely.",
+        "ability_to_dodge": "Aurelion Sol W — stay at range.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Level 6 (roams), Liandry's"
+        },
+        "early_game": "Farm defensively. He roams better early.",
+        "mid_game": "Poke with E. Scale with team.",
+        "late_game": "You outscale with upgrades.",
+        "win_condition": "Survive early, upgrade Hexcore, burst in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Viktor outscales — upgrades beat roams",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm safely."
+      },
+      "Ahri": {
+        "difficulty": "medium",
+        "who_wins_early": "Ahri",
+        "trading_pattern": "Ahri has poke and mobility. Trade when Q down.",
+        "ability_to_dodge": "Ahri Q — dodge sideways.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Ahri has decent poke.",
+        "mid_game": "Poke with E. Both scale.",
+        "late_game": "You outscale with upgrades.",
+        "win_condition": "Survive early, upgrade Hexcore, burst in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Viktor outscales — upgrades beat her burst",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm safely."
+      },
+      "Naafiri": {
+        "difficulty": "hard",
+        "who_wins_early": "Naafiri",
+        "trading_pattern": "Naafiri burst early. Play defensive, poke with E.",
+        "ability_to_dodge": "Naafiri Q — step to side.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Youmuu's, Level 6"
+        },
+        "early_game": "Play safe. Naafiri dominates early.",
+        "mid_game": "Poke with E. Scale with team.",
+        "late_game": "You outscale with upgrades.",
+        "win_condition": "Survive early, upgrade Hexcore, burst in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Viktor outscales — upgrades beat her burst",
+        "jungle_gankable": false,
+        "positioning": "Keep distance. Farm safely."
+      },
+      "Taliyah": {
+        "difficulty": "medium",
+        "who_wins_early": "Taliyah",
+        "trading_pattern": "Taliyah has waveclear. Farm E when abilities down.",
+        "ability_to_dodge": "Taliyah Q — dodge perpendicular.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Taliyah pushes better.",
+        "mid_game": "Poke with E. Both scale.",
+        "late_game": "You outscale with upgrades.",
+        "win_condition": "Survive early, upgrade Hexcore, burst in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Viktor outscales — upgrades beat her roams",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm safely."
+      },
+      "Mel": {
+        "difficulty": "medium",
+        "who_wins_early": "Viktor",
+        "trading_pattern": "Mel weak early. Poke with E and farm.",
+        "ability_to_dodge": "Mel E (Reflect) — use E spells.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Abuse with E poke. Control lane.",
+        "mid_game": "Poke and scale. Both scale.",
+        "late_game": "You outscale with upgrades.",
+        "win_condition": "Get early advantage. Upgrade Hexcore.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Viktor outscales — upgrades beat her defense",
+        "jungle_gankable": true,
+        "positioning": "Use E to poke. Keep distance."
+      },
+      "Ryze": {
+        "difficulty": "medium",
+        "who_wins_early": "Even",
+        "trading_pattern": "Ryze similar trading. Trade when Q down.",
+        "ability_to_dodge": "Ryze Q — dodge sideways.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Mirror his playstyle. Both scale.",
+        "mid_game": "Poke with E. Both scale.",
+        "late_game": "You outscale with upgrades.",
+        "win_condition": "Survive early, upgrade Hexcore, burst in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Viktor outscales — upgrades beat his control",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm safely."
+      },
+      "Smolder": {
+        "difficulty": "easy",
+        "who_wins_early": "Viktor",
+        "trading_pattern": "Smolder very weak. Spam E poke and farm.",
+        "ability_to_dodge": "Smolder Q — dodge away.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Liandry's, Level 13"
+        },
+        "early_game": "Dominate with E poke. Control lane.",
+        "mid_game": "Poke and scale. Deny his farming.",
+        "late_game": "He outscales. Finish before 2-3 items.",
+        "win_condition": "Get early advantage. Finish early.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Smolder significantly outscales — you need major lead",
+        "jungle_gankable": false,
+        "positioning": "Spam E aggressively. Control lane."
+      },
+      "Cassiopeia": {
+        "difficulty": "medium",
+        "who_wins_early": "Cassiopeia",
+        "trading_pattern": "Cassio has sustained poke. Trade when W down.",
+        "ability_to_dodge": "Cassiopeia W — walk around it.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Liandry's, Level 6"
+        },
+        "early_game": "Play defensively. Cassio has poke.",
+        "mid_game": "Poke with E. Both scale.",
+        "late_game": "You outscale with upgrades.",
+        "win_condition": "Survive early, upgrade Hexcore, burst in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Viktor outscales — upgrades beat her sustained damage",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Avoid poison."
+      },
+      "Orianna": {
+        "difficulty": "medium",
+        "who_wins_early": "Even",
+        "trading_pattern": "Orianna similar poke. Trade when ball far.",
+        "ability_to_dodge": "Orianna Q — dodge sideways.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Archangel's, Level 6"
+        },
+        "early_game": "Mirror her playstyle. Both scale.",
+        "mid_game": "Poke with E. Both scale.",
+        "late_game": "You outscale with upgrades.",
+        "win_condition": "Survive early, upgrade Hexcore, burst in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Viktor outscales — upgrades beat her control",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Keep away from ball."
+      },
+      "Diana": {
+        "difficulty": "hard",
+        "who_wins_early": "Diana",
+        "trading_pattern": "Diana is melee. Keep distance with E poke.",
+        "ability_to_dodge": "Diana Q — dodge sideways.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Protobelt, Level 6"
+        },
+        "early_game": "Play safe. Diana has all-in.",
+        "mid_game": "Poke with E. Scale with team.",
+        "late_game": "You outscale with upgrades.",
+        "win_condition": "Survive early, upgrade Hexcore, burst in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Viktor outscales — upgrades beat her all-in",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm safely."
+      },
+      "Syndra": {
+        "difficulty": "medium",
+        "who_wins_early": "Syndra",
+        "trading_pattern": "Syndra has poke and burst. Trade when Q down.",
+        "ability_to_dodge": "Syndra E — dodge by moving away.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Syndra has burst.",
+        "mid_game": "Poke with E. Both scale.",
+        "late_game": "You outscale with upgrades.",
+        "win_condition": "Survive early, upgrade Hexcore, burst in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Viktor outscales — upgrades beat her burst",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm safely."
+      },
+      "Lux": {
+        "difficulty": "medium",
+        "who_wins_early": "Lux",
+        "trading_pattern": "Lux has range. Trade when E down.",
+        "ability_to_dodge": "Lux E — dodge back.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Lux has range.",
+        "mid_game": "Poke with E. Both scale.",
+        "late_game": "You outscale with upgrades.",
+        "win_condition": "Survive early, upgrade Hexcore, burst in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Viktor outscales — upgrades beat her range",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm safely."
+      },
+      "Malzahar": {
+        "difficulty": "medium",
+        "who_wins_early": "Malzahar",
+        "trading_pattern": "Malzahar has sustain. Trade when E down.",
+        "ability_to_dodge": "Malzahar E — respect passive.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Liandry's, Level 6"
+        },
+        "early_game": "Play defensively. Malzahar has sustain.",
+        "mid_game": "Poke with E. Both scale.",
+        "late_game": "You outscale with upgrades.",
+        "win_condition": "Survive early, upgrade Hexcore, burst in fights.",
+        "counter_items": ["Mercury's Treads", "Spirit Visage"],
+        "scaling": "Viktor outscales — upgrades beat his sustain",
+        "jungle_gankable": false,
+        "positioning": "Keep distance. Farm safely."
+      },
+      "Seraphine": {
+        "difficulty": "medium",
+        "who_wins_early": "Even",
+        "trading_pattern": "Seraphine similar poke. Trade when Q down.",
+        "ability_to_dodge": "Seraphine E — dodge away.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Mirror her playstyle. Both scale.",
+        "mid_game": "Poke with E. Both scale.",
+        "late_game": "You outscale with upgrades.",
+        "win_condition": "Survive early, upgrade Hexcore, burst in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Viktor outscales — upgrades beat her utility",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm safely."
+      },
+      "Akali": {
+        "difficulty": "hard",
+        "who_wins_early": "Akali",
+        "trading_pattern": "Akali is melee. Keep distance with E poke.",
+        "ability_to_dodge": "Akali E — step back.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Protobelt, Level 6"
+        },
+        "early_game": "Play safe. Akali has all-in.",
+        "mid_game": "Poke with E. Scale with team.",
+        "late_game": "You outscale with upgrades.",
+        "win_condition": "Survive early, upgrade Hexcore, burst in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Viktor outscales — upgrades beat her all-in",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm safely."
+      },
+      "Corki": {
+        "difficulty": "medium",
+        "who_wins_early": "Corki",
+        "trading_pattern": "Corki has poke. Trade when Q down.",
+        "ability_to_dodge": "Corki Q — dodge back.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Trinity Force, Level 6"
+        },
+        "early_game": "Play defensively. Corki has poke.",
+        "mid_game": "Poke with E. Both scale.",
+        "late_game": "You outscale with upgrades.",
+        "win_condition": "Survive early, upgrade Hexcore, burst in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Viktor outscales — upgrades beat his poke",
+        "jungle_gankable": false,
+        "positioning": "Keep distance. Farm safely."
+      },
+      "Zed": {
+        "difficulty": "hard",
+        "who_wins_early": "Zed",
+        "trading_pattern": "Zed has burst and mobility. Play defensive.",
+        "ability_to_dodge": "Zed W — back off when he clones.",
+        "power_spikes": {
+          "you": "Hexcore upgrade, Liandry's",
+          "enemy": "Youmuu's, Level 6"
+        },
+        "early_game": "Play safe. Zed has strong burst.",
+        "mid_game": "Poke with E. Scale with team.",
+        "late_game": "You outscale with upgrades.",
+        "win_condition": "Survive early, upgrade Hexcore, burst in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Viktor outscales — upgrades beat his burst",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm safely."
+      }
+    }
+  }
+}

@@ -1,0 +1,456 @@
+{
+  "Malphite": {
+    "top": {
+      "Darius": {
+        "difficulty": "medium",
+        "who_wins_early": "Darius",
+        "trading_pattern": "His bleed prevents your passive shield from recharging. Short Q trades to slow him and back off. Never stay in melee range during bleed ticks.",
+        "ability_to_dodge": "Darius Q — stay outside the outer ring. Back off immediately when he chases with W to prevent bleed stacks.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Sunfire + Randuin's",
+          "enemy": "Level 5 (full bleed stacks), Stridebreaker"
+        },
+        "early_game": "Survive his early dominance. Your passive shield can't recharge under bleed. Farm and trade briefly with Q.",
+        "mid_game": "You become tankier with items. His bleed matters less once you have Sunfire.",
+        "late_game": "Your ult engage is more impactful in teamfights than his single-target pressure.",
+        "win_condition": "Survive early bleeding. Build Plated Steelcaps to reduce bleed physical damage. Win through teamfight engage.",
+        "counter_items": ["Plated Steelcaps", "Sunfire Aegis"],
+        "scaling": "Darius wins early lane; Malphite better teamfight enabler",
+        "jungle_gankable": true,
+        "positioning": "Short trades with Q to slow, then back off before bleed stacks. Don't let bleed prevent shield regen."
+      },
+      "Garen": {
+        "difficulty": "hard",
+        "who_wins_early": "Garen",
+        "trading_pattern": "His Q silence stops you from using Q to slow him. His E spins through your armor. He wins most trades pre-items. Farm and look for ult.",
+        "ability_to_dodge": "Garen Q — when you see him sprint, Q him before he reaches you to slow him, then back off.",
+        "power_spikes": {
+          "you": "Level 6 (ult engage), Sunfire + Randuin's",
+          "enemy": "Level 2-5, Sunfire Cape"
+        },
+        "early_game": "He out-trades you. Your passive shield helps but his Q stops your trading. Farm safely.",
+        "mid_game": "You become tankier. His execute ult threatens you at low HP.",
+        "late_game": "Your ult is a better teamfight tool. Group and engage.",
+        "win_condition": "Farm and scale. Your ult is more valuable to the team than his. Win through macro.",
+        "counter_items": ["Plated Steelcaps", "Sunfire Aegis"],
+        "scaling": "Garen wins lane; Malphite better teamfight",
+        "jungle_gankable": false,
+        "positioning": "Q him when he sprints to slow his approach. Trade briefly then back off."
+      },
+      "Fiora": {
+        "difficulty": "hard",
+        "who_wins_early": "Fiora",
+        "trading_pattern": "She procs Vitals constantly and heals off them. Your armor reduces her physical damage somewhat but she has true damage. Never fight extended.",
+        "ability_to_dodge": "Fiora W (Riposte) — she Ripostes your ult. This is a massive problem in teamfights. Bait W before ult if possible.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Sunfire + Randuin's",
+          "enemy": "Level 9 (Riposte CDR), Ravenous Hydra"
+        },
+        "early_game": "She trades through your armor with Vitals true damage. Farm defensively.",
+        "mid_game": "She wins all duels. Your value is in ult roaming.",
+        "late_game": "She can Riposte your ult — try to bait her W before ulting in teamfights.",
+        "win_condition": "Don't 1v1 her. Your value is as a teamfight initiator. Bait W before committing ult.",
+        "counter_items": ["Thornmail", "Sunfire Aegis"],
+        "scaling": "Fiora wins lane; Malphite better teamfight",
+        "jungle_gankable": true,
+        "positioning": "Farm under tower. Your ult value comes from teamfights not lane."
+      },
+      "Aatrox": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Your armor makes his physical Q damage weaker than against other champions. Q him to slow his advance and disengage. He can't stick to you easily.",
+        "ability_to_dodge": "Aatrox Q — stand between his Q hitboxes. Your bulk means you can take some hits without losing much.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Sunfire + Randuin's",
+          "enemy": "Level 9 (Q max), Goredrinker"
+        },
+        "early_game": "Armor vs his physical damage makes trades okay. Q to slow him, disengage.",
+        "mid_game": "His healing becomes a problem. Bramble Vest helps.",
+        "late_game": "Your ult engage is more valuable than his kit. Group and roam.",
+        "win_condition": "Farm and build Bramble Vest. Your ult into a teamfight is more impactful than his lane pressure.",
+        "counter_items": ["Sunfire Aegis", "Bramble Vest"],
+        "scaling": "Even; Malphite better teamfight, Aatrox better split push",
+        "jungle_gankable": true,
+        "positioning": "Stand between his Q zones. Q to slow and disengage."
+      },
+      "Camille": {
+        "difficulty": "hard",
+        "who_wins_early": "Camille",
+        "trading_pattern": "Her true damage in E bypasses your armor entirely. She wins all trades. Farm and look for ult opportunities on other lanes.",
+        "ability_to_dodge": "Camille E (Hookshot) — stay away from walls. Her E requires wall geometry.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Sunfire + Frozen Heart",
+          "enemy": "Level 3 (full kit), Trinity Force"
+        },
+        "early_game": "She wins with true damage. Farm defensively.",
+        "mid_game": "Shove and roam with ult. Don't fight 1v1.",
+        "late_game": "Your ult engage is your value. Group and win through it.",
+        "win_condition": "Survive and roam with ult. Never fight 1v1.",
+        "counter_items": ["Plated Steelcaps", "Sunfire Aegis"],
+        "scaling": "Camille outscales in duels; Malphite better teamfight initiator",
+        "jungle_gankable": true,
+        "positioning": "Center of lane away from walls. Farm and look for ult windows on other lanes."
+      },
+      "Irelia": {
+        "difficulty": "hard",
+        "who_wins_early": "Irelia",
+        "trading_pattern": "Her Q resets avoid your passive shield replenishment easily. Your W reduces her attack speed which slows her stacks somewhat.",
+        "ability_to_dodge": "Irelia E (Flawless Duet) — sidestep the stun blades.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Sunfire + Frozen Heart",
+          "enemy": "Level 5 (full stacks), Trinity Force"
+        },
+        "early_game": "She bullies you. Your W reduces her attack speed.",
+        "mid_game": "Her Trinity and maxed stacks outpace your armor stacking.",
+        "late_game": "Your ult is far more valuable. Group and engage.",
+        "win_condition": "Use W to reduce her attack speed (slows passive stacks). Roam with ult.",
+        "counter_items": ["Plated Steelcaps", "Frozen Heart"],
+        "scaling": "Irelia wins lane; Malphite better teamfight",
+        "jungle_gankable": true,
+        "positioning": "Activate W when she Q chains onto you. Sidestep E blades."
+      },
+      "Jax": {
+        "difficulty": "hard",
+        "who_wins_early": "Jax",
+        "trading_pattern": "His E dodges your auto-attacks. Your Q slow is your best tool. He wins extended fights significantly with mixed damage.",
+        "ability_to_dodge": "Jax E (Counterstrike) — don't autoattack while spinning. Your Q poke still works through his E.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Sunfire + Randuin's",
+          "enemy": "Level 3 (E), Trinity + Steelcaps"
+        },
+        "early_game": "He beats you. Use Q to poke and disengage.",
+        "mid_game": "He wins all 1v1s. Shove and roam with ult.",
+        "late_game": "Your ult engage is better than his kit in teamfights.",
+        "win_condition": "Q to slow and disengage. Roam with ult. Win through teamfight engage.",
+        "counter_items": ["Plated Steelcaps", "Randuin's Omen"],
+        "scaling": "Jax wins lane; Malphite better teamfight",
+        "jungle_gankable": true,
+        "positioning": "Q him to slow, then back off. Don't auto during his E."
+      },
+      "Jayce": {
+        "difficulty": "medium",
+        "who_wins_early": "Jayce",
+        "trading_pattern": "He pokes you from cannon range. Your passive shield absorbs some. Use Q to slow him when he walks up to melee CS.",
+        "ability_to_dodge": "Jayce Q (Shock Blast) — sidestep the cannon arc shot.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Sunfire + Randuin's",
+          "enemy": "Level 7 (Q cannon max), Trinity Force"
+        },
+        "early_game": "He pokes your shield down. Q him during melee CS attempts.",
+        "mid_game": "Your armor reduces his physical poke. He'll roam — push and teleport.",
+        "late_game": "Your ult is more valuable in teamfights than his poke.",
+        "win_condition": "Passive shield tanks some poke. Build armor items. Win through ult teamfight engage.",
+        "counter_items": ["Plated Steelcaps", "Sunfire Aegis"],
+        "scaling": "Jayce wins early; Malphite better teamfight",
+        "jungle_gankable": true,
+        "positioning": "Q him when he's in melee form. Sidestep cannon Q arcs."
+      },
+      "Kayle": {
+        "difficulty": "easy",
+        "who_wins_early": "Malphite",
+        "trading_pattern": "Abuse her early before level 6. Your armor makes her pre-11 physical damage weak. Q her whenever she walks up.",
+        "ability_to_dodge": "Kayle E (Starfire Spellblade) — sidestep her ranged empowered auto at later levels.",
+        "power_spikes": {
+          "you": "Level 2-5 (lane bully), Level 6 (ult)",
+          "enemy": "Level 11 (fully ranged), Nashor's Tooth"
+        },
+        "early_game": "You bully her. She's weak melee against your armor.",
+        "mid_game": "At 11 she becomes ranged. Your armor matters less against her magic E.",
+        "late_game": "Both are teamfight tools. Your ult engage vs her sustained DPS.",
+        "win_condition": "Build early CS lead. At level 11 she threatens — group for ult engage value.",
+        "counter_items": ["Sunfire Aegis", "Randuin's Omen"],
+        "scaling": "Malphite wins early; even late",
+        "jungle_gankable": true,
+        "positioning": "Stay on top of her early. After level 11 maintain distance or group."
+      },
+      "Mordekaiser": {
+        "difficulty": "hard",
+        "who_wins_early": "Mordekaiser",
+        "trading_pattern": "His ult removes your passive shield and ult — both of your main tools are inaccessible in his realm. He wins 1v1 inside the realm.",
+        "ability_to_dodge": "Mordekaiser R (Realm of Death) — you can't escape it. Fight back with Q slow and auto-attacks inside the realm.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Sunfire + Randuin's",
+          "enemy": "Level 6 (Realm), Riftmaker"
+        },
+        "early_game": "He wins early. Short trades with Q.",
+        "mid_game": "His ult negates your ult in 1v1. Very hard lane.",
+        "late_game": "In teamfights without his ult available, your ult engage is stronger.",
+        "win_condition": "Survive and play for teamfight ult engage. Track his ult CD — fight when it's down.",
+        "counter_items": ["Thornmail", "Sunfire Aegis"],
+        "scaling": "Mordekaiser wins lane; Malphite better multi-target teamfight",
+        "jungle_gankable": false,
+        "positioning": "Don't fight inside his W passive ring. Use Q to slow him and disengage."
+      },
+      "Nasus": {
+        "difficulty": "easy",
+        "who_wins_early": "Malphite",
+        "trading_pattern": "Q him every time he goes for Q stacks. He can't respond. Your passive shield recharges freely since he has no bleed. Bully him off every CS.",
+        "ability_to_dodge": "Nasus W (Wither) — Q him back before he can Wither you, or just disengage immediately.",
+        "power_spikes": {
+          "you": "Level 2-5 (passive regen), Level 6 (ult)",
+          "enemy": "300+ Q stacks, Level 6 (ult), Frozen Heart"
+        },
+        "early_game": "Free bully lane. Deny every Q stack with Q poke.",
+        "mid_game": "His stacks accumulate. Build and roam with ult.",
+        "late_game": "500 stacks — Wither makes your Q slow less impactful. Group fight.",
+        "win_condition": "Deny stacks. Build early lead. Your ult teamfight engage wins games.",
+        "counter_items": ["Sunfire Aegis", "Randuin's Omen"],
+        "scaling": "Malphite wins early; Nasus threatens past 400 stacks",
+        "jungle_gankable": true,
+        "positioning": "Step between him and his Q CS target. Q poke every stack attempt."
+      },
+      "Olaf": {
+        "difficulty": "hard",
+        "who_wins_early": "Olaf",
+        "trading_pattern": "He wins the physical trade war. Your armor helps but his Q axes hurt at range. His ult makes your CC useless in extended fights.",
+        "ability_to_dodge": "Olaf Q (Undertow) — sidestep the axe. Your passive makes you tanky but he deals consistent damage.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Sunfire + Randuin's",
+          "enemy": "Level 6 (ult CC immunity), Stridebreaker"
+        },
+        "early_game": "He out-trades you. Farm and survive.",
+        "mid_game": "His ult denies your Q slow and W attack speed reduction. Hard matchup.",
+        "late_game": "Your ult engage in teamfights is still strong. Your ult doesn't CC him during Ragnarok but it targets others.",
+        "win_condition": "Farm and roam with ult. Don't fight him 1v1 when his ult is available. Engage on other targets in teamfights.",
+        "counter_items": ["Plated Steelcaps", "Sunfire Aegis"],
+        "scaling": "Olaf outscales in 1v1; Malphite better multi-target teamfight",
+        "jungle_gankable": false,
+        "positioning": "Dodge his axe. Q to slow when he's out of ult. Disengage when ult activates."
+      },
+      "Renekton": {
+        "difficulty": "medium",
+        "who_wins_early": "Renekton",
+        "trading_pattern": "He burst-combos you before your passive shield can help. Short trades with Q after dodging his W. His burst is front-loaded.",
+        "ability_to_dodge": "Renekton W (Ruthless Predator) — the stun is the critical part. Don't trade into his E dash unless your shield is full.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Sunfire Aegis",
+          "enemy": "Level 3 (full combo), Black Cleaver"
+        },
+        "early_game": "He wins early. Passive shield helps absorb some burst but his combo chunks through it.",
+        "mid_game": "He falls off mid-game. Your armor scaling becomes more relevant.",
+        "late_game": "Your ult is stronger in teamfights. Group.",
+        "win_condition": "Survive early, scale. Your teamfight ult is worth much more than his lane bully kit.",
+        "counter_items": ["Plated Steelcaps", "Sunfire Aegis"],
+        "scaling": "Renekton wins early; Malphite better teamfight",
+        "jungle_gankable": false,
+        "positioning": "Let passive shield recharge between trades. Q him after he uses E-W combo."
+      },
+      "Riven": {
+        "difficulty": "hard",
+        "who_wins_early": "Riven",
+        "trading_pattern": "Her burst combo kills you quickly. Your armor helps but she has too much sustained damage in her combo. Q to slow her and disengage.",
+        "ability_to_dodge": "Riven E (Valor) — she uses shield before engaging. Q after her E to slow her retreat.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Sunfire + Randuin's",
+          "enemy": "Level 9 (CDR combo), Ravenous Hydra"
+        },
+        "early_game": "She out-trades you. Q slow and disengage.",
+        "mid_game": "Her full combo destroys you even with armor. Shove and roam with ult.",
+        "late_game": "Your ult is more impactful. Group.",
+        "win_condition": "Survive and roam with ult. Don't 1v1 her.",
+        "counter_items": ["Plated Steelcaps", "Randuin's Omen"],
+        "scaling": "Riven wins lane; Malphite better teamfight",
+        "jungle_gankable": true,
+        "positioning": "Q her to slow when she engages. Back off and let passive shield recharge."
+      },
+      "Sett": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "His grit accumulates from taking damage — you can't trade freely without feeding his W. Short Q trades and disengage before he builds grit.",
+        "ability_to_dodge": "Sett W (Haymaker) — sidestep the true damage center when he throws it.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Sunfire + Frozen Heart",
+          "enemy": "Level 6 (ult), Heartsteel"
+        },
+        "early_game": "Even. Short Q trades. Don't let him auto-attack you too freely.",
+        "mid_game": "You become tankier with items. His grit W hurts through armor.",
+        "late_game": "Both are teamfight initiators. Your ult engage vs his ult grab.",
+        "win_condition": "Farm and scale. Your ult is generally more impactful in 5v5 engages. Trade Q for Q.",
+        "counter_items": ["Plated Steelcaps", "Sunfire Aegis"],
+        "scaling": "Even; Malphite better multi-target engage late",
+        "jungle_gankable": true,
+        "positioning": "Sidestep his W center. Q him when he walks up for CS."
+      },
+      "Shen": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "His W blocks your autos but not your Q. Q poke to slow him. His energy-based kit means he doesn't run out of resources like mana.",
+        "ability_to_dodge": "Shen W (Spirit's Refuge) — stop autoattacking when active. Use Q poke instead since it's not a basic attack.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Sunfire + Randuin's",
+          "enemy": "Level 6 (global ult), Sunfire + Heartsteel"
+        },
+        "early_game": "Even trading. Q poke is your main tool. His W blocks autos.",
+        "mid_game": "Both want to roam with ults. Track his ult and counter-rotate.",
+        "late_game": "Both are great teamfight initiators. Coordinate with your team.",
+        "win_condition": "Trade Q poke. Push and force him to choose between ulting elsewhere and losing CS.",
+        "counter_items": ["Sunfire Aegis", "Randuin's Omen"],
+        "scaling": "Even throughout",
+        "jungle_gankable": true,
+        "positioning": "Q poke when he walks up. Stop autos when W activates."
+      },
+      "Sion": {
+        "difficulty": "easy",
+        "who_wins_early": "Malphite",
+        "trading_pattern": "Interrupt his Q charge with your Q slow. He's immobile and can't stop your passive shield regeneration. Trade freely.",
+        "ability_to_dodge": "Sion Q (Decimating Smash) — Q him as he charges to slow and close gap. Move perpendicular to avoid knockup.",
+        "power_spikes": {
+          "you": "Level 2-5, Level 6 (ult)",
+          "enemy": "Level 6 (ult roam), Sunfire + Heartsteel"
+        },
+        "early_game": "You bully him. Q slow into trades freely.",
+        "mid_game": "His HP stacks make him tankier. Your armor reduces his damage.",
+        "late_game": "Both are teamfight frontliners. Your ult is faster and more reliable as an engage.",
+        "win_condition": "Bully him and deny HP stacks. Roam with ult to win the map.",
+        "counter_items": ["Sunfire Aegis", "Randuin's Omen"],
+        "scaling": "Malphite wins early; even late",
+        "jungle_gankable": true,
+        "positioning": "Q him when he charges to slow and close gap simultaneously."
+      },
+      "Trundle": {
+        "difficulty": "medium",
+        "who_wins_early": "Malphite",
+        "trading_pattern": "His ult steals your armor and MR — losing resistances while he gains them is devastating for a tank. Avoid 1v1 with his ult available.",
+        "ability_to_dodge": "Trundle E (Pillar of Ice) — sidestep it. Don't let it cut off your escape path.",
+        "power_spikes": {
+          "you": "Level 2-5, Level 6 (ult)",
+          "enemy": "Level 6 (ult steals resistances), Sunfire"
+        },
+        "early_game": "You win early. Bully him and deny CS.",
+        "mid_game": "His ult stealing your resistances is a massive problem. Avoid 1v1.",
+        "late_game": "In teamfights, don't be the target of his ult. Group and engage on others.",
+        "win_condition": "Build large early lead. In teamfights, engage before he can target you with his ult. Force him to waste it on someone else.",
+        "counter_items": ["Sunfire Aegis", "Randuin's Omen"],
+        "scaling": "Malphite wins early; Trundle's ult limits mid-late 1v1",
+        "jungle_gankable": true,
+        "positioning": "Engage with ult on other targets in teamfights to avoid being his ult target."
+      },
+      "Tryndamere": {
+        "difficulty": "easy",
+        "who_wins_early": "Malphite",
+        "trading_pattern": "Q him when he approaches — the slow makes his Spinning Slash follow-up weaker. Your armor reduces his physical crit damage significantly.",
+        "ability_to_dodge": "Tryndamere E (Spinning Slash) — Q before he uses E to slow him, making the gap close less effective.",
+        "power_spikes": {
+          "you": "Level 2-5, Level 6 (ult)",
+          "enemy": "Level 6 (ult), Phantom Drive"
+        },
+        "early_game": "You win early. Q to slow his approach. Your armor halves his crit damage.",
+        "mid_game": "His crits become more threatening but your armor reduces them.",
+        "late_game": "His ult prevents kills for 5 seconds. Wait it out. Your ult on multiple targets is better.",
+        "win_condition": "Build early lead. Q slow reduces his crit effectiveness. Never commit to kill during his ult.",
+        "counter_items": ["Plated Steelcaps", "Randuin's Omen"],
+        "scaling": "Malphite wins early; even mid",
+        "jungle_gankable": false,
+        "positioning": "Q him before he uses E so he arrives slow. Randuin's Omen active reduces his crit damage."
+      },
+      "Urgot": {
+        "difficulty": "hard",
+        "who_wins_early": "Urgot",
+        "trading_pattern": "His shotgun knees shred even with armor. His W passive pops through your passive shield. Very hard to trade favorably.",
+        "ability_to_dodge": "Urgot W (Purge) — angle to reduce knee procs. Don't stand directly in front of his active knees.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Sunfire + Frozen Heart",
+          "enemy": "Level 6 (execute), Frozen Fist + Sunfire"
+        },
+        "early_game": "He beats you. Farm and survive.",
+        "mid_game": "He dominates. Shove and roam with ult.",
+        "late_game": "Your ult engage in teamfights is more valuable.",
+        "win_condition": "Roam with ult. Don't fight him 1v1. Win through team engage.",
+        "counter_items": ["Plated Steelcaps", "Sunfire Aegis"],
+        "scaling": "Urgot outscales in 1v1; Malphite better multi-target teamfight",
+        "jungle_gankable": true,
+        "positioning": "Angle away from his knee direction. Q to slow and disengage when he gets close."
+      },
+      "Vayne": {
+        "difficulty": "hard",
+        "who_wins_early": "Malphite",
+        "trading_pattern": "Kill her before Guinsoo's. Your armor is useless against her Silver Bolts true damage. She hard counters your tank build.",
+        "ability_to_dodge": "Vayne E (Condemn) — never stand near walls. Her stun is devastating.",
+        "power_spikes": {
+          "you": "Levels 1-4 (before she has items)",
+          "enemy": "Guinsoo's Rageblade, Level 6 (stealth)"
+        },
+        "early_game": "You win early — bully her. Force kills before items.",
+        "mid_game": "Her Silver Bolts ignore your entire armor stack. Avoid 1v1.",
+        "late_game": "She counters tank building fundamentally. Engage with ult but don't fight her alone.",
+        "win_condition": "Kill her early and get a lead. After Guinsoo's you fundamentally lose 1v1.",
+        "counter_items": ["Plated Steelcaps", "Randuin's Omen"],
+        "scaling": "Malphite wins very early; Vayne hard outscales vs tanks",
+        "jungle_gankable": true,
+        "positioning": "Never stand near walls. Bully early before her items arrive."
+      },
+      "Varus": {
+        "difficulty": "hard",
+        "who_wins_early": "Varus",
+        "trading_pattern": "He pokes from extreme range. Your passive shield absorbs some Q shots but his consistent W blight poke drains you. Q him when he's within range.",
+        "ability_to_dodge": "Varus Q (Piercing Arrow) — sidestep the slow projectile. Move laterally.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Sunfire + Randuin's",
+          "enemy": "Kraken Slayer + Guinsoo's"
+        },
+        "early_game": "He pokes you down from range. Q him when he approaches.",
+        "mid_game": "His W true damage ignores armor. Very difficult matchup.",
+        "late_game": "Your ult engage is still valuable. Group and engage on carries.",
+        "win_condition": "Roam with ult and create team leads. You can't win side lane — use your ult value.",
+        "counter_items": ["Plated Steelcaps", "Randuin's Omen"],
+        "scaling": "Varus outscales; Malphite better teamfight initiator",
+        "jungle_gankable": true,
+        "positioning": "Sidestep his Q. Q him when he walks up for CS."
+      },
+      "Yasuo": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "He blocks your Q with Wind Wall. Your Q is your primary tool — losing it to Wind Wall hurts. Use Q from angles where Wind Wall can't cover.",
+        "ability_to_dodge": "Yasuo W (Wind Wall) — throw Q from sideways angles he can't block easily. His Wind Wall placement matters.",
+        "power_spikes": {
+          "you": "Level 6 (ult, combo with Yasuo's airborne for free R), Sunfire",
+          "enemy": "Level 6 (ult air combo), IE + Kraken"
+        },
+        "early_game": "Even. He can block Q with Wind Wall.",
+        "mid_game": "Your ult knocks up — a free Yasuo ult target. Coordinate with him if he's ally.",
+        "late_game": "Even in direct fights. Your ult is more impactful in 5v5.",
+        "win_condition": "Throw Q from angles his Wind Wall can't block. Your ult knocks up — devastating setup.",
+        "counter_items": ["Plated Steelcaps", "Randuin's Omen"],
+        "scaling": "Even; both have good teamfight tools",
+        "jungle_gankable": true,
+        "positioning": "Approach from the side so his Wind Wall placement is less effective against your Q."
+      },
+      "Yone": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "His E dash gets through your tank stats eventually. Your armor reduces his physical damage component but his kit has mixed damage.",
+        "ability_to_dodge": "Yone E (Soul Unbound) — Q him when he dashes forward to slow him. Back off before his body returns.",
+        "power_spikes": {
+          "you": "Level 6 (ult, knocks up — combo with his ult), Sunfire",
+          "enemy": "Level 6 (ult), IE + Kraken"
+        },
+        "early_game": "Even early. Q him when he E's forward.",
+        "mid_game": "His damage ramps. Your armor helps with physical component.",
+        "late_game": "Your ult knockup combined with his ult is devastating. Your ult is the better teamfight tool.",
+        "win_condition": "Build armor and trade Q pokes. Your ult knockup is a great setup for his ult if allied.",
+        "counter_items": ["Plated Steelcaps", "Randuin's Omen"],
+        "scaling": "Even; Malphite better pure teamfight initiator",
+        "jungle_gankable": true,
+        "positioning": "Q him when he uses E forward. Back off before his return."
+      },
+      "Yorick": {
+        "difficulty": "easy",
+        "who_wins_early": "Malphite",
+        "trading_pattern": "Q him whenever he goes for CS. Your passive shield recharges fine since his damage isn't bleed. Bully him early.",
+        "ability_to_dodge": "Yorick E (Mourning Mist) — sidestep it. Being marked causes Maiden focus.",
+        "power_spikes": {
+          "you": "Level 2-5, Level 6 (ult)",
+          "enemy": "Level 6 (Maiden), Hullbreaker + Sunfire"
+        },
+        "early_game": "You win early. Q poke and deny CS.",
+        "mid_game": "His Maiden + Hullbreaker makes him a split push threat. Match or let team play.",
+        "late_game": "Group for ult engage. Yorick will split — respond accordingly.",
+        "win_condition": "Build early lead, deny Maiden charges, roam with ult.",
+        "counter_items": ["Sunfire Aegis", "Randuin's Omen"],
+        "scaling": "Malphite wins early; Yorick better split pusher",
+        "jungle_gankable": true,
+        "positioning": "Q poke between him and his CS target. Sidestep E."
+      }
+    }
+  }
+}

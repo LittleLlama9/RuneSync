@@ -1,0 +1,384 @@
+{
+  "Lux": {
+    "mid": {
+      "Naafiri": {
+        "difficulty": "hard",
+        "who_wins_early": "Naafiri",
+        "trading_pattern": "Naafiri has early burst and mobility. Respect her all-in threat and farm safely.",
+        "ability_to_dodge": "Naafiri Q (Darkin Salvo) — step to the side or back away.",
+        "power_spikes": {
+          "you": "Level 6 (utility), Liandry's Torment",
+          "enemy": "Youmuu's Ghostblade, Level 6 (ult burst)"
+        },
+        "early_game": "Play defensively. Naafiri has strong early all-in potential.",
+        "mid_game": "Use ult for picks on isolated targets. Space in fights.",
+        "late_game": "Both scale. Teamfight positioning matters most.",
+        "win_condition": "Survive early, make picks with ult. Win through teamfight coordination.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Even — both scale at similar rates",
+        "jungle_gankable": false,
+        "positioning": "Keep distance with E poke. Never walk into her all-in range."
+      },
+      "Aurelion Sol": {
+        "difficulty": "hard",
+        "who_wins_early": "Aurelion Sol",
+        "trading_pattern": "Aurelion Sol has superior waveclear and roam threat. Farm safely and respect his scaling.",
+        "ability_to_dodge": "Aurelion Sol W (Celestial Expansion) — stay at range or back off.",
+        "power_spikes": {
+          "you": "Level 6 (utility), Liandry's Torment",
+          "enemy": "Level 6 (roams), Liandry's Torment"
+        },
+        "early_game": "Farm defensively. Aurelion Sol pushes faster and roams better.",
+        "mid_game": "Use ult for picks. Aurelion Sol controls mid lane better.",
+        "late_game": "He outscales in teamfights. Win through picks and objective control.",
+        "win_condition": "Make picks with ult before he roams. Win through macro pressure.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Aurelion Sol outscales — his teamfight control and roam impact is superior",
+        "jungle_gankable": true,
+        "positioning": "Keep distance with E poke. Use ult for picks on roamers."
+      },
+      "Vel'Koz": {
+        "difficulty": "hard",
+        "who_wins_early": "Vel'Koz",
+        "trading_pattern": "Vel'Koz outranges you. Space carefully and farm defensively.",
+        "ability_to_dodge": "Vel'Koz E (Tractor Beam) — dodge by stepping away or to the side.",
+        "power_spikes": {
+          "you": "Level 6 (utility), Liandry's Torment",
+          "enemy": "Luden's Tempest, Level 6 (sustained poke)"
+        },
+        "early_game": "Farm defensively. His range advantage is overwhelming.",
+        "mid_game": "Both scale into poke wars. Space properly.",
+        "late_game": "He outscales in sustained damage. Use ult for picks.",
+        "win_condition": "Make picks with ult. Win through teamfight coordination.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Vel'Koz outscales — his sustained poke is overwhelming",
+        "jungle_gankable": false,
+        "positioning": "Keep maximum distance. Use minions for cover."
+      },
+      "Mel": {
+        "difficulty": "hard",
+        "who_wins_early": "Mel",
+        "trading_pattern": "Mel reflects projectile damage. Use E carefully and respect her reflect defense.",
+        "ability_to_dodge": "Mel E (Reflect) — your E reflects back, so be strategic with casts.",
+        "power_spikes": {
+          "you": "Level 6 (utility), Liandry's Torment",
+          "enemy": "Luden's Tempest, Level 6 (enhanced reflect)"
+        },
+        "early_game": "Farm defensively. Mel's reflect punishes your poke.",
+        "mid_game": "Use ult selectively to avoid wasting damage. Space properly.",
+        "late_game": "She outscales with her reflect defense. Make picks before teamfights.",
+        "win_condition": "Make picks with ult before teamfights. Win through macro pressure.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Mel slightly favored — her reflect becomes more valuable late",
+        "jungle_gankable": true,
+        "positioning": "Use E cautiously to avoid reflect penalty. Keep distance."
+      },
+      "Fizz": {
+        "difficulty": "hard",
+        "who_wins_early": "Fizz",
+        "trading_pattern": "Fizz is melee with burst. Keep maximum distance and farm safely.",
+        "ability_to_dodge": "Fizz R (Chum the Waters) — move perpendicular or away from shark.",
+        "power_spikes": {
+          "you": "Level 6 (utility), Liandry's Torment",
+          "enemy": "Protobelt, Level 6 (all-in burst)"
+        },
+        "early_game": "Play very defensively. Fizz has strong all-in potential.",
+        "mid_game": "Use ult to protect yourself from his engages. Space in fights.",
+        "late_game": "Both scale. Teamfight positioning determines winner.",
+        "win_condition": "Survive early, make picks with ult. Win through teamfight coordination.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Even — both scale at similar rates",
+        "jungle_gankable": true,
+        "positioning": "Keep maximum distance. Use ult defensively against his engage."
+      },
+      "Wukong": {
+        "difficulty": "hard",
+        "who_wins_early": "Wukong",
+        "trading_pattern": "Wukong has early mobility and tankiness. Keep distance and farm safely.",
+        "ability_to_dodge": "Wukong E (Nimble Strike) — step back when he dashes toward you.",
+        "power_spikes": {
+          "you": "Level 6 (utility), Liandry's Torment",
+          "enemy": "Trinity Force, Level 6 (engage)"
+        },
+        "early_game": "Play defensively. Wukong has strong early skirmish potential.",
+        "mid_game": "Use ult to protect from his engage. Space properly.",
+        "late_game": "Both scale. Teamfight positioning matters most.",
+        "win_condition": "Survive early, make picks with ult. Win through teamfight coordination.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Even — both scale at similar rates",
+        "jungle_gankable": true,
+        "positioning": "Keep distance with E poke. Use ult defensively."
+      },
+      "Vladimir": {
+        "difficulty": "hard",
+        "who_wins_early": "Vladimir",
+        "trading_pattern": "Vladimir is weak early but sustains well. Respect his scaling and farm safely.",
+        "ability_to_dodge": "Vladimir Q (Transfusion) — stay out of his short range.",
+        "power_spikes": {
+          "you": "Level 6 (utility), Liandry's Torment",
+          "enemy": "Protobelt, Level 6 (teamfight)"
+        },
+        "early_game": "You have early advantage with poke. Don't let him get fed.",
+        "mid_game": "Both scale into teamfights. Make picks when possible.",
+        "late_game": "He outscales in sustained teamfights. Use ult for picks.",
+        "win_condition": "Get an early advantage, make picks with ult. Finish before he scales.",
+        "counter_items": ["Mercury's Treads", "Morellonomicon"],
+        "scaling": "Vladimir outscales — his teamfight sustain is overwhelming",
+        "jungle_gankable": true,
+        "positioning": "Use E to poke. Keep distance from his Q range."
+      },
+      "Nasus": {
+        "difficulty": "medium",
+        "who_wins_early": "Lux",
+        "trading_pattern": "Nasus stacks damage. Abuse him early with E poke before he scales.",
+        "ability_to_dodge": "Nasus W (Wither) — dodge by moving away or stepping back.",
+        "power_spikes": {
+          "you": "Levels 1-6 (early poke), Liandry's Torment",
+          "enemy": "Liandry's Torment stacks, Level 6 (damage)"
+        },
+        "early_game": "Abuse him with constant E poke. Prevent his scaling.",
+        "mid_game": "Continue poking. Make picks before he becomes unkillable.",
+        "late_game": "He outscales significantly. Finish before his stacks make him unkillable.",
+        "win_condition": "Get an early lead through poke. Finish before Nasus scales.",
+        "counter_items": ["Mercury's Treads", "Morellonomicon"],
+        "scaling": "Nasus significantly outscales — you need a major early lead",
+        "jungle_gankable": true,
+        "positioning": "Use E to constantly poke from range. Never walk into his all-in."
+      },
+      "Smolder": {
+        "difficulty": "easy",
+        "who_wins_early": "Lux",
+        "trading_pattern": "Smolder is weak early. Use E to farm and poke freely.",
+        "ability_to_dodge": "Smolder Q (Breath) — dodge by stepping back.",
+        "power_spikes": {
+          "you": "Levels 1-6 (early advantage), Liandry's Torment",
+          "enemy": "Liandry's Torment, Level 13 (upgraded Q)"
+        },
+        "early_game": "Completely dominate with E poke. Farm freely.",
+        "mid_game": "Maintain pressure. Don't let him scale.",
+        "late_game": "He outscales significantly. Finish before he gets 2-3 items.",
+        "win_condition": "Get an early lead and snowball. Finish before Smolder scales.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Smolder significantly outscales — you need a major lead",
+        "jungle_gankable": false,
+        "positioning": "Use E to constantly poke. Push him off farm."
+      },
+      "Azir": {
+        "difficulty": "easy",
+        "who_wins_early": "Lux",
+        "trading_pattern": "Azir is weak early. Use E to farm and poke freely.",
+        "ability_to_dodge": "Azir soldiers have limited early range; spam E into them.",
+        "power_spikes": {
+          "you": "Levels 1-6 (early advantage), Liandry's Torment",
+          "enemy": "Liandry's Torment, Level 6 (soldier spam)"
+        },
+        "early_game": "Dominate early with E poke. Azir struggles early.",
+        "mid_game": "Maintain pressure. Don't let him free-farm.",
+        "late_game": "He outscales in teamfights. Finish before his control becomes oppressive.",
+        "win_condition": "Get an early lead and snowball. Finish before Azir scales.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Azir outscales — his teamfight control improves late",
+        "jungle_gankable": false,
+        "positioning": "Use E to constantly poke. Maintain mid lane control."
+      },
+      "Yone": {
+        "difficulty": "easy",
+        "who_wins_early": "Lux",
+        "trading_pattern": "Yone is weak early to ranged poke. Use E to spam him out.",
+        "ability_to_dodge": "Yone E (Soul Unbound) — abuse the cooldown when he returns.",
+        "power_spikes": {
+          "you": "Levels 1-6 (early poke), Liandry's Torment",
+          "enemy": "Shieldbow, Level 6 (engage potential)"
+        },
+        "early_game": "Dominate with E poke. Yone is weak to ranged harassment.",
+        "mid_game": "Maintain pressure. Make picks with ult.",
+        "late_game": "He outscales with itemization. Finish before he gets tanky.",
+        "win_condition": "Get an early lead through poke. Finish before Yone scales.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Yone outscales — his itemization and scaling are superior",
+        "jungle_gankable": true,
+        "positioning": "Use E to constantly poke from range. Maintain distance."
+      },
+      "Galio": {
+        "difficulty": "easy",
+        "who_wins_early": "Lux",
+        "trading_pattern": "Galio is melee. Use E to farm and poke from range freely.",
+        "ability_to_dodge": "Galio W (Shield) — respect his tankiness but spam E.",
+        "power_spikes": {
+          "you": "Levels 1-6 (early poke), Liandry's Torment",
+          "enemy": "Abyssal Mask, Level 6 (engage ult)"
+        },
+        "early_game": "Dominate with E poke. Galio is weak to ranged harassment.",
+        "mid_game": "Maintain pressure. Use ult for picks.",
+        "late_game": "He becomes tanky. Finish before his tankiness becomes oppressive.",
+        "win_condition": "Get an early lead through poke. Finish before Galio scales.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Galio outscales — his tankiness increases late",
+        "jungle_gankable": true,
+        "positioning": "Use E to constantly poke from range. Maintain distance."
+      },
+      "Taliyah": {
+        "difficulty": "medium",
+        "who_wins_early": "Taliyah",
+        "trading_pattern": "Taliyah has strong waveclear. Farm when her abilities are down.",
+        "ability_to_dodge": "Taliyah Q (Threaded Volley) — dodge by moving perpendicular.",
+        "power_spikes": {
+          "you": "Level 6 (utility), Liandry's Torment",
+          "enemy": "Liandry's Torment, Level 6 (roam)"
+        },
+        "early_game": "Taliyah pushes faster. Farm defensively.",
+        "mid_game": "Both have roam potential. Make picks with ult.",
+        "late_game": "Both scale. Teamfight positioning determines winner.",
+        "win_condition": "Make picks with ult. Win through objective control.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Taliyah slightly favored — her roaming is stronger",
+        "jungle_gankable": true,
+        "positioning": "Farm safely. Use E poke when safe."
+      },
+      "Cassiopeia": {
+        "difficulty": "medium",
+        "who_wins_early": "Cassiopeia",
+        "trading_pattern": "Cassiopeia has poke and poison. Trade when her abilities are down.",
+        "ability_to_dodge": "Cassiopeia W (Miasma) — walk around it or wait for dissipation.",
+        "power_spikes": {
+          "you": "Level 6 (utility), Liandry's Torment",
+          "enemy": "Liandry's Torment, Level 6 (sustained damage)"
+        },
+        "early_game": "Cassio has early poke advantage. Farm defensively.",
+        "mid_game": "Both scale into poke wars. Make picks with ult.",
+        "late_game": "She outscales in sustained teamfights. Use ult for picks.",
+        "win_condition": "Make picks with ult. Win through objective control.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Cassiopeia outscales — her sustained damage is overwhelming",
+        "jungle_gankable": true,
+        "positioning": "Keep distance and use E poke. Avoid her poison zones."
+      },
+      "Ryze": {
+        "difficulty": "medium",
+        "who_wins_early": "Ryze",
+        "trading_pattern": "Ryze has early poke. Trade when his abilities are down.",
+        "ability_to_dodge": "Ryze Q (Overload) — dodge by stepping back or to the side.",
+        "power_spikes": {
+          "you": "Level 6 (utility), Liandry's Torment",
+          "enemy": "Liandry's Torment, Level 6 (sustained damage)"
+        },
+        "early_game": "Ryze has early poke. Farm defensively.",
+        "mid_game": "Both scale. Make picks with ult.",
+        "late_game": "He outscales in sustained teamfights. Use ult for picks.",
+        "win_condition": "Make picks with ult. Finish before he scales.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Ryze outscales — his teamfight control improves late",
+        "jungle_gankable": true,
+        "positioning": "Keep distance with E poke. Use ult for picks."
+      },
+      "Seraphine": {
+        "difficulty": "medium",
+        "who_wins_early": "Even",
+        "trading_pattern": "Seraphine has similar poke and utility. Trade when her abilities are down.",
+        "ability_to_dodge": "Seraphine E (Surround Sound) — dodge by stepping away from zone.",
+        "power_spikes": {
+          "you": "Level 6 (utility), Liandry's Torment",
+          "enemy": "Luden's Tempest, Level 6 (enhanced poke)"
+        },
+        "early_game": "Mirror her playstyle. Both have similar early game.",
+        "mid_game": "Both scale. Make picks with ult.",
+        "late_game": "Both scale similarly. Teamfight positioning determines winner.",
+        "win_condition": "Make picks with ult. Win through teamfight coordination.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Seraphine slightly favored — her teamfight utility is marginally better",
+        "jungle_gankable": true,
+        "positioning": "Use E poke to maintain distance. Avoid her poke zones."
+      },
+      "Orianna": {
+        "difficulty": "medium",
+        "who_wins_early": "Even",
+        "trading_pattern": "Orianna has similar poke and teamfight. Trade when her ball is far.",
+        "ability_to_dodge": "Orianna Q (Command: Attack) — dodge by stepping back.",
+        "power_spikes": {
+          "you": "Level 6 (utility), Liandry's Torment",
+          "enemy": "Archangel's Scepter, Level 6 (teamfight)"
+        },
+        "early_game": "Mirror her playstyle. Both have similar early game.",
+        "mid_game": "Both scale. Make picks with ult.",
+        "late_game": "She outscales slightly in teamfights. Use ult for picks.",
+        "win_condition": "Make picks with ult. Win through objective control.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Orianna slightly favored — her teamfight control is superior",
+        "jungle_gankable": true,
+        "positioning": "Use E poke to maintain distance. Keep distance from her ball."
+      },
+      "Zed": {
+        "difficulty": "hard",
+        "who_wins_early": "Zed",
+        "trading_pattern": "Zed has mobility and burst damage. Keep distance and poke with E.",
+        "ability_to_dodge": "Zed W (Living Shadow) — back off when he clones to close range.",
+        "power_spikes": {
+          "you": "Level 6 (utility), Liandry's Torment",
+          "enemy": "Youmuu's Ghostblade, Level 6 (all-in burst)"
+        },
+        "early_game": "Play defensively. Zed has strong early all-in.",
+        "mid_game": "Use ult for picks and poke with E. Space from his shadows.",
+        "late_game": "Both scale. Teamfight positioning determines winner.",
+        "win_condition": "Make picks with ult before he gets leads. Farm safely early.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Even — both scale at similar rates",
+        "jungle_gankable": true,
+        "positioning": "Keep maximum distance. Never walk into his shadow range."
+      },
+      "Diana": {
+        "difficulty": "hard",
+        "who_wins_early": "Diana",
+        "trading_pattern": "Diana is melee with all-in potential. Keep distance and farm safely.",
+        "ability_to_dodge": "Diana Q (Crescent Strike) — dodge by stepping to the side.",
+        "power_spikes": {
+          "you": "Level 6 (utility), Liandry's Torment",
+          "enemy": "Protobelt, Level 6 (engage)"
+        },
+        "early_game": "Play defensively. Diana has strong all-in potential.",
+        "mid_game": "Use ult for picks on isolated targets. Space in teamfights.",
+        "late_game": "Both scale. Teamfight positioning matters most.",
+        "win_condition": "Survive early, make picks with ult. Win through teamfight coordination.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Even — both scale at similar rates",
+        "jungle_gankable": true,
+        "positioning": "Keep distance with E poke. Use ult defensively."
+      },
+      "Syndra": {
+        "difficulty": "medium",
+        "who_wins_early": "Syndra",
+        "trading_pattern": "Syndra has poke and CC. Trade when her abilities are down.",
+        "ability_to_dodge": "Syndra E (Scatter the Weak) — dodge by moving away.",
+        "power_spikes": {
+          "you": "Level 6 (utility), Liandry's Torment",
+          "enemy": "Luden's Tempest, Level 6 (ult burst)"
+        },
+        "early_game": "Play defensively. Syndra has strong early poke.",
+        "mid_game": "Both scale into poke wars. Make picks with ult.",
+        "late_game": "She outscales slightly in burst potential. Use ult for picks.",
+        "win_condition": "Make picks with ult. Win through objective control.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Syndra slightly favored — her spike potential is higher",
+        "jungle_gankable": true,
+        "positioning": "Keep distance with E poke. Avoid her orb zones."
+      },
+      "LeBlanc": {
+        "difficulty": "hard",
+        "who_wins_early": "LeBlanc",
+        "trading_pattern": "LeBlanc has burst and mobility. Keep distance and farm safely.",
+        "ability_to_dodge": "LeBlanc E (Ethereal Chains) — dodge by moving away or to the side.",
+        "power_spikes": {
+          "you": "Level 6 (utility), Liandry's Torment",
+          "enemy": "Luden's Tempest, Level 6 (burst combo)"
+        },
+        "early_game": "Play very defensively. LeBlanc has superior burst.",
+        "mid_game": "Use ult to protect from her engage. Space in teamfights.",
+        "late_game": "Both scale. Teamfight positioning determines winner.",
+        "win_condition": "Survive early, make picks with ult. Win through teamfight coordination.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Even — both scale at similar rates",
+        "jungle_gankable": true,
+        "positioning": "Keep maximum distance. Never walk into her combo range."
+      }
+    }
+  }
+}

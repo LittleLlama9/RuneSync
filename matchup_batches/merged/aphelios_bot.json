@@ -1,0 +1,438 @@
+{
+  "Aphelios": {
+    "bot": {
+      "Ashe": {
+        "difficulty": "even",
+        "who_wins_early": "even",
+        "trading_pattern": "Aphelios can out-trade with Severum but Ashe's slows allow safe distance trading. Look for extended trades when Severum is active.",
+        "ability_to_dodge": "Ashe R (Enchanted Crystal Arrow) — dodge by positioning behind minions or moving unpredictably.",
+        "power_spikes": {
+          "you": "Level 6 with Chakram stacks, First Legendary item (IE or Kraken)",
+          "enemy": "Level 6 (ultimate slow effect), completed RFC"
+        },
+        "early_game": "Trade evenly in short engagements. Avoid getting slowed in the wave as it locks you down for burst.",
+        "mid_game": "Position to avoid her ultimate from river. Use terrain to limit her arrow accuracy.",
+        "late_game": "Kite around her slows, prioritize grouping where her ult has harder time landing on your entire team.",
+        "win_condition": "Scale hard into team fights and out-dps her with proper positioning. Never get caught alone.",
+        "counter_items": ["Quicksilver Sash", "Mercury's Treads"],
+        "scaling": "Even — Both scale at similar rates, positioning determines fights",
+        "jungle_gankable": true,
+        "positioning": "Space away from walls in river to ensure you have room to dodge Ashe's ultimate. Stay mobile with Aphelios' reposition tools."
+      },
+      "Caitlyn": {
+        "difficulty": "hard",
+        "who_wins_early": "Caitlyn",
+        "trading_pattern": "Caitlyn dominate early trades with superior range. Avoid standing in her trap zones and use minion wave for protection.",
+        "ability_to_dodge": "Caitlyn Headshot (auto attacks) — stay behind minions early, never face-check bushes.",
+        "power_spikes": {
+          "you": "Level 6 with access to all weapons, completed Kraken Slayer",
+          "enemy": "Level 2-3 with Headshot stacks, RFC (extended range)"
+        },
+        "early_game": "Play safe and avoid her trap zones. Don't contest early poke. Farm under tower if needed.",
+        "mid_game": "Group with team and leverage numbers. Aphelios scales much harder into mid game.",
+        "late_game": "Use superior damage in team fights to out-dps her range advantage. Stick with teammates.",
+        "win_condition": "Survive laning phase with minimal losses, then scale into late game where you deal more sustained damage.",
+        "counter_items": ["Hexdrinker (early MR)", "Quicksilver Sash"],
+        "scaling": "Aphelios heavily outscales — Caitlyn strong early, Aphelios dominates mid/late",
+        "jungle_gankable": true,
+        "positioning": "Hug the side of the lane away from Caitlyn to minimize trap placement. Space back when she moves forward aggressively."
+      },
+      "Draven": {
+        "difficulty": "skill_matchup",
+        "who_wins_early": "Draven",
+        "trading_pattern": "Draven can out-trade with catchaxe stacks, but Aphelios can kite if you use Infernum. Space carefully around his axe positions.",
+        "ability_to_dodge": "Draven E (Cataclysm) — position near walls so you have room to dodge sideways, never get stuck against tower.",
+        "power_spikes": {
+          "you": "Level 5 with Chakram slow, Kraken Slayer completed",
+          "enemy": "Level 1-3 with stacked catchaxes, completed Duskblade"
+        },
+        "early_game": "Focus on not feeding his axes. Use minion positioning to avoid his free gold generation. Play for scaling.",
+        "mid_game": "Group with team and use range advantage to kite his engages. Infernum spread helps against supports too.",
+        "late_game": "Proper positioning ensures you out-dps him massively. Never let him get close enough for true damage burst.",
+        "win_condition": "Avoid his all-in threats early, then abuse superior late-game scaling and range in team fights.",
+        "counter_items": ["Quicksilver Sash", "Mercury's Treads"],
+        "scaling": "Aphelios heavily outscales once Draven loses gold efficiency",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and avoid center lane where his E can trap you. Position away from walls during his engagement attempts."
+      },
+      "Ezreal": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Ezreal has poke but Aphelios can out-trade in extended fights. Use Severum sustain and Chakram root when he mispositions.",
+        "ability_to_dodge": "Ezreal Q (Mystic Shot) — never bunch up in the wave, stay spread to minimize poke damage.",
+        "power_spikes": {
+          "you": "Level 6 with Chakram, Kraken Slayer completed",
+          "enemy": "Level 3-4 with Sheen spike, muramana completed"
+        },
+        "early_game": "Trade evenly and use sustain from Severum to outlast his poke. Don't get caught out of position near walls.",
+        "mid_game": "Group with team and leverage superior sustained damage. Ezreal will scale but so will you.",
+        "late_game": "In team fights, position where you can freely deal damage while using cooldowns to peel threats.",
+        "win_condition": "Scale with Ezreal but outposition him in team fights. Make proper use of each weapon rotation.",
+        "counter_items": ["Bloodthirster", "Kaenic Rookern"],
+        "scaling": "Even — Both scale similarly, skill and positioning matter more",
+        "jungle_gankable": true,
+        "positioning": "Spread horizontally in the wave to reduce his Q poke efficiency. Use terrain to limit his kite ability."
+      },
+      "Jhin": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Jhin's every-fourth-shot damage is high but slow attack speed works against extended trades. Look for Severum or Chakram trades.",
+        "ability_to_dodge": "Jhin E (Captive Audience trap) — avoid walking into his trap zones, especially in river control situations.",
+        "power_spikes": {
+          "you": "Level 6 with all weapons available, Kraken Slayer completed",
+          "enemy": "Level 6 with ultimate critical damage, completed Collector"
+        },
+        "early_game": "Trade when his attack animations are long. Focus on safe farming and avoiding his trap zones.",
+        "mid_game": "Position to engage on his longer attack animations. Group and use numbers advantage.",
+        "late_game": "In team fights, avoid his ultimate angles by staying behind cover. Persistent damage out-values his burst.",
+        "win_condition": "Survive early laning, scale into team fights where your sustained dps exceeds his burst potential.",
+        "counter_items": ["Quicksilver Sash", "Mercury's Treads"],
+        "scaling": "Aphelios slightly outscales — sustained dps beats burst setup",
+        "jungle_gankable": true,
+        "positioning": "Position to avoid his R ultimate angles by staying near cover or teammates. Never group closely for his W."
+      },
+      "Jinx": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Jinx has stronger early game with Pow-Pow but Aphelios sustain and poke with Chakram keeps the lane even.",
+        "ability_to_dodge": "Jinx E (Flame Chompers) — avoid her trap zones and never jump into them without proper setup.",
+        "power_spikes": {
+          "you": "Level 6 with Chakram, Kraken Slayer first item",
+          "enemy": "Level 6 with rocket form, completed IE"
+        },
+        "early_game": "Trade with Chakram poke when she switches to rocket form slow attack. Maintain spacing.",
+        "mid_game": "Group with team and leverage Aphelios' flexibility. Jinx can't duel late game scaling.",
+        "late_game": "In extended team fights, your sustained damage and range flexibility let you kite her and trade favorably.",
+        "win_condition": "Survive laning phase, scale harder, and position well in team fights where range and sustained dps matter.",
+        "counter_items": ["Kaenic Rookern", "Bloodthirster"],
+        "scaling": "Aphelios outscales — sustained dps beats burst potential",
+        "jungle_gankable": true,
+        "positioning": "Stay spread to avoid her W and E. Never fight in tight chokepoints where she can trap your entire team."
+      },
+      "Kai'Sa": {
+        "difficulty": "medium",
+        "who_wins_early": "Kai'Sa",
+        "trading_pattern": "Kai'Sa has stronger early trades but Aphelios matches her as weapons unlock. Use Severum to sustain through her poke.",
+        "ability_to_dodge": "Kai'Sa E (Supercharge) — dodge her follow-up trades by moving away from where she lands.",
+        "power_spikes": {
+          "you": "Level 5-6 with access to all weapons, Kraken Slayer completed",
+          "enemy": "Level 3-4 with Manamune spike, evolved E"
+        },
+        "early_game": "Play safe and sustain with Severum. Let her push and look for jungler ganks on overextension.",
+        "mid_game": "Aphelios scaling equals Kai'Sa's scaling at this point. Group and leverage team fights.",
+        "late_game": "With proper positioning, you out-dps her in extended fights. Use Chakram and Infernum to control space.",
+        "win_condition": "Survive early lane poke, reach mid game on par, then scale with flexibility of weapon switching.",
+        "counter_items": ["Kaenic Rookern", "Bloodthirster"],
+        "scaling": "Even — Both scale similarly after 2-3 items",
+        "jungle_gankable": true,
+        "positioning": "Space horizontally in lane to make her E repositioning less valuable. Group as 5 in mid/late for team fight control."
+      },
+      "Kalista": {
+        "difficulty": "hard",
+        "who_wins_early": "Kalista",
+        "trading_pattern": "Kalista dominates early trades with rapid attacks and hop mechanics. Aphelios wins extended fights with sustain.",
+        "ability_to_dodge": "Kalista W (Sentinel) — avoid grouping with teammates, deny her W information by spreading.",
+        "power_spikes": {
+          "you": "Level 6 with Chakram root, Kraken Slayer completed",
+          "enemy": "Level 2-3 with hop stacking, completed Spear"
+        },
+        "early_game": "Play extremely safe and focus on farming. Don't engage her hops as she wins those trades.",
+        "mid_game": "Group with team and leverage numbers. Kalista struggles without early lead.",
+        "late_game": "Massive advantage to Aphelios. You can kite and out-dps her, especially with Infernum and Chakram.",
+        "win_condition": "Survive laning without falling behind, then outscale massively where she has no late game damage.",
+        "counter_items": ["Quicksilver Sash", "Kaenic Rookern"],
+        "scaling": "Aphelios heavily outscales — Kalista is an early game champion",
+        "jungle_gankable": false,
+        "positioning": "Stay spread to deny her W value. Keep maximum distance during fights to make her hops less effective."
+      },
+      "Kog'Maw": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Kog'Maw has poke and armor shred but Aphelios trades evenly with Severum sustain and Chakram utility.",
+        "ability_to_dodge": "Kog'Maw Q (Bio-Arcane Barrage) — avoid getting marked, stay spread to reduce shred efficiency.",
+        "power_spikes": {
+          "you": "Level 6 with Chakram slow, Kraken Slayer completed",
+          "enemy": "Level 6 with true damage scaling, completed Nashor's Tooth"
+        },
+        "early_game": "Trade evenly and use positioning to minimize his Q shred. Focus on farming safely.",
+        "mid_game": "Group with team, your weapons give flexibility to poke and engage safely.",
+        "late_game": "Kog'Maw slightly outscales in extended fights due to true damage, but you can kite and position better.",
+        "win_condition": "Scale evenly and position better in late game fights. Use Chakram and Infernum to maintain kiting distance.",
+        "counter_items": ["Bloodthirster", "Kaenic Rookern"],
+        "scaling": "Kog'Maw slightly favored — true damage and range armor shred scale well",
+        "jungle_gankable": true,
+        "positioning": "Stay spread and mobile to avoid his Q shred stacking. Position at max range where his true damage is less impactful."
+      },
+      "Lucian": {
+        "difficulty": "medium",
+        "who_wins_early": "Lucian",
+        "trading_pattern": "Lucian strong early with duelist stats but Aphelios sustain matches. Use Severum to heal through his poke.",
+        "ability_to_dodge": "Lucian E (Relentless Pursuit) — position away from walls so you have room to kite his reposition.",
+        "power_spikes": {
+          "you": "Level 6 with all weapons, Kraken Slayer completed",
+          "enemy": "Level 2-3 with double attacks, early crit mythic"
+        },
+        "early_game": "Play safe and sustain with Severum. Let Lucian push if he wants to, focus on farming.",
+        "mid_game": "Aphelios weapons give flexibility to trade and scale. Group and let your utility shine.",
+        "late_game": "Lucian falls off hard. You out-dps and out-range him with proper positioning.",
+        "win_condition": "Survive early lane, scale with flexibility, then dominate late game where Lucian has no impact.",
+        "counter_items": ["Quicksilver Sash", "Mercury's Treads"],
+        "scaling": "Aphelios heavily outscales — Lucian is early/mid game champion",
+        "jungle_gankable": true,
+        "positioning": "Keep distance and use terrain to limit his E repositioning. Never let him get inside you."
+      },
+      "Miss Fortune": {
+        "difficulty": "hard",
+        "who_wins_early": "Miss Fortune",
+        "trading_pattern": "Miss Fortune out-trades with Q bounces and E slow. Aphelios' sustain mitigates some damage but she dictates early trades.",
+        "ability_to_dodge": "Miss Fortune R (Bullet Time) — dodge by moving perpendicular to ultimate direction, never stand still.",
+        "power_spikes": {
+          "you": "Level 6 with Chakram, Kraken Slayer completed",
+          "enemy": "Level 1-2 with Q bounce harass, early crit items"
+        },
+        "early_game": "Play extremely safe. Her early poke is oppressive. Focus on surviving and farming under tower.",
+        "mid_game": "Avoid her ultimate by positioning behind cover. Group and use team to block her engage.",
+        "late_game": "Aphelios scales better but MF's ultimate is always a threat. Proper positioning around cover wins fights.",
+        "win_condition": "Survive oppressive early game, scale into mid-game strength, position perfectly to avoid ultimate in fights.",
+        "counter_items": ["Quicksilver Sash", "Mercury's Treads"],
+        "scaling": "Aphelios scales better late game but Miss Fortune's early aggression can snowball",
+        "jungle_gankable": false,
+        "positioning": "Hug cover to block Miss Fortune's ultimate. Never stand in open during team fights where she can channel freely."
+      },
+      "Nilah": {
+        "difficulty": "hard",
+        "who_wins_early": "Nilah",
+        "trading_pattern": "Nilah wins early extended trades with healing and burst. Aphelios must respect her all-in potential and keep distance.",
+        "ability_to_dodge": "Nilah E (Splitter) — dodge by moving perpendicular to her dash, position away from walls where she can trap you.",
+        "power_spikes": {
+          "you": "Level 6 with full weapon rotation, Kraken Slayer completed",
+          "enemy": "Level 2-3 with healing, completed Sunfire/Trinity"
+        },
+        "early_game": "Play extremely safe. Don't let her get near you. Use Chakram to maintain distance.",
+        "mid_game": "Group with team to reduce her effectiveness. Aphelios' flexibility helps against her aggression.",
+        "late_game": "You out-dps her in group fights but never get isolated. Nilah punishes single targets.",
+        "win_condition": "Survive her early aggression, never get caught alone, leverage team in group fights.",
+        "counter_items": ["Quicksilver Sash", "Mercury's Treads"],
+        "scaling": "Even in pure stats but Nilah's early lead can snowball — focus on surviving",
+        "jungle_gankable": false,
+        "positioning": "Stay near teammates at all times. Never push forward alone. Use minion wave as spacing tool against her."
+      },
+      "Samira": {
+        "difficulty": "hard",
+        "who_wins_early": "Samira",
+        "trading_pattern": "Samira out-trades heavily with style-stacking burst. Aphelios must kite and respect her all-in damage.",
+        "ability_to_dodge": "Samira R (Inferno Trigger) — dodge by moving out of her attack range entirely, maintain distance.",
+        "power_spikes": {
+          "you": "Level 6 with Chakram utility, Kraken Slayer completed",
+          "enemy": "Level 2-3 with style stacking, completed Collector"
+        },
+        "early_game": "Play safe and don't engage her trades. Let her push if she wants, focus on farming.",
+        "mid_game": "Group with team. Samira struggles in group fights where she can't all-in single targets.",
+        "late_game": "Aphelios scales better. You out-dps her in proper team fights with positioning.",
+        "win_condition": "Survive her oppressive early game, scale without dying, execute proper spacing in team fights.",
+        "counter_items": ["Quicksilver Sash", "Mercury's Treads"],
+        "scaling": "Aphelios outscales — Samira is early/mid burst champion",
+        "jungle_gankable": false,
+        "positioning": "Keep maximum distance from Samira at all times. Use terrain to limit her engagement angles."
+      },
+      "Sivir": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Sivir trades with extended range but Aphelios matches with Chakram poke. Use sustain to outlast her harassment.",
+        "ability_to_dodge": "Sivir E (Spell Shield) — save burst combos for after her shield is down. Use auto-attacks to bait blocks.",
+        "power_spikes": {
+          "you": "Level 6 with access to all weapons, Kraken Slayer completed",
+          "enemy": "Level 6 with ultimate engage, completed RFC"
+        },
+        "early_game": "Trade with Chakram poke and Severum sustain. Don't overcommit to kills she won't take.",
+        "mid_game": "Group and leverage superior team fight potential. Aphelios' flexibility beats Sivir's range.",
+        "late_game": "You out-dps her significantly. Proper positioning ensures you win extended fights.",
+        "win_condition": "Scale evenly through laning, group as 5, leverage superior sustained damage in team fights.",
+        "counter_items": ["Bloodthirster", "Kaenic Rookern"],
+        "scaling": "Aphelios outscales — more sustained dps in late game",
+        "jungle_gankable": true,
+        "positioning": "Space back against her range advantage. Use minion wave for protection during early laning."
+      },
+      "Tristana": {
+        "difficulty": "medium",
+        "who_wins_early": "Tristana",
+        "trading_pattern": "Tristana all-ins at level 2-3 with E bomb. Aphelios' sustain and range keep distance safe, matches her scaling.",
+        "ability_to_dodge": "Tristana E (Explosive Charge) — position where the bomb range can't stack properly, use range to kite.",
+        "power_spikes": {
+          "you": "Level 5-6 with Chakram root, Kraken Slayer completed",
+          "enemy": "Level 2-3 with E bombs, early attack speed"
+        },
+        "early_game": "Space back from her all-in range. Don't let her stack E charges. Farm safely under tower if needed.",
+        "mid_game": "Aphelios scaling equals or exceeds Tristana's. Group and use team to control fights.",
+        "late_game": "You out-range and out-dps her in proper team fights. Position to avoid her all-ins.",
+        "win_condition": "Survive her early all-in attempts, scale with team, leverage superior positioning in late fights.",
+        "counter_items": ["Kaenic Rookern", "Bloodthirster"],
+        "scaling": "Aphelios outscales — better sustained dps and flexibility",
+        "jungle_gankable": true,
+        "positioning": "Keep distance from Tristana to prevent E stacking. Never let her get inside your effective range."
+      },
+      "Twitch": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Twitch weak early but scales fast. Trade evenly and use Severum sustain to match his poke.",
+        "ability_to_dodge": "Twitch R (Spray and Pray) — dodge by moving perpendicular, use terrain to block bullets.",
+        "power_spikes": {
+          "you": "Level 6 with all weapons, Kraken Slayer completed",
+          "enemy": "Level 6 with ultimate spray, completed IE or Runaans"
+        },
+        "early_game": "Aphelios has advantage early. Use it to apply pressure. Don't let him free scale.",
+        "mid_game": "Group with team. Twitch's range in teamfights is threatening but you can kite.",
+        "late_game": "Twitch slightly outscales with ultimate range, but proper positioning lets you control fights.",
+        "win_condition": "Pressure early and mid game to prevent Twitch scaling. Group and position to avoid his ultimate spray.",
+        "counter_items": ["Quicksilver Sash", "Mercury's Treads"],
+        "scaling": "Twitch slightly favored late — ultimate range and attack speed scale well",
+        "jungle_gankable": true,
+        "positioning": "Dodge his R spray by moving perpendicular. Use terrain to block his attacks in team fights."
+      },
+      "Varus": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Varus has poke but Aphelios' sustain and Chakram utility keep trades even. Focus on avoiding stun.",
+        "ability_to_dodge": "Varus E (Hail of Arrows) — stay spread to reduce damage, never group during his barrage.",
+        "power_spikes": {
+          "you": "Level 6 with Chakram, Kraken Slayer completed",
+          "enemy": "Level 6 with true damage scaling, completed Manamune"
+        },
+        "early_game": "Trade evenly and use Severum sustain. Avoid getting marked for his burst.",
+        "mid_game": "Group with team and leverage superior flexibility. Aphelios' weapons give trading advantage.",
+        "late_game": "Varus' true damage is threatening but you scale similarly. Proper positioning determines fights.",
+        "win_condition": "Scale evenly and position well. Avoid his stun combos and out-dps him in group fights.",
+        "counter_items": ["Bloodthirster", "Kaenic Rookern"],
+        "scaling": "Even — Both scale similarly, positioning matters more",
+        "jungle_gankable": true,
+        "positioning": "Stay spread to avoid his E barrage. Position behind minions to reduce stun vulnerability."
+      },
+      "Vayne": {
+        "difficulty": "easy",
+        "who_wins_early": "Aphelios",
+        "trading_pattern": "Aphelios out-ranges and out-trades Vayne early. Use poke with Chakram to keep her away.",
+        "ability_to_dodge": "Vayne E (Condemn) — position away from walls where she can trap you.",
+        "power_spikes": {
+          "you": "Level 1-3 with range advantage, Kraken Slayer completed",
+          "enemy": "Level 6 with true damage, completed Sheen/Trinity"
+        },
+        "early_game": "Completely dominate. Don't let her get free farm. Push and zone with range.",
+        "mid_game": "Vayne starts scaling but she's still weak. Continue farming lead and group when beneficial.",
+        "late_game": "Vayne's true damage is a problem but you scale hard too. Proper positioning prevents her dueling.",
+        "win_condition": "Leverage early range advantage to build lead, then scale and avoid her single-target true damage in fights.",
+        "counter_items": ["Bloodthirster", "Kaenic Rookern"],
+        "scaling": "Aphelios wins early, Vayne catches up late, skill and positioning matter",
+        "jungle_gankable": true,
+        "positioning": "Stay away from walls to prevent her Condemn traps. Use range to kite and never let her duel you."
+      },
+      "Xayah": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Xayah trades with feather spread but Aphelios' Chakram poke and sustain keep lane even.",
+        "ability_to_dodge": "Xayah R (Featherstorm) — dodge by moving out of her animation range, use terrain for cover.",
+        "power_spikes": {
+          "you": "Level 6 with Chakram, Kraken Slayer completed",
+          "enemy": "Level 6 with ultimate evasion, completed IE"
+        },
+        "early_game": "Trade with Chakram poke. She can't escape your range easily.",
+        "mid_game": "Group with team. Aphelios' flexibility gives advantage over Xayah's pattern.",
+        "late_game": "Both scale similarly but Aphelios' positioning flexibility wins fights.",
+        "win_condition": "Scale evenly and position well. Use Chakram and Infernum to control space in fights.",
+        "counter_items": ["Bloodthirster", "Kaenic Rookern"],
+        "scaling": "Even — Both scale similarly, positioning and team coordination matter",
+        "jungle_gankable": true,
+        "positioning": "Stay spread to minimize her feather damage. Position to avoid her R by using terrain or minions."
+      },
+      "Zeri": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Zeri has early engage but Aphelios' range and sustain keep distance. Use Chakram to kite her.",
+        "ability_to_dodge": "Zeri E (Sparkpack) — dodge by moving perpendicular to her dash direction.",
+        "power_spikes": {
+          "you": "Level 6 with full weapons, Kraken Slayer completed",
+          "enemy": "Level 2-3 with engage, early Sunfire"
+        },
+        "early_game": "Space back and use Chakram poke to prevent her all-ins. Don't let her close gap.",
+        "mid_game": "Group with team to reduce her effectiveness. Aphelios' group fighting strength exceeds Zeri's.",
+        "late_game": "Zeri falls off hard. You out-dps and out-range her significantly.",
+        "win_condition": "Survive early engages, scale with team, then dominate late game where Zeri has minimal impact.",
+        "counter_items": ["Quicksilver Sash", "Mercury's Treads"],
+        "scaling": "Aphelios heavily outscales — Zeri is early/mid champion",
+        "jungle_gankable": true,
+        "positioning": "Keep maximum distance from Zeri. Use terrain to limit her engagement paths."
+      },
+      "Aphelios": {
+        "difficulty": "skill_matchup",
+        "who_wins_early": "even",
+        "trading_pattern": "Mirror matchup where weapon prioritization matters. Both can sustain or poke equally. Position better.",
+        "ability_to_dodge": "Depends on opponent's weapon — respect Chakram root and Infernum spread.",
+        "power_spikes": {
+          "you": "First completed Legendary item, level 6 with full rotation access",
+          "enemy": "Same as you — scaling is identical"
+        },
+        "early_game": "Trade carefully and manage your weapon cooldowns. Whoever has better rotation wins trades.",
+        "mid_game": "Both scale at identical rates. Team coordination and support matchup determine lane outcome.",
+        "late_game": "Pure skill and positioning. Whoever positions better and times abilities wins fights.",
+        "win_condition": "Master weapon rotations, position better than opponent, and leverage team fights.",
+        "counter_items": ["Bloodthirster", "Kaenic Rookern"],
+        "scaling": "Perfectly even — identical scaling and damage patterns",
+        "jungle_gankable": true,
+        "positioning": "Mirror opponent's spacing. React to their weapon choices with appropriate positioning adjustments."
+      },
+      "Senna": {
+        "difficulty": "hard",
+        "who_wins_early": "Senna",
+        "trading_pattern": "Senna out-ranges and out-trades with poke. Aphelios' sustain helps but her advantage is clear early.",
+        "ability_to_dodge": "Senna Q (Piercing Darkness) — stay spread to reduce consecutive hits.",
+        "power_spikes": {
+          "you": "Level 6 with Chakram utility, Kraken Slayer completed",
+          "enemy": "Level 1-3 with poke, any completed item"
+        },
+        "early_game": "Senna has a significant advantage. Play safe and focus on farming.",
+        "mid_game": "Aphelios starts matching her scaling. Group and leverage team fighting.",
+        "late_game": "Senna outscales you with more range and consistent dps. Position carefully in fights.",
+        "win_condition": "Survive oppressive early game, leverage team fights to prevent her snowballing.",
+        "counter_items": ["Kaenic Rookern", "Bloodthirster"],
+        "scaling": "Senna outscales — longer range and consistent dps advantage",
+        "jungle_gankable": false,
+        "positioning": "Stay spread to reduce her poke efficiency. Group early and often to neutralize her range advantage."
+      },
+      "Seraphine": {
+        "difficulty": "hard",
+        "who_wins_early": "Seraphine",
+        "trading_pattern": "Seraphine out-ranges and pokes safely. Aphelios' sustain mitigates but her advantage is clear.",
+        "ability_to_dodge": "Seraphine E (Surround) — dodge by moving perpendicular, never get caught in choke.",
+        "power_spikes": {
+          "you": "Level 6 with weapons, Kraken Slayer completed",
+          "enemy": "Level 6 with ultimate damage, completed Shard items"
+        },
+        "early_game": "Play safe against her poke and root threat. Farm and survive.",
+        "mid_game": "Aphelios starts matching. Group and use team fighting to your advantage.",
+        "late_game": "Seraphine's ultimate is always a threat. Position behind cover and leverage your dps in grouped fights.",
+        "win_condition": "Survive early, scale with team, position perfectly to avoid her root ultimates.",
+        "counter_items": ["Kaenic Rookern", "Bloodthirster"],
+        "scaling": "Seraphine slightly favored — better utility and scaling poke",
+        "jungle_gankable": false,
+        "positioning": "Position behind cover to block her root ability. Spread to reduce her poke impact."
+      },
+      "Smolder": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Smolder has poke and sustain similar to Aphelios. Trade with Chakram and Severum for advantage.",
+        "ability_to_dodge": "Smolder E (Scorched Earth) — dodge by moving out of radius, don't get trapped in his flames.",
+        "power_spikes": {
+          "you": "Level 6 with full weapon access, Kraken Slayer completed",
+          "enemy": "Level 6 with ultimate, completed IE"
+        },
+        "early_game": "Trade evenly and use superior weapon flexibility. Don't get caught in his flame zone.",
+        "mid_game": "Both scale at similar rates. Group and leverage team fights.",
+        "late_game": "Smolder's utility and dps are comparable. Positioning and team coordination win fights.",
+        "win_condition": "Match his scaling, avoid his flame zones, leverage better positioning in team fights.",
+        "counter_items": ["Bloodthirster", "Kaenic Rookern"],
+        "scaling": "Even — Similar scaling patterns, positioning matters",
+        "jungle_gankable": true,
+        "positioning": "Keep distance from his flame zone. Use terrain to limit his engagement attempts."
+      }
+    }
+  }
+}

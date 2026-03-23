@@ -1,0 +1,348 @@
+{
+  "Veigar": {
+    "mid": {
+      "Ziggs": {
+        "difficulty": "hard",
+        "who_wins_early": "Ziggs",
+        "trading_pattern": "Ziggs outranges early. Farm safely, stack AP.",
+        "ability_to_dodge": "Ziggs Q — dodge sideways.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Farm defensively. Ziggs ranges better.",
+        "mid_game": "Stack AP with Q spam. Burst enemies.",
+        "late_game": "You outscale massively with stacks.",
+        "win_condition": "Stack AP and burst enemies in teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar outscales significantly — stacking gives oppressive damage",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm Q constantly."
+      },
+      "Annie": {
+        "difficulty": "medium",
+        "who_wins_early": "Annie",
+        "trading_pattern": "Annie has burst. Trade when stun down.",
+        "ability_to_dodge": "Annie Q — dodge by moving away.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Level 6 (Tibbers), Luden's"
+        },
+        "early_game": "Play defensive. Annie has burst.",
+        "mid_game": "Stack and scale. Avoid her stun.",
+        "late_game": "You outscale with AP.",
+        "win_condition": "Stack AP and dodge her stun.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar outscales — stacking is too strong",
+        "jungle_gankable": true,
+        "positioning": "Keep distance from Tibbers. Farm Q."
+      },
+      "Xerath": {
+        "difficulty": "hard",
+        "who_wins_early": "Xerath",
+        "trading_pattern": "Xerath outranges. Farm safely, build AP.",
+        "ability_to_dodge": "Xerath Q — dodge perpendicular.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Farm defensively. Xerath ranges dominate.",
+        "mid_game": "Stack with Q. Burst enemies.",
+        "late_game": "You outscale massively.",
+        "win_condition": "Stack AP and burst in teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar significantly outscales — stacking AP oppressive",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm Q constantly."
+      },
+      "Zed": {
+        "difficulty": "medium",
+        "who_wins_early": "Zed",
+        "trading_pattern": "Zed has burst. Trade when W down.",
+        "ability_to_dodge": "Zed W — back off when he clones.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Youmuu's, Level 6"
+        },
+        "early_game": "Play defensive. Zed has burst.",
+        "mid_game": "Stack with Q. Build defensive.",
+        "late_game": "You outscale with AP.",
+        "win_condition": "Stack AP and burst in teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar outscales — your stacking overcomes his burst",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm Q constantly."
+      },
+      "Vel'Koz": {
+        "difficulty": "medium",
+        "who_wins_early": "Vel'Koz",
+        "trading_pattern": "Vel'Koz ranges better. Farm safely with Q.",
+        "ability_to_dodge": "Vel'Koz E — dodge by stepping away.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Farm defensively. Vel'Koz ranges dominate.",
+        "mid_game": "Stack with Q. Burst enemies.",
+        "late_game": "You outscale with AP.",
+        "win_condition": "Stack AP and burst in teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar slightly outscales — stacking gives more burst",
+        "jungle_gankable": false,
+        "positioning": "Keep distance. Farm Q constantly."
+      },
+      "Azir": {
+        "difficulty": "easy",
+        "who_wins_early": "Veigar",
+        "trading_pattern": "Azir weak early. Use Q spam to farm and stack.",
+        "ability_to_dodge": "Azir soldiers weak early.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Dominate with Q spam stacking.",
+        "mid_game": "Stack and scale. Burst enemies.",
+        "late_game": "You outscale massively.",
+        "win_condition": "Stack AP and burst in teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar significantly outscales — stacking dominates late",
+        "jungle_gankable": false,
+        "positioning": "Spam Q early. Farm constantly."
+      },
+      "Taliyah": {
+        "difficulty": "medium",
+        "who_wins_early": "Taliyah",
+        "trading_pattern": "Taliyah has waveclear. Farm Q when abilities down.",
+        "ability_to_dodge": "Taliyah Q — dodge perpendicular.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Taliyah pushes better.",
+        "mid_game": "Stack with Q. Avoid roams.",
+        "late_game": "You outscale with AP.",
+        "win_condition": "Stack AP and burst in teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar outscales — stacking overcomes roams",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm Q constantly."
+      },
+      "Orianna": {
+        "difficulty": "medium",
+        "who_wins_early": "Even",
+        "trading_pattern": "Orianna similar poke. Trade when ball far.",
+        "ability_to_dodge": "Orianna Q — dodge by stepping back.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Archangel's, Level 6"
+        },
+        "early_game": "Mirror her. Both scale.",
+        "mid_game": "Stack with Q. Scale together.",
+        "late_game": "You outscale with AP.",
+        "win_condition": "Stack AP and burst in teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar outscales — your stacking beats her control",
+        "jungle_gankable": true,
+        "positioning": "Farm Q. Keep away from ball."
+      },
+      "Smolder": {
+        "difficulty": "easy",
+        "who_wins_early": "Veigar",
+        "trading_pattern": "Smolder very weak. Spam Q to stack.",
+        "ability_to_dodge": "Smolder Q — dodge away.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Liandry's, Level 13"
+        },
+        "early_game": "Dominate with Q spam. Stack freely.",
+        "mid_game": "Stack and scale. Burst enemies.",
+        "late_game": "You outscale massively if built.",
+        "win_condition": "Stack AP early and burst.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Smolder outscales — finish before he scales",
+        "jungle_gankable": false,
+        "positioning": "Spam Q aggressively. Stack constantly."
+      },
+      "Sylas": {
+        "difficulty": "hard",
+        "who_wins_early": "Sylas",
+        "trading_pattern": "Sylas is melee. Keep distance, farm Q.",
+        "ability_to_dodge": "Sylas E — back off when he dashes.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Protobelt, Level 6"
+        },
+        "early_game": "Play safe. Sylas has all-in.",
+        "mid_game": "Stack with Q. Avoid his engage.",
+        "late_game": "You outscale with AP.",
+        "win_condition": "Stack AP and cage him in teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar outscales — caging beats his mobility",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm Q constantly."
+      },
+      "Viktor": {
+        "difficulty": "medium",
+        "who_wins_early": "Viktor",
+        "trading_pattern": "Viktor has good E poke. Trade when cooldown down.",
+        "ability_to_dodge": "Viktor E — dodge perpendicular.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Viktor has poke.",
+        "mid_game": "Stack with Q. Scale together.",
+        "late_game": "You outscale with AP.",
+        "win_condition": "Stack AP and burst in teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar outscales — stacking beats his burst",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm Q constantly."
+      },
+      "Diana": {
+        "difficulty": "hard",
+        "who_wins_early": "Diana",
+        "trading_pattern": "Diana is melee. Keep distance, farm Q.",
+        "ability_to_dodge": "Diana Q — dodge sideways.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Protobelt, Level 6"
+        },
+        "early_game": "Play safe. Diana has all-in.",
+        "mid_game": "Stack with Q. Avoid cage range.",
+        "late_game": "You outscale with AP.",
+        "win_condition": "Stack AP and cage her in teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar outscales — caging dominates late",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm Q constantly."
+      },
+      "Neeko": {
+        "difficulty": "medium",
+        "who_wins_early": "Neeko",
+        "trading_pattern": "Neeko has poke and CC. Trade when Q down.",
+        "ability_to_dodge": "Neeko E — dodge by moving away.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Neeko has poke.",
+        "mid_game": "Stack with Q. Avoid her E.",
+        "late_game": "You outscale with AP.",
+        "win_condition": "Stack AP and cage in teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar outscales — stacking beats her utility",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm Q constantly."
+      },
+      "Syndra": {
+        "difficulty": "medium",
+        "who_wins_early": "Syndra",
+        "trading_pattern": "Syndra has poke and burst. Trade when Q down.",
+        "ability_to_dodge": "Syndra E — dodge by moving away.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Syndra has burst.",
+        "mid_game": "Stack with Q. Avoid her E.",
+        "late_game": "You outscale with AP.",
+        "win_condition": "Stack AP and cage in teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar outscales — stacking beats her burst",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm Q constantly."
+      },
+      "Ahri": {
+        "difficulty": "medium",
+        "who_wins_early": "Ahri",
+        "trading_pattern": "Ahri has poke and mobility. Trade when Q down.",
+        "ability_to_dodge": "Ahri Q — dodge sideways.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Ahri has poke.",
+        "mid_game": "Stack with Q. Avoid her all-in.",
+        "late_game": "You outscale with AP.",
+        "win_condition": "Stack AP and cage in teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar outscales — stacking beats her mobility",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm Q constantly."
+      },
+      "Corki": {
+        "difficulty": "medium",
+        "who_wins_early": "Corki",
+        "trading_pattern": "Corki has poke. Trade when Q down.",
+        "ability_to_dodge": "Corki Q — dodge back.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Trinity Force, Level 6"
+        },
+        "early_game": "Play defensively. Corki has early poke.",
+        "mid_game": "Stack with Q. Scale together.",
+        "late_game": "You outscale with AP.",
+        "win_condition": "Stack AP and burst in teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar outscales — stacking beats his poke",
+        "jungle_gankable": false,
+        "positioning": "Keep distance. Farm Q constantly."
+      },
+      "Seraphine": {
+        "difficulty": "medium",
+        "who_wins_early": "Seraphine",
+        "trading_pattern": "Seraphine has utility and poke. Trade when Q down.",
+        "ability_to_dodge": "Seraphine E — dodge away.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Seraphine has poke.",
+        "mid_game": "Stack with Q. Scale together.",
+        "late_game": "You outscale with AP.",
+        "win_condition": "Stack AP and burst in teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar outscales — stacking beats her utility",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm Q constantly."
+      },
+      "Lux": {
+        "difficulty": "medium",
+        "who_wins_early": "Lux",
+        "trading_pattern": "Lux has range and poke. Trade when E down.",
+        "ability_to_dodge": "Lux E — dodge back.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Lux has range.",
+        "mid_game": "Stack with Q. Scale together.",
+        "late_game": "You outscale with AP.",
+        "win_condition": "Stack AP and burst in teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar outscales — stacking beats her range",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Farm Q constantly."
+      },
+      "Malzahar": {
+        "difficulty": "medium",
+        "who_wins_early": "Malzahar",
+        "trading_pattern": "Malzahar has sustain and CC. Trade when E down.",
+        "ability_to_dodge": "Malzahar E — respect passive.",
+        "power_spikes": {
+          "you": "Stacks, Liandry's",
+          "enemy": "Liandry's, Level 6"
+        },
+        "early_game": "Play defensively. Malzahar has sustain.",
+        "mid_game": "Stack with Q. Avoid his ult.",
+        "late_game": "You outscale with AP.",
+        "win_condition": "Stack AP and burst in teamfights.",
+        "counter_items": ["Mercury's Treads", "Spirit Visage"],
+        "scaling": "Veigar outscales — stacking beats his sustain",
+        "jungle_gankable": false,
+        "positioning": "Keep distance. Farm Q constantly."
+      }
+    }
+  }
+}

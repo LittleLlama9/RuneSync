@@ -1,0 +1,258 @@
+{
+  "Taliyah": {
+    "mid": {
+      "Veigar": {
+        "difficulty": "hard",
+        "who_wins_early": "Veigar",
+        "trading_pattern": "Veigar stacks early. Trade before stacks. Respect cage.",
+        "ability_to_dodge": "Veigar E (Event Horizon) — dodge immediately.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Stacks, Level 6"
+        },
+        "early_game": "Abuse before stacks. Poke with Q.",
+        "mid_game": "Roam to deny picks. Avoid his cage.",
+        "late_game": "He outscales. Roam for advantage.",
+        "win_condition": "Roam early before he stacks.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar outscales — stacking makes him stronger",
+        "jungle_gankable": true,
+        "positioning": "Avoid cage range. Roam frequently."
+      },
+      "Katarina": {
+        "difficulty": "hard",
+        "who_wins_early": "Katarina",
+        "trading_pattern": "Katarina has all-in. Play defensive, use Q poke.",
+        "ability_to_dodge": "Katarina E (Shunpo) — step back immediately.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Protobelt, Level 6"
+        },
+        "early_game": "Play safe. Katarina has strong all-in.",
+        "mid_game": "Roam when she farms. Make picks.",
+        "late_game": "You outscale with roams.",
+        "win_condition": "Roam before she gets kills.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Taliyah outscales — your roaming improves late",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Roam frequently."
+      },
+      "LeBlanc": {
+        "difficulty": "hard",
+        "who_wins_early": "LeBlanc",
+        "trading_pattern": "LeBlanc has burst and deception. Play defensive.",
+        "ability_to_dodge": "LeBlanc E (Chains) — dodge by moving away.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play very defensive. LeBlanc has superior burst.",
+        "mid_game": "Roam when she farms. Make picks.",
+        "late_game": "You outscale with roams.",
+        "win_condition": "Roam early and snowball.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Taliyah outscales — your roaming improves late",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Roam frequently."
+      },
+      "Zed": {
+        "difficulty": "medium",
+        "who_wins_early": "Zed",
+        "trading_pattern": "Zed has mobility and burst. Trade when W down.",
+        "ability_to_dodge": "Zed W (Living Shadow) — back off when he clones.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Youmuu's, Level 6"
+        },
+        "early_game": "Play defensively. Zed has strong all-in.",
+        "mid_game": "Roam when he farms. Make picks.",
+        "late_game": "You outscale with roams.",
+        "win_condition": "Roam before he gets kills.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Taliyah outscales — your roaming improves late",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Roam frequently."
+      },
+      "Azir": {
+        "difficulty": "easy",
+        "who_wins_early": "Taliyah",
+        "trading_pattern": "Azir is weak early. Use Q spam and roam.",
+        "ability_to_dodge": "Azir soldiers weak early.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Dominate with Q spam. Roam early.",
+        "mid_game": "Maintain pressure. Make picks.",
+        "late_game": "He outscales. Finish before control.",
+        "win_condition": "Roam early and snowball.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Azir outscales — his teamfight control improves late",
+        "jungle_gankable": false,
+        "positioning": "Spam Q early. Roam frequently."
+      },
+      "Ryze": {
+        "difficulty": "easy",
+        "who_wins_early": "Taliyah",
+        "trading_pattern": "Ryze is weak early. Use Q spam and roam.",
+        "ability_to_dodge": "Ryze Q (Overload) — dodge sideways.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Dominate with Q spam. Roam early.",
+        "mid_game": "Maintain pressure. Make picks.",
+        "late_game": "He outscales. Finish before control.",
+        "win_condition": "Roam early and snowball.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Ryze outscales — his teamfight control improves late",
+        "jungle_gankable": true,
+        "positioning": "Spam Q early. Roam frequently."
+      },
+      "Qiyana": {
+        "difficulty": "medium",
+        "who_wins_early": "Qiyana",
+        "trading_pattern": "Qiyana has burst and CC. Play defensive.",
+        "ability_to_dodge": "Qiyana E (Audacity) — step back when she dashes.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Youmuu's, Level 6"
+        },
+        "early_game": "Play defensively. Qiyana has strong all-in.",
+        "mid_game": "Roam to deny her picks. Scale with team.",
+        "late_game": "You outscale with roams.",
+        "win_condition": "Roam and coordinate teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Taliyah slightly favored — your roaming is superior",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Roam frequently."
+      },
+      "Orianna": {
+        "difficulty": "medium",
+        "who_wins_early": "Even",
+        "trading_pattern": "Orianna has similar poke. Trade when ball far.",
+        "ability_to_dodge": "Orianna Q (Command) — dodge by stepping back.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Archangel's, Level 6"
+        },
+        "early_game": "Mirror her. Both have similar early.",
+        "mid_game": "Both roam. Coordinate roams.",
+        "late_game": "She outscales. Use roams.",
+        "win_condition": "Roam and coordinate teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Orianna slightly favored — her teamfight control is superior",
+        "jungle_gankable": true,
+        "positioning": "Use Q to farm. Roam frequently."
+      },
+      "Swain": {
+        "difficulty": "medium",
+        "who_wins_early": "Swain",
+        "trading_pattern": "Swain has tankiness and CC. Trade when E down.",
+        "ability_to_dodge": "Swain E (Nevermove) — dodge sideways.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Protobelt, Level 6"
+        },
+        "early_game": "Play defensively. Swain dominates early.",
+        "mid_game": "Roam while he farms. Make picks.",
+        "late_game": "You outscale with roams.",
+        "win_condition": "Roam early before he scales.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Taliyah outscales — your roaming improves late",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Roam frequently."
+      },
+      "Cho'Gath": {
+        "difficulty": "medium",
+        "who_wins_early": "Taliyah",
+        "trading_pattern": "Cho'Gath is melee. Use Q spam to poke.",
+        "ability_to_dodge": "Cho'Gath Q (Rupture) — dodge by moving perpendicular.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Level 6 (stacks), Protobelt"
+        },
+        "early_game": "Abuse with Q spam. Roam early.",
+        "mid_game": "Maintain roam pressure. Make picks.",
+        "late_game": "He becomes tanky. Use roams.",
+        "win_condition": "Roam early before he stacks.",
+        "counter_items": ["Mercury's Treads", "Liandry's"],
+        "scaling": "Cho'Gath outscales — his tankiness increases late",
+        "jungle_gankable": true,
+        "positioning": "Spam Q early. Roam frequently."
+      },
+      "Ekko": {
+        "difficulty": "medium",
+        "who_wins_early": "Even",
+        "trading_pattern": "Ekko is mobile. Trade when abilities down.",
+        "ability_to_dodge": "Ekko W (Zone) — avoid zone.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Protobelt, Level 6"
+        },
+        "early_game": "Trade when vulnerable. Both scale.",
+        "mid_game": "Both roam. Coordinate roams.",
+        "late_game": "Both scale. Teamfights determine outcome.",
+        "win_condition": "Roam and coordinate teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Even — both scale at similar rates",
+        "jungle_gankable": true,
+        "positioning": "Use Q to farm. Roam frequently."
+      },
+      "Cassiopeia": {
+        "difficulty": "medium",
+        "who_wins_early": "Cassiopeia",
+        "trading_pattern": "Cassio has sustained poke. Trade when W down.",
+        "ability_to_dodge": "Cassiopeia W (Miasma) — walk around it.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Liandry's, Level 6"
+        },
+        "early_game": "Play defensively. Cassio has poke.",
+        "mid_game": "Roam while she farms. Make picks.",
+        "late_game": "She outscales. Use roams.",
+        "win_condition": "Roam before she scales.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Cassiopeia outscales — her sustained damage dominates late",
+        "jungle_gankable": true,
+        "positioning": "Use Q to farm. Avoid poison. Roam frequently."
+      },
+      "Smolder": {
+        "difficulty": "easy",
+        "who_wins_early": "Taliyah",
+        "trading_pattern": "Smolder very weak early. Spam Q and roam.",
+        "ability_to_dodge": "Smolder Q (Breath) — dodge away.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Liandry's, Level 13"
+        },
+        "early_game": "Dominate with Q spam. Roam heavily.",
+        "mid_game": "Maintain roam pressure.",
+        "late_game": "He outscales. Finish before 2-3 items.",
+        "win_condition": "Roam early and finish.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Smolder significantly outscales — you need major lead",
+        "jungle_gankable": false,
+        "positioning": "Spam Q aggressively. Roam constantly."
+      },
+      "Akshan": {
+        "difficulty": "medium",
+        "who_wins_early": "Akshan",
+        "trading_pattern": "Akshan has mobility and poke. Trade carefully.",
+        "ability_to_dodge": "Akshan E (Grapple) — step back when he grapples.",
+        "power_spikes": {
+          "you": "Level 6 (roams), Luden's",
+          "enemy": "Serylda's, Level 6"
+        },
+        "early_game": "Play defensively. Akshan has poke.",
+        "mid_game": "Roam while he farms. Make picks.",
+        "late_game": "You outscale with roams.",
+        "win_condition": "Roam early and snowball.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Taliyah outscales — your roaming improves late",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Roam frequently."
+      }
+    }
+  }
+}

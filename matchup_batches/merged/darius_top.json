@@ -1,0 +1,546 @@
+{
+  "Darius": {
+    "top": {
+      "Aatrox": {
+        "difficulty": "medium",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Walk into his Q to avoid sweet spots and auto-attack him while his Q is on cooldown. Stack passive during his Q animation — he's locked in place.",
+        "ability_to_dodge": "Aatrox Q — walk inside his model to dodge the sweet spot edge damage where the knockup and bonus damage land.",
+        "power_spikes": {
+          "you": "Level 1 (passive stacking), Trinity Force",
+          "enemy": "Level 6 (World Ender sustain), Spear of Shojin"
+        },
+        "early_game": "You win hard if you can get on top of him. Walk into his Q sweet spots to deny the edge damage, then auto-W-auto to stack passive. E pull him when he tries to kite.",
+        "mid_game": "He starts matching you with sustain. Build anti-heal early. Don't let him hit you with Q edges from range — close the distance and fight inside.",
+        "late_game": "He has better teamfights. You need to flank and get on top of carries. If you can't get five-stack resets in teamfights, you're outvalued.",
+        "win_condition": "Kill him early by closing the gap and stacking passive. Build Bramble Vest to reduce his healing. Use Ghost to stick to him.",
+        "counter_items": ["Bramble Vest", "Sterak's Gage"],
+        "scaling": "Aatrox slightly favored — better teamfight AoE and sustain make him more valuable late",
+        "jungle_gankable": true,
+        "positioning": "Walk INTO his Q, not away. Stay inside his model during his Q combo to deny the sweet spot damage."
+      },
+      "Garen": {
+        "difficulty": "easy",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Pull him with E when he walks up for CS. Auto-W-auto to stack passive. He can't outtrade you if you get five stacks. Don't let him disengage with Q movespeed.",
+        "ability_to_dodge": "Garen Q — his empowered auto gives movespeed; pull him with E before he reaches you to deny the gap close.",
+        "power_spikes": {
+          "you": "Level 1 (passive dominance), Trinity Force",
+          "enemy": "Level 6 (Demacian Justice execute), Stridebreaker"
+        },
+        "early_game": "You destroy Garen. Pull him whenever he walks up, auto-W for the slow, and stack passive. He can't match your sustained damage. Zone him off every CS.",
+        "mid_game": "Continue bullying. Push and roam or freeze and deny. He has no way to fight back unless he's significantly ahead.",
+        "late_game": "He becomes tanky and his R execute is point-click. Respect his damage threshold and don't duel below 30% HP or his ult finishes you.",
+        "win_condition": "Crush him levels 1-5 and build a massive CS lead. Freeze the wave and zone him. He can never trade into you if you manage passive correctly.",
+        "counter_items": ["Sterak's Gage", "Dead Man's Plate"],
+        "scaling": "Even — both fall off in different ways; Garen gets tankier while Darius needs resets",
+        "jungle_gankable": true,
+        "positioning": "Stand between Garen and the minion wave. Pull him with E the instant he walks forward. Keep passive stacking with autos during his Q animation."
+      },
+      "Mordekaiser": {
+        "difficulty": "easy",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Walk into him and auto-W-auto stack passive. Dodge his E pull by sidestepping. In his Death Realm you still win if you get five stacks.",
+        "ability_to_dodge": "Mordekaiser E — Death's Grasp pull is slow; sidestep it and engage with your own E pull for a free trade.",
+        "power_spikes": {
+          "you": "Level 1 (passive king), Trinity Force",
+          "enemy": "Level 6 (Death Realm stat steal), Riftmaker"
+        },
+        "early_game": "You hard-win. Stack passive on him and he melts. His E is easy to dodge and without it he can't kite you. Zone him off CS repeatedly.",
+        "mid_game": "In his Death Realm, you still beat him 1v1 if you stack passive. Pop Ghost if needed to stay on top of him. His stat steal matters less when you have five stacks.",
+        "late_game": "His Death Realm removing you from teamfights can be annoying. Stay near your team so his ult wastes his own positioning.",
+        "win_condition": "Kill him early and often. You win the 1v1 at every stage as long as you stack passive. Ghost through his Death Realm if needed.",
+        "counter_items": ["Sterak's Gage", "Black Cleaver"],
+        "scaling": "Even — Mordekaiser's Death Realm becomes more impactful but Darius still wins the 1v1 inside it",
+        "jungle_gankable": true,
+        "positioning": "Dodge his E pull and immediately pull him with your E. Stay on top of him and auto-W to stack. Never let him kite with passive DoT."
+      },
+      "Renekton": {
+        "difficulty": "skill_matchup",
+        "who_wins_early": "even",
+        "trading_pattern": "He short trades — you want extended trades. When he E-W-Q combos and tries to E away, pull him back with your E to force an extended fight.",
+        "ability_to_dodge": "Renekton E2 — his second dash escape; pull with E immediately after his combo to catch him before he dashes out.",
+        "power_spikes": {
+          "you": "Level 1 (passive stacking), Trinity Force",
+          "enemy": "Level 3 (empowered W burst), Blade of the Ruined King"
+        },
+        "early_game": "He wants short trades, you want long ones. When he dashes in, let him combo, then E pull him when he tries to disengage. Five stacks = you win.",
+        "mid_game": "You outscale him. He falls off hard while your ult resets are still threatening. Look for splitpush kills.",
+        "late_game": "You massively outscale. He's useless while you can still pentakill in teamfights with resets. Don't let him end early.",
+        "win_condition": "Extend every trade. Pull him back when he tries to dash away. Once you hit five stacks, he's dead.",
+        "counter_items": ["Plated Steelcaps", "Sterak's Gage"],
+        "scaling": "Darius favored — Renekton falls off a cliff while Darius maintains ult reset potential",
+        "jungle_gankable": true,
+        "positioning": "Save E pull for when he tries to dash away after his combo. Pull him back into the fight and stack passive."
+      },
+      "Fiora": {
+        "difficulty": "hard",
+        "who_wins_early": "Fiora",
+        "trading_pattern": "Hug walls to deny vitals. Short trades with E pull into W slow. Don't let her proc all four ult vitals — back off if she pops R.",
+        "ability_to_dodge": "Fiora W — Riposte blocks everything; don't use W or R predictably. Bait her W with an auto then use W after it's gone.",
+        "power_spikes": {
+          "you": "Level 1 (passive stacking), Trinity Force",
+          "enemy": "Level 1 (vital poke), Ravenous Hydra"
+        },
+        "early_game": "Tough matchup. She parries your W or R for a free stun. Keep vitals against walls. Short trade with E pull-auto-W, then back off before she procs vitals.",
+        "mid_game": "She outduels you in sidelane. Don't try to match her split push. Group for teamfights where she's less useful.",
+        "late_game": "She hard counters you. Grand Challenge heals her through everything. Never 1v1 her. Force teamfights where your AoE is better.",
+        "win_condition": "Get early kills by baiting her Riposte. If you use W and she blocks it, you lose the trade. Mindgame her W timing.",
+        "counter_items": ["Plated Steelcaps", "Bramble Vest", "Sterak's Gage"],
+        "scaling": "Fiora heavily favored — she's the premier anti-juggernaut duelist and Darius can't match her late",
+        "jungle_gankable": false,
+        "positioning": "Hug walls to deny vital spawns. Never R when her W is up — the riposted R stuns you and she gets a free kill."
+      },
+      "Camille": {
+        "difficulty": "medium",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Pull her with E when she hookshots in. She has to commit to the dash — punish with E pull into auto-W stack combo. Respect her passive shield timing.",
+        "ability_to_dodge": "Camille E — Hookshot stun; pull her with your E after she arrives to cancel her disengage.",
+        "power_spikes": {
+          "you": "Level 1 (passive stacking), Trinity Force",
+          "enemy": "Level 6 (Hextech Ultimatum), Trinity Force"
+        },
+        "early_game": "You win if you pull her when she hookshots in. She can't trade into five stacks. Respect her passive shield — wait for it to fade before committing damage.",
+        "mid_game": "She starts matching you with Trinity Force. Her R locks you in place for ganks. Keep vision and don't overextend.",
+        "late_game": "She outscales in sidelane. Group for teamfights where your resets are more impactful than her isolated picks.",
+        "win_condition": "Punish her hookshot commits with E pull. Five stacks kills her every time. Don't let her short trade and escape.",
+        "counter_items": ["Plated Steelcaps", "Sterak's Gage"],
+        "scaling": "Camille favored — true damage scaling and split push pressure outpace Darius late",
+        "jungle_gankable": true,
+        "positioning": "Stand away from walls to give her less hookshot angles. When she dashes in, pull immediately and stack."
+      },
+      "Sett": {
+        "difficulty": "skill_matchup",
+        "who_wins_early": "even",
+        "trading_pattern": "Extended trade king vs extended trade king. Stack passive while dodging his Haymaker center. If you dodge the true damage zone, you win the slugfest.",
+        "ability_to_dodge": "Sett W — Haymaker center is true damage; sidestep left or right, never dodge backwards through it.",
+        "power_spikes": {
+          "you": "Level 1 (passive advantage), Trinity Force",
+          "enemy": "Level 1-3 (high base stats), Stridebreaker"
+        },
+        "early_game": "Classic juggernaut mirror. Both want extended trades. The difference is you MUST dodge his W center. If you eat the true damage, you lose. Sidestep it and you win with five stacks.",
+        "mid_game": "You slightly outscale. Your ult execute is more reliable than his W burst. Keep forcing fights and using Ghost to stick.",
+        "late_game": "You outscale with ult resets. His W becomes predictable. In teamfights, get resets on low-HP targets while he tries to R your tank into your team.",
+        "win_condition": "Dodge Haymaker center every single time. It's the entire matchup. Five stacks with Haymaker dodged = you always win.",
+        "counter_items": ["Plated Steelcaps", "Black Cleaver"],
+        "scaling": "Darius slightly favored — ult resets provide more teamfight value than Sett's W burst late game",
+        "jungle_gankable": true,
+        "positioning": "Sidestep his W every time. After he wastes it, engage hard and stack passive. The true damage center is the only way he wins."
+      },
+      "Jax": {
+        "difficulty": "medium",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Auto-W immediately when he jumps on you. When he activates Counter Strike, keep auto-attacking — your passive stacks through it. Pull with E when he tries to stun and run.",
+        "ability_to_dodge": "Jax E — Counter Strike blocks your autos but NOT your passive bleed damage. Keep stacking and pull him when he tries to walk away.",
+        "power_spikes": {
+          "you": "Level 1 (passive dominance), Trinity Force",
+          "enemy": "Level 6 (R resistances), Trinity Force"
+        },
+        "early_game": "You win early. When he jumps on you, auto-W immediately and start stacking. His Counter Strike blocks autos but your W damage and passive bleed still apply.",
+        "mid_game": "He starts matching you. Respect his Counter Strike timing — if he stuns you at five stacks and disengages, you waste your window.",
+        "late_game": "He massively outscales. Don't try to sidelane against him. Group for teamfights where your AoE and resets matter more.",
+        "win_condition": "Get early kills before he scales. Your W slow lets you stick through Counter Strike. Ghost is essential for chasing after his E stun.",
+        "counter_items": ["Plated Steelcaps", "Sterak's Gage", "Dead Man's Plate"],
+        "scaling": "Jax heavily favored — one of the hardest scaling duelists who eventually stomps Darius",
+        "jungle_gankable": true,
+        "positioning": "Stay on top of him and keep auto-attacking through Counter Strike. Pull with E after his stun to prevent escape."
+      },
+      "Irelia": {
+        "difficulty": "medium",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Pull her with E when she Q-dashes onto you. Auto-W and stack passive. She's squishy and can't survive five stacks. Don't fight near dying minions — she gets Q resets.",
+        "ability_to_dodge": "Irelia Q — her dash resets on kills; manage your minion wave so she can't build a highway of resets into you.",
+        "power_spikes": {
+          "you": "Level 1 (passive dominance), Trinity Force",
+          "enemy": "Level 4-5 (full passive stacks), Blade of the Ruined King"
+        },
+        "early_game": "You win if you manage the wave. Don't let her build passive stacks off minions. Pull her when she dashes in and stack passive. Five stacks = dead Irelia.",
+        "mid_game": "Respect her BOTRK spike. She can outplay you with dashes if your E is down. Hold E for when she commits.",
+        "late_game": "She outscales in extended fights. Group for teamfights where your AoE and resets are stronger than her single-target dive.",
+        "win_condition": "Manage the wave, pull her when she dashes in, and five-stack her. Don't let her build passive off dying minions before engaging.",
+        "counter_items": ["Plated Steelcaps", "Bramble Vest", "Sterak's Gage"],
+        "scaling": "Even — Irelia outduels but Darius has better teamfight resets",
+        "jungle_gankable": false,
+        "positioning": "Keep the wave pushing slightly toward you. Stand away from dying minions so she can't dash-chain into you."
+      },
+      "Malphite": {
+        "difficulty": "hard",
+        "who_wins_early": "Malphite",
+        "trading_pattern": "His armor scaling hard-counters you. Try to break his passive shield with an auto, then Q him for the bleed. Short trades with Q-auto-W.",
+        "ability_to_dodge": "Malphite R — Unstoppable Force knockup; flash sideways to avoid being CC'd and killed in a gank setup.",
+        "power_spikes": {
+          "you": "Level 1-5 (before he stacks armor), Trinity Force",
+          "enemy": "Level 6 (R engage), Iceborn Gauntlet"
+        },
+        "early_game": "You need to kill him early before he stacks armor. His Q slows you and prevents you from reaching him. Push hard and try to get plates before he becomes unkillable.",
+        "mid_game": "He stacks armor and you can't kill him. Black Cleaver is essential. Push sidelane and roam — you can't solo kill him anymore.",
+        "late_game": "He hard-counters you late. Full armor build negates your entire kit. Don't waste time trying to kill him — go for his squishier teammates.",
+        "win_condition": "Kill him before he stacks armor, or give up on the matchup and roam. He's your worst type of opponent — a stacking armor tank.",
+        "counter_items": ["Black Cleaver", "Serylda's Grudge"],
+        "scaling": "Malphite heavily favored — armor stacking completely neutralizes Darius's physical damage kit",
+        "jungle_gankable": true,
+        "positioning": "Try to engage on him early before his passive shield refreshes. Pop shield with auto, then Q-W for bleed stacks."
+      },
+      "Nasus": {
+        "difficulty": "easy",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Zone him off every CS. Pull with E when he walks up to Q stack. Auto-W and stack passive. He literally cannot fight you levels 1-8.",
+        "ability_to_dodge": "Nasus W — Wither is a crippling slow; pop Ghost immediately when Withered to maintain kill pressure.",
+        "power_spikes": {
+          "you": "Level 1 (total lane dominance), Trinity Force",
+          "enemy": "Level 6 (R stat boost), 200+ stacks + Sheen"
+        },
+        "early_game": "Freeze near your tower and zone him off every single CS. Pull him whenever he walks forward. He cannot fight you at any point pre-6. Deny every stack.",
+        "mid_game": "If you denied enough stacks, he's useless. If he somehow farmed, respect his Wither + Q damage. Ghost through his slow.",
+        "late_game": "He outscales if he stacked. His Wither makes you useless. End the game before he becomes a raid boss. If you're ahead, force objectives.",
+        "win_condition": "Freeze and deny. If he has under 200 stacks at 15 minutes, you've won. Don't let the game go past 30 minutes or he wins regardless.",
+        "counter_items": ["Trinity Force", "Black Cleaver"],
+        "scaling": "Nasus massively favored — infinite Q scaling and Wither make him unstoppable past 25 minutes",
+        "jungle_gankable": true,
+        "positioning": "Freeze the wave near your tower. Stand between Nasus and the minion wave. Pull him the instant he walks forward for a stack."
+      },
+      "Gangplank": {
+        "difficulty": "medium",
+        "who_wins_early": "Darius",
+        "trading_pattern": "He removes your W slow with his W oranges. You need Ghost to stick to him. Pull with E and all-in before he can W cleanse and run.",
+        "ability_to_dodge": "Gangplank W — Remove Scurvy cleanses your W slow and heals him; bait it before committing to an all-in with Ghost.",
+        "power_spikes": {
+          "you": "Level 1 (zone him hard), Trinity Force",
+          "enemy": "Level 13 (barrel tick speed), Trinity Force + Collector"
+        },
+        "early_game": "You bully him hard. Pull and stack passive. His W removes your slow but it costs mana. Bait W first, then Ghost and all-in — he can't escape without cleanse.",
+        "mid_game": "Push him in and look for roams. His barrel combos get dangerous. If you can't kill him, impact the map.",
+        "late_game": "He massively outscales with barrel crits. Force fights before three items or you lose. His barrels one-shot squishies.",
+        "win_condition": "Bait his W orange cleanse, then Ghost-E-pull and five-stack him. End the game before his crit scaling takes over.",
+        "counter_items": ["Dead Man's Plate", "Sterak's Gage"],
+        "scaling": "Gangplank heavily favored — barrel crit combos and global ult give him far more late game value",
+        "jungle_gankable": true,
+        "positioning": "Stand on his barrels to deny chains. Auto them at 1 HP to disarm. Zone him off barrel setups."
+      },
+      "Gnar": {
+        "difficulty": "hard",
+        "who_wins_early": "Gnar",
+        "trading_pattern": "Mini Gnar kites you. Wait for Mega Gnar to expire and then Ghost onto him in Mini form — he's squishy and can't escape.",
+        "ability_to_dodge": "Mega Gnar R — fight away from walls so his ult knockback doesn't stun you into terrain.",
+        "power_spikes": {
+          "you": "Level 6 (ult execute), Trinity Force + Ghost",
+          "enemy": "Level 6 (Mega Gnar R), Black Cleaver"
+        },
+        "early_game": "Mini Gnar kites you all day. Take Second Wind and Doran's Shield. Don't waste Ghost — save it for when he's in Mini form and vulnerable.",
+        "mid_game": "Ghost onto Mini Gnar and five-stack him. He's squishy and dies fast. Avoid Mega Gnar near walls at all costs.",
+        "late_game": "Mega Gnar teamfight is insane. In Mini form he's free kills. Track his rage bar and engage when Mega is unavailable.",
+        "win_condition": "Save Ghost for Mini Gnar windows. Five-stack him when he's squishy and Mega is on cooldown.",
+        "counter_items": ["Dead Man's Plate", "Force of Nature"],
+        "scaling": "Gnar favored — Mini form kiting and Mega form teamfight make him a constant threat Darius can't pin down",
+        "jungle_gankable": true,
+        "positioning": "Track his rage bar. Ghost onto him the moment Mega expires and he's stuck in Mini form."
+      },
+      "K'Sante": {
+        "difficulty": "easy",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Dodge his Q3 dash and pull him with E. He's weak early and can't match your passive stacking. Auto-W-auto and overwhelm him.",
+        "ability_to_dodge": "K'Sante Q3 — sidestep the dash knockup and immediately E pull him for a free five-stack combo.",
+        "power_spikes": {
+          "you": "Level 1 (passive dominance), Trinity Force",
+          "enemy": "Level 6 (ult form), Iceborn Gauntlet"
+        },
+        "early_game": "You stomp him. He has no damage and your passive shreds him. Pull and stack freely. Dodge Q3 and he has zero trading tools.",
+        "mid_game": "Continue bullying. When he ults into damage form, he's squishier — five-stack and execute him even faster.",
+        "late_game": "He becomes a useful tank but you still win the 1v1. Group for teamfights where your resets compete with his engage utility.",
+        "win_condition": "Abuse his weak laning and build a massive lead. He's one of the easiest matchups for Darius.",
+        "counter_items": ["Black Cleaver", "Sterak's Gage"],
+        "scaling": "Even — K'Sante becomes more useful as a tank while Darius needs resets to stay relevant",
+        "jungle_gankable": true,
+        "positioning": "Sidestep Q3 dash. Pull him immediately after and stack passive. In his ult form, he's squishier — punish it."
+      },
+      "Yasuo": {
+        "difficulty": "easy",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Pull him with E when he dashes through minions near you. Auto-W and stack passive. He's squishy and dies to five stacks every time.",
+        "ability_to_dodge": "Yasuo E — he dashes through minions; don't stand in the minion wave where he can dash through freely.",
+        "power_spikes": {
+          "you": "Level 1 (passive chunks him hard), Trinity Force",
+          "enemy": "Level 6 (R combo), Infinity Edge"
+        },
+        "early_game": "Free lane. Pull him whenever he dashes near you. He's squishy and five stacks kill him instantly. Zone him off CS with pull threat.",
+        "mid_game": "He gets crit items but you still one-combo him. Respect his tornado knockup into R combo though.",
+        "late_game": "He outscales with full crit. In teamfights, try to pull him when he dashes in and five-stack before he can ult your team.",
+        "win_condition": "Kill him repeatedly in lane. He can't survive five stacks at any point. Snowball the lead and end before crit scaling takes over.",
+        "counter_items": ["Plated Steelcaps", "Sterak's Gage", "Dead Man's Plate"],
+        "scaling": "Yasuo favored — crit scaling eventually overwhelms Darius, but only if he survives laning",
+        "jungle_gankable": true,
+        "positioning": "Pull him when he dashes near you. Don't stand in the minion wave where he can freely dash around you."
+      },
+      "Gwen": {
+        "difficulty": "easy",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Pull her and stack passive. Her W mist zone doesn't block your melee attacks — it only blocks ranged. Stay inside her W and auto-W-auto.",
+        "ability_to_dodge": "Gwen W — Hallowed Mist makes her immune to attacks from outside the zone; step inside the mist and fight her there.",
+        "power_spikes": {
+          "you": "Level 1 (passive dominance), Trinity Force",
+          "enemy": "Level 6 (R burst + sustain), Riftmaker"
+        },
+        "early_game": "You win hard. Her Hallowed Mist doesn't help against melee. Pull her and five-stack. She's squishy and can't escape your damage.",
+        "mid_game": "She scales with AP and sustain. Build anti-heal and keep fighting her. You still win 1v1 if you get five stacks.",
+        "late_game": "She outscales with AP items and true damage from passive. Don't let the game go too long. Force teamfights before she's full build.",
+        "win_condition": "Kill her early and snowball. Her W is useless against you in melee. Five stacks destroy her every time.",
+        "counter_items": ["Bramble Vest", "Sterak's Gage"],
+        "scaling": "Gwen slightly favored — her AP scaling and true damage eventually outpace Darius in duels",
+        "jungle_gankable": true,
+        "positioning": "Walk inside her mist zone and auto-attack her. Her W doesn't protect against melee damage — it only blocks ranged."
+      },
+      "Ornn": {
+        "difficulty": "medium",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Pull him and stack passive. He's a tank — extended fights favor you. Watch for his W unstoppable and his Brittle auto proc.",
+        "ability_to_dodge": "Ornn W — Bellows Breath makes him unstoppable during cast; don't try to pull him mid-W. Wait for it to end then E.",
+        "power_spikes": {
+          "you": "Level 1 (passive stacking), Trinity Force + Black Cleaver",
+          "enemy": "Level 13+ (item upgrades), Sunfire Cape"
+        },
+        "early_game": "You win early. Pull and stack passive. He's tanky but your passive damage shreds him. Respect his W unstoppable — time your E pull after it ends.",
+        "mid_game": "He's getting tanky. Black Cleaver is mandatory. You can still kill him but it takes longer. Push and look for better targets.",
+        "late_game": "He outscales through team item upgrades. His R is a massive engage. Force fights before his team gets all upgrades. You can't solo kill him late.",
+        "win_condition": "Build a lead early and push objectives. He outscales through team utility — end the game before item upgrades matter.",
+        "counter_items": ["Black Cleaver", "Serylda's Grudge"],
+        "scaling": "Ornn heavily favored — item upgrades for the team make him the best scaling tank",
+        "jungle_gankable": true,
+        "positioning": "Wait for his W to end before pulling with E. He's unstoppable during Bellows Breath."
+      },
+      "Sion": {
+        "difficulty": "easy",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Interrupt his Q with your E pull. He's a free lane — stack passive and kill him repeatedly. His Q charge is easy to cancel with any of your abilities.",
+        "ability_to_dodge": "Sion Q — pull him with E to cancel his Decimating Smash charge before it completes.",
+        "power_spikes": {
+          "you": "Level 1 (passive stacking), Trinity Force",
+          "enemy": "Level 6 (R engage), Sunfire Cape + Titanic Hydra"
+        },
+        "early_game": "Free lane. Pull his Q charges with E every time. He can never charge Q safely against you. Stack passive and kill.",
+        "mid_game": "He proxies and avoids you. Let him push and take farm — you can't always chase him. Impact teamfights instead.",
+        "late_game": "He becomes a massive tank. Black Cleaver helps but he's hard to kill. Focus on his squishier teammates in fights.",
+        "win_condition": "Kill him repeatedly in lane and build a massive lead. Force objectives while he's dead.",
+        "counter_items": ["Black Cleaver", "Sterak's Gage"],
+        "scaling": "Sion slightly favored — infinite health scaling eventually makes him unkillable, but Darius's early lead should close the game",
+        "jungle_gankable": true,
+        "positioning": "Stay in E pull range to cancel his Q at any time. Sidestep his R charge and pull him after he passes."
+      },
+      "Riven": {
+        "difficulty": "skill_matchup",
+        "who_wins_early": "Darius",
+        "trading_pattern": "When she Q-combos into you, auto-W immediately for the slow. If she E-dashes away, save E pull for when her shield expires. Don't let her short trade and escape.",
+        "ability_to_dodge": "Riven E — Valor dash shield; wait for the shield to expire before committing damage. Pull with E after shield fades.",
+        "power_spikes": {
+          "you": "Level 1 (passive stacking), Trinity Force",
+          "enemy": "Level 6 (Wind Slash execute), Eclipse"
+        },
+        "early_game": "You win extended trades, she wins short ones. When she combos in, auto-W and try to hold E pull for when she tries to escape. Five stacks with Ghost = dead Riven.",
+        "mid_game": "She gets CDR and her trades get faster. Respect her burst combos. Hold E pull for when she commits to fighting rather than poking.",
+        "late_game": "She outscales with CDR. Her burst combos can kill you before you stack passive. Group for teamfights rather than dueling.",
+        "win_condition": "Pull her when she tries to disengage. Force extended trades where your passive shines. Ghost is mandatory to stick through her dashes.",
+        "counter_items": ["Plated Steelcaps", "Sterak's Gage", "Dead Man's Plate"],
+        "scaling": "Riven slightly favored — CDR scaling lets her burst faster than Darius can stack passive",
+        "jungle_gankable": false,
+        "positioning": "Hold E pull for after her shield expires. Auto-W when she Q3's onto you. Don't chase her through three Q dashes — wait for her to come to you."
+      },
+      "Yorick": {
+        "difficulty": "hard",
+        "who_wins_early": "even",
+        "trading_pattern": "Kill his ghouls before fighting him. If trapped in his W cage, auto-attack the wall out. Don't fight surrounded by Maiden and ghouls.",
+        "ability_to_dodge": "Yorick W — Dark Procession cage; auto-attack the nearest wall to break free. Don't fight inside the cage with ghouls.",
+        "power_spikes": {
+          "you": "Level 1 (passive), Trinity Force",
+          "enemy": "Level 6 (Maiden of the Mist), Trinity Force"
+        },
+        "early_game": "Kill his ghouls first. If he traps you with W and has four ghouls plus E mark on you, you take massive damage. Fight him only when ghouls are dead.",
+        "mid_game": "He splits hard with Maiden. You can't easily match him once he has Maiden. Look for teamfights instead.",
+        "late_game": "He's one of the best split pushers. He takes towers faster than almost anyone. You need to either match him or force fights elsewhere.",
+        "win_condition": "Kill ghouls with Q AoE, break his cage immediately, and fight him without his minion army. Never fight in his cage with Maiden.",
+        "counter_items": ["Dead Man's Plate", "Sterak's Gage"],
+        "scaling": "Yorick favored — his split push with Maiden is nearly impossible for Darius to match",
+        "jungle_gankable": true,
+        "positioning": "Kill ghouls before engaging. Auto his cage walls immediately to break free. Don't fight in his W with Maiden active."
+      },
+      "Vayne": {
+        "difficulty": "hard",
+        "who_wins_early": "Vayne",
+        "trading_pattern": "She kites you endlessly. You need Ghost and Flash to reach her. If she condemns you into a wall, you're dead. Close the gap by any means.",
+        "ability_to_dodge": "Vayne E — Condemn knocks you back and stuns against walls; never fight near walls where she can pin you.",
+        "power_spikes": {
+          "you": "Level 6 (ult execute if you reach her), Trinity Force + Ghost",
+          "enemy": "Level 6 (R stealth + tumble), Blade of the Ruined King"
+        },
+        "early_game": "She kites you. Take Doran's Shield and farm. Ghost is MANDATORY. Look for an all-in with Ghost when she wastes her E condemn.",
+        "mid_game": "Flash-Ghost onto her for kills. If both are down, you can't touch her. Her percent health true damage shreds you.",
+        "late_game": "She hard-counters you. Percent health true damage means your tankiness is meaningless. You need to Flash-E-Ghost her for any chance.",
+        "win_condition": "Catch her with Ghost-Flash-E pull when her condemn is on cooldown. If you can touch her, she dies. If you can't, you lose.",
+        "counter_items": ["Dead Man's Plate", "Force of Nature", "Randuin's Omen"],
+        "scaling": "Vayne massively favored — percent health true damage counters all forms of tankiness",
+        "jungle_gankable": true,
+        "positioning": "Never fight near walls where she can condemn-stun you. Approach from open areas and Ghost-E pull."
+      },
+      "Quinn": {
+        "difficulty": "hard",
+        "who_wins_early": "Quinn",
+        "trading_pattern": "She blinds you and kites. Ghost is mandatory. Wait for her E vault and immediately pull with E — she vaults backwards, so E her landing spot.",
+        "ability_to_dodge": "Quinn E — Vault kicks off you; pull her with E the instant she vaults back to catch her at landing.",
+        "power_spikes": {
+          "you": "Level 6 (ult execute), Trinity Force + Ghost",
+          "enemy": "Level 1 (ranged bully), Youmuu's Ghostblade"
+        },
+        "early_game": "She zones you from CS. Take Doran's Shield and farm what you can. Save Ghost for all-in attempts. Pull when she E-vaults and five-stack her.",
+        "mid_game": "She roams with R. Push tower when she leaves lane. Your teamfight is far stronger than hers.",
+        "late_game": "You outscale in teamfights. She's a roaming assassin who falls off. Group and use your presence in fights.",
+        "win_condition": "Survive lane, let her roam, take tower. Your teamfight impact is massively higher than hers.",
+        "counter_items": ["Plated Steelcaps", "Dead Man's Plate"],
+        "scaling": "Darius favored late — Quinn is an early game bully who gets outscaled in teamfights",
+        "jungle_gankable": true,
+        "positioning": "Save Ghost for all-ins. When she vaults off you, immediately E pull. She lands at a predictable distance after vault."
+      },
+      "Dr. Mundo": {
+        "difficulty": "easy",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Dodge his Q and all-in. He has no CC or escape. Pull him with E and stack passive. He's free kills all lane phase.",
+        "ability_to_dodge": "Dr. Mundo Q — sidestep his cleaver and engage. Without Q slow he can't kite or trade.",
+        "power_spikes": {
+          "you": "Level 1 (passive dominance), Trinity Force",
+          "enemy": "Level 6 (R regen), Spirit Visage + Warmog's"
+        },
+        "early_game": "Free lane. Dodge his Q and pull him. He has no way to escape and your passive shreds him. Zone him off all CS.",
+        "mid_game": "He gets tanky with R regen. Build anti-heal. Your ult execute ignores his healing since it's true damage.",
+        "late_game": "He becomes an unkillable meatshield. Don't waste time trying to kill him — go for squishier targets. He offers nothing but being tanky.",
+        "win_condition": "Kill him repeatedly early and snowball. Even when he gets tanky, your ult true damage chunks him.",
+        "counter_items": ["Bramble Vest", "Black Cleaver"],
+        "scaling": "Even — Mundo becomes unkillable but Darius's true damage execute is always relevant",
+        "jungle_gankable": true,
+        "positioning": "Sidestep his Q cleaver and walk at him. E pull and stack passive. He has no escape and no CC."
+      },
+      "Volibear": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Both want to all-in. When he runs at you with Q, auto-W and start stacking. He's strong early but you outscale if you get five stacks.",
+        "ability_to_dodge": "Volibear Q — Thundering Smash stun; auto-W him when he reaches you and start stacking immediately.",
+        "power_spikes": {
+          "you": "Level 1 (passive), Trinity Force",
+          "enemy": "Level 6 (R tower disable), Nashor's Tooth"
+        },
+        "early_game": "Coin flip level 1-3. Both are strong early. If you get five stacks, you win. If he stuns you and combos before you stack, he wins. Ghost helps you stick.",
+        "mid_game": "You outscale. His R tower disable is threatening for dives but you win the 1v1 with five stacks.",
+        "late_game": "You outscale. He falls off while your ult resets keep you relevant. Group and fight.",
+        "win_condition": "Get five stacks in every fight. If you reach five stacks, you always win. Ghost to stick through his disengage.",
+        "counter_items": ["Plated Steelcaps", "Bramble Vest"],
+        "scaling": "Darius favored — Volibear falls off while Darius maintains ult reset potential",
+        "jungle_gankable": true,
+        "positioning": "Stand your ground when he charges. Auto-W the instant he reaches you and start stacking. Don't run — fight."
+      },
+      "Urgot": {
+        "difficulty": "medium",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Dodge his E flip and pull him. He's a juggernaut like you but your passive outscales his. Don't walk circles around him — his shotgun knees proc from all angles.",
+        "ability_to_dodge": "Urgot E — Disdain flip; sidestep it and E pull him while it's on a long cooldown.",
+        "power_spikes": {
+          "you": "Level 1 (passive advantage), Trinity Force",
+          "enemy": "Level 9 (all knees active), Black Cleaver"
+        },
+        "early_game": "You win if his E misses. Dodge the flip, pull him, and stack passive. Stay on one side of him to minimize shotgun knee procs.",
+        "mid_game": "Respect his R execute. If you're below 25%, his chain pulls you in. Don't duel at low HP — his execute outranges yours.",
+        "late_game": "Both are juggernauts who fall off. Whoever gets ahead in lane usually maintains the advantage. Your teamfight is slightly better with resets.",
+        "win_condition": "Dodge E, pull, and stack. Stay on one side to minimize knee damage. Don't sit at low HP or his R chains you.",
+        "counter_items": ["Plated Steelcaps", "Sterak's Gage"],
+        "scaling": "Even — both are similar juggernauts who rely on getting ahead in lane",
+        "jungle_gankable": true,
+        "positioning": "Stay on one side of him so fewer shotgun knees proc. Dodge his E and immediately pull."
+      },
+      "Jayce": {
+        "difficulty": "hard",
+        "who_wins_early": "Jayce",
+        "trading_pattern": "He pokes you from range. Take Doran's Shield and farm. Save Ghost for when he switches to hammer form — if he's in melee, pull and five-stack.",
+        "ability_to_dodge": "Jayce Q+E — Shock Blast through Acceleration Gate; stand behind minions to block the combo.",
+        "power_spikes": {
+          "you": "Level 6 (ult execute), Trinity Force + Ghost",
+          "enemy": "Level 1-3 (ranged bully), Muramana"
+        },
+        "early_game": "He pokes you endlessly. Take Second Wind and Doran's Shield. Farm safely and wait for Ghost all-in window. If he switches to hammer, pull and five-stack.",
+        "mid_game": "Once you have items, Ghost onto him and five-stack. He's squishy and your ult deletes him. Don't let him kite you.",
+        "late_game": "You outscale in teamfights. He's a squishy ranged champion. One pull and he's dead.",
+        "win_condition": "Survive lane, Ghost-pull him when possible, and outscale. He's squishy late and one pull = death.",
+        "counter_items": ["Plated Steelcaps", "Dead Man's Plate"],
+        "scaling": "Darius favored — Jayce falls off while Darius's ult execute stays relevant",
+        "jungle_gankable": true,
+        "positioning": "Stand behind minions to block Q+E poke. Save Ghost for when he walks into hammer range."
+      },
+      "Singed": {
+        "difficulty": "medium",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Do NOT chase him. If he runs at you, pull with E and stack passive. Let him come to you. Never follow through poison trail.",
+        "ability_to_dodge": "Singed E — Fling throws you behind him into poison; pull him before he reaches fling range.",
+        "power_spikes": {
+          "you": "Level 1 (passive if you reach him), Trinity Force",
+          "enemy": "Level 2 (proxy farming), Rylai's Crystal Scepter"
+        },
+        "early_game": "If he proxies, freeze under tower and wait for your jungler. If he lanes normally, pull him and stack passive. NEVER chase him through poison.",
+        "mid_game": "He roams and proxies. Push tower when he's behind it. Don't waste time chasing — he wants you to follow.",
+        "late_game": "He's annoying but not dangerous 1v1. Your teamfight is better. Group and fight his team while he runs around.",
+        "win_condition": "Don't chase. Let him come to you or freeze the wave. If he proxies, call your jungler. Your 1v1 is better if you fight in place.",
+        "counter_items": ["Force of Nature", "Dead Man's Plate"],
+        "scaling": "Even — both are annoying to deal with in different ways; Singed proxies while Darius teamfights",
+        "jungle_gankable": false,
+        "positioning": "Stand still and let him come to you. Pull when he runs at you. NEVER chase through poison."
+      },
+      "Tryndamere": {
+        "difficulty": "medium",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Pull him and stack passive. His early crits are RNG. When he ults, stop attacking and walk away for 5 seconds, then re-engage and execute.",
+        "ability_to_dodge": "Tryndamere R — Undying Rage; disengage for 5 seconds when he ults. Your R won't kill through his invulnerability.",
+        "power_spikes": {
+          "you": "Level 1 (passive stacking), Trinity Force",
+          "enemy": "Level 6 (R unkillable), Kraken Slayer"
+        },
+        "early_game": "You win early. Pull and stack. His RNG crits can surprise you so don't gamble at low HP. Keep health above 50% to avoid crit deaths.",
+        "mid_game": "Respect his ult. Don't use R into his Undying Rage. Disengage for 5 seconds and re-engage after it expires.",
+        "late_game": "He outduels you in sidelane with ult and crit scaling. Group for teamfights where he's much weaker than you.",
+        "win_condition": "Get early kills, don't waste R into his ult, and force teamfights where his split-push style is weaker.",
+        "counter_items": ["Plated Steelcaps", "Warden's Mail", "Randuin's Omen"],
+        "scaling": "Tryndamere favored — his ult and crit scaling make him an unstoppable split pusher late",
+        "jungle_gankable": true,
+        "positioning": "When he pops R, immediately walk away. Count to 5, then re-engage with E pull and execute with R."
+      },
+      "Illaoi": {
+        "difficulty": "skill_matchup",
+        "who_wins_early": "even",
+        "trading_pattern": "Dodge her E soul grab. If she pulls your spirit, fight her immediately to reduce the damage. If she misses E, all-in her — she has nothing without it.",
+        "ability_to_dodge": "Illaoi E — Test of Spirit pulls your soul; dodge it by standing behind minions. If she misses E, she's helpless.",
+        "power_spikes": {
+          "you": "Level 1 (passive stacking), Trinity Force",
+          "enemy": "Level 6 (R tentacle spawn), Black Cleaver"
+        },
+        "early_game": "Dodge her E. If she misses, pull and five-stack her. If she lands E and ults, LEAVE immediately. Do not fight in her ult with tentacles everywhere.",
+        "mid_game": "She's strong in her tentacle zone. Pull her out of position and fight where there are no tentacles set up.",
+        "late_game": "Her teamfight is strong if she lands E and ults. Dodge her E and she's useless. Focus on positioning to avoid spirit pull.",
+        "win_condition": "Dodge E, then all-in. If she lands E and ults, leave immediately. Come back when tentacles despawn.",
+        "counter_items": ["Black Cleaver", "Sterak's Gage"],
+        "scaling": "Even — both are strong lane bullies who fall off in different ways",
+        "jungle_gankable": false,
+        "positioning": "Stand behind minions to block her E spirit grab. When she misses E, immediately engage and five-stack."
+      },
+      "Kayle": {
+        "difficulty": "easy",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Zone her off all CS. Pull her the instant she walks forward. She's melee pre-6 and useless. Kill her repeatedly.",
+        "ability_to_dodge": "Kayle R — her ult makes her invulnerable; wait it out then immediately pull and execute.",
+        "power_spikes": {
+          "you": "Level 1 (total domination), Trinity Force",
+          "enemy": "Level 6 (becomes ranged), Level 11 (waves), Level 16 (hypercarry)"
+        },
+        "early_game": "Crush her. She's melee and useless. Freeze near your tower and zone her off every CS and XP. Kill her on repeat.",
+        "mid_game": "She's scaling. Don't let her free farm. Keep pushing objectives and forcing fights before she hits 11.",
+        "late_game": "She hard-outscales everyone. If she reaches level 16, it's over. End the game before she transforms.",
+        "win_condition": "Deny her every CS and XP point early. End the game before level 16 or she wins regardless of your lead.",
+        "counter_items": ["Dead Man's Plate", "Sterak's Gage"],
+        "scaling": "Kayle massively favored — she becomes a ranged hypercarry at level 16 that destroys everything",
+        "jungle_gankable": true,
+        "positioning": "Stand between Kayle and the minion wave. Pull her the instant she walks forward. Freeze and zone."
+      }
+    }
+  }
+}

@@ -1,0 +1,510 @@
+{
+  "Maokai": {
+    "support": {
+      "Alistar": {
+        "difficulty": "even",
+        "who_wins_early": "even",
+        "trading_pattern": "Both have strong cc and engage. Trade carefully and respect cc chains.",
+        "ability_to_dodge": "Alistar E (Trample) — dodge by moving away, save Q for defense.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage potential",
+          "enemy": "Level 6 with ultimate lockdown, completed Mandate"
+        },
+        "early_game": "Trade with careful cc usage. Both have strong utilities.",
+        "mid_game": "Both scale similarly through cc and engage.",
+        "late_game": "Both strong. Whoever lands cc better controls fights.",
+        "win_condition": "Land Q roots reliably, setup engage, execute cc chains.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through cc and utility",
+        "jungle_gankable": true,
+        "positioning": "Keep distance and prepare for engages."
+      },
+      "Bard": {
+        "difficulty": "medium",
+        "who_wins_early": "Maokai",
+        "trading_pattern": "Maokai's poke and cc beat Bard early. Maintain pressure.",
+        "ability_to_dodge": "Bard Q (Cosmic Binding) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage potential",
+          "enemy": "Level 6 with Magical Journey, chime scaling"
+        },
+        "early_game": "Dominate with poke and cc. Keep him zoned.",
+        "mid_game": "Bard's roaming catches up. Both scale similarly.",
+        "late_game": "Bard's roaming and utility provide advantage.",
+        "win_condition": "Maintain pressure early, setup ganks, leverage cc.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Bard scales through roaming, Maokai through cc",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and position for Q roots."
+      },
+      "Blitzcrank": {
+        "difficulty": "even",
+        "who_wins_early": "even",
+        "trading_pattern": "Both have strong hook/cc threats. Trade carefully.",
+        "ability_to_dodge": "Blitzcrank Q (Rocket Grab) — stay behind minions, don't overextend.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 2-3 with hook threat, Level 6 with ultimate"
+        },
+        "early_game": "Trade with caution. Both have hook/cc threat.",
+        "mid_game": "Both scale similarly through cc utility.",
+        "late_game": "Both strong. Whoever lands cc better wins.",
+        "win_condition": "Land Q roots reliably, avoid his hook, setup plays.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through cc",
+        "jungle_gankable": false,
+        "positioning": "Stay behind minions. Prepare for hook threat."
+      },
+      "Brand": {
+        "difficulty": "medium",
+        "who_wins_early": "Maokai",
+        "trading_pattern": "Maokai's cc beats Brand's poke early. Maintain pressure.",
+        "ability_to_dodge": "Brand Q (Sear) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 1-2 with Q poke, Level 6 with ultimate burst"
+        },
+        "early_game": "Dominate with cc and poke. Don't let him scale.",
+        "mid_game": "Brand catches up through scaling but Maokai maintains pressure.",
+        "late_game": "Both strong. Maokai's cc provides advantage.",
+        "win_condition": "Maintain pressure, land Q roots, leverage cc chains.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through utility",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and position for Q roots."
+      },
+      "Janna": {
+        "difficulty": "hard",
+        "who_wins_early": "Janna",
+        "trading_pattern": "Janna's disengage beats Maokai's engage early. Play patiently.",
+        "ability_to_dodge": "Janna Q (Howling Gale) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 1-2 with disengage, Level 6 with ultimate knockup"
+        },
+        "early_game": "Play patiently against her disengage. Scale through cc.",
+        "mid_game": "Janna's utility is strong. Maokai catches up gradually.",
+        "late_game": "Both strong. Positioning determines fights.",
+        "win_condition": "Scale through cc, avoid her disengage, setup ganks.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through utility",
+        "jungle_gankable": true,
+        "positioning": "Keep distance and prepare for engages."
+      },
+      "Karma": {
+        "difficulty": "medium",
+        "who_wins_early": "Maokai",
+        "trading_pattern": "Maokai's cc dominates Karma's utility early. Pressure.",
+        "ability_to_dodge": "Karma Q (Inner Flame) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate damage"
+        },
+        "early_game": "Dominate with cc. Setup ganks and kills.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Maokai's cc provides slight advantage.",
+        "win_condition": "Maintain early pressure, land Q roots, leverage cc.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale similarly",
+        "jungle_gankable": true,
+        "positioning": "Keep distance and position for Q roots."
+      },
+      "Lulu": {
+        "difficulty": "medium",
+        "who_wins_early": "Maokai",
+        "trading_pattern": "Maokai's cc beats Lulu's utility early. Pressure.",
+        "ability_to_dodge": "Lulu Q (Glitterlance) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate poly"
+        },
+        "early_game": "Dominate with cc. Setup ganks.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Both strong. Positioning matters.",
+        "win_condition": "Maintain pressure, land Q roots, leverage cc chains.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale similarly",
+        "jungle_gankable": true,
+        "positioning": "Keep distance and position for Q roots."
+      },
+      "Maokai": {
+        "difficulty": "skill_matchup",
+        "who_wins_early": "even",
+        "trading_pattern": "Mirror matchup where Q positioning and cc timing matter.",
+        "ability_to_dodge": "Maokai Q (Bramble Smash) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Same as you — scaling is identical"
+        },
+        "early_game": "Trade with careful cc usage. Better cc timing wins.",
+        "mid_game": "Both scale identically. Team coordination matters.",
+        "late_game": "Whoever lands cc better controls fights.",
+        "win_condition": "Better Q accuracy, superior cc timing, team execution.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Perfectly even — identical in every way",
+        "jungle_gankable": true,
+        "positioning": "Mirror opponent's spacing. Execute cc better."
+      },
+      "Nami": {
+        "difficulty": "medium",
+        "who_wins_early": "Maokai",
+        "trading_pattern": "Maokai's cc beats Nami's utility early. Pressure.",
+        "ability_to_dodge": "Nami Q (Aqua Prison) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate knockup"
+        },
+        "early_game": "Dominate with cc. Setup ganks and kills.",
+        "mid_game": "Both scale similarly through cc utility.",
+        "late_game": "Both strong. Maokai's cc provides slight advantage.",
+        "win_condition": "Maintain pressure, land Q roots, leverage cc.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale similarly",
+        "jungle_gankable": true,
+        "positioning": "Keep distance and position for Q roots."
+      },
+      "Nautilus": {
+        "difficulty": "medium",
+        "who_wins_early": "Nautilus",
+        "trading_pattern": "Nautilus's cc and engage beat Maokai early. Play patiently.",
+        "ability_to_dodge": "Nautilus Q (Dredge Line) — dodge by moving sideways, don't overextend.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 2-3 with cc threat, Level 6 with ultimate"
+        },
+        "early_game": "Play patiently against his stronger cc. Scale gradually.",
+        "mid_game": "Both scale similarly through cc.",
+        "late_game": "Both strong. Whoever lands cc better wins.",
+        "win_condition": "Scale through cc, land Q roots, leverage utility.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through cc",
+        "jungle_gankable": false,
+        "positioning": "Keep distance from his Q. Prepare for engage."
+      },
+      "Neeko": {
+        "difficulty": "medium",
+        "who_wins_early": "Neeko",
+        "trading_pattern": "Neeko's poke and root beat Maokai early. Play patiently.",
+        "ability_to_dodge": "Neeko E (Tangle-Barbs) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate root"
+        },
+        "early_game": "Play patiently against her poke. Scale gradually.",
+        "mid_game": "Both scale similarly through cc.",
+        "late_game": "Both strong. Positioning matters.",
+        "win_condition": "Scale through cc, land Q roots, avoid her root.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale similarly",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and position for Q roots."
+      },
+      "Pantheon": {
+        "difficulty": "hard",
+        "who_wins_early": "Pantheon",
+        "trading_pattern": "Pantheon's all-in damage beats Maokai early. Play defensively.",
+        "ability_to_dodge": "Pantheon W (Aegis Assault) — dodge by moving away from dash.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 2-3 with all-in, Level 6 with ultimate gank"
+        },
+        "early_game": "Play defensively from his all-in. Scale gradually.",
+        "mid_game": "Maokai catches up through cc scaling.",
+        "late_game": "Maokai's cc provides advantage.",
+        "win_condition": "Survive early, scale through cc, land Q roots.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Maokai slightly favored — cc scales better",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and prepare for engage."
+      },
+      "Poppy": {
+        "difficulty": "hard",
+        "who_wins_early": "Poppy",
+        "trading_pattern": "Poppy's cc and engage beat Maokai early. Play defensively.",
+        "ability_to_dodge": "Poppy E (Heroic Charge) — dodge by moving away from walls.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 2-3 with all-in, Level 6 with ultimate knock"
+        },
+        "early_game": "Play defensively from her cc. Scale gradually.",
+        "mid_game": "Both scale similarly through cc.",
+        "late_game": "Both strong. Whoever lands cc better wins.",
+        "win_condition": "Survive early, scale through cc, land Q roots.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through cc",
+        "jungle_gankable": false,
+        "positioning": "Keep distance from walls. Position for Q roots."
+      },
+      "Pyke": {
+        "difficulty": "hard",
+        "who_wins_early": "Pyke",
+        "trading_pattern": "Pyke's cc and execute beat Maokai early. Play defensively.",
+        "ability_to_dodge": "Pyke Q (Bone Skewer) — dodge by moving sideways, stay behind minions.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 2-3 with cc threat, Level 6 with ultimate execute"
+        },
+        "early_game": "Play defensively from his cc. Scale gradually.",
+        "mid_game": "Maokai catches up through cc scaling.",
+        "late_game": "Maokai's cc provides counter play advantage.",
+        "win_condition": "Survive early, scale through cc, land Q roots.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Maokai slightly favored — cc utility beats execute",
+        "jungle_gankable": false,
+        "positioning": "Stay behind minions. Position for Q roots."
+      },
+      "Rakan": {
+        "difficulty": "even",
+        "who_wins_early": "even",
+        "trading_pattern": "Both have strong engage. Trade carefully and respect timing.",
+        "ability_to_dodge": "Rakan W (Grand Entrance) — dodge by moving away from dash.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 1-2 with engage, Level 6 with ultimate engage"
+        },
+        "early_game": "Trade with caution. Both have strong engage.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Both strong. Whoever engages better controls fights.",
+        "win_condition": "Land Q roots, setup ganks, execute cc chains.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through utility",
+        "jungle_gankable": true,
+        "positioning": "Keep distance and prepare for engages."
+      },
+      "Renata": {
+        "difficulty": "medium",
+        "who_wins_early": "Renata",
+        "trading_pattern": "Renata's poke and root beat Maokai early. Play patiently.",
+        "ability_to_dodge": "Renata W (Bailout) — position to avoid her root.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate revive"
+        },
+        "early_game": "Play patiently against her poke. Scale gradually.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Both strong. Maokai's cc provides slight advantage.",
+        "win_condition": "Scale through cc, land Q roots, avoid her root.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale similarly",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and position for Q roots."
+      },
+      "Seraphine": {
+        "difficulty": "medium",
+        "who_wins_early": "Seraphine",
+        "trading_pattern": "Seraphine's poke and root beat Maokai early. Play patiently.",
+        "ability_to_dodge": "Seraphine E (Surround) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate damage"
+        },
+        "early_game": "Play patiently against her poke. Scale gradually.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Both strong. Positioning matters.",
+        "win_condition": "Scale through cc, land Q roots, avoid her root.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale similarly",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and position for Q roots."
+      },
+      "Sona": {
+        "difficulty": "medium",
+        "who_wins_early": "Maokai",
+        "trading_pattern": "Maokai's cc dominates Sona's early utility. Pressure.",
+        "ability_to_dodge": "Sona Q (Hymn of Valor) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 6 with ultimate cc, completed Mandate"
+        },
+        "early_game": "Dominate with cc. Setup ganks.",
+        "mid_game": "Maokai maintains pressure while Sona scales.",
+        "late_game": "Maokai's cc provides advantage.",
+        "win_condition": "Maintain pressure, land Q roots, leverage cc chains.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Maokai slightly favored — cc scales better",
+        "jungle_gankable": true,
+        "positioning": "Keep distance and position for Q roots."
+      },
+      "Soraka": {
+        "difficulty": "medium",
+        "who_wins_early": "Maokai",
+        "trading_pattern": "Maokai's cc beats Soraka's poke early. Pressure.",
+        "ability_to_dodge": "Soraka Q (Starcall) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate heal"
+        },
+        "early_game": "Dominate with cc. Setup ganks.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Soraka's heal is valuable but Maokai's cc provides advantage.",
+        "win_condition": "Maintain pressure, land Q roots, leverage cc.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale similarly",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and position for Q roots."
+      },
+      "Tahm Kench": {
+        "difficulty": "hard",
+        "who_wins_early": "Tahm Kench",
+        "trading_pattern": "Tahm Kench's cc and eating beat Maokai early. Play patiently.",
+        "ability_to_dodge": "Tahm Kench Q (Tongue Lash) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 1-2 with cc, Level 6 with ultimate roam"
+        },
+        "early_game": "Play patiently from his cc. Scale gradually.",
+        "mid_game": "Both scale similarly through utility and cc.",
+        "late_game": "Both strong. Positioning matters.",
+        "win_condition": "Scale through cc, land Q roots, avoid his cc.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale through utility and cc",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and position for Q roots."
+      },
+      "Taric": {
+        "difficulty": "hard",
+        "who_wins_early": "Taric",
+        "trading_pattern": "Taric's stun and armor beat Maokai early. Play defensively.",
+        "ability_to_dodge": "Taric E (Dazzle) — dodge by moving sideways, don't stand still.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 3-4 with stun, Level 6 with ultimate armor"
+        },
+        "early_game": "Play defensively from his stun. Scale gradually.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Both strong. Maokai's cc provides slight advantage.",
+        "win_condition": "Scale through cc, land Q roots, avoid his stun.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale similarly",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and position for Q roots."
+      },
+      "Thresh": {
+        "difficulty": "medium",
+        "who_wins_early": "Thresh",
+        "trading_pattern": "Thresh's hook threat beats Maokai early. Play carefully.",
+        "ability_to_dodge": "Thresh Q (Death Sentence) — stay behind minions, don't overextend.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 2-3 with hook threat, Level 6 with ultimate cage"
+        },
+        "early_game": "Play carefully from his hook. Scale gradually.",
+        "mid_game": "Both scale similarly through cc utility.",
+        "late_game": "Maokai's cc provides slight advantage.",
+        "win_condition": "Scale through cc, land Q roots, avoid his hooks.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale similarly",
+        "jungle_gankable": false,
+        "positioning": "Stay behind minions. Position for Q roots."
+      },
+      "Vel'Koz": {
+        "difficulty": "medium",
+        "who_wins_early": "Vel'Koz",
+        "trading_pattern": "Vel'Koz's poke and root beat Maokai early. Play patiently.",
+        "ability_to_dodge": "Vel'Koz Q (Plasma Fission) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate knockup"
+        },
+        "early_game": "Play patiently against his poke. Scale gradually.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Maokai's cc provides slight advantage.",
+        "win_condition": "Scale through cc, land Q roots, avoid his poke.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Maokai slightly favored — cc scales well",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and position for Q roots."
+      },
+      "Xerath": {
+        "difficulty": "medium",
+        "who_wins_early": "Xerath",
+        "trading_pattern": "Xerath's poke beats Maokai early. Play patiently.",
+        "ability_to_dodge": "Xerath Q (Arcanopulse) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate shots"
+        },
+        "early_game": "Play patiently against his poke. Scale gradually.",
+        "mid_game": "Both scale similarly through utility and poke.",
+        "late_game": "Maokai's cc provides slight advantage.",
+        "win_condition": "Scale through cc, land Q roots, avoid his shots.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale similarly",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and position for Q roots."
+      },
+      "Yuumi": {
+        "difficulty": "easy",
+        "who_wins_early": "Maokai",
+        "trading_pattern": "Maokai dominates Yuumi. She provides no lane presence.",
+        "ability_to_dodge": "Yuumi Q (Prowling Projectile) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 6 with ultimate cc, attached to ADC"
+        },
+        "early_game": "Completely dominate. Setup ganks.",
+        "mid_game": "Maokai scales well while Yuumi provides minimal value.",
+        "late_game": "Maokai's cc far outscales Yuumi.",
+        "win_condition": "Leverage lane dominance, setup ganks, build lead.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Maokai heavily outscales — Yuumi early/attach champion",
+        "jungle_gankable": true,
+        "positioning": "Dominate space. Position for Q roots aggressively."
+      },
+      "Zyra": {
+        "difficulty": "medium",
+        "who_wins_early": "Zyra",
+        "trading_pattern": "Zyra's plants and root beat Maokai early. Play patiently.",
+        "ability_to_dodge": "Zyra E (Rampant Growth) — dodge by moving around roots.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate knockup"
+        },
+        "early_game": "Play patiently from her plants. Scale gradually.",
+        "mid_game": "Both scale similarly through cc.",
+        "late_game": "Both strong. Positioning matters.",
+        "win_condition": "Scale through cc, land Q roots, avoid her plants.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale similarly",
+        "jungle_gankable": false,
+        "positioning": "Keep distance from plants. Position for Q roots."
+      },
+      "Lux": {
+        "difficulty": "medium",
+        "who_wins_early": "Lux",
+        "trading_pattern": "Lux's poke and root beat Maokai early. Play patiently.",
+        "ability_to_dodge": "Lux E (Lucent Singularity) — dodge by moving out of radius.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate laser"
+        },
+        "early_game": "Play patiently against her poke. Scale gradually.",
+        "mid_game": "Both scale similarly through utility.",
+        "late_game": "Maokai's cc provides slight advantage.",
+        "win_condition": "Scale through cc, land Q roots, avoid her root.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale similarly",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and position for Q roots."
+      },
+      "Morgana": {
+        "difficulty": "medium",
+        "who_wins_early": "Morgana",
+        "trading_pattern": "Morgana's root and shield beat Maokai early. Play patiently.",
+        "ability_to_dodge": "Morgana Q (Dark Binding) — dodge by moving sideways.",
+        "power_spikes": {
+          "you": "Level 6 with ultimate root, early engage",
+          "enemy": "Level 1-2 with poke, Level 6 with ultimate root"
+        },
+        "early_game": "Play patiently against her poke. Scale gradually.",
+        "mid_game": "Both scale similarly through utility and cc.",
+        "late_game": "Both strong. Positioning matters.",
+        "win_condition": "Scale through cc, land Q roots, avoid her root.",
+        "counter_items": ["Mikael's Blessing", "Mercury's Treads"],
+        "scaling": "Even — Both scale similarly",
+        "jungle_gankable": false,
+        "positioning": "Keep distance and position for Q roots."
+      }
+    }
+  }
+}

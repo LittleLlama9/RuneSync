@@ -1,0 +1,414 @@
+[ugg] Gnar: active_imgs=['fleetfootwork', 'triumph', 'legendalacrity', 'laststand', 'boneplating', 'overgrowth']
+[ugg] Gnar: perk_ids=[8021, 9111, 9104, 8299, 8473, 8451], shards=[5005, 5008, 5002]
+[ugg] Gnar: tree_raw=['8000', '8400'], primary=8000, secondary=8400
+[ugg] Gnar: active_imgs=['fleetfootwork', 'triumph', 'legendalacrity', 'laststand', 'boneplating', 'overgrowth']
+[ugg] Gnar: perk_ids=[8021, 9111, 9104, 8299, 8473, 8451], shards=[5005, 5008, 5002]
+[ugg] Gnar: tree_raw=['8000', '8400'], primary=8000, secondary=8400
+[ugg] Gnar: active_imgs=['fleetfootwork', 'triumph', 'legendalacrity', 'laststand', 'boneplating', 'overgrowth']
+[ugg] Gnar: perk_ids=[8021, 9111, 9104, 8299, 8473, 8451], shards=[5005, 5008, 5002]
+[ugg] Gnar: tree_raw=['8000', '8400'], primary=8000, secondary=8400
+[ugg] Gnar: active_imgs=['fleetfootwork', 'triumph', 'legendalacrity', 'laststand', 'boneplating', 'overgrowth']
+[ugg] Gnar: perk_ids=[8021, 9111, 9104, 8299, 8473, 8451], shards=[5005, 5008, 5002]
+[ugg] Gnar: tree_raw=['8000', '8400'], primary=8000, secondary=8400
+[ugg] Gnar: active_imgs=['fleetfootwork', 'triumph', 'legendalacrity', 'laststand', 'boneplating', 'overgrowth']
+[ugg] Gnar: perk_ids=[8021, 9111, 9104, 8299, 8473, 8451], shards=[5005, 5008, 5002]
+[ugg] Gnar: tree_raw=['8000', '8400'], primary=8000, secondary=8400
+[ugg] Gnar: active_imgs=['fleetfootwork', 'triumph', 'legendalacrity', 'laststand', 'boneplating', 'overgrowth']
+[ugg] Gnar: perk_ids=[8021, 9111, 9104, 8299, 8473, 8451], shards=[5005, 5008, 5001]
+[ugg] Gnar: tree_raw=['8000', '8400'], primary=8000, secondary=8400
+[ugg] Malphite: active_imgs=['arcanecomet', 'manaflowband', 'transcendence', 'scorch', 'secondwind', 'overgrowth']
+[ugg] Malphite: perk_ids=[8229, 8226, 8210, 8237, 8444, 8451], shards=[5005, 5001, 5001]
+[ugg] Malphite: tree_raw=['8200', '8400'], primary=8200, secondary=8400
+[ugg] Bard: active_imgs=['electrocute', 'cheapshot', 'deepward', 'relentlesshunter', 'celeritytemp', 'scorch']
+[ugg] Bard: perk_ids=[8112, 8126, 8141, 8105, 8234, 8237], shards=[5005, 5008, 5001]
+[ugg] Bard: tree_raw=['8100', '8200'], primary=8100, secondary=8200
+[ugg] Veigar: active_imgs=['firststrike', 'magicalfootwear', 'biscuitdelivery', 'cosmicinsight', 'manaflowband', 'transcendence']
+[ugg] Veigar: perk_ids=[8369, 8304, 8345, 8347, 8226, 8210], shards=[5007, 5010, 5001]
+[ugg] Veigar: tree_raw=['8300', '8200'], primary=8300, secondary=8200
+[ugg] Ryze: active_imgs=['phaserush', 'manaflowband', 'celeritytemp', 'scorch', 'boneplating', 'overgrowth']
+[ugg] Ryze: perk_ids=[8230, 8226, 8234, 8237, 8473, 8451], shards=[5005, 5010, 5001]
+[ugg] Ryze: tree_raw=['8200', '8400'], primary=8200, secondary=8400
+[ugg] Ornn: active_imgs=['graspoftheundying', 'demolish', 'secondwind', 'overgrowth', 'manaflowband', 'transcendence']
+[ugg] Ornn: perk_ids=[8437, 8446, 8444, 8451, 8226, 8210], shards=[5007, 5001, 5001]
+[ugg] Ornn: tree_raw=['8400', '8200'], primary=8400, secondary=8200
+[ugg] Malphite: active_imgs=['arcanecomet', 'manaflowband', 'transcendence', 'scorch', 'secondwind', 'overgrowth']
+[ugg] Malphite: perk_ids=[8229, 8226, 8210, 8237, 8444, 8451], shards=[5005, 5001, 5001]
+[ugg] Malphite: tree_raw=['8200', '8400'], primary=8200, secondary=8400
+[ugg] Kai'Sa: active_imgs=['lethaltempotemp', 'triumph', 'legendbloodline', 'cutdown', 'cashback2', 'alchemistcabinet']
+[ugg] Kai'Sa: perk_ids=[8008, 9111, 9103, 8017, 8321, 8313], shards=[5005, 5008, 5001]
+[ugg] Kai'Sa: tree_raw=['8000', '8300'], primary=8000, secondary=8300
+[ugg] Aphelios: active_imgs=['presstheattack', 'triumph', 'legendbloodline', 'cutdown', 'cashback2', 'alchemistcabinet']
+[ugg] Aphelios: perk_ids=[8005, 9111, 9103, 8017, 8321, 8313], shards=[5005, 5008, 5001]
+[ugg] Aphelios: tree_raw=['8000', '8300'], primary=8000, secondary=8300
+[ugg] Aphelios: active_imgs=['presstheattack', 'triumph', 'legendbloodline', 'cutdown', 'cashback2', 'alchemistcabinet']
+[ugg] Aphelios: perk_ids=[8005, 9111, 9103, 8017, 8321, 8313], shards=[5005, 5008, 5001]
+[ugg] Aphelios: tree_raw=['8000', '8300'], primary=8000, secondary=8300
+[ugg] Aphelios: active_imgs=['presstheattack', 'triumph', 'legendbloodline', 'cutdown', 'cashback2', 'alchemistcabinet']
+[ugg] Aphelios: perk_ids=[8005, 9111, 9103, 8017, 8321, 8313], shards=[5005, 5008, 5001]
+[ugg] Aphelios: tree_raw=['8000', '8300'], primary=8000, secondary=8300
+[ugg] Yone: active_imgs=['lethaltempotemp', 'triumph', 'legendalacrity', 'laststand', 'secondwind', 'overgrowth']
+[ugg] Yone: perk_ids=[8008, 9111, 9104, 8299, 8444, 8451], shards=[5005, 5008, 5001]
+[ugg] Yone: tree_raw=['8000', '8400'], primary=8000, secondary=8400
+[ugg] Dr. Mundo: active_imgs=['graspoftheundying', 'demolish', 'secondwind', 'overgrowth', 'magicalfootwear', 'biscuitdelivery']
+[ugg] Dr. Mundo: perk_ids=[8437, 8446, 8444, 8451, 8304, 8345], shards=[5005, 5001, 5001]
+[ugg] Dr. Mundo: tree_raw=['8400', '8300'], primary=8400, secondary=8300
+[ugg] Caitlyn: active_imgs=['lethaltempotemp', 'presenceofmind', 'legendbloodline', 'cutdown', 'cashback2', 'alchemistcabinet']
+[ugg] Caitlyn: perk_ids=[8008, 8009, 9103, 8017, 8321, 8313], shards=[5005, 5008, 5001]
+[ugg] Caitlyn: tree_raw=['8000', '8300'], primary=8000, secondary=8300
+[ugg] Caitlyn: active_imgs=['lethaltempotemp', 'presenceofmind', 'legendbloodline', 'cutdown', 'cashback2', 'alchemistcabinet']
+[ugg] Caitlyn: perk_ids=[8008, 8009, 9103, 8017, 8321, 8313], shards=[5005, 5008, 5001]
+[ugg] Caitlyn: tree_raw=['8000', '8300'], primary=8000, secondary=8300
+[ugg] Caitlyn: active_imgs=['lethaltempotemp', 'presenceofmind', 'legendbloodline', 'cutdown', 'cashback2', 'alchemistcabinet']
+[ugg] Caitlyn: perk_ids=[8008, 8009, 9103, 8017, 8321, 8313], shards=[5005, 5008, 5001]
+[ugg] Caitlyn: tree_raw=['8000', '8300'], primary=8000, secondary=8300
+[ugg] Caitlyn: active_imgs=['lethaltempotemp', 'presenceofmind', 'legendbloodline', 'cutdown', 'cashback2', 'alchemistcabinet']
+[ugg] Caitlyn: perk_ids=[8008, 8009, 9103, 8017, 8321, 8313], shards=[5005, 5008, 5001]
+[ugg] Caitlyn: tree_raw=['8000', '8300'], primary=8000, secondary=8300
+[ugg] Caitlyn: summoner_imgs=['summonerflash', 'summonerbarrier'], summoner_ids=[4, 21]
+[lcu] set_summoner_spells failed: PATCH /lol-champ-select/v1/my-selection failed 404: {"errorCode":"RESOURCE_NOT_FOUND","httpStatus":404,"message":"Invalid URI format"}
+[ugg] Caitlyn: active_imgs=['lethaltempotemp', 'presenceofmind', 'legendbloodline', 'cutdown', 'cashback2', 'alchemistcabinet']
+[ugg] Caitlyn: perk_ids=[8008, 8009, 9103, 8017, 8321, 8313], shards=[5005, 5008, 5001]
+[ugg] Caitlyn: tree_raw=['8000', '8300'], primary=8000, secondary=8300
+[ugg] Caitlyn: summoner_imgs=['summonerflash', 'summonerbarrier'], summoner_ids=[4, 21]
+[lcu] set_summoner_spells failed: PATCH /lol-champ-select/v1/my-selection failed 404: {"errorCode":"RESOURCE_NOT_FOUND","httpStatus":404,"message":"Invalid URI format"}
+[ugg] Caitlyn: active_imgs=['lethaltempotemp', 'presenceofmind', 'legendbloodline', 'cutdown', 'cashback2', 'alchemistcabinet']
+[ugg] Caitlyn: perk_ids=[8008, 8009, 9103, 8017, 8321, 8313], shards=[5005, 5008, 5001]
+[ugg] Caitlyn: tree_raw=['8000', '8300'], primary=8000, secondary=8300
+[ugg] Caitlyn: summoner_imgs=['summonerflash', 'summonerbarrier'], summoner_ids=[4, 21]
+[ugg] Azir: active_imgs=['lethaltempotemp', 'presenceofmind', 'legendalacrity', 'cutdown', 'boneplating', 'unflinching']
+[ugg] Azir: perk_ids=[8008, 8009, 9104, 8017, 8473, 8242], shards=[5005, 5008, 5001]
+[ugg] Azir: tree_raw=['8000', '8400'], primary=8000, secondary=8400
+[ugg] Azir: summoner_imgs=['summonerflash', 'summonerteleport'], summoner_ids=[4, 12]
+[ugg] request failed for /counters: <urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+[ugg] request failed for /build: <urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+[ugg] request failed for /matchup: <urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---

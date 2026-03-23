@@ -1,0 +1,456 @@
+{
+  "Kayle": {
+    "top": {
+      "Darius": {
+        "difficulty": "hard",
+        "who_wins_early": "Darius",
+        "trading_pattern": "He kills you freely pre-6. His bleed prevents your HP sustain. Only trade at level 2 with max poke, then retreat. Survive until level 6.",
+        "ability_to_dodge": "Darius E (Apprehend) — never walk into pull range. His pull into full bleed stack combo kills you at levels 1-5.",
+        "power_spikes": {
+          "you": "Level 6 (ult self-use for survival), Level 11 (ranged form)",
+          "enemy": "Level 5 (full bleed), Stridebreaker"
+        },
+        "early_game": "Farm under tower with Fleet Footwork. Take every poke trade you can safely. Call for jungle.",
+        "mid_game": "Level 11 changes things significantly. You become ranged and he can't stick to you.",
+        "late_game": "You outscale him heavily. Your ult makes you unkillable during his all-in.",
+        "win_condition": "Survive to level 11. Farm safely with Fleet Footwork. After 11 you win the lane — before 11 you lose it.",
+        "counter_items": ["Plated Steelcaps", "Nashor's Tooth"],
+        "scaling": "Darius wins early; Kayle wins past level 11",
+        "jungle_gankable": true,
+        "positioning": "Stay outside his E hook range. Hug minion wave so he can't cleanly get to you without aggroing them."
+      },
+      "Garen": {
+        "difficulty": "medium",
+        "who_wins_early": "Garen",
+        "trading_pattern": "His Q silence stops you from using abilities for the duration. Never fight him melee during silence. Kite with E after level 6.",
+        "ability_to_dodge": "Garen Q — sprint away when you see his Q animation. His silence combined with E spin is devastating at low levels.",
+        "power_spikes": {
+          "you": "Level 6 (ult survival), Level 11 (ranged)",
+          "enemy": "Level 2-5, Sunfire Cape"
+        },
+        "early_game": "Survive his early dominance. Fleet Footwork to sustain through trades.",
+        "mid_game": "You start gaining ranged harass. He can't match your progressive range advantage.",
+        "late_game": "You hard outscale. Your ult makes his execute irrelevant during the invulnerability window.",
+        "win_condition": "Survive to level 6 and farm. At 11 you dominate him permanently.",
+        "counter_items": ["Nashor's Tooth", "Plated Steelcaps"],
+        "scaling": "Garen wins early; Kayle wins past level 11",
+        "jungle_gankable": true,
+        "positioning": "Keep maximum distance. When his Q is on cooldown, trade briefly then retreat."
+      },
+      "Fiora": {
+        "difficulty": "hard",
+        "who_wins_early": "Fiora",
+        "trading_pattern": "She can Riposte your E flame wave. She procs Vitals on you constantly. She wins every melee trade. Survive to level 11 and kite her.",
+        "ability_to_dodge": "Fiora W (Riposte) — don't use E when her W is available. Bait it first with a basic attack.",
+        "power_spikes": {
+          "you": "Level 11 (ranged kiting), Nashor's Tooth",
+          "enemy": "Level 9 (Riposte CDR), Ravenous Hydra"
+        },
+        "early_game": "Farm defensively. She will kill you if you fight. Fleet Footwork keeps you healthy.",
+        "mid_game": "Even at level 11 she can chase. Use ult for survival during her engage.",
+        "late_game": "Your DPS at level 16 is enormous. You outscale her in raw damage.",
+        "win_condition": "Survive to 11 with jungle help if needed. Your ult blocks her execute. Farm safely.",
+        "counter_items": ["Plated Steelcaps", "Nashor's Tooth"],
+        "scaling": "Fiora wins early-mid; Kayle wins late game (16+)",
+        "jungle_gankable": true,
+        "positioning": "Farm under tower early. Use ult when she goes for kills — the invulnerability negates her entire combo."
+      },
+      "Aatrox": {
+        "difficulty": "hard",
+        "who_wins_early": "Aatrox",
+        "trading_pattern": "His Q sweet spots destroy you melee. Never fight him at levels 1-10. At 11 kite from range.",
+        "ability_to_dodge": "Aatrox Q — his Q hitboxes are your death sentence early. Stay outside all three Q zones.",
+        "power_spikes": {
+          "you": "Level 11 (ranged), Level 16 (ult empowerment)",
+          "enemy": "Level 9 (Q max), Goredrinker"
+        },
+        "early_game": "Farm under tower. His healing and Q make trading suicidal.",
+        "mid_game": "Still dangerous pre-11. Take every safe trade opportunity with ranged poke at level 6.",
+        "late_game": "You outscale significantly. Your passive burn and Nashor's auto-attacks melt him.",
+        "win_condition": "Survive to level 11-16. Never fight melee. Use ult for survival when he dives.",
+        "counter_items": ["Plated Steelcaps", "Nashor's Tooth"],
+        "scaling": "Aatrox wins early-mid; Kayle wins late",
+        "jungle_gankable": true,
+        "positioning": "Stand completely outside his Q range early. After 11 use E ranged poke to whittle him down."
+      },
+      "Camille": {
+        "difficulty": "hard",
+        "who_wins_early": "Camille",
+        "trading_pattern": "She can ult you and isolate you pre-11. Her ult in hex zone removes your kite ability. Use your ult during her hex zone to survive.",
+        "ability_to_dodge": "Camille E (Hookshot) — stay away from walls. She can't angle E without wall geometry.",
+        "power_spikes": {
+          "you": "Level 11 (ranged kite), Nashor's Tooth",
+          "enemy": "Level 3 (full kit), Trinity Force"
+        },
+        "early_game": "Farm defensively. She outdamages you completely.",
+        "mid_game": "At level 11 you start kiting. Her ult isolates you — use your ult to survive.",
+        "late_game": "You outscale her in sustained DPS.",
+        "win_condition": "Survive early. After level 11 your ranged auto-attacks and kite beat her mobility.",
+        "counter_items": ["Plated Steelcaps", "Nashor's Tooth"],
+        "scaling": "Camille wins early-mid; Kayle wins late",
+        "jungle_gankable": true,
+        "positioning": "Stay center of lane away from walls. Use ult inside her hex zone to survive."
+      },
+      "Irelia": {
+        "difficulty": "hard",
+        "who_wins_early": "Irelia",
+        "trading_pattern": "Her Q resets through your kit are oppressive. At levels 1-10 she kills you easily. Keep max distance and kite from 11.",
+        "ability_to_dodge": "Irelia E (Flawless Duet) — sidestep the stun blades.",
+        "power_spikes": {
+          "you": "Level 11 (ranged), Nashor's Tooth",
+          "enemy": "Level 5 (full stacks), Trinity Force"
+        },
+        "early_game": "Survive her aggression. She will kill you if you fight.",
+        "mid_game": "At level 11 your range gives you safety. She still closes gap with Q resets.",
+        "late_game": "Your raw DPS surpasses her at full build.",
+        "win_condition": "Survive to 11. Build speed items to kite her Q gap closes.",
+        "counter_items": ["Plated Steelcaps", "Nashor's Tooth"],
+        "scaling": "Irelia wins early-mid; Kayle wins late",
+        "jungle_gankable": true,
+        "positioning": "Max distance constantly. Use ult when she Q-chains onto you."
+      },
+      "Jax": {
+        "difficulty": "hard",
+        "who_wins_early": "Jax",
+        "trading_pattern": "His E blocks your auto-attacks which is your main DPS. He wins every fight pre-11. At 11 your ranged E flame wave bypasses his E dodge.",
+        "ability_to_dodge": "Jax E (Counterstrike) — your ranged E at level 11+ hits through his E dodge zone. Timing matters.",
+        "power_spikes": {
+          "you": "Level 11 (ranged flame bypasses his E), Level 16",
+          "enemy": "Level 3 (E), Trinity Force"
+        },
+        "early_game": "Farm under tower. His E blocks your auto-attacks.",
+        "mid_game": "At 11, your ranged E hits through his Counterstrike. Major power reversal.",
+        "late_game": "You outscale him at full build significantly.",
+        "win_condition": "Survive to level 11 where your E ranged hits through his Counterstrike. Farm safely.",
+        "counter_items": ["Plated Steelcaps", "Nashor's Tooth"],
+        "scaling": "Jax wins early; Kayle wins past level 11",
+        "jungle_gankable": true,
+        "positioning": "Farm defensively under tower. After 11 kite him with ranged E at max range."
+      },
+      "Jayce": {
+        "difficulty": "hard",
+        "who_wins_early": "Jayce",
+        "trading_pattern": "He out-pokets you from cannon form. His early range is better than yours levels 1-5. Survive and scale.",
+        "ability_to_dodge": "Jayce Q (Shock Blast) — dodge the arc projectile. It's a wide shot but predictable.",
+        "power_spikes": {
+          "you": "Level 11 (fully ranged), Nashor's Tooth",
+          "enemy": "Level 7 (Q max), Trinity Force"
+        },
+        "early_game": "He out-ranges you early. Farm defensively.",
+        "mid_game": "At 11 you become fully ranged — similar to him. More even.",
+        "late_game": "Your raw DPS output surpasses his.",
+        "win_condition": "Survive early poke with Fleet Footwork. Build Nashor's and become the stronger scaling carry.",
+        "counter_items": ["Nashor's Tooth", "Plated Steelcaps"],
+        "scaling": "Jayce wins early; Kayle outscales past level 16",
+        "jungle_gankable": true,
+        "positioning": "Farm under tower. After level 11 match his cannon poke with your own ranged E."
+      },
+      "Malphite": {
+        "difficulty": "medium",
+        "who_wins_early": "Malphite",
+        "trading_pattern": "His armor reduces your auto-attack DPS significantly. Your E flame wave (magic damage) still hits effectively. Focus magic damage in trades.",
+        "ability_to_dodge": "Malphite Q (Seismic Shard) — sidestep it. The movement speed slow makes kiting him harder.",
+        "power_spikes": {
+          "you": "Level 11 (ranged magic), Nashor's Tooth",
+          "enemy": "Level 6 (ult), Sunfire + Randuin's"
+        },
+        "early_game": "He reduces your auto DPS with armor. Focus on E poke (magic damage).",
+        "mid_game": "His armor makes physical damage ineffective. Your magic damage from E and ult works fine.",
+        "late_game": "You outscale him. His ult can catch you — use your ult during his ult if needed.",
+        "win_condition": "Build AP damage (Nashor's + Rabadon's). Your E magic damage bypasses his armor stacking.",
+        "counter_items": ["Nashor's Tooth", "Rabadon's Deathcap"],
+        "scaling": "Malphite wins early; Kayle wins late with AP build",
+        "jungle_gankable": true,
+        "positioning": "Stay outside his Q range. After level 11, kite at max E range."
+      },
+      "Mordekaiser": {
+        "difficulty": "hard",
+        "who_wins_early": "Mordekaiser",
+        "trading_pattern": "His ult negates your ranged advantage at level 11. Inside the realm you're melee again. Use your ult inside his ult for survival.",
+        "ability_to_dodge": "Mordekaiser R (Realm of Death) — you can't escape. Your ult inside his ult buys time. Fight with E + ult burst.",
+        "power_spikes": {
+          "you": "Level 11 (ranged), Level 16 (ult full power), Nashor's Tooth",
+          "enemy": "Level 6 (ult), Riftmaker"
+        },
+        "early_game": "Very dangerous. His melee trades crush you. Farm under tower.",
+        "mid_game": "His ult negates your level 11 power spike. Very hard.",
+        "late_game": "Your raw DPS at full build surpasses his.",
+        "win_condition": "Survive early. Your ult inside his ult is survival insurance. Win through teamfight DPS.",
+        "counter_items": ["Plated Steelcaps", "Nashor's Tooth"],
+        "scaling": "Mordekaiser wins early-mid; Kayle wins full build late",
+        "jungle_gankable": false,
+        "positioning": "Max distance early. Inside his ult, use your ult immediately for invulnerability."
+      },
+      "Nasus": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "You both scale. Harass him off Q stacks with your progressive range advantage. At level 6 poke freely. He Withers you — use ult during Wither to survive his follow-up.",
+        "ability_to_dodge": "Nasus W (Wither) — use your ult during Wither to negate the slow/attack speed reduction during invulnerability window.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Level 11 (ranged), Nashor's Tooth",
+          "enemy": "300+ Q stacks, Level 6 (ult), Frozen Heart"
+        },
+        "early_game": "Harass his Q stack attempts. You have range advantage even early.",
+        "mid_game": "At 11 you dominate the poke war. Deny stacks aggressively.",
+        "late_game": "500 stacks Nasus challenges your 1v1. Use ult and kite him.",
+        "win_condition": "Deny Q stacks early. After level 11 you poke him out of every CS attempt. Build Nashor's for magic damage.",
+        "counter_items": ["Nashor's Tooth", "Plated Steelcaps"],
+        "scaling": "Kayle wins from level 6 onward if ahead; Nasus catches up with stacks",
+        "jungle_gankable": true,
+        "positioning": "After level 6, stand at E range and poke every Q stack attempt."
+      },
+      "Olaf": {
+        "difficulty": "hard",
+        "who_wins_early": "Olaf",
+        "trading_pattern": "His ult makes him immune to your slow and kite tools. After level 11, your ranged autos still work on him even during his ult.",
+        "ability_to_dodge": "Olaf Q (Undertow) — dodge the axe. Your ranged kite works around his retrieve walk.",
+        "power_spikes": {
+          "you": "Level 11 (ranged kite), Nashor's Tooth",
+          "enemy": "Level 6 (ult CC immunity), Stridebreaker"
+        },
+        "early_game": "Survive. He kills you early.",
+        "mid_game": "At 11 you kite better but his ult removes your slow tool.",
+        "late_game": "Your DPS at full build is enormous. Your ult makes you unkillable during his burst.",
+        "win_condition": "Survive early. Use movement speed to kite even when his ult is active — your attacks still work.",
+        "counter_items": ["Nashor's Tooth", "Plated Steelcaps"],
+        "scaling": "Olaf wins early; Kayle wins late",
+        "jungle_gankable": true,
+        "positioning": "Max distance always. At 11, kite with movement speed runes."
+      },
+      "Renekton": {
+        "difficulty": "hard",
+        "who_wins_early": "Renekton",
+        "trading_pattern": "His burst combo kills you at levels 1-5. His E closes the gap before you can react. Survive and scale.",
+        "ability_to_dodge": "Renekton E (Slice and Dice) — when he uses E, back off immediately. Use ult if he E-W combo's you.",
+        "power_spikes": {
+          "you": "Level 6 (ult survival), Level 11 (ranged)",
+          "enemy": "Level 3 (full combo), Level 9 (Q max)"
+        },
+        "early_game": "Very rough. Survive under tower. His burst outdamages your healing entirely.",
+        "mid_game": "He falls off after level 10-12. At 11 you poke him from range.",
+        "late_game": "You outscale him massively.",
+        "win_condition": "Survive his early power window. Get jungle help. After 11 you dominate.",
+        "counter_items": ["Plated Steelcaps", "Nashor's Tooth"],
+        "scaling": "Renekton wins early; Kayle outscales past level 11",
+        "jungle_gankable": false,
+        "positioning": "Tower hug early. After 11 kite from maximum range."
+      },
+      "Riven": {
+        "difficulty": "hard",
+        "who_wins_early": "Riven",
+        "trading_pattern": "She can close gap with E and Q. Her shield absorbs your E hit. Survive to 11 then kite — she still has mobility but less gap close at range.",
+        "ability_to_dodge": "Riven Q3 — sidestep her Q casts. Move between each Q to make the knockup miss.",
+        "power_spikes": {
+          "you": "Level 11 (ranged kite), Nashor's Tooth",
+          "enemy": "Level 9 (CDR combo), Ravenous Hydra"
+        },
+        "early_game": "Farm safely. She kills you if she lands full combo.",
+        "mid_game": "At 11 your range is an advantage. She can still dash through you.",
+        "late_game": "Your full build DPS surpasses her.",
+        "win_condition": "Survive early. Use ult when she commits full combo. After 11 kite aggressively.",
+        "counter_items": ["Plated Steelcaps", "Nashor's Tooth"],
+        "scaling": "Riven wins early-mid; Kayle wins late",
+        "jungle_gankable": true,
+        "positioning": "Move sideways during her Q casts. Use ult to nullify her burst window."
+      },
+      "Sett": {
+        "difficulty": "hard",
+        "who_wins_early": "Sett",
+        "trading_pattern": "His W grit true damage ignores your ult invulnerability timing if you ult while it's mid-flight. Dodge W entirely by sidestepping and using ult before W hits.",
+        "ability_to_dodge": "Sett W (Haymaker) — sidestep the center explosion. Use ult before the W center hits you.",
+        "power_spikes": {
+          "you": "Level 11 (ranged kite), Nashor's Tooth",
+          "enemy": "Level 2 (full kit), Heartsteel"
+        },
+        "early_game": "Survive. He kills you at all early levels.",
+        "mid_game": "At 11 you gain range advantage. He can still close gap.",
+        "late_game": "You outscale him significantly.",
+        "win_condition": "Survive to 11 with jungle help. Use ult to block his all-in. After 11 poke freely.",
+        "counter_items": ["Plated Steelcaps", "Nashor's Tooth"],
+        "scaling": "Sett wins early; Kayle outscales",
+        "jungle_gankable": true,
+        "positioning": "Sidestep his W center. Never stand in front of him melee range."
+      },
+      "Shen": {
+        "difficulty": "medium",
+        "who_wins_early": "Shen",
+        "trading_pattern": "His W blocks your auto-attacks. Your E magic wave still hits through his W zone. Focus E poke in trades.",
+        "ability_to_dodge": "Shen W (Spirit's Refuge) — use E (magic damage) during his W, not autos.",
+        "power_spikes": {
+          "you": "Level 11 (ranged), Nashor's Tooth",
+          "enemy": "Level 6 (global ult), Sunfire + Heartsteel"
+        },
+        "early_game": "He out-trades you. Your E magic hits through his W.",
+        "mid_game": "His ult roams are impactful. Push and create counter-pressure.",
+        "late_game": "You outscale. Your DPS is enormous.",
+        "win_condition": "Survive early. Use E poke (magic) through his W. After 11 dominate him from range.",
+        "counter_items": ["Nashor's Tooth", "Rabadon's Deathcap"],
+        "scaling": "Shen wins early; Kayle wins past level 11",
+        "jungle_gankable": true,
+        "positioning": "After 11, stand at E max range and poke. Never melee fight."
+      },
+      "Sion": {
+        "difficulty": "medium",
+        "who_wins_early": "Sion",
+        "trading_pattern": "Dodge his Q charge easily with movement. He's slow and can't stick to you. After level 6 you poke him freely.",
+        "ability_to_dodge": "Sion Q (Decimating Smash) — move perpendicular to his charge direction. Very easy to dodge at range.",
+        "power_spikes": {
+          "you": "Level 6 (ult + progressive range), Level 11 (fully ranged)",
+          "enemy": "Level 6 (ult roam), Sunfire + Heartsteel HP"
+        },
+        "early_game": "He zones you with Q threat. Farm carefully.",
+        "mid_game": "At level 11 you poke him out of every trade.",
+        "late_game": "Your DPS melts him. His HP becomes your execute target.",
+        "win_condition": "Survive early, dominate after 11. Your execute ult at 16 is devastating on high-HP targets like him.",
+        "counter_items": ["Nashor's Tooth", "Rabadon's Deathcap"],
+        "scaling": "Sion wins early; Kayle wins past level 11",
+        "jungle_gankable": true,
+        "positioning": "Dodge his Q charge with lateral movement. After 11, stand at E flame range."
+      },
+      "Trundle": {
+        "difficulty": "medium",
+        "who_wins_early": "Trundle",
+        "trading_pattern": "He wins early trades. His ult steals your AD/AP scaling stats which is brutal for your late game 1v1. Group fight instead of 1v1 him.",
+        "ability_to_dodge": "Trundle E (Pillar of Ice) — sidestep it. Don't let it cut off your kite path.",
+        "power_spikes": {
+          "you": "Level 11 (ranged), Nashor's Tooth",
+          "enemy": "Level 6 (ult steals your scaling), Sunfire"
+        },
+        "early_game": "Farm safely. He wins early.",
+        "mid_game": "His ult on you steals your AP stacks. Very painful for your 1v1 scaling.",
+        "late_game": "Avoid 1v1 with his ult. Group fight where his ult can't be wasted on you solo.",
+        "win_condition": "After 11, poke from range. Avoid his ult 1v1 scenario by grouping for fights.",
+        "counter_items": ["Nashor's Tooth", "Plated Steelcaps"],
+        "scaling": "Even post-11; Trundle's ult limits Kayle's 1v1 scaling effectiveness",
+        "jungle_gankable": true,
+        "positioning": "Kite around his Pillar. Stay at max E range after level 11."
+      },
+      "Tryndamere": {
+        "difficulty": "hard",
+        "who_wins_early": "Tryndamere",
+        "trading_pattern": "His crits destroy you early. Use ult at the last second when he spins on you. At level 11 your ranged form lets you kite his spin.",
+        "ability_to_dodge": "Tryndamere E (Spinning Slash) — at level 11+, kite backwards when he spins toward you.",
+        "power_spikes": {
+          "you": "Level 11 (ranged kite), Nashor's Tooth",
+          "enemy": "Level 6 (ult), Phantom Drive"
+        },
+        "early_game": "He kills you. Farm under tower.",
+        "mid_game": "At 11 your ranged form lets you kite his engage.",
+        "late_game": "Your DPS melts him. Wait out his ult then finish.",
+        "win_condition": "Survive early. After 11, kite his Spinning Slash approach. Use ult at the right moment — never during his ult.",
+        "counter_items": ["Plated Steelcaps", "Nashor's Tooth"],
+        "scaling": "Tryndamere wins early; Kayle wins past level 11",
+        "jungle_gankable": true,
+        "positioning": "After 11, maintain max E range. Kite backwards when he spins."
+      },
+      "Urgot": {
+        "difficulty": "hard",
+        "who_wins_early": "Urgot",
+        "trading_pattern": "He out-ranges you pre-11 with his shotgun knees. After 11 you have similar range to his W zone. Still loses direct trades.",
+        "ability_to_dodge": "Urgot W (Purge) — stay outside his W activation range. Kite backwards continuously.",
+        "power_spikes": {
+          "you": "Level 11 (ranged poke), Nashor's Tooth",
+          "enemy": "Level 6 (execute), Sunfire + Frozen Fist"
+        },
+        "early_game": "He dominates. Survive and farm.",
+        "mid_game": "At 11 you match his range. Hard to win 1v1 due to his passive.",
+        "late_game": "Your DPS at full build outpaces his.",
+        "win_condition": "Survive early. At 11 and beyond, outpoke him. Your ult prevents his execute.",
+        "counter_items": ["Plated Steelcaps", "Nashor's Tooth"],
+        "scaling": "Urgot wins early-mid; Kayle outscales late",
+        "jungle_gankable": true,
+        "positioning": "Stay outside his W knee activation range. Kite continuously."
+      },
+      "Vayne": {
+        "difficulty": "skill_matchup",
+        "who_wins_early": "Vayne",
+        "trading_pattern": "Both scale as carries. Her Silver Bolts true damage counters your ult invulnerability timing. You out-range her at level 11. Never stand near walls.",
+        "ability_to_dodge": "Vayne E (Condemn) — never stand near walls. Your ult doesn't block wall stuns.",
+        "power_spikes": {
+          "you": "Level 11 (ranged), Nashor's Tooth",
+          "enemy": "Guinsoo's Rageblade, Level 6 (stealth)"
+        },
+        "early_game": "She pokes you early. Farm defensively.",
+        "mid_game": "Both becoming carries. You have more range at level 11.",
+        "late_game": "Very close matchup. Your ult prevents one kill attempt. Her true damage is constant.",
+        "win_condition": "Stay away from walls. Use ult to deny her kill attempt. Your ranged form at 11 helps kite her.",
+        "counter_items": ["Plated Steelcaps", "Nashor's Tooth"],
+        "scaling": "Vayne wins early; Kayle slightly better at full build due to range",
+        "jungle_gankable": true,
+        "positioning": "Never near walls. After 11, maintain max E range to outpoke her."
+      },
+      "Varus": {
+        "difficulty": "hard",
+        "who_wins_early": "Varus",
+        "trading_pattern": "He out-ranges you pre-11. His W blight stacks hurt even at range. Survive and scale — at 11 you match his range.",
+        "ability_to_dodge": "Varus Q (Piercing Arrow) — dodge the slow charged projectile laterally.",
+        "power_spikes": {
+          "you": "Level 11 (ranged equal to his), Nashor's Tooth",
+          "enemy": "Kraken Slayer + Guinsoo's"
+        },
+        "early_game": "He out-ranges and out-damages you early. Farm safely.",
+        "mid_game": "At 11 you match his range. Still his blight damage is consistent.",
+        "late_game": "Your burst output surpasses his sustained damage.",
+        "win_condition": "Survive early. After 11 match his range and out-trade. Nashor's provides consistent magic DPS.",
+        "counter_items": ["Plated Steelcaps", "Nashor's Tooth"],
+        "scaling": "Varus wins early; even at level 11; Kayle wins full build",
+        "jungle_gankable": true,
+        "positioning": "Dodge his Q laterally. After 11, stand at max E range and trade magic damage."
+      },
+      "Yasuo": {
+        "difficulty": "hard",
+        "who_wins_early": "Yasuo",
+        "trading_pattern": "His Wind Wall blocks your E flame wave. He blocks your main harass tool. At level 11 your flame E is blockable. Poke with autos outside his Wind Wall.",
+        "ability_to_dodge": "Yasuo W (Wind Wall) — don't throw E into it. Throw E from angles where his Wind Wall coverage is minimal.",
+        "power_spikes": {
+          "you": "Level 11 (fully ranged), Nashor's Tooth",
+          "enemy": "Level 6 (ult air combo), IE + Kraken"
+        },
+        "early_game": "He kills you at melee range. Farm under tower.",
+        "mid_game": "His crits and Wind Wall block your poke. Very frustrating matchup.",
+        "late_game": "Your ult negates his ult air combo. Use ult when he ults you.",
+        "win_condition": "Use ult to negate his ult air combo. Throw E from sideways angles to bypass Wind Wall. Survive early.",
+        "counter_items": ["Plated Steelcaps", "Nashor's Tooth"],
+        "scaling": "Yasuo wins early-mid; Kayle wins full build late",
+        "jungle_gankable": true,
+        "positioning": "After 11, approach from angles where his Wind Wall coverage is limited."
+      },
+      "Yone": {
+        "difficulty": "hard",
+        "who_wins_early": "Yone",
+        "trading_pattern": "His E dash closes gap before your ranged form helps. His ult hits you even at range. Use your ult when he ults you to negate it.",
+        "ability_to_dodge": "Yone R (Fate Sealed) — use your ult when his ult starts. It's an invulnerability window through his ult.",
+        "power_spikes": {
+          "you": "Level 11 (ranged), Level 16 (ult empowerment)",
+          "enemy": "Level 6 (ult), IE + Kraken"
+        },
+        "early_game": "He kills you. Farm under tower.",
+        "mid_game": "At 11 you have range but he can E-dash through it.",
+        "late_game": "Your ult negates his. DPS fight at full build favors you.",
+        "win_condition": "Use ult to negate his ult. After 11 maintain max range. His E commitments leave him vulnerable.",
+        "counter_items": ["Plated Steelcaps", "Nashor's Tooth"],
+        "scaling": "Yone wins early-mid; Kayle wins late",
+        "jungle_gankable": true,
+        "positioning": "After 11, max E range. When he E-dashes, use ult if his damage threatens you."
+      },
+      "Yorick": {
+        "difficulty": "medium",
+        "who_wins_early": "Yorick",
+        "trading_pattern": "Dodge his E to deny Maiden empowerment. Your range advantage early makes dodging his E easier than most champions.",
+        "ability_to_dodge": "Yorick E (Mourning Mist) — sidestep it. Your movement advantage makes this easier than most.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Level 11 (ranged poke), Nashor's Tooth",
+          "enemy": "Level 6 (Maiden), Hullbreaker"
+        },
+        "early_game": "He wins early. Your range helps dodge his E.",
+        "mid_game": "Maiden + Hullbreaker makes him dangerous in split push. At 11 you poke him out.",
+        "late_game": "You outscale him enormously.",
+        "win_condition": "Dodge his E consistently. At level 11 poke him out of every CS attempt. Win before he fully stacks Hullbreaker.",
+        "counter_items": ["Nashor's Tooth", "Plated Steelcaps"],
+        "scaling": "Yorick wins early; Kayle wins past level 11",
+        "jungle_gankable": true,
+        "positioning": "Move laterally to dodge E. After 11, kite at max E range."
+      }
+    }
+  }
+}

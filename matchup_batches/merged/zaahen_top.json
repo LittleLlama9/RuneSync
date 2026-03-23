@@ -1,0 +1,402 @@
+{
+  "Zaahen": {
+    "top": {
+      "Darius": {
+        "difficulty": "hard",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Both have a pull ability (his E, your W) — whoever lands theirs first controls the fight. His bleed prevents your passive Determination from recharging between trades. Short trades only until you have stacks.",
+        "ability_to_dodge": "Darius E (Apprehend) — never stand still at medium range. He pulls you into bleed stacks which shuts down your passive regen window.",
+        "power_spikes": {
+          "you": "Level 6 (ult sustain + damage reduction), 12 Determination stacks, Stridebreaker",
+          "enemy": "Level 5 (full bleed stacks), Stridebreaker"
+        },
+        "early_game": "He out-trades you pre-stacks. Build Determination on minions safely. Avoid his pull at all costs — it leads to full bleed.",
+        "mid_game": "With 12 stacks your passive revive threat makes him play differently. Your ult's 50% damage reduction lets you survive his burst.",
+        "late_game": "Your ult heal + passive revive make you harder to kill than him. Win extended fights.",
+        "win_condition": "Hit 12 Determination stacks before committing. Your W pull vs his E pull — bait his first then punish with yours. Use ult to absorb his burst and heal back.",
+        "counter_items": ["Plated Steelcaps", "Bramble Vest"],
+        "scaling": "Darius wins early; Zaahen even or favored mid-late with passive stacks",
+        "jungle_gankable": true,
+        "positioning": "Stay far enough to avoid his E but close enough to land W pull. Never stand in his Q outer ring."
+      },
+      "Garen": {
+        "difficulty": "medium",
+        "who_wins_early": "Garen",
+        "trading_pattern": "His Q silence stops your Q recast knockup during the silence window. Trade when Q silence is on cooldown. Your W pull after he uses Q brings him into your optimal range.",
+        "ability_to_dodge": "Garen Q — back off when he sprints toward you. His silence prevents your Q recast knockup, which is critical for your combo.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Determination stacks, Stridebreaker",
+          "enemy": "Level 2-4, Sunfire Cape"
+        },
+        "early_game": "He out-trades you short-term. Stack Determination on minions. Engage only when his Q is on cooldown.",
+        "mid_game": "Your ult damage reduction absorbs his E spin damage. W pull him when he uses Q to close, then Q double-hit.",
+        "late_game": "Your passive revive makes 1v1 kills on you nearly impossible if stacked. Outscale him significantly.",
+        "win_condition": "Time trades around his Q cooldown. W pull after his Q is used. Your passive revive at max stacks makes you nearly unkillable.",
+        "counter_items": ["Plated Steelcaps", "Stridebreaker"],
+        "scaling": "Garen wins early; Zaahen outscales with passive stacks",
+        "jungle_gankable": false,
+        "positioning": "Stay outside his Q sprint range. W him after he uses Q to keep him in your range."
+      },
+      "Fiora": {
+        "difficulty": "hard",
+        "who_wins_early": "Fiora",
+        "trading_pattern": "She can Riposte your W pull or your Q knockup recast — bait one before committing the other. Your passive stacks don't help much if she heals via Vitals. Keep fights short.",
+        "ability_to_dodge": "Fiora W (Riposte) — bait it with a basic attack first, then use W pull or Q knockup. Never commit both abilities when her W is available.",
+        "power_spikes": {
+          "you": "Level 6 (ult with damage reduction), 12 Determination stacks",
+          "enemy": "Level 9 (Riposte CDR), Ravenous Hydra"
+        },
+        "early_game": "She wins early with Vitals healing. Trade carefully and don't extend fights.",
+        "mid_game": "Your ult damage reduction absorbs her burst window. Bait W before W pull combo.",
+        "late_game": "She outduels you in extended 1v1s via Vitals. Group for teamfights.",
+        "win_condition": "Bait Riposte with a basic attack before committing W pull + Q knockup. Use Ignite to cancel Vital healing. Don't let her proc multiple Vitals per trade.",
+        "counter_items": ["Bramble Vest", "Plated Steelcaps"],
+        "scaling": "Fiora slightly better in pure 1v1; Zaahen better in teamfights",
+        "jungle_gankable": true,
+        "positioning": "Reposition off her active Vital sides. Bait W before using your pull."
+      },
+      "Aatrox": {
+        "difficulty": "skill_matchup",
+        "who_wins_early": "even",
+        "trading_pattern": "Both have pull/displacement abilities. His Q hitboxes are manageable — stand in the safe zones and W pull him during his Q animation. Extended fights favor you with Determination stacks.",
+        "ability_to_dodge": "Aatrox Q — stand between the two safe zones between his Q hitboxes. Dash with E through him to avoid Q zones.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Determination stacks, Stridebreaker",
+          "enemy": "Level 9 (Q max), Goredrinker"
+        },
+        "early_game": "Fairly even. Your W pull while he commits to Q is a strong punish. Stack Determination in every trade.",
+        "mid_game": "His Goredrinker healing competes with yours. Both have strong sustain — Determination stacks give you the edge.",
+        "late_game": "Your passive revive makes you harder to kill. Win extended teamfight brawls.",
+        "win_condition": "Stack Determination on every trade. W pull him during his Q animation. Your ult damage reduction negates his burst window.",
+        "counter_items": ["Bramble Vest", "Stridebreaker"],
+        "scaling": "Even; Zaahen slightly favored with full Determination stacks",
+        "jungle_gankable": true,
+        "positioning": "Stand between his Q hitbox zones. E dash through him to avoid the sweet spots."
+      },
+      "Camille": {
+        "difficulty": "hard",
+        "who_wins_early": "Camille",
+        "trading_pattern": "Her true damage in E bypasses your passive Determination healing. She wins most early trades. Her ult isolates you 1v1 — use your ult damage reduction inside her hex zone.",
+        "ability_to_dodge": "Camille E (Hookshot) — stay center of lane away from walls. No wall geometry means no clean E angle.",
+        "power_spikes": {
+          "you": "Level 6 (ult damage reduction inside her hex zone), Determination stacks",
+          "enemy": "Level 3 (full kit), Trinity Force"
+        },
+        "early_game": "She out-trades you early with true damage and passive shield. Farm safely and build stacks on minions.",
+        "mid_game": "Her ult isolates you — immediately use ult for 50% damage reduction and heal. Fight back.",
+        "late_game": "Your passive revive and ult sustain make you hard to solo kill. Outlast her.",
+        "win_condition": "Use ult during her hex zone isolation for damage reduction. Stack Determination before fights. Stay away from walls.",
+        "counter_items": ["Plated Steelcaps", "Stridebreaker"],
+        "scaling": "Camille wins early; even mid; Zaahen harder to kill late",
+        "jungle_gankable": true,
+        "positioning": "Center of lane, no walls. Use ult preemptively when she ults you."
+      },
+      "Irelia": {
+        "difficulty": "hard",
+        "who_wins_early": "Irelia",
+        "trading_pattern": "Her Q resets at max stacks destroy you before you can build Determination. Keep her passive stacks low by not feeding her minion resets. Your W pull counters her dash-in.",
+        "ability_to_dodge": "Irelia E (Flawless Duet) — sidestep the two stun blades. W pull can interrupt her E combo setup.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Determination stacks, Stridebreaker",
+          "enemy": "Level 5 (max stacks), Trinity Force"
+        },
+        "early_game": "She bullies you at max passive stacks. Only trade when she has 0-2 stacks.",
+        "mid_game": "Your ult sustain starts competing with her. Stack Determination and fight at max stacks.",
+        "late_game": "Your passive revive makes killing you very difficult. Win extended fights.",
+        "win_condition": "Deny her passive stacks by keeping low HP minions away from her. W pull when she dashes in. Hit max Determination before engaging.",
+        "counter_items": ["Plated Steelcaps", "Thornmail"],
+        "scaling": "Irelia wins early; Zaahen outscales with passive revive",
+        "jungle_gankable": true,
+        "positioning": "Keep low HP minions away from her to deny Q resets and passive stacks."
+      },
+      "Jax": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Your Q double strike auto does not get blocked by his E (it's a special attack, not a basic attack — confirm based on Riot mechanics). His E blocks basic attacks. Trade with Q and W during his E cooldown.",
+        "ability_to_dodge": "Jax E (Counterstrike) — don't basic attack during his E spin. Use Q ability during his E since it may bypass the dodge.",
+        "power_spikes": {
+          "you": "Level 6 (ult sustain), Determination stacks",
+          "enemy": "Level 3 (E), Trinity Force + Steelcaps"
+        },
+        "early_game": "Fairly even. Your W pull gives you engage that his E can't stop. Build stacks on him safely.",
+        "mid_game": "His Trinity Counterstrike pattern is strong. Your ult sustain competes.",
+        "late_game": "Both scale well. Your passive revive gives you the edge in extended duels.",
+        "win_condition": "W pull him outside his E range. Trade with Q ability strikes during his E cooldown. Max Determination before all-ins.",
+        "counter_items": ["Plated Steelcaps", "Stridebreaker"],
+        "scaling": "Even; Zaahen slightly favored with passive revive late",
+        "jungle_gankable": true,
+        "positioning": "W pull him after he uses E to re-enter the fight when he wants to back off."
+      },
+      "Renekton": {
+        "difficulty": "hard",
+        "who_wins_early": "Renekton",
+        "trading_pattern": "His burst combo kills you before you can stack Determination. His E gap close is faster than your response window. Survive early and respond with ult.",
+        "ability_to_dodge": "Renekton W (Ruthless Predator) — W pull him when he uses E to close so his W stun lands mid-pull and you control the fight position.",
+        "power_spikes": {
+          "you": "Level 6 (ult damage reduction absorbs his burst), Determination stacks",
+          "enemy": "Level 3 (full combo), Black Cleaver"
+        },
+        "early_game": "He dominates early. Farm under tower. Your ult at 6 gives you a fighting chance.",
+        "mid_game": "He falls off mid-game. With ult and stacks you can fight back.",
+        "late_game": "You outscale significantly. Your passive revive means he can never reliably kill you.",
+        "win_condition": "Survive to level 6. Use ult to absorb his burst burst combo. W pull to control fight position when he E's in.",
+        "counter_items": ["Plated Steelcaps", "Bramble Vest"],
+        "scaling": "Renekton wins early; Zaahen outscales mid-late",
+        "jungle_gankable": false,
+        "positioning": "Farm under tower early. W pull timing when he commits E is key."
+      },
+      "Nasus": {
+        "difficulty": "easy",
+        "who_wins_early": "Zaahen",
+        "trading_pattern": "Bully him off every Q stack attempt. W pull him when he goes for CS and combo him. He has no early damage. Your Determination stacks while he farms.",
+        "ability_to_dodge": "Nasus W (Wither) — W pull him before he can Wither you, or disengage immediately when Wither lands.",
+        "power_spikes": {
+          "you": "Levels 1-6, Determination stacks, Stridebreaker",
+          "enemy": "300+ Q stacks, Level 6 (ult), Frozen Heart"
+        },
+        "early_game": "Free bully lane. W pull him off every CS attempt. Stack Determination constantly.",
+        "mid_game": "He starts getting stacks. Keep harassing. Your W pull is great for catching him.",
+        "late_game": "500 stacks Nasus challenges you. Your passive revive is insurance. Group for objectives.",
+        "win_condition": "Deny every Q stack you can. Win before 400 stacks. Your Determination stacking means you're always at high passive bonus.",
+        "counter_items": ["Plated Steelcaps", "Thornmail"],
+        "scaling": "Zaahen wins early; Nasus threatens past 400 stacks",
+        "jungle_gankable": true,
+        "positioning": "Stand between him and the CS he's trying to Q. W pull him away from it."
+      },
+      "Malphite": {
+        "difficulty": "easy",
+        "who_wins_early": "Zaahen",
+        "trading_pattern": "His armor reduces your physical Q damage but your sheer trading frequency builds Determination fast. W pull him when he goes for CS and trade freely.",
+        "ability_to_dodge": "Malphite Q (Seismic Shard) — sidestep it. The movement speed slow makes your W pull harder to dodge for him.",
+        "power_spikes": {
+          "you": "Level 2-5, Level 6 (ult), Determination stacks",
+          "enemy": "Level 6 (ult), Sunfire + Randuin's"
+        },
+        "early_game": "You win early. W pull him and trade. His passive shield is an annoyance but your frequency of trades keeps it down.",
+        "mid_game": "His armor stacking limits your physical damage. Build Black Cleaver or Lord Dom's.",
+        "late_game": "His ult engage in teamfights is strong but your passive revive insurance is better for 1v1.",
+        "win_condition": "W pull into Q double-hit combo repeatedly. Build Black Cleaver for armor shred. Win lane and snowball.",
+        "counter_items": ["Black Cleaver", "Plated Steelcaps"],
+        "scaling": "Zaahen wins lane; Malphite better multi-target teamfight",
+        "jungle_gankable": false,
+        "positioning": "Pull him away from his passive shield recharge safe zones. W pull → Q combo is your bread and butter."
+      },
+      "Mordekaiser": {
+        "difficulty": "hard",
+        "who_wins_early": "Mordekaiser",
+        "trading_pattern": "His ult removes your Determination stacks from the teamfight context — it's 1v1 in the realm. Inside the realm, your ult damage reduction + Q heal makes it winnable.",
+        "ability_to_dodge": "Mordekaiser R (Realm of Death) — you can't escape it. Use your ult immediately inside the realm for 50% damage reduction and the heal.",
+        "power_spikes": {
+          "you": "Level 6 (ult in realm fight), Determination stacks",
+          "enemy": "Level 6 (Realm of Death), Riftmaker"
+        },
+        "early_game": "He wins early with passive shield sustain. Short trades with W pull.",
+        "mid_game": "His ult isolated is dangerous. Fight inside realm with ult active.",
+        "late_game": "Your passive revive makes his ult less reliable as a kill tool. Extended fights favor you.",
+        "win_condition": "Use ult immediately when he ults you for 50% DR + heal. Stack Determination before he can ult again. Track his ult cooldown.",
+        "counter_items": ["Bramble Vest", "Stridebreaker"],
+        "scaling": "Mordekaiser wins lane; even mid-late with passive stacks",
+        "jungle_gankable": false,
+        "positioning": "Don't stand in his W golden zone. Outside it you can W pull him on your terms."
+      },
+      "Olaf": {
+        "difficulty": "hard",
+        "who_wins_early": "Olaf",
+        "trading_pattern": "His ult makes him immune to your W pull — you lose your primary engage tool. Fight before his ult activates or wait it out. His axes at range are dangerous.",
+        "ability_to_dodge": "Olaf Q (Undertow) — dodge the axe. Punish his retrieve walk with W pull toward you.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Determination stacks",
+          "enemy": "Level 6 (ult CC immunity — makes your W pull less effective), Stridebreaker"
+        },
+        "early_game": "His axes hurt early. Build stacks safely and avoid his all-in levels.",
+        "mid_game": "His ult negates your W pull. Fight before he activates Ragnarok.",
+        "late_game": "Your passive revive insurance is strong. Force extended fights when his ult is down.",
+        "win_condition": "W pull before he activates ult. Your ult damage reduction absorbs his burst. Fight extended when his ult is on cooldown.",
+        "counter_items": ["Plated Steelcaps", "Thornmail"],
+        "scaling": "Olaf favored mid; even late with Zaahen's passive revive",
+        "jungle_gankable": false,
+        "positioning": "Dodge axe throw. Punish his retrieve walk with W pull. Don't engage when his ult is active."
+      },
+      "Tryndamere": {
+        "difficulty": "medium",
+        "who_wins_early": "Zaahen",
+        "trading_pattern": "Abuse him pre-6. Your W pull prevents his Spinning Slash escape. Your passive Determination stacks fast off his aggressive crits. Never fight during his ult.",
+        "ability_to_dodge": "Tryndamere E (Spinning Slash) — W pull him back when he tries to Spinning Slash away from you.",
+        "power_spikes": {
+          "you": "Level 2-5, Level 6 (ult), Determination stacks",
+          "enemy": "Level 6 (ult unkillable), Phantom Drive"
+        },
+        "early_game": "Bully him pre-6. Your W pull keeps him in your range. Stack Determination off every trade.",
+        "mid_game": "His crits compete with your healing. Your W pull denies his escape.",
+        "late_game": "His ult makes killing him impossible for 5s. Your passive revive makes you unkillable simultaneously. Coin flip fights.",
+        "win_condition": "W pull to deny his Spinning Slash escape. When he ults, back off and wait it out. Your passive revive vs his ult creates interesting dynamics.",
+        "counter_items": ["Plated Steelcaps", "Thornmail"],
+        "scaling": "Zaahen wins early; even mid; both have anti-death mechanics late",
+        "jungle_gankable": true,
+        "positioning": "W pull him when he tries to Spinning Slash away. Keep him in your optimal range at all times."
+      },
+      "Yorick": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Kill his ghouls with E AoE to deny mist charges. Your W pull keeps him in range and prevents E escape. Avoid fighting with Maiden active.",
+        "ability_to_dodge": "Yorick E (Mourning Mist) — sidestep the mark. Being marked causes Maiden and ghouls to prioritize you.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Determination stacks, Stridebreaker",
+          "enemy": "Level 6 (Maiden summon), Hullbreaker + Sunfire"
+        },
+        "early_game": "Even early. Kill ghouls with E AoE. W pull him off CS attempts.",
+        "mid_game": "Maiden + Hullbreaker makes him dangerous. Match his push.",
+        "late_game": "Your passive revive insurance is great in split push scenarios. W pull denies his escape.",
+        "win_condition": "Kill ghouls with E AoE to deny Maiden. W pull keeps him in range. Your passive revive makes 1v1 splits very hard for him.",
+        "counter_items": ["Plated Steelcaps", "Bramble Vest"],
+        "scaling": "Even; Zaahen slightly better 1v1, Yorick better split with Maiden",
+        "jungle_gankable": true,
+        "positioning": "Use E AoE to clear ghoul clusters. W pull to keep him from escaping to Maiden."
+      },
+      "Sett": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "His grit generates from taking damage — your frequent trading builds his W. W pull him when his grit is low. Sidestep his W center explosion.",
+        "ability_to_dodge": "Sett W (Haymaker) — sidestep the center true damage. W pull him sideways so he throws W at an awkward angle.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Determination stacks",
+          "enemy": "Level 6 (ult grab), Heartsteel"
+        },
+        "early_game": "Even early. W pull to keep him in range. Don't let him freely auto-attack you to build grit.",
+        "mid_game": "He becomes tankier. Your ult sustain competes with his bulk.",
+        "late_game": "Your passive revive + ult heal makes you very hard to kill. Extended fights favor you.",
+        "win_condition": "W pull at low grit. Sidestep W center. Your passive revive means he needs to burst you which is hard against your DR ult.",
+        "counter_items": ["Plated Steelcaps", "Stridebreaker"],
+        "scaling": "Even; Zaahen harder to kill late",
+        "jungle_gankable": true,
+        "positioning": "Don't stand directly in front of him when grit is high. W pull sideways to create bad W angles."
+      },
+      "Shen": {
+        "difficulty": "medium",
+        "who_wins_early": "Zaahen",
+        "trading_pattern": "His W dodge blocks your basic attacks but not your Q (ability strike) or W pull. Use Q recast knockup and W pull freely even during his W dodge window.",
+        "ability_to_dodge": "Shen W (Spirit's Refuge) — stop basic attacking. Use Q ability cast and W pull since they hit through his dodge zone.",
+        "power_spikes": {
+          "you": "Level 2-5, Level 6 (ult), Determination stacks",
+          "enemy": "Level 6 (global ult), Sunfire + Heartsteel"
+        },
+        "early_game": "You win early. Q and W hit through his dodge. Bully him.",
+        "mid_game": "His global ult changes other lanes. Push fast and deny his roam.",
+        "late_game": "Even direct fight. Your passive revive vs his global utility.",
+        "win_condition": "Q ability + W pull hit through his W dodge zone. Build CS lead and track his ult cooldown for objectives.",
+        "counter_items": ["Black Cleaver", "Stridebreaker"],
+        "scaling": "Zaahen wins lane; even late",
+        "jungle_gankable": true,
+        "positioning": "W pull him away from his dodge zone walls. Q through his W dodge since it's an ability cast."
+      },
+      "Sion": {
+        "difficulty": "easy",
+        "who_wins_early": "Zaahen",
+        "trading_pattern": "W pull him when he charges Q to interrupt it and pull him into your range. His immobility is a gift. Stack Determination for free.",
+        "ability_to_dodge": "Sion Q (Decimating Smash) — W pull him toward you to interrupt his Q charge. Sidestep the knockup direction.",
+        "power_spikes": {
+          "you": "Level 2-5, Level 6, Determination stacks",
+          "enemy": "Level 6 (ult roam), Sunfire + Heartsteel"
+        },
+        "early_game": "Free lane. W pull interrupts his Q. E dash through him for AoE damage.",
+        "mid_game": "He becomes tankier. Build Black Cleaver.",
+        "late_game": "Your passive revive is more useful than his passive zombie form.",
+        "win_condition": "W pull to interrupt Q charges. Build Black Cleaver for armor shred. Dominate lane and roam.",
+        "counter_items": ["Black Cleaver", "Plated Steelcaps"],
+        "scaling": "Zaahen wins throughout",
+        "jungle_gankable": true,
+        "positioning": "W pull when he begins Q windup to interrupt. E dash through for AoE damage."
+      },
+      "Vayne": {
+        "difficulty": "hard",
+        "who_wins_early": "Zaahen",
+        "trading_pattern": "Kill her early before Guinsoo's. Your W pull closes the gap efficiently. Her Silver Bolts true damage shreds your HP in extended fights and you can't heal through true damage.",
+        "ability_to_dodge": "Vayne E (Condemn) — never stand near walls. She'll condemn you into terrain and remove your fighting ability.",
+        "power_spikes": {
+          "you": "Levels 1-4 (kill window), Level 6",
+          "enemy": "Guinsoo's Rageblade, Level 6 (stealth)"
+        },
+        "early_game": "All-in her early with W pull + Q combo. She's squishy and can't escape your pull.",
+        "mid_game": "Silver Bolts true damage starts melting you despite Q healing. Short trades only.",
+        "late_game": "True damage bypasses your Determination healing. Avoid 1v1s. Burst her fast in teamfights.",
+        "win_condition": "Kill her before Guinsoo's. Take Ignite. W pull to prevent her backstep. Your W pull denies her kite pattern.",
+        "counter_items": ["Plated Steelcaps", "Stridebreaker"],
+        "scaling": "Zaahen wins very early; Vayne hard outscales",
+        "jungle_gankable": true,
+        "positioning": "W pull toward you when she tries to reposition. Stay away from walls."
+      },
+      "Kayle": {
+        "difficulty": "medium",
+        "who_wins_early": "Zaahen",
+        "trading_pattern": "Abuse her hard pre-11. W pull closes the gap instantly. Your Q heal + Determination stacking makes early trades very favorable. Kill her before she scales.",
+        "ability_to_dodge": "Kayle E (Starfire Spellblade) — when she's progressive ranged at later levels, W pull negates her kite by bringing her to you.",
+        "power_spikes": {
+          "you": "Levels 1-10, Level 6 (ult), Determination stacks",
+          "enemy": "Level 11 (fully ranged), Nashor's Tooth"
+        },
+        "early_game": "Dominate her. W pull prevents any kite. Kill her at level 2-3.",
+        "mid_game": "Keep pressure through level 10. At 11 her range becomes dangerous.",
+        "late_game": "At level 11+ she kites. Your W pull's range matters — try to land it before she escapes range.",
+        "win_condition": "Kill her before level 6. W pull negates her kite. Snowball lead before she hits 11.",
+        "counter_items": ["Plated Steelcaps", "Stridebreaker"],
+        "scaling": "Zaahen wins early; Kayle wins past level 11",
+        "jungle_gankable": true,
+        "positioning": "Stay on top of her constantly pre-11. W pull every time she tries to step back."
+      },
+      "Trundle": {
+        "difficulty": "medium",
+        "who_wins_early": "Zaahen",
+        "trading_pattern": "W pull to keep him from running into his Frozen Domain. His ult steals your AD — very painful for a melee fighter. Avoid 1v1 when his ult is available.",
+        "ability_to_dodge": "Trundle E (Pillar of Ice) — W pull him before he places it, or sidestep the Pillar once placed. Don't let it trap you.",
+        "power_spikes": {
+          "you": "Level 2-5, Level 6, Determination stacks",
+          "enemy": "Level 6 (ult steals your AD/resistances), Sunfire"
+        },
+        "early_game": "You win early. W pull to keep him in range.",
+        "mid_game": "His ult stealing your AD is brutal for a primarily physical fighter. Avoid 1v1.",
+        "late_game": "Your passive revive insurance. Group for teamfights where his ult is less impactful.",
+        "win_condition": "Win lane early. Avoid 1v1 when his ult is up — it steals your AD which is your entire damage source.",
+        "counter_items": ["Plated Steelcaps", "Stridebreaker"],
+        "scaling": "Zaahen wins early; Trundle's ult is very painful mid-late",
+        "jungle_gankable": true,
+        "positioning": "W pull to keep him outside his Frozen Domain speed boost."
+      },
+      "Urgot": {
+        "difficulty": "hard",
+        "who_wins_early": "Urgot",
+        "trading_pattern": "His shotgun knees deal massive damage per trade and your Q healing barely keeps up. His W passive fires constantly. Only commit with W pull + full combo when his W is on cooldown.",
+        "ability_to_dodge": "Urgot W (Purge) — kite backwards when it activates. His knees are directional — angle away from his front.",
+        "power_spikes": {
+          "you": "Level 6 (ult with 50% DR helps survive his burst), Determination stacks",
+          "enemy": "Level 6 (execute ult), Sunfire + Frozen Fist"
+        },
+        "early_game": "He wins early. Farm under tower. His passive knees outdamage your Q heal.",
+        "mid_game": "With ult and stacks you can fight. His ult execute threatens you at low HP — use passive revive insurance.",
+        "late_game": "Your passive revive denies his execute ult. Very interesting anti-synergy.",
+        "win_condition": "Passive revive insurance means his execute ult doesn't kill you on first proc. Engage with ult DR. W pull to keep him in range.",
+        "counter_items": ["Plated Steelcaps", "Thornmail"],
+        "scaling": "Urgot wins early; even late due to Zaahen's passive revive countering his execute",
+        "jungle_gankable": true,
+        "positioning": "Angle away from his knee direction. Don't stand directly in front of his W active. Use ult preemptively."
+      },
+      "Riven": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Her shield and mobility make short trades go her way. Your W pull after her E shield expires keeps her in range. Time W pull for after her E.",
+        "ability_to_dodge": "Riven E (Valor) — bait her shield before W pulling. If she shielded, wait for it to expire then W pull.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Determination stacks",
+          "enemy": "Level 9 (CDR combo), Ravenous Hydra + Black Cleaver"
+        },
+        "early_game": "Even. Your W pull is great for keeping her in range when she tries to disengage.",
+        "mid_game": "Her full combo bursts you fast. Use ult for damage reduction + heal.",
+        "late_game": "Your passive revive gives you insurance against her execute ult.",
+        "win_condition": "W pull after her E shield expires. Use ult DR to survive her burst window then fight back. Passive revive vs her execute ult.",
+        "counter_items": ["Plated Steelcaps", "Bramble Vest"],
+        "scaling": "Even throughout; Zaahen slightly better with passive revive",
+        "jungle_gankable": true,
+        "positioning": "W pull after her E shield. Move sideways between her Q casts."
+      }
+    }
+  }
+}

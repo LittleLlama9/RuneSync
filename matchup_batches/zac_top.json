@@ -1,0 +1,348 @@
+{
+  "Zac": {
+    "top": {
+      "Darius": {
+        "difficulty": "medium",
+        "who_wins_early": "Darius",
+        "trading_pattern": "Darius Q bleed is oppressive. Your E engage and tankiness help. Trade with E engage.",
+        "ability_to_dodge": "His Q outer ring bleed — walk at him to avoid. Your tankiness absorbs damage.",
+        "power_spikes": {
+          "you": "Level 3 (E engage), Sunfire Aegis",
+          "enemy": "Level 6 (R execute), Stridebreaker"
+        },
+        "early_game": "Darius dominates early. Use E to engage carefully. Don't extend far.",
+        "mid_game": "Your tankiness scales. His ult is deadly — avoid low HP.",
+        "late_game": "You outscale through tankiness and teamfight CC. He struggles vs grouped.",
+        "win_condition": "Use E wisely to engage. Scale into tankiness. Group for fights.",
+        "counter_items": ["Sunfire Aegis", "Plated Steelcaps"],
+        "scaling": "You outscale through tankiness and CC.",
+        "jungle_gankable": false,
+        "positioning": "Use E to engage. Teamfight grouped. Avoid extended."
+      },
+      "Garen": {
+        "difficulty": "medium",
+        "who_wins_early": "Garen",
+        "trading_pattern": "Garen Q silence dominates close. Your E engage and tankiness help. Use E wisely.",
+        "ability_to_dodge": "His Q silence wind-up — move away. Your tankiness helps survive.",
+        "power_spikes": {
+          "you": "Level 3 (E engage), Sunfire Aegis",
+          "enemy": "Level 6 (R execute), Sunfire Aegis"
+        },
+        "early_game": "Garen dominates early. Use E to engage or disengage. Play around it.",
+        "mid_game": "Both scale into tankiness. Trade carefully around cooldowns.",
+        "late_game": "Even — both scale as tanks.",
+        "win_condition": "Use E wisely. Trade around cooldowns. Group for fights.",
+        "counter_items": ["Sunfire Aegis", "Plated Steelcaps"],
+        "scaling": "Even — both scale as tanks.",
+        "jungle_gankable": false,
+        "positioning": "Use E wisely. Teamfight grouped. Respect tankiness."
+      },
+      "Fiora": {
+        "difficulty": "hard",
+        "who_wins_early": "Fiora",
+        "trading_pattern": "Fiora's parry negates your damage. Your E engage helps but risky. Play carefully.",
+        "ability_to_dodge": "Her parry W — don't trade into her. Use E to engage at range.",
+        "power_spikes": {
+          "you": "Level 3 (E engage), Sunfire Aegis",
+          "enemy": "Level 3 (parry), Trinity Force"
+        },
+        "early_game": "Fiora dominates early. Use E defensively. Don't trade into parry.",
+        "mid_game": "Your tankiness scales. Her split push is strong. Group for fights.",
+        "late_game": "You outscale through tankiness. Fiora struggles vs grouped.",
+        "win_condition": "Use E defensively. Avoid parry. Group for teamfights.",
+        "counter_items": ["Sunfire Aegis", "Hollow Radiance"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use E defensively. Avoid parry. Group for fights."
+      },
+      "Jax": {
+        "difficulty": "hard",
+        "who_wins_early": "Jax",
+        "trading_pattern": "Jax's dueling and E stun are oppressive. Your E engage is risky into E. Play safe.",
+        "ability_to_dodge": "His E stun counter — don't use E into him carelessly.",
+        "power_spikes": {
+          "you": "Level 3 (E engage), Sunfire Aegis",
+          "enemy": "Level 6 (E stun), Trinity Force"
+        },
+        "early_game": "Jax dominates early. Use E defensively. Don't trade.",
+        "mid_game": "Your tankiness scales. His dueling is still strong. Group for fights.",
+        "late_game": "You outscale through tankiness. Jax struggles vs grouped.",
+        "win_condition": "Use E defensively. Avoid trading. Group for teamfights.",
+        "counter_items": ["Sunfire Aegis", "Hollow Radiance"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use E defensively. Avoid E range. Group for fights."
+      },
+      "Riven": {
+        "difficulty": "hard",
+        "who_wins_early": "Riven",
+        "trading_pattern": "Riven's combo is fast and oppressive. Your E engage and tankiness help. Play safe.",
+        "ability_to_dodge": "Her Q dash combo — use E defensively to kite away.",
+        "power_spikes": {
+          "you": "Level 3 (E engage), Sunfire Aegis",
+          "enemy": "Level 1 (combo), Trinity Force"
+        },
+        "early_game": "Riven's burst dominates. Use E defensively. Don't trade.",
+        "mid_game": "Your tankiness scales. Her split push is strong. Group for fights.",
+        "late_game": "You outscale through tankiness. Riven struggles grouped.",
+        "win_condition": "Use E defensively. Avoid her. Group for teamfights.",
+        "counter_items": ["Plated Steelcaps", "Sunfire Aegis"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use E defensively. Avoid combo. Group for fights."
+      },
+      "Aatrox": {
+        "difficulty": "medium",
+        "who_wins_early": "Aatrox",
+        "trading_pattern": "Aatrox Q range is massive. Your E engage and tankiness help. Play around his cooldowns.",
+        "ability_to_dodge": "His Q skillshots — use E to engage or disengage.",
+        "power_spikes": {
+          "you": "Level 3 (E engage), Sunfire Aegis",
+          "enemy": "Level 1 (Q damage), Goliath Cleaver"
+        },
+        "early_game": "Aatrox Q dominates. Use E wisely. Play around his cooldowns.",
+        "mid_game": "Your tankiness scales. His all-in is still strong. Group for fights.",
+        "late_game": "You outscale through tankiness. He falls off.",
+        "win_condition": "Use E wisely. Trade around cooldowns. Group for fights.",
+        "counter_items": ["Sunfire Aegis", "Plated Steelcaps"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use E to engage. Teamfight grouped. Avoid extended."
+      },
+      "Mordekaiser": {
+        "difficulty": "hard",
+        "who_wins_early": "Mordekaiser",
+        "trading_pattern": "Mordekaiser's all-in is oppressive. Your E engage and tankiness help. Play safe.",
+        "ability_to_dodge": "His E pull — don't use E into him. Play defensively.",
+        "power_spikes": {
+          "you": "Level 3 (E engage), Sunfire Aegis",
+          "enemy": "Level 1 (all-in), Trinity Force"
+        },
+        "early_game": "Mordekaiser dominates. Use E defensively. Don't trade.",
+        "mid_game": "Your tankiness scales. His ult can isolate. Group for fights.",
+        "late_game": "You outscale through tankiness. He struggles grouped.",
+        "win_condition": "Use E defensively. Group for fights. Avoid 1v1.",
+        "counter_items": ["Sunfire Aegis", "Hollow Radiance"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use E defensively. Group for fights. Avoid duels."
+      },
+      "Nasus": {
+        "difficulty": "easy",
+        "who_wins_early": "Zac",
+        "trading_pattern": "Nasus has zero early game. Your E engage and tankiness dominate. Engage freely.",
+        "ability_to_dodge": "His W wither — use E to engage and tank. Your tankiness is stronger.",
+        "power_spikes": {
+          "you": "Level 1-6 (early dominance), Sunfire Aegis",
+          "enemy": "Level 16+ (stacking), Iceborn Gauntlet"
+        },
+        "early_game": "Dominate with E engage. Nasus is helpless. Build a lead.",
+        "mid_game": "Your lead carries. His stacking helps. Group for fights.",
+        "late_game": "His stacks scale. You outscale through tankiness. Group always.",
+        "win_condition": "Dominate early with E. Build lead. Group for fights.",
+        "counter_items": ["Sunfire Aegis", "Trinity Force"],
+        "scaling": "He outscales through stacks — you through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Engage aggressively early. Group for fights. Teamfight."
+      },
+      "Sion": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Sion's Q poke is strong. Your E engage and tankiness help. Trade around cooldowns.",
+        "ability_to_dodge": "His Q slow — use E to engage or disengage.",
+        "power_spikes": {
+          "you": "Level 3 (E engage), Sunfire Aegis",
+          "enemy": "Level 9 (Q cooldown), Hollow Radiance"
+        },
+        "early_game": "Trade around his Q cooldowns. Use E wisely.",
+        "mid_game": "Both scale into tankiness. Trade carefully.",
+        "late_game": "Even — both scale well. Your CC helps teamfights.",
+        "win_condition": "Use E wisely. Trade around cooldowns. Group for fights.",
+        "counter_items": ["Sunfire Aegis", "Plated Steelcaps"],
+        "scaling": "Even — both scale well.",
+        "jungle_gankable": true,
+        "positioning": "Use E wisely. Trade around cooldowns. Teamfight grouped."
+      },
+      "Malphite": {
+        "difficulty": "medium",
+        "who_wins_early": "Malphite",
+        "trading_pattern": "Malphite is tanky but low damage. Your E engage and tankiness help. Trade carefully.",
+        "ability_to_dodge": "His E shockwave — your tankiness absorbs it.",
+        "power_spikes": {
+          "you": "Level 3 (E engage), Sunfire Aegis",
+          "enemy": "Level 6 (R engage), Thornmail"
+        },
+        "early_game": "Malphite is hard to kill. Use E wisely. Trade gradually.",
+        "mid_game": "Both scale into tankiness. Your CC is useful. Trade carefully.",
+        "late_game": "Even — both scale well. Teamfight is even.",
+        "win_condition": "Use E wisely. Trade gradually. Group for fights.",
+        "counter_items": ["Sunfire Aegis", "Hollow Radiance"],
+        "scaling": "Even — both scale well.",
+        "jungle_gankable": true,
+        "positioning": "Use E wisely. Trade gradually. Teamfight grouped."
+      },
+      "Kayle": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Kayle's early range is limited. Your E engage and tankiness help. Engage when possible.",
+        "ability_to_dodge": "Her R invincibility — don't engage when she ults.",
+        "power_spikes": {
+          "you": "Level 1-6 (early dominance), Sunfire Aegis",
+          "enemy": "Level 11 (range extends), Nashor's Tooth"
+        },
+        "early_game": "Engage with E early. Kayle's range is limited.",
+        "mid_game": "Her range extends. Your tankiness scales. Group for fights.",
+        "late_game": "She scales well. You outscale through CC. Group always.",
+        "win_condition": "Engage early with E. Build lead. Group for fights.",
+        "counter_items": ["Sunfire Aegis", "Hollow Radiance"],
+        "scaling": "Even — both scale well late game.",
+        "jungle_gankable": true,
+        "positioning": "Engage early. Group for fights. Teamfight grouped."
+      },
+      "Yorick": {
+        "difficulty": "medium",
+        "who_wins_early": "Yorick",
+        "trading_pattern": "Yorick's ghouls are oppressive. Your E engage and tankiness help. Trade with caution.",
+        "ability_to_dodge": "His E cage — use E to engage around it.",
+        "power_spikes": {
+          "you": "Level 3 (E engage), Sunfire Aegis",
+          "enemy": "Level 6 (R maiden), Trinity Force"
+        },
+        "early_game": "Yorick's ghouls zone you. Use E wisely. Don't trade.",
+        "mid_game": "Your tankiness scales. His maiden is strong. Group for fights.",
+        "late_game": "You outscale through tankiness. Avoid 1v1s.",
+        "win_condition": "Use E wisely. Avoid his cage. Group for teamfights.",
+        "counter_items": ["Sunfire Aegis", "Hollow Radiance"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use E wisely. Avoid cage. Group for fights."
+      },
+      "Illaoi": {
+        "difficulty": "medium",
+        "who_wins_early": "Illaoi",
+        "trading_pattern": "Illaoi's E test is devastating. Your E engage and tankiness help avoid. Play safe.",
+        "ability_to_dodge": "Her E tentacle test — use E to move away from her.",
+        "power_spikes": {
+          "you": "Level 3 (E engage)", "Sunfire Aegis",
+          "enemy": "Level 6 (R spawns), Sunfire Aegis"
+        },
+        "early_game": "Illaoi's tentacles zone you. Use E to space. Avoid E test.",
+        "mid_game": "Your tankiness scales. Her tentacles zone. Trade carefully.",
+        "late_game": "You outscale through tankiness. Avoid tentacles.",
+        "win_condition": "Use E to space. Avoid E test. Group for teamfights.",
+        "counter_items": ["Sunfire Aegis", "Hollow Radiance"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use E to space. Avoid tentacles. Group for fights."
+      },
+      "Camille": {
+        "difficulty": "hard",
+        "who_wins_early": "Camille",
+        "trading_pattern": "Camille's E hook is oppressive. Your E engage is risky. Play safe.",
+        "ability_to_dodge": "Her E hook — use E defensively to engage elsewhere.",
+        "power_spikes": {
+          "you": "Level 3 (E engage)", "Sunfire Aegis",
+          "enemy": "Level 3 (E hook), Trinity Force"
+        },
+        "early_game": "Camille dominates. Use E defensively. Don't trade.",
+        "mid_game": "Your tankiness scales. Her dueling is strong. Group for fights.",
+        "late_game": "You outscale through tankiness. Camille struggles grouped.",
+        "win_condition": "Use E defensively. Avoid her. Group for teamfights.",
+        "counter_items": ["Sunfire Aegis", "Hollow Radiance"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use E defensively. Avoid E. Group for fights."
+      },
+      "Olaf": {
+        "difficulty": "medium",
+        "who_wins_early": "Olaf",
+        "trading_pattern": "Olaf's Q slow is oppressive. Your E engage and tankiness help. Play around cooldowns.",
+        "ability_to_dodge": "His Q axe slow — use E to engage and tank.",
+        "power_spikes": {
+          "you": "Level 3 (E engage)", "Sunfire Aegis",
+          "enemy": "Level 1 (Q slow), Trinity Force"
+        },
+        "early_game": "Olaf's poke dominates. Use E wisely. Play around his cooldowns.",
+        "mid_game": "Your tankiness scales. His R makes him unkiteable. Group for fights.",
+        "late_game": "You outscale through tankiness. Avoid his ult.",
+        "win_condition": "Use E wisely. Trade around cooldowns. Group for fights.",
+        "counter_items": ["Sunfire Aegis", "Hollow Radiance"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use E wisely. Teamfight grouped. Respect R."
+      },
+      "Ornn": {
+        "difficulty": "hard",
+        "who_wins_early": "Ornn",
+        "trading_pattern": "Ornn's W brittle is oppressive. Your E engage and tankiness help. Play safe.",
+        "ability_to_dodge": "His E charge — use E defensively. Don't get caught.",
+        "power_spikes": {
+          "you": "Level 3 (E engage)", "Sunfire Aegis",
+          "enemy": "Level 6 (R knockup), Sunfire Aegis"
+        },
+        "early_game": "Ornn dominates. Use E defensively. Don't trade.",
+        "mid_game": "Your tankiness scales. His tankiness improves. Trade carefully.",
+        "late_game": "You outscale through tankiness. His upgrades are annoying.",
+        "win_condition": "Use E defensively. Group for fights. Avoid extended.",
+        "counter_items": ["Sunfire Aegis", "Hollow Radiance"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use E defensively. Avoid E. Group for fights."
+      },
+      "Maokai": {
+        "difficulty": "medium",
+        "who_wins_early": "Maokai",
+        "trading_pattern": "Maokai's W pull is strong. Your E engage is risky. Play around cooldowns.",
+        "ability_to_dodge": "His W pull — use E to engage or disengage.",
+        "power_spikes": {
+          "you": "Level 3 (E engage)", "Sunfire Aegis",
+          "enemy": "Level 6 (R CC chain), Liandry's"
+        },
+        "early_game": "Maokai's poke is strong. Use E wisely. Play around cooldowns.",
+        "mid_game": "Your tankiness scales. His tankiness improves. Trade carefully.",
+        "late_game": "Even — both scale well. Teamfight is even.",
+        "win_condition": "Use E wisely. Trade around cooldowns. Group for fights.",
+        "counter_items": ["Sunfire Aegis", "Hollow Radiance"],
+        "scaling": "Even — both scale well.",
+        "jungle_gankable": true,
+        "positioning": "Use E wisely. Trade around cooldowns. Teamfight grouped."
+      },
+      "Gnar": {
+        "difficulty": "medium",
+        "who_wins_early": "Gnar",
+        "trading_pattern": "Gnar's poke from range is oppressive. Your E engage and tankiness help. Trade wisely.",
+        "ability_to_dodge": "His E hop — use E to engage and tank.",
+        "power_spikes": {
+          "you": "Level 3 (E engage)", "Sunfire Aegis",
+          "enemy": "Level 1 (ranged poke), Trinity Force"
+        },
+        "early_game": "Gnar's ranged poke dominates. Use E to engage. Don't extend.",
+        "mid_game": "Your tankiness scales. His mega form is scary. Group for fights.",
+        "late_game": "You outscale through tankiness. Avoid mega.",
+        "win_condition": "Use E to engage. Avoid mega form. Group for fights.",
+        "counter_items": ["Sunfire Aegis", "Hollow Radiance"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": true,
+        "positioning": "Use E to engage. Avoid mega. Group for fights."
+      },
+      "Volibear": {
+        "difficulty": "hard",
+        "who_wins_early": "Volibear",
+        "trading_pattern": "Volibear's W bite is oppressive. Your E engage and tankiness help. Play safe.",
+        "ability_to_dodge": "His R storm dive — use E defensively or tank the damage.",
+        "power_spikes": {
+          "you": "Level 3 (E engage)", "Sunfire Aegis",
+          "enemy": "Level 6 (R engage), Trinity Force"
+        },
+        "early_game": "Volibear dominates. Use E defensively. Don't trade.",
+        "mid_game": "Your tankiness scales. His tankiness improves. Trade carefully.",
+        "late_game": "You outscale through tankiness. Avoid his all-in.",
+        "win_condition": "Use E defensively. Group for fights. Avoid extended.",
+        "counter_items": ["Sunfire Aegis", "Plated Steelcaps"],
+        "scaling": "You outscale through tankiness.",
+        "jungle_gankable": false,
+        "positioning": "Use E defensively. Group for fights. Respect W."
+      }
+    }
+  }
+}

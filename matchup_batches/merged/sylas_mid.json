@@ -1,0 +1,312 @@
+{
+  "Sylas": {
+    "mid": {
+      "Naafiri": {
+        "difficulty": "hard",
+        "who_wins_early": "Naafiri",
+        "trading_pattern": "Naafiri has early burst. Play defensive and use W to farm safely.",
+        "ability_to_dodge": "Naafiri Q (Darkin Salvo) — step to the side or back.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Protobelt",
+          "enemy": "Youmuu's, Level 6"
+        },
+        "early_game": "Play safe pre-6. Naafiri wins early all-ins.",
+        "mid_game": "Use ult to steal her abilities. Group with team.",
+        "late_game": "You outscale. Use stolen ults effectively.",
+        "win_condition": "Steal key ultimates and use them in teamfights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Sylas outscales — your ult versatility grows",
+        "jungle_gankable": false,
+        "positioning": "Keep distance early. Use W to farm safely."
+      },
+      "Graves": {
+        "difficulty": "hard",
+        "who_wins_early": "Graves",
+        "trading_pattern": "Graves has early burst. Play defensive and use W to farm.",
+        "ability_to_dodge": "Graves Q (End and Beginning) — dodge by stepping back.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Protobelt",
+          "enemy": "Youmuu's, Level 6"
+        },
+        "early_game": "Play safe. Graves dominates early.",
+        "mid_game": "Use ult defensively. Scale with team.",
+        "late_game": "You outscale. Use stolen ults.",
+        "win_condition": "Steal his ult and use it in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Sylas outscales — ult versatility improves",
+        "jungle_gankable": false,
+        "positioning": "Keep distance with W. Never close range early."
+      },
+      "Veigar": {
+        "difficulty": "hard",
+        "who_wins_early": "Veigar",
+        "trading_pattern": "Veigar stacks power. Trade early before stacks accumulate.",
+        "ability_to_dodge": "Veigar E (Event Horizon) — dodge immediately.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Protobelt",
+          "enemy": "Stacks, Level 6"
+        },
+        "early_game": "Abuse before stacks. Poke with Q.",
+        "mid_game": "Use ult to steal his ult. Don't fight in cage.",
+        "late_game": "He outscales. Use stolen ults effectively.",
+        "win_condition": "Steal and use his powerful ult.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Veigar outscales — his stacking makes him stronger",
+        "jungle_gankable": true,
+        "positioning": "Avoid his cage range. Close distance when safe."
+      },
+      "Viktor": {
+        "difficulty": "medium",
+        "who_wins_early": "Viktor",
+        "trading_pattern": "Viktor has good early E poke. Trade when cooldowns are down.",
+        "ability_to_dodge": "Viktor E (Death Ray) — dodge perpendicular.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Protobelt",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Viktor has decent poke.",
+        "mid_game": "Use ult to steal his ult. Scale with team.",
+        "late_game": "He outscales. Use stolen ults.",
+        "win_condition": "Steal his powerful ult and use it.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Viktor outscales — his itemization is superior",
+        "jungle_gankable": true,
+        "positioning": "Keep distance with W. Avoid E zones."
+      },
+      "Vex": {
+        "difficulty": "medium",
+        "who_wins_early": "Vex",
+        "trading_pattern": "Vex has poke and CC. Trade when abilities are down.",
+        "ability_to_dodge": "Vex E (Looming Darkness) — avoid zone.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Protobelt",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Vex has poke.",
+        "mid_game": "Use ult to steal hers. Scale with team.",
+        "late_game": "Both scale. Teamfights determine outcome.",
+        "win_condition": "Steal her ult and use it in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Sylas slightly favored — ult versatility is higher",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Use W to trade safely."
+      },
+      "Lissandra": {
+        "difficulty": "medium",
+        "who_wins_early": "Lissandra",
+        "trading_pattern": "Lissandra has CC and crowd control. Trade when cooldowns down.",
+        "ability_to_dodge": "Lissandra E (Glacial Path) — dodge by moving away.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Protobelt",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Lissandra has good CC.",
+        "mid_game": "Use ult to steal her ult. Scale with team.",
+        "late_game": "She outscales. Use stolen ults.",
+        "win_condition": "Steal her powerful CC ult.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Lissandra slightly favored — her CC scales well",
+        "jungle_gankable": true,
+        "positioning": "Keep distance with W. Avoid her combo range."
+      },
+      "Xerath": {
+        "difficulty": "hard",
+        "who_wins_early": "Xerath",
+        "trading_pattern": "Xerath outranges you. Play defensive with W.",
+        "ability_to_dodge": "Xerath Q (Runic Barrage) — dodge perpendicular.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Protobelt",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play very safe. His range is overwhelming.",
+        "mid_game": "Use E to close distance. Scale with team.",
+        "late_game": "He outscales. Use stolen ults.",
+        "win_condition": "Close distance with E and use stolen ults.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Xerath outscales — his poke range is oppressive",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Use minions for cover."
+      },
+      "Akshan": {
+        "difficulty": "medium",
+        "who_wins_early": "Akshan",
+        "trading_pattern": "Akshan has mobility and poke. Trade when abilities down.",
+        "ability_to_dodge": "Akshan E (Grappling Hook) — step back when he grapples.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Protobelt",
+          "enemy": "Serylda's, Level 6"
+        },
+        "early_game": "Play defensively. Akshan has decent poke.",
+        "mid_game": "Use ult to steal his ult. Scale with team.",
+        "late_game": "Both scale. Teamfights determine outcome.",
+        "win_condition": "Steal his ult and use it.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Sylas slightly favored — ult versatility is higher",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Close when he overextends."
+      },
+      "Diana": {
+        "difficulty": "skill_matchup",
+        "who_wins_early": "Even",
+        "trading_pattern": "Diana is melee. Trade when her abilities are down.",
+        "ability_to_dodge": "Diana Q (Crescent Strike) — dodge sideways.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Protobelt",
+          "enemy": "Protobelt, Level 6"
+        },
+        "early_game": "Trade when she's vulnerable. Both scale.",
+        "mid_game": "Use ult to steal hers. Scale with team.",
+        "late_game": "Both scale. Use stolen ults effectively.",
+        "win_condition": "Steal her ult and use it in fights.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Even — both scale at similar rates",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Close when she overextends."
+      },
+      "Azir": {
+        "difficulty": "medium",
+        "who_wins_early": "Azir",
+        "trading_pattern": "Azir has soldiers for poke. Trade when soldiers down.",
+        "ability_to_dodge": "Azir soldiers have range.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Protobelt",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Play defensively. Azir has decent early poke.",
+        "mid_game": "Use ult to steal his ult. Scale with team.",
+        "late_game": "He outscales. Use stolen ults.",
+        "win_condition": "Steal his ult and use it.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Azir outscales — his teamfight control improves",
+        "jungle_gankable": false,
+        "positioning": "Close distance with E. Avoid soldiers."
+      },
+      "Tristana": {
+        "difficulty": "easy",
+        "who_wins_early": "Sylas",
+        "trading_pattern": "Tristana is weak early. Use E to close and trade.",
+        "ability_to_dodge": "Tristana E (Explosive Charge) — step away.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Protobelt",
+          "enemy": "IE, Level 9"
+        },
+        "early_game": "Abuse her weak early. Close with E.",
+        "mid_game": "Maintain pressure. Don't let her scale.",
+        "late_game": "She outscales. Finish before she becomes oppressive.",
+        "win_condition": "Get early lead. Finish before ADC scaling.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Tristana outscales — her ADC scaling dominates late",
+        "jungle_gankable": false,
+        "positioning": "Close with E early. Abuse her weakness."
+      },
+      "Smolder": {
+        "difficulty": "easy",
+        "who_wins_early": "Sylas",
+        "trading_pattern": "Smolder is very weak early. Spam E and farm.",
+        "ability_to_dodge": "Smolder Q (Breath) — dodge back.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Protobelt",
+          "enemy": "Liandry's, Level 13"
+        },
+        "early_game": "Dominate with E aggression. Farm freely.",
+        "mid_game": "Maintain pressure. Don't let him scale.",
+        "late_game": "He outscales significantly. Finish early.",
+        "win_condition": "Get early lead. Finish before 2-3 items.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Smolder significantly outscales — you need major lead",
+        "jungle_gankable": false,
+        "positioning": "Use E aggressively early. Push him off farm."
+      },
+      "Ryze": {
+        "difficulty": "medium",
+        "who_wins_early": "Even",
+        "trading_pattern": "Ryze has poke. Trade when cooldowns are down.",
+        "ability_to_dodge": "Ryze Q (Overload) — dodge back or sideways.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Protobelt",
+          "enemy": "Luden's, Level 6"
+        },
+        "early_game": "Trade when vulnerable. Both scale.",
+        "mid_game": "Use ult to steal his ult. Scale with team.",
+        "late_game": "He outscales slightly. Use stolen ults.",
+        "win_condition": "Steal his ult and use it.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Ryze outscales — his teamfight control improves",
+        "jungle_gankable": true,
+        "positioning": "Keep distance with W. Close when safe."
+      },
+      "Orianna": {
+        "difficulty": "medium",
+        "who_wins_early": "Even",
+        "trading_pattern": "Orianna has poke. Trade when ball is far.",
+        "ability_to_dodge": "Orianna Q (Command: Attack) — dodge back.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Protobelt",
+          "enemy": "Archangel's, Level 6"
+        },
+        "early_game": "Trade when ball is away. Both scale.",
+        "mid_game": "Use ult to steal her ult. Scale with team.",
+        "late_game": "She outscales. Use stolen ults.",
+        "win_condition": "Steal her powerful ult.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Orianna slightly favored — her teamfight control is superior",
+        "jungle_gankable": true,
+        "positioning": "Keep distance with W. Keep away from ball."
+      },
+      "Cassiopeia": {
+        "difficulty": "medium",
+        "who_wins_early": "Cassiopeia",
+        "trading_pattern": "Cassiopeia has sustained poke. Trade carefully.",
+        "ability_to_dodge": "Cassiopeia W (Miasma) — walk around it.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Protobelt",
+          "enemy": "Liandry's, Level 6"
+        },
+        "early_game": "Play defensively. Cassio has decent poke.",
+        "mid_game": "Use ult to steal hers. Scale with team.",
+        "late_game": "She outscales. Use stolen ults.",
+        "win_condition": "Steal her ult and use it.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Cassiopeia outscales — her sustained damage is overwhelming",
+        "jungle_gankable": true,
+        "positioning": "Keep distance. Close when safe. Avoid poison."
+      },
+      "Zed": {
+        "difficulty": "hard",
+        "who_wins_early": "Zed",
+        "trading_pattern": "Zed has burst and mobility. Play defensive with W.",
+        "ability_to_dodge": "Zed W (Living Shadow) — back off when clones.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Protobelt",
+          "enemy": "Youmuu's, Level 6"
+        },
+        "early_game": "Play safe pre-6. Zed has strong burst.",
+        "mid_game": "Use ult to steal his ult. Scale with team.",
+        "late_game": "He outscales. Use stolen ults effectively.",
+        "win_condition": "Steal and use his burst ult.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Zed slightly favored — his burst is higher",
+        "jungle_gankable": true,
+        "positioning": "Keep distance with W. Never close to shadows."
+      },
+      "Malphite": {
+        "difficulty": "medium",
+        "who_wins_early": "Malphite",
+        "trading_pattern": "Malphite is melee. Trade when his abilities are down.",
+        "ability_to_dodge": "Malphite Q (Seismic Shard) — dodge by stepping away.",
+        "power_spikes": {
+          "you": "Level 6 (ult), Protobelt",
+          "enemy": "Armguard, Level 6"
+        },
+        "early_game": "Play defensively. Malphite has tankiness.",
+        "mid_game": "Use ult to steal his ult. Scale with team.",
+        "late_game": "He outscales with tankiness. Use stolen ults.",
+        "win_condition": "Steal his powerful teamfight ult.",
+        "counter_items": ["Mercury's Treads", "Banshee's Veil"],
+        "scaling": "Malphite outscales — his tankiness increases late",
+        "jungle_gankable": true,
+        "positioning": "Keep distance with W. Close when safe."
+      }
+    }
+  }
+}

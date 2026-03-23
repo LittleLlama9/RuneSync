@@ -1,0 +1,366 @@
+{
+  "Olaf": {
+    "top": {
+      "Volibear": {
+        "difficulty": "hard",
+        "who_wins_early": "Volibear",
+        "trading_pattern": "Volibear E flip interrupts your Q spam. His W all-in with healing is overwhelming. You can't trade back.",
+        "ability_to_dodge": "His E flip — move perpendicular when charging. If flipped, he all-ins with W and destroys you.",
+        "power_spikes": {
+          "you": "Level 5 (R into all-ins), Trinity Force",
+          "enemy": "Level 3 (E engage spike), Hollow Radiance"
+        },
+        "early_game": "Volibear dominates early. His all-in is too strong. Play safe and minimize all-ins.",
+        "mid_game": "Your R helps in some fights. His tankiness is still oppressive. Teamfight instead of 1v1.",
+        "late_game": "He outscales as a tank. You're a duelist. Stick to grouped fights where you have backup.",
+        "win_condition": "Survive early. Group for teamfights. Use R to escape and disengage.",
+        "counter_items": ["Mercury's Treads", "Kaenic Rookern"],
+        "scaling": "Volibear outscales as a tank. You scale as an early-game champion.",
+        "jungle_gankable": false,
+        "positioning": "Move perpendicular to his E. Don't stand still for his flip."
+      },
+      "Warwick": {
+        "difficulty": "hard",
+        "who_wins_early": "Warwick",
+        "trading_pattern": "Warwick Q tracks your blood in trades. His R fear-engage is devastating. You can't escape him.",
+        "ability_to_dodge": "His R bloodhunt — when he marks you, don't fight in lanes. Use R to kite away.",
+        "power_spikes": {
+          "you": "Level 5 (R kiting), Trinity Force",
+          "enemy": "Level 3 (Q track + engage), Hollow Radiance"
+        },
+        "early_game": "Warwick's tracking and engage are too strong. Play safe and avoid extending.",
+        "mid_game": "His R becomes an execute tool. Your R helps kite but can't escape forever.",
+        "late_game": "He outscales through R utility. You're weaker late. Win through grouping.",
+        "win_condition": "Survive early. Stick to grouped fights. Use R to kite away from ganks.",
+        "counter_items": ["Mercury's Treads", "Kaenic Rookern"],
+        "scaling": "Warwick outscales through R. You're early-game focused.",
+        "jungle_gankable": false,
+        "positioning": "Kite away from him. Use R to increase distance. Don't let him catch you alone."
+      },
+      "Master Yi": {
+        "difficulty": "hard",
+        "who_wins_early": "even",
+        "trading_pattern": "Master Yi's Q reset is unpredictable. His all-in with W is strong. You trade short but he kites.",
+        "ability_to_dodge": "His R dash reset — move unpredictably. His W makes him untargetable; use R to avoid.",
+        "power_spikes": {
+          "you": "Level 5 (R utility), Trinity Force",
+          "enemy": "Level 6 (R reset tool), Phantom Dancer"
+        },
+        "early_game": "Master Yi is weak early but can surprise with all-in. Play safe and don't overextend.",
+        "mid_game": "His items amplify his reset potential. Teamfight instead of letting him 1v1.",
+        "late_game": "He becomes an assassin late. Protect your team. Group and lock him down with CC.",
+        "win_condition": "Stick to grouped fights. Use R to kite away from his engages.",
+        "counter_items": ["Plated Steelcaps", "Kaenic Rookern"],
+        "scaling": "Master Yi outscales as a reset champion. You're early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Space from his Q range. Don't let him get close without R available."
+      },
+      "Yorick": {
+        "difficulty": "hard",
+        "who_wins_early": "Yorick",
+        "trading_pattern": "Yorick ghouls swarm you in trades. Extended fights are oppressive. You can't out-trade early.",
+        "ability_to_dodge": "His E ghoul spawn — move sideways. Don't let him spawn all his ghouls on you.",
+        "power_spikes": {
+          "you": "Level 5 (R kiting), Trinity Force",
+          "enemy": "Level 1 (maiden spawns), Trinity Force"
+        },
+        "early_game": "Yorick's ghouls are overwhelming. Play safe and minimize extended trades.",
+        "mid_game": "His maiden plus ghouls destroy extended fights. Teamfight grouped.",
+        "late_game": "He's a split-pushing god. You can't duel him. Force grouped fights.",
+        "win_condition": "Survive early. Group for teamfights. Never split against him.",
+        "counter_items": ["Plated Steelcaps", "Kaenic Rookern"],
+        "scaling": "Yorick outscales as a split pusher. You're early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Space from ghoul swarms. Dodge his E by moving sideways."
+      },
+      "Gnar": {
+        "difficulty": "hard",
+        "who_wins_early": "Gnar",
+        "trading_pattern": "Gnar mini-form pokes early with range. Mega all-in is oppressive. Trade short when mini.",
+        "ability_to_dodge": "His mega transformation — brace for impact. His R knockback separates you from allies.",
+        "power_spikes": {
+          "you": "Level 5 (R kiting), Trinity Force",
+          "enemy": "Mega transformation (all-in spike), Trinity Force"
+        },
+        "early_game": "Gnar pokes and transforms early. His all-in is scary. Play safe.",
+        "mid_game": "His form cycling is unpredictable. Your R helps kite. Teamfight when possible.",
+        "late_game": "He outscales as a teamfighter. You're weaker late. Group and focus.",
+        "win_condition": "Survive early. Group for teamfights. Use R to kite from R knockback.",
+        "counter_items": ["Kaenic Rookern", "Plated Steelcaps"],
+        "scaling": "Gnar outscales as a teamfighter. You're early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Target him when mini. Space when mega. Don't let his R separate you."
+      },
+      "Kennen": {
+        "difficulty": "medium",
+        "who_wins_early": "Kennen",
+        "trading_pattern": "Kennen's shurikens poke from range safely. His E dodge reduces damage. You can't pressure him.",
+        "ability_to_dodge": "His R stun — move away from the center. It stuns all nearby enemies.",
+        "power_spikes": {
+          "you": "Level 5 (R engage), Trinity Force",
+          "enemy": "Level 1 (poke), Mercury's Treads"
+        },
+        "early_game": "Kennen outpokes from range. Your all-in is strong but hard to execute. Play safe.",
+        "mid_game": "His R is powerful grouped. Your R helps engage but exposes you. Teamfight instead of 1v1.",
+        "late_game": "He outscales as a teamfighter. You're weaker late. Group and coordinate.",
+        "win_condition": "Look for all-in opportunities. Use R to engage grouped teamfights.",
+        "counter_items": ["Adaptive Helm", "Mercury's Treads"],
+        "scaling": "Kennen outscales as a teamfighter. You're early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Rush him when you have the chance. Don't let him poke safely."
+      },
+      "Vayne": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Vayne's range and tumble let her kite. She applies true damage slowly. Extended trades favor her.",
+        "ability_to_dodge": "Her E condemn stun — move away from walls. Never fight near walls; she'll condemn you.",
+        "power_spikes": {
+          "you": "Level 5 (R engage), Trinity Force",
+          "enemy": "Trinity Force (scaling), Level 6"
+        },
+        "early_game": "Vayne is weak early. Pressure heavily. Look for early kills before scaling.",
+        "mid_game": "Her items accelerate scaling. Your all-in is still relevant. Teamfight instead of dueling.",
+        "late_game": "She's a hypercarry late. You can't duel. Group and protect your team.",
+        "win_condition": "Kill her early. Get a lead. Teamfight grouped with numbers advantage.",
+        "counter_items": ["Plated Steelcaps", "Trinity Force"],
+        "scaling": "Vayne outscales as a hypercarry. Win early.",
+        "jungle_gankable": true,
+        "positioning": "Stay away from walls. Rush her early to all-in."
+      },
+      "Singed": {
+        "difficulty": "medium",
+        "who_wins_early": "Singed",
+        "trading_pattern": "Singed's poison is relentless. He runs away from you easily with W. You can't catch him.",
+        "ability_to_dodge": "His R slow + proxy playstyle — he plays for flips and proxying. Avoid extended chases.",
+        "power_spikes": {
+          "you": "Level 5 (R engagement), Trinity Force",
+          "enemy": "Rylai's Crystal Scepter (kite tool), Level 6"
+        },
+        "early_game": "Singed proxies and runs. Your all-in doesn't work against kiting. Play safe.",
+        "mid_game": "His Rylai's slows you. Your all-in is less effective. Teamfight instead of chasing.",
+        "late_game": "He outscales through kiting. You can't catch him. Stick to grouped fights.",
+        "win_condition": "Group for teamfights. Never chase him alone. Coordinate with team.",
+        "counter_items": ["Plated Steelcaps", "Trinity Force"],
+        "scaling": "Singed outscales through kiting. You're early-game focused.",
+        "jungle_gankable": false,
+        "positioning": "Don't chase him endlessly. Fight around objectives with team."
+      },
+      "Teemo": {
+        "difficulty": "medium",
+        "who_wins_early": "Teemo",
+        "trading_pattern": "Teemo pokes from range with Q. He's invisible in shrooms. Extended fights favor you after level 6.",
+        "ability_to_dodge": "His Q blind — move unpredictably. When blinded, all-in his next trade.",
+        "power_spikes": {
+          "you": "Level 5 (R engage), Trinity Force",
+          "enemy": "Level 1 (poke), Nashor's Tooth"
+        },
+        "early_game": "Teemo pokes safely. Your all-in is strong but risky. Rush him hard when possible.",
+        "mid_game": "Your shroom avoidance helps. His split-push is weak to teamfights. Teamfight grouped.",
+        "late_game": "He splits and shrooms. You duel better. Never let him split freely.",
+        "win_condition": "All-in him early. Group for teamfights. Force fights when possible.",
+        "counter_items": ["Mercury's Treads", "Adaptive Helm"],
+        "scaling": "You outscale through all-in potential. Teemo through split push.",
+        "jungle_gankable": true,
+        "positioning": "Rush him to all-in. Don't let him poke safely from range."
+      },
+      "Quinn": {
+        "difficulty": "medium",
+        "who_wins_early": "Quinn",
+        "trading_pattern": "Quinn's E vault knock-back prevents your all-in. Her passive on-hit procs are strong. Play around it.",
+        "ability_to_dodge": "Her E vault — move sideways when she targets you. She knock-backs and bursts.",
+        "power_spikes": {
+          "you": "Level 5 (R engage), Trinity Force",
+          "enemy": "Level 2 (poke spike), Manamune"
+        },
+        "early_game": "Quinn's poke and vault are annoying. Your all-in is strong but risky. Trade carefully.",
+        "mid_game": "Her items help scaling. Your all-in is still relevant. Teamfight instead of dueling.",
+        "late_game": "She outscales as a roaming split pusher. You're weaker late. Group for fights.",
+        "win_condition": "All-in her early. Group for teamfights. Use R to engage grouped fights.",
+        "counter_items": ["Adaptive Helm", "Kaenic Rookern"],
+        "scaling": "Quinn outscales as a split pusher. You're early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Avoid her E vault by moving sideways. Rush her when she's in range."
+      },
+      "Darius": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Darius Q outer ring applies bleed. Extended trades favor him. Trade short when his Q is down.",
+        "ability_to_dodge": "His Q bleed — walk at him to avoid outer ring. Standing in outer ring is terrible.",
+        "power_spikes": {
+          "you": "Level 5 (R all-in), Trinity Force",
+          "enemy": "Level 6 (R execute), Stridebreaker"
+        },
+        "early_game": "Trade short when his Q is down. Your all-in is strong. Look for level 2-3 kills.",
+        "mid_game": "Your R engage is powerful. His ult is an execute. Teamfight instead of dueling.",
+        "late_game": "He outscales through ult utility. You're weaker late. Group for fights.",
+        "win_condition": "Get a lead early. Use R to engage grouped teamfights. Teamfight instead of dueling.",
+        "counter_items": ["Plated Steelcaps", "Kaenic Rookern"],
+        "scaling": "Darius outscales through ult utility. You're early-game focused.",
+        "jungle_gankable": false,
+        "positioning": "Walk at him to avoid Q outer ring. Rush him when possible."
+      },
+      "Garen": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Garen Q silence shuts down your combo. His Judgment AOE is oppressive. Trade short when Q is down.",
+        "ability_to_dodge": "His Q silence — when he winds up, back away. Silence prevents your combo.",
+        "power_spikes": {
+          "you": "Level 5 (R all-in), Trinity Force",
+          "enemy": "Level 6 (R execute), Sunfire Aegis"
+        },
+        "early_game": "Garen silence is annoying but manageable. Trade short. Your all-in is strong early.",
+        "mid_game": "Your R engage is powerful. His tankiness is high. Teamfight instead of dueling.",
+        "late_game": "He outscales through tankiness. You're weaker late. Group for fights.",
+        "win_condition": "Get a lead early. Use R to engage grouped teamfights. Teamfight instead of dueling.",
+        "counter_items": ["Plated Steelcaps", "Kaenic Rookern"],
+        "scaling": "Garen outscales as a tank. You're early-game focused.",
+        "jungle_gankable": false,
+        "positioning": "Back away when he winds up Q. Rush him when his abilities are down."
+      },
+      "Aatrox": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Aatrox Q swings deal high damage and heal him. Extended trades favor him. Trade short when Q is down.",
+        "ability_to_dodge": "His Q swings — dodge by moving perpendicular. Avoid standing in swings.",
+        "power_spikes": {
+          "you": "Level 5 (R all-in), Trinity Force",
+          "enemy": "Level 3 (Q swing combo), Goredrinker"
+        },
+        "early_game": "Trade short when his Q is down. Your all-in is strong. Look for level 2-3 kills.",
+        "mid_game": "Your R engage is powerful. His healing is strong. Teamfight instead of dueling.",
+        "late_game": "He outscales through items. You're weaker late. Group for fights.",
+        "win_condition": "Get a lead early. Use R to engage grouped teamfights. Teamfight instead of dueling.",
+        "counter_items": ["Plated Steelcaps", "Kaenic Rookern"],
+        "scaling": "Aatrox outscales through items. You're early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Dodge his Q swings by moving sideways. Rush him when Q is down."
+      },
+      "Renekton": {
+        "difficulty": "medium",
+        "who_wins_early": "Renekton",
+        "trading_pattern": "Renekton's empowered abilities with Fury are strong. He outbursts you early. Play around his Fury meter.",
+        "ability_to_dodge": "His W empowered stun — when his Fury is up, back away. Empowered W locks you down.",
+        "power_spikes": {
+          "you": "Level 5 (R all-in), Trinity Force",
+          "enemy": "Level 3 (Fury spike), Trinity Force"
+        },
+        "early_game": "Renekton is strong early with Fury. Play safe and avoid extended trades.",
+        "mid_game": "Your R engage helps. His Fury cycling is strong. Teamfight instead of dueling.",
+        "late_game": "He outscales early. You're equal teamfighters. Group for fights.",
+        "win_condition": "Survive early. Use R to engage grouped teamfights. Teamfight instead of dueling.",
+        "counter_items": ["Plated Steelcaps", "Kaenic Rookern"],
+        "scaling": "Even — both scale as fighters.",
+        "jungle_gankable": true,
+        "positioning": "Back away when his Fury is up. Rush him when Fury is low."
+      },
+      "Jax": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Jax Q-AA burst wins short trades. Extended trades are more even. Trade when his E is on cooldown.",
+        "ability_to_dodge": "His E counter-strike — when he jumps, back away. He stuns if counter triggers.",
+        "power_spikes": {
+          "you": "Level 5 (R all-in), Trinity Force",
+          "enemy": "Trinity Force completion (duelist god), Level 6"
+        },
+        "early_game": "Trade short when his E is down. Your all-in is strong. Look for kills early.",
+        "mid_game": "Your R engage is powerful. His items help dueling. Teamfight instead of 1v1.",
+        "late_game": "He outscales as a duelist. You're weaker late. Group for fights.",
+        "win_condition": "Get a lead early. Use R to engage grouped teamfights. Teamfight instead of dueling.",
+        "counter_items": ["Adaptive Helm", "Kaenic Rookern"],
+        "scaling": "Jax outscales as a duelist. You're early-game focused.",
+        "jungle_gankable": false,
+        "positioning": "Trade when his E is down. Rush him early for all-ins."
+      },
+      "Sett": {
+        "difficulty": "medium",
+        "who_wins_early": "even",
+        "trading_pattern": "Sett's tankiness makes short trades even. His W all-in can burst you. Trade short when W is down.",
+        "ability_to_dodge": "His W grit slam — move away when he builds grit. It stuns and bursts.",
+        "power_spikes": {
+          "you": "Level 5 (R all-in), Trinity Force",
+          "enemy": "Level 2 (all-in spike), Trinity Force"
+        },
+        "early_game": "Sett's all-in is strong. Play safe and trade short. Your all-in is comparable early.",
+        "mid_game": "Your R engage is powerful. His items help dueling. Teamfight instead of 1v1.",
+        "late_game": "He outscales as a tank. You're weaker late. Group for fights.",
+        "win_condition": "Get a lead early. Use R to engage grouped teamfights. Teamfight instead of dueling.",
+        "counter_items": ["Plated Steelcaps", "Kaenic Rookern"],
+        "scaling": "Sett outscales as a tank. You're early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Trade when his W is down. Rush him when possible."
+      },
+      "Malphite": {
+        "difficulty": "easy",
+        "who_wins_early": "even",
+        "trading_pattern": "Malphite is tanky but low damage early. Your all-in destroys him. All-in at level 2-3 hard.",
+        "ability_to_dodge": "His E shockwave — move away. It reduces armor but doesn't stop your damage.",
+        "power_spikes": {
+          "you": "Level 2 (all-in), Trinity Force",
+          "enemy": "Level 6 (R engage tool), Thornmail"
+        },
+        "early_game": "Malphite is weak early. All-in him hard. You should get a kill.",
+        "mid_game": "He scales to a teamfight god. Your R engage helps. Teamfight instead of dueling.",
+        "late_game": "He outscales as a teamfighter. You're weaker late. Group for fights.",
+        "win_condition": "Kill him early. All-in at level 2-3. Roam with R.",
+        "counter_items": ["Hollow Radiance", "Trinity Force"],
+        "scaling": "Malphite outscales as a teamfighter. You're early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Rush him early to all-in. Don't let him scale."
+      },
+      "Kayle": {
+        "difficulty": "easy",
+        "who_wins_early": "even",
+        "trading_pattern": "Kayle farms early with Q. She's weak to all-ins. All-in her hard when she walks up.",
+        "ability_to_dodge": "Her W healing — focus her down before she heals. Her range increases with levels.",
+        "power_spikes": {
+          "you": "Level 2 (all-in), Trinity Force",
+          "enemy": "Level 6 (ult invulnerability), Level 11 (melee form)"
+        },
+        "early_game": "Kayle is incredibly weak early. All-in hard at level 2-3. You should dominate.",
+        "mid_game": "She scales with items. Your R engage helps. Teamfight instead of dueling.",
+        "late_game": "She outscales as a hypercarry. You're weaker late. Group for fights.",
+        "win_condition": "Kill her early. All-in at level 1-3. Roam with R.",
+        "counter_items": ["Hollow Radiance", "Trinity Force"],
+        "scaling": "Kayle outscales dramatically. You must win early.",
+        "jungle_gankable": true,
+        "positioning": "Rush her early to all-in. Never let her scale."
+      },
+      "Vladimir": {
+        "difficulty": "easy",
+        "who_wins_early": "even",
+        "trading_pattern": "Vladimir pools your damage early. He scales with healing. Short trades are neutral early.",
+        "ability_to_dodge": "His E pool drain — move away when he heals. His range increases with AP.",
+        "power_spikes": {
+          "you": "Level 2 (all-in), Trinity Force",
+          "enemy": "Protobelt completion (all-in spike), Level 6"
+        },
+        "early_game": "Vladimir is weak early. All-in hard at level 2-3. Your damage is strong.",
+        "mid_game": "He scales with items. Your R engage helps. Teamfight instead of dueling.",
+        "late_game": "He outscales through healing and AP. You're weaker late. Group for fights.",
+        "win_condition": "Kill him early. All-in at level 1-3. Roam with R.",
+        "counter_items": ["Hollow Radiance", "Mercury's Treads"],
+        "scaling": "Vladimir outscales through healing. You're early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Rush him early to all-in. Don't let him scale."
+      },
+      "Ornn": {
+        "difficulty": "easy",
+        "who_wins_early": "even",
+        "trading_pattern": "Ornn is tanky but slow early. Your all-in destroys him. All-in at level 2-3 hard.",
+        "ability_to_dodge": "His R volcanic rupture — move sideways. It doesn't prevent your all-in.",
+        "power_spikes": {
+          "you": "Level 2 (all-in), Trinity Force",
+          "enemy": "Level 6 (R engage tool), Level 11 (upgrades)"
+        },
+        "early_game": "Ornn is weak early. All-in him hard. You should get a kill.",
+        "mid_game": "He scales with items and upgrades. Your R engage helps. Teamfight instead of dueling.",
+        "late_game": "He outscales as a tank. You're weaker late. Group for fights.",
+        "win_condition": "Kill him early. All-in at level 2-3. Roam with R.",
+        "counter_items": ["Trinity Force", "Kaenic Rookern"],
+        "scaling": "Ornn outscales as a tank. You're early-game focused.",
+        "jungle_gankable": true,
+        "positioning": "Rush him early to all-in. Don't let him scale."
+      }
+    }
+  }
+}
