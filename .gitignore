@@ -1,0 +1,28 @@
+# Secrets
+.env
+*.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Local Claude Code settings (contains machine-specific hooks/permissions)
+.claude/settings.local.json
+
+# Test / coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# PyInstaller
+*.spec.bak
+
+# OS
+.DS_Store
+Thumbs.db
