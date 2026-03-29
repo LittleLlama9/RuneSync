@@ -247,11 +247,6 @@ class ChampSelectMonitor:
              b. Our role is NOT assigned yet (e.g. only Lux/Jinx/Zed picked,
                 we're top) → log "Waiting for enemy top laner..." once.
         """
-        # Stop if we have a confident (non-guess) assignment already.
-        # A guess can be overridden, but only re-evaluate when new picks arrive.
-        if self._enemy_laner and not self._enemy_laner_is_guess:
-            return
-
         enemy_names = self._get_enemy_champ_names(session)
         if not enemy_names:
             return
