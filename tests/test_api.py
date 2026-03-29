@@ -15,10 +15,14 @@ from ugg_api import UGGClient, _get
 
 @pytest.fixture(autouse=True)
 def clear_winrate_cache():
-    """Reset the module-level winrate cache before every test."""
+    """Reset the module-level winrate cache and patch state before every test."""
     ugg_api._WINRATE_CACHE.clear()
+    ugg_api._patch_value = ""
+    ugg_api._patch_fetched_at = 0.0
     yield
     ugg_api._WINRATE_CACHE.clear()
+    ugg_api._patch_value = ""
+    ugg_api._patch_fetched_at = 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -185,12 +189,13 @@ class TestGetMatchupWinrate:
             call_count["n"] += 1
             return fake
 
-        with patch("ugg_api._get", side_effect=counting_get):
-            r1 = self.client.get_matchup_winrate("Darius", "Garen", "top")
-            r2 = self.client.get_matchup_winrate("Darius", "Garen", "top")
+        with patch("ugg_api._current_patch", return_value="16.6"):
+            with patch("ugg_api._get", side_effect=counting_get):
+                r1 = self.client.get_matchup_winrate("Darius", "Garen", "top")
+                r2 = self.client.get_matchup_winrate("Darius", "Garen", "top")
 
         assert r1 == r2 == fake
-        assert call_count["n"] == 1  # server only hit once
+        assert call_count["n"] == 1  # /matchup fetched only once; second call hit cache
 
     def test_cache_is_case_insensitive(self):
         fake = {"win_rate": 51.5, "games": 3000}
@@ -200,9 +205,10 @@ class TestGetMatchupWinrate:
             call_count["n"] += 1
             return fake
 
-        with patch("ugg_api._get", side_effect=counting_get):
-            self.client.get_matchup_winrate("Darius", "Garen", "top")
-            self.client.get_matchup_winrate("darius", "garen", "top")
+        with patch("ugg_api._current_patch", return_value="16.6"):
+            with patch("ugg_api._get", side_effect=counting_get):
+                self.client.get_matchup_winrate("Darius", "Garen", "top")
+                self.client.get_matchup_winrate("darius", "garen", "top")
 
         assert call_count["n"] == 1
 
@@ -214,9 +220,10 @@ class TestGetMatchupWinrate:
             call_count["n"] += 1
             return None
 
-        with patch("ugg_api._get", side_effect=counting_get):
-            self.client.get_matchup_winrate("Darius", "Garen", "top")
-            self.client.get_matchup_winrate("Darius", "Garen", "top")
+        with patch("ugg_api._current_patch", return_value="16.6"):
+            with patch("ugg_api._get", side_effect=counting_get):
+                self.client.get_matchup_winrate("Darius", "Garen", "top")
+                self.client.get_matchup_winrate("Darius", "Garen", "top")
 
         assert call_count["n"] == 2  # retried because first returned None
 
