@@ -70,11 +70,16 @@ class UGGClient:
 
     def get_matchup_winrate(self, my_champ: str, enemy_champ: str,
                             role: str = "auto") -> Optional[dict]:
+        key = (my_champ.lower(), enemy_champ.lower(), role.lower())
+        if key in _WINRATE_CACHE:
+            return _WINRATE_CACHE[key]
         result = _get("/matchup", {
             "my_champ": my_champ,
             "enemy_champ": enemy_champ,
             "role": role,
         }, timeout=45)
+        if result is not None:
+            _WINRATE_CACHE[key] = result
         return result  # None on miss is fine — monitor.py already handles it
 
     def get_current_patch(self) -> str:
