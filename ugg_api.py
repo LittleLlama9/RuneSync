@@ -19,9 +19,30 @@ ROLE_MAP = {
 }
 
 # ── in-memory winrate cache ─────────────────────────────────────────────────
-# Persists for the lifetime of the app process so the same matchup is never
-# fetched twice in a session.  Key: (my_champ_lower, enemy_lower, role_lower)
-_WINRATE_CACHE: dict = {}
+# Keyed by (my_champ_lower, enemy_lower, role_lower).
+# Each entry stores the patch version alongside the result so the cache is
+# automatically invalidated when a new patch ships.
+_WINRATE_CACHE: dict = {}   # key -> {"patch": str, "result": dict}
+_patch_value: str = ""
+_patch_fetched_at: float = 0.0
+_PATCH_TTL: float = 6 * 3600  # re-check at most every 6 hours (matches server TTL)
+
+
+def _current_patch() -> str:
+    """Return the current patch, re-fetching from server at most every 6 hours."""
+    global _patch_value, _patch_fetched_at
+    now = time.time()
+    if _patch_value and now - _patch_fetched_at < _PATCH_TTL:
+        return _patch_value
+    result = _get("/patch", {}, timeout=10)
+    new_patch = result.get("patch", "") if result else ""
+    if new_patch and new_patch != _patch_value:
+        if _patch_value:
+            print(f"[ugg] patch {_patch_value} → {new_patch}: clearing winrate cache", file=sys.stderr)
+            _WINRATE_CACHE.clear()
+        _patch_value = new_patch
+        _patch_fetched_at = now
+    return _patch_value
 
 
 def _get(path: str, params: dict, timeout: int = 35) -> Optional[dict | list]:
