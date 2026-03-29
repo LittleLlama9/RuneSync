@@ -177,6 +177,49 @@ class TestGetMatchupWinrate:
         with patch("ugg_api._get", return_value=None):
             assert self.client.get_matchup_winrate("Darius", "Zed", "top") is None
 
+    def test_caches_successful_result(self):
+        fake = {"win_rate": 51.5, "games": 3000}
+        call_count = {"n": 0}
+
+        def counting_get(path, params, **kwargs):
+            call_count["n"] += 1
+            return fake
+
+        with patch("ugg_api._get", side_effect=counting_get):
+            r1 = self.client.get_matchup_winrate("Darius", "Garen", "top")
+            r2 = self.client.get_matchup_winrate("Darius", "Garen", "top")
+
+        assert r1 == r2 == fake
+        assert call_count["n"] == 1  # server only hit once
+
+    def test_cache_is_case_insensitive(self):
+        fake = {"win_rate": 51.5, "games": 3000}
+        call_count = {"n": 0}
+
+        def counting_get(path, params, **kwargs):
+            call_count["n"] += 1
+            return fake
+
+        with patch("ugg_api._get", side_effect=counting_get):
+            self.client.get_matchup_winrate("Darius", "Garen", "top")
+            self.client.get_matchup_winrate("darius", "garen", "top")
+
+        assert call_count["n"] == 1
+
+    def test_does_not_cache_failed_lookups(self):
+        """Server-down results (None) must not be cached so the next session can retry."""
+        call_count = {"n": 0}
+
+        def counting_get(path, params, **kwargs):
+            call_count["n"] += 1
+            return None
+
+        with patch("ugg_api._get", side_effect=counting_get):
+            self.client.get_matchup_winrate("Darius", "Garen", "top")
+            self.client.get_matchup_winrate("Darius", "Garen", "top")
+
+        assert call_count["n"] == 2  # retried because first returned None
+
     def test_passes_correct_params(self):
         captured = {}
 
