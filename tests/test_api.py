@@ -13,6 +13,14 @@ import ugg_api
 from ugg_api import UGGClient, _get
 
 
+@pytest.fixture(autouse=True)
+def clear_winrate_cache():
+    """Reset the module-level winrate cache before every test."""
+    ugg_api._WINRATE_CACHE.clear()
+    yield
+    ugg_api._WINRATE_CACHE.clear()
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

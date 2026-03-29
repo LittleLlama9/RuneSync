@@ -42,6 +42,8 @@ class ChampSelectMonitor:
         self._my_champ: str = ""
         # Matchup / counterpick state
         self._enemy_laner: str = ""          # confirmed enemy laner name
+        self._enemy_laner_is_guess: bool = False  # True if set from guess, not confident assignment
+        self._enemy_names_evaluated: frozenset = frozenset()  # picks that produced current assignment
         self._counters_done_for: str = ""    # enemy we already ran counters for
         self._matchup_done_for: str = ""     # "mychamp|enemy" we already ran matchup for
         self._waiting_logged: bool = False   # whether we've logged "waiting for laner"
@@ -135,6 +137,8 @@ class ChampSelectMonitor:
                 self.log("Left champion select.", "info")
                 self._last_champ_id = None
                 self._enemy_laner = ""
+                self._enemy_laner_is_guess = False
+                self._enemy_names_evaluated = frozenset()
                 self._counters_done_for = ""
                 self._matchup_done_for = ""
                 self._waiting_logged = False
@@ -147,6 +151,8 @@ class ChampSelectMonitor:
             self.log("Entered champion select!", "success")
             self._last_champ_id = None
             self._enemy_laner = ""
+            self._enemy_laner_is_guess = False
+            self._enemy_names_evaluated = frozenset()
             self._counters_done_for = ""
             self._matchup_done_for = ""
             self._waiting_logged = False
@@ -170,6 +176,8 @@ class ChampSelectMonitor:
                 self.log(f"  → Lane swap: {old_role} → {detected_role}", "warn")
                 # Reset matchup state so it re-runs for the new lane
                 self._enemy_laner = ""
+                self._enemy_laner_is_guess = False
+                self._enemy_names_evaluated = frozenset()
                 self._counters_done_for = ""
                 self._matchup_done_for = ""
                 self._waiting_logged = False
@@ -239,8 +247,10 @@ class ChampSelectMonitor:
              b. Our role is NOT assigned yet (e.g. only Lux/Jinx/Zed picked,
                 we're top) → log "Waiting for enemy top laner..." once.
         """
-        if self._enemy_laner:
-            return  # already confirmed, nothing to do
+        # Stop if we have a confident (non-guess) assignment already.
+        # A guess can be overridden, but only re-evaluate when new picks arrive.
+        if self._enemy_laner and not self._enemy_laner_is_guess:
+            return
 
         enemy_names = self._get_enemy_champ_names(session)
         if not enemy_names:
@@ -250,28 +260,35 @@ class ChampSelectMonitor:
         if self._my_role in ("auto", ""):
             return
 
+        # Don't re-run if the enemy pick set hasn't changed since last evaluation
+        current_names = frozenset(enemy_names)
+        if current_names == self._enemy_names_evaluated:
+            return
+
         assignment, guesses = infer_full_assignment(enemy_names)
         detected = assignment.get(self._my_role)
         is_guess = False
 
         if not detected:
-            # Only fall back to guesses (flex picks) once all enemy picks are locked.
-            # This prevents committing to e.g. "Poppy top" when she's support and
-            # the real top laner (Darius) hasn't picked yet.
-            if self._all_enemy_picks_complete(session):
-                detected = guesses.get(self._my_role)
-                is_guess = detected is not None
+            # Use guesses immediately rather than waiting for all 5 picks.
+            # Guesses are shown with a warning already; no info is worse than
+            # an uncertain guess (e.g. Brand 18% mid when only Briar + Brand visible).
+            detected = guesses.get(self._my_role)
+            is_guess = detected is not None
 
         if not detected:
             # No enemy laner assigned to our role yet
+            self._enemy_names_evaluated = current_names
             if not self._waiting_logged:
                 self._waiting_logged = True
                 role_label = self._my_role.title() if self._my_role != "auto" else "lane"
                 self.log(f"  → Waiting for enemy {role_label} laner...", "info")
             return
 
-        # Laner found — confirm it
+        # Laner found — record it (guess or confident)
         self._enemy_laner = detected
+        self._enemy_laner_is_guess = is_guess
+        self._enemy_names_evaluated = current_names
         self._waiting_logged = False
         role_label = self._my_role.title() if self._my_role != "auto" else "lane"
         if is_guess:
@@ -353,7 +370,7 @@ class ChampSelectMonitor:
         try:
             result = self.ugg.get_matchup_winrate(my_champ, enemy_champ, role)
             if result is None:
-                self.log(f"  ⚠ Matchup: couldn't find {enemy_champ} on u.gg", "warn")
+                self.log(f"  ⚠ Winrate unavailable for {enemy_champ} (server offline or champion not found)", "warn")
             else:
                 wr = result["win_rate"]
                 if wr >= 52:
@@ -488,6 +505,16 @@ class ChampSelectMonitor:
                                        build["sub_style_id"], build["selected_perk_ids"])
         if ok:
             self.log(f"  ✓ Runes imported for {champ_name} ({build['role']})", "success")
+            if build.get("items_core_ids"):
+                champ_id = next((k for k, v in self._champ_name_map.items() if v == champ_name), 0)
+                set_ok = self.lcu.import_item_set(champ_name, champ_id, role,
+                                                  build.get("items_start_ids", []),
+                                                  build["items_core_ids"],
+                                                  build.get("items_fourth_ids"),
+                                                  build.get("items_fifth_ids"),
+                                                  build.get("items_sixth_ids"))
+                if set_ok:
+                    self.log(f"  ✓ Item set imported for {champ_name}", "success")
             summoners = build.get("summoners", [])
             if len(summoners) >= 2:
                 spell_ok = self.lcu.set_summoner_spells(summoners[0], summoners[1])
@@ -584,16 +611,59 @@ class ChampSelectMonitor:
             self.log(f"  ✗ Failed to push rune page", "error")
 
         # ── Item build ─────────────────────────────────────────────────────────
-        if self._on_item_build:
-            custom_items = override.get("items_build", [])
-            if custom_items:
-                self._on_item_build(custom_items, True)
-            else:
+        custom_build = override.get("items_build", {})
+        has_custom = bool(custom_build)
+
+        if has_custom and isinstance(custom_build, list):
+            # Legacy flat-list format (display only)
+            if self._on_item_build:
+                self._on_item_build(custom_build, True)
+
+        elif has_custom and isinstance(custom_build, dict):
+            # Structured format from item_builder
+            starter = custom_build.get("starter", [])
+            core    = custom_build.get("core",    [])
+            fourth  = custom_build.get("fourth",  [])
+            fifth   = custom_build.get("fifth",   [])
+            sixth   = custom_build.get("sixth",   [])
+            display = [i["name"] for i in core] if core else [i["name"] for i in starter]
+            if display and self._on_item_build:
+                self._on_item_build(display, True)
+            if core:
+                item_role = override.get("role", "auto")
+                champ_id  = next((k for k, v in self._champ_name_map.items() if v == champ_name), 0)
                 try:
-                    item_build = self.ugg.get_top_build(
-                        champ_name, role=override.get("role", "auto"),
-                        rank="Platinum+", region="World")
-                    if item_build and item_build.get("items_core"):
-                        self._on_item_build(item_build["items_core"], False)
+                    set_ok = self.lcu.import_item_set(
+                        champ_name, champ_id, item_role,
+                        [i["id"] for i in starter],
+                        [i["id"] for i in core],
+                        [i["id"] for i in fourth] or None,
+                        [i["id"] for i in fifth]  or None,
+                        [i["id"] for i in sixth]  or None,
+                    )
+                    if set_ok:
+                        self.log(f"  ✓ Custom item set imported for {champ_name}", "success")
                 except Exception:
                     pass
+
+        else:
+            try:
+                item_build = self.ugg.get_top_build(
+                    champ_name, role=override.get("role", "auto"),
+                    rank="Platinum+", region="World")
+                if item_build and item_build.get("items_core"):
+                    if self._on_item_build:
+                        self._on_item_build(item_build["items_core"], False)
+                    if item_build.get("items_core_ids"):
+                        item_role = override.get("role", "auto")
+                        champ_id = next((k for k, v in self._champ_name_map.items() if v == champ_name), 0)
+                        set_ok = self.lcu.import_item_set(champ_name, champ_id, item_role,
+                                                          item_build.get("items_start_ids", []),
+                                                          item_build["items_core_ids"],
+                                                          item_build.get("items_fourth_ids"),
+                                                          item_build.get("items_fifth_ids"),
+                                                          item_build.get("items_sixth_ids"))
+                        if set_ok:
+                            self.log(f"  ✓ Item set imported for {champ_name}", "success")
+            except Exception:
+                pass
