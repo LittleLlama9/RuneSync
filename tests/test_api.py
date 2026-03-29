@@ -227,6 +227,29 @@ class TestGetMatchupWinrate:
 
         assert call_count["n"] == 2  # retried because first returned None
 
+    def test_cache_evicted_on_patch_change(self):
+        """Cache entries for old patch must not be served after a patch bump."""
+        fake = {"win_rate": 51.5, "games": 3000}
+        call_count = {"n": 0}
+
+        def counting_get(path, params, **kwargs):
+            call_count["n"] += 1
+            return fake
+
+        # Seed cache on patch 16.6
+        with patch("ugg_api._current_patch", return_value="16.6"):
+            with patch("ugg_api._get", side_effect=counting_get):
+                self.client.get_matchup_winrate("Darius", "Garen", "top")
+
+        assert call_count["n"] == 1
+
+        # Same lookup on new patch — must re-fetch
+        with patch("ugg_api._current_patch", return_value="16.7"):
+            with patch("ugg_api._get", side_effect=counting_get):
+                self.client.get_matchup_winrate("Darius", "Garen", "top")
+
+        assert call_count["n"] == 2  # fetched again for new patch
+
     def test_passes_correct_params(self):
         captured = {}
 
@@ -234,8 +257,9 @@ class TestGetMatchupWinrate:
             captured.update(params)
             return {}
 
-        with patch("ugg_api._get", side_effect=fake_get):
-            self.client.get_matchup_winrate("Darius", "Garen", "top")
+        with patch("ugg_api._current_patch", return_value="16.6"):
+            with patch("ugg_api._get", side_effect=fake_get):
+                self.client.get_matchup_winrate("Darius", "Garen", "top")
 
         assert captured["my_champ"] == "Darius"
         assert captured["enemy_champ"] == "Garen"
