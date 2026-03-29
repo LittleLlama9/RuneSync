@@ -44,21 +44,50 @@ def is_league_running():
 def is_runesync_running(proc):
     return proc is not None and proc.poll() is None
 
+SERVER_CMD = ["py", "-m", "uvicorn", "main:app", "--host", "0.0.0.0",
+              "--port", "8000", "--no-access-log"]
+SERVER_CWD  = r"C:\Users\Matth\RuneSyncServer"
+
+_server_log = None
+
+def _open_server_log():
+    """Open (append) the server log file, return file handle or None."""
+    try:
+        log_path = os.path.join(SERVER_CWD, "server.log")
+        return open(log_path, "a", encoding="utf-8", buffering=1)
+    except Exception:
+        return None
+
+def start_server():
+    global _server_log
+    try:
+        if _server_log is None:
+            _server_log = _open_server_log()
+        proc = subprocess.Popen(
+            SERVER_CMD,
+            cwd=SERVER_CWD,
+            creationflags=0x08000000,  # CREATE_NO_WINDOW
+            stdout=_server_log,
+            stderr=_server_log,
+        )
+        print("RuneSync Server started.", flush=True)
+        return proc
+    except Exception as e:
+        print(f"ERROR: Could not start RuneSync Server: {e}", flush=True)
+        return None
+
 def main():
-    # Launch the scraping server as a hidden background process.
-    # It runs for the entire Windows session regardless of whether League is open.
-    _server_proc = subprocess.Popen(
-        ["py", "-m", "uvicorn", "main:app", "--host", "0.0.0.0",
-         "--port", "8000", "--no-access-log"],
-        cwd=r"C:\Users\Matth\RuneSyncServer",
-        creationflags=0x08000000,  # CREATE_NO_WINDOW
-    )
-    print("RuneSync Server started.", flush=True)
+    server_proc = start_server()
 
     runesync_proc = None
     print("RuneSync Watcher started — waiting for League client...")
 
     while True:
+        # Restart server if it crashed
+        if server_proc is None or server_proc.poll() is not None:
+            print("RuneSync Server stopped — restarting...", flush=True)
+            server_proc = start_server()
+
         league_up = is_league_running()
 
         if league_up and not is_runesync_running(runesync_proc):
