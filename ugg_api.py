@@ -6,7 +6,7 @@ This module is a thin HTTP wrapper that keeps the same public interface so
 monitor.py needs no changes.
 """
 
-import json, sys, urllib.request, urllib.error, urllib.parse
+import json, sys, time, urllib.request, urllib.error, urllib.parse
 from typing import Optional
 
 # ── server config ──────────────────────────────────────────────────────────
