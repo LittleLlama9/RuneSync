@@ -18,6 +18,11 @@ ROLE_MAP = {
     "bot": "adc", "adc": "adc", "top": "top", "mid": "mid",
 }
 
+# ── in-memory winrate cache ─────────────────────────────────────────────────
+# Persists for the lifetime of the app process so the same matchup is never
+# fetched twice in a session.  Key: (my_champ_lower, enemy_lower, role_lower)
+_WINRATE_CACHE: dict = {}
+
 
 def _get(path: str, params: dict, timeout: int = 35) -> Optional[dict | list]:
     """Make a GET request to the server and return parsed JSON, or None on error."""
