@@ -110,3 +110,11 @@ Power spikes must reference specific levels or items, not vague descriptions.
 Counter items must be specifically useful in this matchup, not just generally good items.
 All champion name keys must match Riot's exact display name spelling (e.g. "Kog'Maw", "Dr. Mundo", "Nunu & Willump").
 Difficulty ratings and teamfight expectations should reflect high-plat / low-diamond level of play.
+
+GIT WORKFLOW:
+main is always the stable branch. For any significant experiment or feature that could break things, create a branch first:
+  git checkout -b feature/short-description
+Work on it, commit normally (the auto-commit hook handles this). When it works:
+  git checkout main && git merge feature/short-description
+If it doesn't work, delete it: git branch -D feature/short-description
+Never force-push main. Never skip the pre-commit hook.
