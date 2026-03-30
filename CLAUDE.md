@@ -118,3 +118,9 @@ Work on it, commit normally (the auto-commit hook handles this). When it works:
   git checkout main && git merge feature/short-description
 If it doesn't work, delete it: git branch -D feature/short-description
 Never force-push main. Never skip the pre-commit hook.
+
+COMMIT NAMING:
+Before making any code changes, use AskUserQuestion to ask:
+  "What should I name this commit? (press Enter to use default)"
+Write the user's non-empty answer to .git/CLAUDE_COMMIT_MSG — the Stop hook reads this file and uses it as the commit message. If the user skips (empty answer), do nothing; the hook falls back to "auto: Claude edit via Claude Code".
+Skip this prompt for trivial follow-up fixes within the same conversation if a commit was already named moments earlier.
