@@ -46,7 +46,7 @@ def is_runesync_running(proc):
 
 SERVER_CMD = ["py", "-m", "uvicorn", "main:app", "--host", "0.0.0.0",
               "--port", "8000", "--no-access-log"]
-SERVER_CWD  = r"C:\Users\Matth\RuneSyncServer"
+SERVER_CWD  = os.path.join(_base, "server") if not _is_frozen else os.path.join(_base, "server")
 
 _server_log = None
 

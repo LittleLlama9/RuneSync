@@ -23,6 +23,10 @@ htmlcov/
 # PyInstaller
 *.spec.bak
 
+# Generated cache files (rebuilt automatically on startup)
+role_weights_cache.json
+server/cache.json
+
 # OS
 .DS_Store
 Thumbs.db
