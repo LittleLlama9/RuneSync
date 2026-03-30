@@ -114,13 +114,17 @@ Difficulty ratings and teamfight expectations should reflect high-plat / low-dia
 GIT WORKFLOW:
 main is always the stable branch. For any significant experiment or feature that could break things, create a branch first:
   git checkout -b feature/short-description
-Work on it, commit normally (the auto-commit hook handles this). When it works:
+Work on it, then commit manually when the work is ready. When it works:
   git checkout main && git merge feature/short-description
 If it doesn't work, delete it: git branch -D feature/short-description
 Never force-push main. Never skip the pre-commit hook.
 
 COMMIT NAMING:
 Before making any code changes, use AskUserQuestion to ask:
-  "What should I name this commit? (press Enter to use default)"
-Write the user's non-empty answer to .git/CLAUDE_COMMIT_MSG — the Stop hook reads this file and uses it as the commit message. If the user skips (empty answer), do nothing; the hook falls back to "auto: Claude edit via Claude Code".
+  "What should I name this commit? (press Enter to skip)"
+If the user provides a name, write it to .git/CLAUDE_COMMIT_MSG. After all edits are done, run:
+  git add -p   (or stage specific files)
+  git commit -m "<name from user or next version>"
+  git push
+Version is tracked in the VERSION file (e.g. 1.00, 1.01 …). Increment the minor version on each commit unless the user provides a named message.
 Skip this prompt for trivial follow-up fixes within the same conversation if a commit was already named moments earlier.

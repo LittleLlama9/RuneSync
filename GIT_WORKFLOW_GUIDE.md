@@ -51,7 +51,7 @@ Thumbs.db
 
 ## 3 — Pre-commit hook (blocks bad commits)
 
-Create `.git/hooks/pre-commit` — note: this file lives inside `.git/` so it is
+Create `.git/hooks/pre-commit` — this file lives inside `.git/` so it is
 **not tracked by git** and must be re-created on each fresh clone.
 
 ```bash
@@ -113,7 +113,8 @@ testpaths = tests
 
 Create a `tests/` folder with at minimum:
 
-**`tests/test_imports.py`** — verifies every source file parses without syntax errors and core modules import cleanly. Adjust `IMPORTABLE` to match your project's modules.
+**`tests/test_imports.py`** — verifies every source file parses without syntax errors
+and core modules import cleanly. Adjust `IMPORTABLE` to match your project's modules.
 
 ```python
 import ast
@@ -183,47 +184,26 @@ Push to GitHub — the Actions tab will show a green check on passing commits.
 
 ---
 
-## 6 — Claude Code auto-commit hooks
+## 6 — Claude Code commit naming
 
-These two files wire Claude Code so that every Claude response that edits files
-results in exactly one git commit (staged incrementally, committed once on Stop).
+These files let Claude prompt you for a commit name before making changes,
+and fall back to auto-versioning (v1.01, v1.02 …) if you skip.
 
 ### 6a — Directory structure
 
 ```
 .claude/
   hooks/
-    auto_commit.py        ← PostToolUse: git add the edited file
-    auto_commit_stop.py   ← Stop: git commit + push once per response
+    auto_commit_stop.py   ← run manually after edits to commit + push
 ```
 
-### 6b — `auto_commit.py`
+### 6b — `auto_commit_stop.py`
 
 ```python
 #!/usr/bin/env python3
-"""PostToolUse hook: stage the edited file for later commit."""
-import json
-import subprocess
-import sys
-
-def main() -> None:
-    data = json.load(sys.stdin)
-    fp: str = data.get("tool_input", {}).get("file_path", "")
-    if fp:
-        subprocess.run(["git", "add", fp], check=False)
-
-if __name__ == "__main__":
-    main()
-```
-
-### 6c — `auto_commit_stop.py`
-
-```python
-#!/usr/bin/env python3
-"""Stop hook: commit all staged files once per Claude response.
-
-Falls back to auto-versioning (v1.01, v1.02 …) when no named commit was set.
-Version is stored in VERSION at the repo root and committed with the changes.
+"""Commit all staged files. Falls back to auto-versioning when no named commit
+was set. Run this manually after staging your changes:
+  git add <files> && python .claude/hooks/auto_commit_stop.py
 """
 import os
 import subprocess
@@ -275,36 +255,20 @@ if __name__ == "__main__":
     main()
 ```
 
-### 6d — `.claude/settings.local.json`
+### 6c — CLAUDE.md commit naming instruction
 
-> This file must NOT be committed (it's in .gitignore). Create it manually on each machine.
+Add this to your `CLAUDE.md` so Claude always prompts for a commit name:
 
-```json
-{
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python .claude/hooks/auto_commit.py"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python .claude/hooks/auto_commit_stop.py"
-          }
-        ]
-      }
-    ]
-  }
-}
+```markdown
+COMMIT NAMING:
+Before making any code changes, use AskUserQuestion to ask:
+  "What should I name this commit? (press Enter to skip)"
+If the user provides a name, write it to .git/CLAUDE_COMMIT_MSG. After all edits
+are done, stage the changed files and run:
+  python .claude/hooks/auto_commit_stop.py
+Version is tracked in the VERSION file (e.g. 1.00, 1.01 …). The script increments
+the minor version automatically when no named message is given.
+Skip this prompt for trivial follow-up fixes within the same conversation.
 ```
 
 ---
@@ -317,30 +281,12 @@ Create `VERSION` at the repo root:
 1.00
 ```
 
-Commit it. From here on, every unnamed Claude response auto-increments this
-(v1.01, v1.02 …). To bump the major version manually, edit the file and commit.
+Commit it. From here on, every unnamed commit auto-increments this
+(v1.01, v1.02 …). To bump the major version (e.g. v2.00), edit the file manually.
 
 ---
 
-## 8 — CLAUDE.md instructions for commit naming
-
-Add this section to your project's `CLAUDE.md` so Claude always prompts for a
-commit name before making changes:
-
-```markdown
-COMMIT NAMING:
-Before making any code changes, use AskUserQuestion to ask:
-  "What should I name this commit? (press Enter to use default)"
-Write the user's non-empty answer to .git/CLAUDE_COMMIT_MSG — the Stop hook
-reads this file and uses it as the commit message. If the user skips (empty
-answer), do nothing; the hook falls back to auto-versioning (v1.01, v1.02 …).
-Skip this prompt for trivial follow-up fixes within the same conversation if a
-commit was already named moments earlier.
-```
-
----
-
-## 9 — Branch workflow
+## 8 — Branch workflow
 
 ```
 main = always stable and deployable
@@ -348,7 +294,7 @@ main = always stable and deployable
 For any experiment or potentially-breaking feature:
   git checkout -b feature/short-description
 
-Work normally (auto-commit handles commits). When it's working:
+Work normally. When it's working:
   git checkout main && git merge feature/short-description
 
 If it doesn't work:
@@ -360,26 +306,25 @@ Never skip the pre-commit hook (--no-verify).
 
 ---
 
-## Setup checklist (copy-paste for Claude)
+## Quick-start checklist for Claude
+
+Paste this into a new Claude Code session to set everything up:
 
 ```
 Please set up the following git/GitHub/Claude Code workflow for this project.
-Reference implementation: github.com/YOUR_USERNAME/RuneSync
+Reference: RuneSync repo (ask me for the guide file if needed).
 
 [ ] 1. .gitignore — secrets, __pycache__, dist, build, .claude/settings.local.json
-[ ] 2. Pre-commit hook at .git/hooks/pre-commit — blocks .env, syntax checks staged
+[ ] 2. Pre-commit hook at .git/hooks/pre-commit — blocks .env, syntax-checks staged
        .py files, runs pytest. chmod +x after creating.
 [ ] 3. requirements.txt (at minimum: pytest) + pytest.ini (pythonpath=., testpaths=tests)
 [ ] 4. tests/test_imports.py — ast.parse all root .py files + import core modules
 [ ] 5. .github/workflows/tests.yml — CI on push/PR, ubuntu-latest, pip cache, pytest -v
-[ ] 6. .claude/hooks/auto_commit.py — PostToolUse: git add the edited file
-[ ] 7. .claude/hooks/auto_commit_stop.py — Stop: commit once per response,
-       auto-version fallback (v1.01, v1.02 …), reads .git/CLAUDE_COMMIT_MSG
-[ ] 8. .claude/settings.local.json — wire hooks (PostToolUse Write|Edit + Stop),
-       do NOT commit this file
-[ ] 9. VERSION file at repo root containing "1.00"
-[  ] 10. CLAUDE.md — add COMMIT NAMING section instructing Claude to use
-        AskUserQuestion before edits and write answer to .git/CLAUDE_COMMIT_MSG
-[ ] 11. Initial push to GitHub with all of the above committed
-[ ] 12. Confirm GitHub Actions shows green on first push
+[ ] 6. .claude/hooks/auto_commit_stop.py — commit + push with auto-version fallback,
+       reads .git/CLAUDE_COMMIT_MSG for named commits
+[ ] 7. VERSION file at repo root containing "1.00"
+[ ] 8. CLAUDE.md — add COMMIT NAMING section: use AskUserQuestion before edits,
+       write answer to .git/CLAUDE_COMMIT_MSG, run auto_commit_stop.py after staging
+[ ] 9. Initial push to GitHub with all of the above committed
+[ ] 10. Confirm GitHub Actions shows green on first push
 ```
