@@ -9,7 +9,31 @@
       "Bash(powershell -command \"Get-Process -Id 29404 | Select-Object Name, Id, Path\")",
       "Bash(powershell -command \"Get-WmiObject Win32_Process -Filter ''ProcessId=29404'' | Select-Object CommandLine\")",
       "Bash(grep -E \"\\\\.\\(html|css|js\\)$|src|frontend|ui|electron\")",
-      "Bash(curl -s http://localhost:8000/patch)"
+      "Bash(curl -s http://localhost:8000/patch)",
+      "Bash(chmod:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/auto_commit.py"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/auto_commit_stop.py"
+          }
+        ]
+      }
     ]
   }
 }
