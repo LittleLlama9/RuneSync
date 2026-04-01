@@ -341,10 +341,19 @@ def infer_full_assignment(enemy_picks: list[str]) -> tuple[dict[str, str], dict[
 
     unassigned = [c for c in champ_weights if c not in assigned.values()]
     unassigned.sort(key=lambda c: max(champ_weights[c].values()), reverse=True)
+
+    # Track champions forced onto their 3rd+ role — these are low-confidence
+    # and will be demoted to guesses rather than treated as confident picks.
+    forced: dict[str, str] = {}  # role -> champ
+
     for champ in unassigned:
-        for role, _ in sorted(champ_weights[champ].items(), key=lambda x: x[1], reverse=True):
+        sorted_roles = sorted(champ_weights[champ].items(), key=lambda x: x[1], reverse=True)
+        for rank, (role, _) in enumerate(sorted_roles):
             if role not in assigned:
-                assigned[role] = champ
+                if rank >= 2:
+                    forced[role] = champ   # 3rd+ preference — low confidence
+                else:
+                    assigned[role] = champ  # 1st or 2nd preference — confident
                 break
 
     # Pass 3: for roles still unfilled, find any enemy champ with >= 10% in
@@ -360,5 +369,10 @@ def infer_full_assignment(enemy_picks: list[str]) -> tuple[dict[str, str], dict[
         ]
         if candidates:
             guesses[role] = max(candidates)[1]
+
+    # Forced (3rd+ role) assignments fill guesses only when no better candidate exists
+    for role, champ in forced.items():
+        if role not in guesses:
+            guesses[role] = champ
 
     return assigned, guesses
