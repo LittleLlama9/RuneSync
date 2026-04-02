@@ -44,31 +44,22 @@ def is_league_running():
 def is_runesync_running(proc):
     return proc is not None and proc.poll() is None
 
-SERVER_CMD = ["py", "-m", "uvicorn", "main:app", "--host", "0.0.0.0",
-              "--port", "8000", "--no-access-log"]
-SERVER_CWD  = os.path.join(_base, "server") if not _is_frozen else os.path.join(_base, "server")
-
-_server_log = None
-
-def _open_server_log():
-    """Open (append) the server log file, return file handle or None."""
-    try:
-        log_path = os.path.join(SERVER_CWD, "server.log")
-        return open(log_path, "a", encoding="utf-8", buffering=1)
-    except Exception:
-        return None
+SERVER_CWD = os.path.join(_base, "server")
 
 def start_server():
-    global _server_log
     try:
-        if _server_log is None:
-            _server_log = _open_server_log()
+        log_path = os.path.join(SERVER_CWD, "server.log")
+        # Use cmd /c so the child gets its own console handles and can write the log.
+        # This avoids handle-inheritance issues when the parent is a windowless exe.
+        cmd = (
+            f'cmd /c "py -m uvicorn main:app --host 0.0.0.0 --port 8000'
+            f' --no-access-log >> "{log_path}" 2>&1"'
+        )
         proc = subprocess.Popen(
-            SERVER_CMD,
+            cmd,
             cwd=SERVER_CWD,
+            shell=False,
             creationflags=0x08000000,  # CREATE_NO_WINDOW
-            stdout=_server_log,
-            stderr=_server_log,
         )
         print("RuneSync Server started.", flush=True)
         return proc
