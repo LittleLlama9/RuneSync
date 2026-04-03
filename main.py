@@ -74,10 +74,13 @@ def _load_spell_icon(name: str) -> "Image.Image | None":
     return None
 
 def _make_spell_pair_icon(spell1_id: int, spell2_id: int) -> "ImageTk.PhotoImage | None":
-    """Create a composite PhotoImage of two spell icons side by side."""
+    """Create a composite PhotoImage of two spell icons side by side.
+    Returns None when neither spell is explicitly set (both 0 = u.gg default)."""
+    if not spell1_id and not spell2_id:
+        return None
     id_to_name = {v: k for k, v in SUMMONER_SPELLS.items() if v != 0}
-    name1 = id_to_name.get(spell1_id, "auto")
-    name2 = id_to_name.get(spell2_id, "auto")
+    name1 = id_to_name.get(spell1_id, "auto") if spell1_id else "auto"
+    name2 = id_to_name.get(spell2_id, "auto") if spell2_id else "auto"
     cache_key = f"pair_{name1}_{name2}"
     if cache_key in _spell_image_cache:
         return _spell_image_cache[cache_key]
@@ -132,151 +135,207 @@ def make_btn(parent, text, cmd, bg=BLUE, hov=BLUE_H, **kw):
     return b
 
 
-class OverrideDialog:
-    def __init__(self, parent, overrides, champ="", on_save=None, lcu=None):
+class OverrideEditorPage:
+    """Renders the champion override editor into an existing parent frame."""
+
+    def __init__(self, parent, overrides, champ="", on_save=None, on_back=None, lcu=None):
+        self.parent    = parent
         self.overrides = overrides
         self.on_save   = on_save
+        self.on_back   = on_back
         self._lcu      = lcu
+        self._champ    = champ
         existing = overrides.get(champ) or {}
+        self._imported_page_name = existing.get("page_name", "")
 
-        w = tk.Toplevel(parent)
-        w.title("Edit Override" if champ else "Add Override")
-        w.geometry("440x580")
-        w.configure(bg=PANEL)
-        w.grab_set()
+        from item_builder import normalize_build
+        self._items_build = normalize_build(existing.get("items_build", {}))
+
+        self._build_ui(existing, champ)
+
+    def _build_ui(self, existing: dict, champ: str):
+        p = self.parent
+
+        # ── Header ────────────────────────────────────────────────────────────
+        hdr = tk.Frame(p, bg=PANEL, pady=8)
+        hdr.pack(fill="x")
+        back = tk.Label(hdr, text="← Back", font=("Segoe UI", 9),
+                        bg=PANEL, fg="#666", cursor="hand2", padx=10)
+        back.pack(side="left")
+        back.bind("<Button-1>", lambda e: self._do_back())
+        back.bind("<Enter>",    lambda e: back.configure(fg="#aaa"))
+        back.bind("<Leave>",    lambda e: back.configure(fg="#666"))
+        title = "Edit Override" if champ else "Add Override"
+        tk.Label(hdr, text=title, font=("Segoe UI", 12, "bold"),
+                 bg=PANEL, fg=GOLD).pack(side="left", padx=6)
+
+        tk.Frame(p, bg="#2a2a2a", height=1).pack(fill="x")
+
+        # ── Scrollable content ────────────────────────────────────────────────
+        wrap = tk.Frame(p, bg=PANEL)
+        wrap.pack(fill="both", expand=True)
+        canvas = tk.Canvas(wrap, bg=PANEL, highlightthickness=0)
+        vsb = tk.Scrollbar(wrap, orient="vertical", command=canvas.yview, bg=DARK)
+        canvas.configure(yscrollcommand=vsb.set)
+        vsb.pack(side="right", fill="y")
+        canvas.pack(side="left", fill="both", expand=True)
+        cf = tk.Frame(canvas, bg=PANEL)
+        _cw = canvas.create_window((0, 0), window=cf, anchor="nw")
+        cf.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        canvas.bind("<Configure>", lambda e: canvas.itemconfig(_cw, width=e.width))
+        canvas.bind_all("<MouseWheel>",
+                        lambda e: canvas.yview_scroll(-1 * (e.delta // 120), "units"))
 
         def row(lbl_text):
-            tk.Label(w, text=lbl_text, font=("Segoe UI",9),
-                     bg=PANEL, fg="#aaa", anchor="w").pack(fill="x", padx=16, pady=(6,0))
+            tk.Label(cf, text=lbl_text, font=("Segoe UI", 9),
+                     bg=PANEL, fg="#aaa", anchor="w").pack(fill="x", padx=24, pady=(8, 0))
 
         def entry(default=""):
             v = tk.StringVar(value=default)
-            tk.Entry(w, textvariable=v, bg=DARK, fg="#ccc",
+            tk.Entry(cf, textvariable=v, bg=DARK, fg="#ccc",
                      insertbackground="#ccc", relief="flat",
-                     font=("Segoe UI",10)).pack(fill="x", padx=16, pady=(2,0))
+                     font=("Segoe UI", 10)).pack(fill="x", padx=24, pady=(2, 0))
             return v
 
         def combo(vals, default=""):
             v = tk.StringVar(value=default or vals[0])
-            ttk.Combobox(w, textvariable=v, values=vals,
-                         state="readonly", font=("Segoe UI",9)
-                         ).pack(fill="x", padx=16, pady=(2,0))
+            ttk.Combobox(cf, textvariable=v, values=vals,
+                         state="readonly", font=("Segoe UI", 9)
+                         ).pack(fill="x", padx=24, pady=(2, 0))
             return v
 
-        row("Champion name:");        self.champ_v    = entry(champ)
-        row("Role:");                 self.role_v     = combo(ROLES, existing.get("role","auto"))
-        row("Primary rune tree:");    self.primary_v  = combo(TREES, existing.get("primary_tree","Precision"))
-        row("Keystone:");             self.keystone_v = combo(
-            KEYSTONES.get(self.primary_v.get(),[]), existing.get("keystone",""))
-        row("Secondary rune tree:");  self.secondary_v= combo(TREES, existing.get("secondary_tree","Domination"))
+        row("Champion name:");       self.champ_v    = entry(champ)
+        row("Role:");                self.role_v     = combo(ROLES, existing.get("role", "auto"))
+        row("Primary rune tree:");   self.primary_v  = combo(TREES, existing.get("primary_tree", "Precision"))
+        row("Keystone:");            self.keystone_v = combo(
+            KEYSTONES.get(self.primary_v.get(), []), existing.get("keystone", ""))
+        row("Secondary rune tree:"); self.secondary_v = combo(TREES, existing.get("secondary_tree", "Domination"))
         row("Full rune IDs (optional, 9 comma-sep ints):")
-        self.runes_v = entry(",".join(str(r) for r in existing.get("rune_ids",[])))
-        row("Item build (optional, comma-sep):")
-        existing_items = existing.get("items_build", [])
-        self.items_v = entry(", ".join(existing_items) if existing_items else "")
-        row("Note (optional):");      self.note_v     = entry(existing.get("note",""))
+        self.runes_v = entry(",".join(str(r) for r in existing.get("rune_ids", [])))
+
+        # Item build row
+        row("Item build:")
+        ibf = tk.Frame(cf, bg=PANEL); ibf.pack(fill="x", padx=24, pady=(2, 0))
+        self._items_summary_lbl = tk.Label(
+            ibf, text=self._items_build_summary(),
+            font=("Segoe UI", 8), bg=PANEL, fg="#666", anchor="w")
+        self._items_summary_lbl.pack(side="left", fill="x", expand=True)
+        make_btn(ibf, "Edit Build", self._open_build_editor,
+                 "#1a3a2a", "#2a4a3a").pack(side="right")
+
+        row("Note (optional):");     self.note_v = entry(existing.get("note", ""))
 
         # Summoner spells
         spell_names = list(SUMMONER_SPELLS.keys())
         def spell_name_from_id(sid):
             for name, i in SUMMONER_SPELLS.items():
-                if i == sid:
-                    return name
+                if i == sid: return name
             return "— (use u.gg default)"
+
         row("Summoner Spell 1:")
         self.spell1_v = tk.StringVar(value=spell_name_from_id(existing.get("spell1", 0)))
-        ttk.Combobox(w, textvariable=self.spell1_v, values=spell_names,
-                     state="readonly", font=("Segoe UI",9)).pack(fill="x", padx=16, pady=(2,0))
+        ttk.Combobox(cf, textvariable=self.spell1_v, values=spell_names,
+                     state="readonly", font=("Segoe UI", 9)).pack(fill="x", padx=24, pady=(2, 0))
         row("Summoner Spell 2:")
         self.spell2_v = tk.StringVar(value=spell_name_from_id(existing.get("spell2", 0)))
-        ttk.Combobox(w, textvariable=self.spell2_v, values=spell_names,
-                     state="readonly", font=("Segoe UI",9)).pack(fill="x", padx=16, pady=(2,0))
+        ttk.Combobox(cf, textvariable=self.spell2_v, values=spell_names,
+                     state="readonly", font=("Segoe UI", 9)).pack(fill="x", padx=24, pady=(2, 0))
 
-        # Import from client button
-        import_frame = tk.Frame(w, bg=PANEL); import_frame.pack(fill="x", padx=16, pady=(8,0))
-        make_btn(import_frame, "?  Import Active Rune Page from Client",
+        import_f = tk.Frame(cf, bg=PANEL); import_f.pack(fill="x", padx=24, pady=(10, 0))
+        make_btn(import_f, "?  Import Active Rune Page from Client",
                  self._import_from_client, "#2a3a2a", "#3a4a3a").pack(side="left")
-        self._import_status = tk.Label(import_frame, text="", font=("Segoe UI",8),
+        self._import_status = tk.Label(import_f, text="", font=("Segoe UI", 8),
                                        bg=PANEL, fg="#888")
-        self._import_status.pack(side="left", padx=(8,0))
-        self._imported_page_name = ""
+        self._import_status.pack(side="left", padx=(8, 0))
 
-        tk.Frame(w, bg="#2a2a2a", height=1).pack(fill="x", padx=16, pady=10)
-        bf = tk.Frame(w, bg=PANEL); bf.pack(fill="x", padx=16)
-        tk.Button(bf, text="Save", command=lambda: self._save(w),
-                  bg=BLUE, fg="white", relief="flat", font=("Segoe UI",9),
+        tk.Frame(cf, bg=PANEL, height=12).pack()  # bottom padding
+
+        # ── Footer ────────────────────────────────────────────────────────────
+        tk.Frame(p, bg="#2a2a2a", height=1).pack(fill="x")
+        footer = tk.Frame(p, bg=PANEL, pady=10)
+        footer.pack(fill="x")
+        tk.Button(footer, text="Save", command=self._save,
+                  bg=BLUE, fg="white", relief="flat", font=("Segoe UI", 9),
+                  padx=12).pack(side="left", padx=(16, 6))
+        tk.Button(footer, text="Cancel", command=self._do_back,
+                  bg="#2a2d3a", fg="white", relief="flat", font=("Segoe UI", 9),
                   padx=12).pack(side="left")
-        tk.Button(bf, text="Cancel", command=w.destroy,
-                  bg="#2a2d3a", fg="white", relief="flat", font=("Segoe UI",9),
-                  padx=12).pack(side="left", padx=8)
 
+    # ── Actions ───────────────────────────────────────────────────────────────
+
+    def _open_build_editor(self):
+        from item_builder import BuildEditorWindow
+        def _on_save(build):
+            self._items_build = build
+            self._items_summary_lbl.configure(text=self._items_build_summary())
+        BuildEditorWindow(
+            self.parent.winfo_toplevel(),
+            self.champ_v.get().strip() or self._champ or "Champion",
+            self.role_v.get() or "auto",
+            self._items_build,
+            _on_save,
+        )
 
     def _import_from_client(self):
-        """Pull the active rune page from the League client and fill the fields."""
         try:
             from lcu import LCUClient, LCUConnectionError
-            lcu = LCUClient()
-            lcu.connect()
+            lcu = LCUClient(); lcu.connect()
             page = lcu.get_current_rune_page()
             if not page:
-                self._import_status.configure(text="No rune page found.", fg="#e05252")
-                return
-            perk_ids = page.get("selectedPerkIds", [])
-            primary_id = page.get("primaryStyleId", 0)
+                self._import_status.configure(text="No rune page found.", fg="#e05252"); return
+            perk_ids     = page.get("selectedPerkIds", [])
+            primary_id   = page.get("primaryStyleId", 0)
             secondary_id = page.get("subStyleId", 0)
-            # Reverse-lookup tree names
             from lcu import RUNE_TREE_IDS, KEYSTONE_IDS
             id_to_tree = {v: k for k, v in RUNE_TREE_IDS.items()}
             id_to_ks   = {v: k for k, v in KEYSTONE_IDS.items()}
-            primary_name   = id_to_tree.get(primary_id,   self.primary_v.get())
-            secondary_name = id_to_tree.get(secondary_id, self.secondary_v.get())
-            keystone_name  = id_to_ks.get(perk_ids[0], self.keystone_v.get()) if perk_ids else ""
-            self._imported_page_name = page.get("name", "")
-            self.primary_v.set(primary_name)
-            self.secondary_v.set(secondary_name)
-            if keystone_name:
-                self.keystone_v.set(keystone_name)
+            self.primary_v.set(id_to_tree.get(primary_id, self.primary_v.get()))
+            self.secondary_v.set(id_to_tree.get(secondary_id, self.secondary_v.get()))
+            ks = id_to_ks.get(perk_ids[0], "") if perk_ids else ""
+            if ks: self.keystone_v.set(ks)
             self.runes_v.set(",".join(str(p) for p in perk_ids))
-            # Auto-detect champion name from page name
-            detected_champ = self._detect_champ_in_name(self._imported_page_name)
-            if detected_champ and not self.champ_v.get().strip():
-                self.champ_v.set(detected_champ)
+            self._imported_page_name = page.get("name", "")
+            detected = self._detect_champ_in_name(self._imported_page_name)
+            if detected and not self.champ_v.get().strip():
+                self.champ_v.set(detected)
             self._import_status.configure(
                 text=f"✓ Imported '{self._imported_page_name or 'page'}'", fg="#4caf73")
         except Exception as ex:
             self._import_status.configure(text=f"✗ {ex}", fg="#e05252")
 
     def _detect_champ_in_name(self, page_name: str) -> str:
-        """Return the first champion name found in the rune page name, or ''."""
-        if not page_name:
-            return ""
+        if not page_name: return ""
         name_lower = page_name.lower()
         champ_map = {}
         if self._lcu and self._lcu.connected:
-            try:
-                champ_map = self._lcu.get_champion_name_map()
-            except Exception:
-                pass
-        # Sort longest-first so e.g. "Twisted Fate" matches before "Fate"
-        champ_names = sorted(champ_map.values(), key=len, reverse=True)
-        for name in champ_names:
-            if name.lower() in name_lower:
-                return name
+            try: champ_map = self._lcu.get_champion_name_map()
+            except Exception: pass
+        for name in sorted(champ_map.values(), key=len, reverse=True):
+            if name.lower() in name_lower: return name
         return ""
 
-    def _save(self, win):
+    def _items_build_summary(self) -> str:
+        from item_builder import SLOT_DEFS as _SD
+        parts = []
+        for k, label in _SD:
+            items = self._items_build.get(k, [])
+            if items:
+                names = ", ".join(i["name"] for i in items[:3])
+                if len(items) > 3: names += "…"
+                parts.append(f"{label}: {names}")
+        return "  |  ".join(parts) if parts else "No custom build"
+
+    def _save(self):
         champ = self.champ_v.get().strip()
         if not champ:
-            messagebox.showerror("Error","Enter a champion name."); return
+            messagebox.showerror("Error", "Enter a champion name."); return
         rids = []
         raw = self.runes_v.get().strip()
         if raw:
             try:
                 rids = [int(x.strip()) for x in raw.split(",") if x.strip()]
             except ValueError:
-                messagebox.showerror("Error","Rune IDs must be integers."); return
-        items_raw = self.items_v.get().strip()
-        items_build = [i.strip() for i in items_raw.split(",") if i.strip()] if items_raw else []
+                messagebox.showerror("Error", "Rune IDs must be integers."); return
         self.overrides.set(champ, {
             "role": self.role_v.get(), "primary_tree": self.primary_v.get(),
             "keystone": self.keystone_v.get(), "secondary_tree": self.secondary_v.get(),
@@ -284,10 +343,13 @@ class OverrideDialog:
             "page_name": self._imported_page_name,
             "spell1": SUMMONER_SPELLS.get(self.spell1_v.get(), 0),
             "spell2": SUMMONER_SPELLS.get(self.spell2_v.get(), 0),
-            "items_build": items_build,
+            "items_build": self._items_build,
         })
         if self.on_save: self.on_save()
-        win.destroy()
+        self._do_back()
+
+    def _do_back(self):
+        if self.on_back: self.on_back()
 
 
 class RuneSyncApp:
@@ -295,6 +357,10 @@ class RuneSyncApp:
         self.root = root
         root.title("RuneSync"); root.geometry("780x560")
         root.resizable(False,False); root.configure(bg=BG)
+        try:
+            root.iconbitmap(os.path.join(getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__))), "icon.ico"))
+        except Exception:
+            pass
 
         self.lcu       = LCUClient()
         self.overrides = OverrideManager()
@@ -304,14 +370,12 @@ class RuneSyncApp:
         self.running   = False
         self._saved_geometry: str | None = None
         # Game overlay state
-        self._game_tips: dict       = {}
         self._game_champ: str       = ""
         self._game_enemy: str       = ""
         self._game_role: str        = ""
         self._in_game_overlay: bool = False
         self._game_frame            = None
         self._game_log_widget       = None
-        self._game_tips_text        = None
         self._game_match_label      = None
         self._game_wr_label         = None
         self._game_winrate: str     = ""
@@ -421,15 +485,24 @@ class RuneSyncApp:
                  font=("Segoe UI",9), bg=PANEL, fg="#666").pack(anchor="w", padx=14, pady=(10,4))
         lf = tk.Frame(f, bg=DARK); lf.pack(fill="both", expand=True, padx=14, pady=(0,8))
         cols = ("Champion","Role","Primary","Secondary")
-        self.tree = ttk.Treeview(lf, columns=cols, show="tree headings", height=10)
+        self.tree = ttk.Treeview(lf, columns=cols, show="tree headings", height=10, style="Builds.Treeview")
         ts = ttk.Style()
-        ts.configure("Treeview", background=DARK, foreground="#ccc",
-                     fieldbackground=DARK, rowheight=28, font=("Segoe UI",9))
-        ts.configure("Treeview.Heading", background=PANEL, foreground=GOLD,
+        ts.configure("Builds.Treeview", background=DARK, foreground="#ccc",
+                     fieldbackground=DARK, rowheight=28, font=("Segoe UI",9), indent=0)
+        ts.configure("Builds.Treeview.Heading", background=PANEL, foreground=GOLD,
                      font=("Segoe UI",9,"bold"))
-        ts.map("Treeview", background=[("selected","#2a3050")])
+        ts.map("Builds.Treeview", background=[("selected","#2a3050")])
+        # Remove the expand indicator from the row layout so icons sit at the left edge
+        ts.layout("Builds.Treeview.Item", [
+            ("Treeitem.padding", {"children": [
+                ("Treeitem.image",  {"side": "left", "sticky": ""}),
+                ("Treeitem.focus",  {"children": [
+                    ("Treeitem.text", {"side": "left", "sticky": ""})
+                ], "side": "left", "sticky": ""}),
+            ], "sticky": "nsew"}),
+        ])
         # #0 is the tree column — used for spell icons
-        self.tree.column("#0", width=52, stretch=False, anchor="center")
+        self.tree.column("#0", width=48, stretch=False, anchor="w")
         self.tree.heading("#0", text="Spells")
         for col, w in [("Champion",110),("Role",70),("Primary",110),("Secondary",110)]:
             self.tree.heading(col, text=col)
@@ -438,9 +511,9 @@ class RuneSyncApp:
         self.tree.configure(yscrollcommand=sb2.set)
         sb2.pack(side="right",fill="y"); self.tree.pack(fill="both",expand=True)
         bf = tk.Frame(f, bg=PANEL); bf.pack(fill="x", padx=14, pady=(0,12))
-        make_btn(bf,"+ Add",  self._add_ov,  BLUE,  BLUE_H).pack(side="left")
-        make_btn(bf,"✎ Edit", self._edit_ov, "#2a2d3a","#3a3d4a").pack(side="left",padx=(8,0))
-        make_btn(bf,"✕ Remove",self._rm_ov,  RED,   RED_H).pack(side="left",padx=(8,0))
+        make_btn(bf,"+ Add",     self._add_ov,  BLUE,      BLUE_H).pack(side="left")
+        make_btn(bf,"✎ Edit",   self._edit_ov, "#2a2d3a","#3a3d4a").pack(side="left",padx=(8,0))
+        make_btn(bf,"✕ Remove", self._rm_ov,   RED,       RED_H).pack(side="left",padx=(8,0))
         self._refresh_tree()
 
     def _tab_settings(self, nb):
@@ -732,7 +805,6 @@ class RuneSyncApp:
             on_game_start=lambda: self.root.after(0, self._on_game_start),
             on_game_end=lambda: self.root.after(0, self._on_game_end),
             on_league_closed=lambda: self.root.after(0, self.root.quit),
-            on_matchup_tips=self._on_matchup_tips,
             on_matchup_winrate=self._on_matchup_winrate,
             on_item_build=self._on_item_build,
         )
@@ -756,19 +828,13 @@ class RuneSyncApp:
             self._build_src_label.configure(text=src, fg=src_color)
         self.root.after(0, _do)
 
-    def _on_matchup_winrate(self, _champ: str, _enemy: str, wr: float, label: str, tag: str):
+    def _on_matchup_winrate(self, champ: str, enemy: str, role: str, wr: float, label: str, tag: str):
         tag_to_color = {"success": "#4caf73", "warn": GOLD, "error": "#e05252", "info": "#aab4c8"}
+        self._game_champ     = champ
+        self._game_enemy     = enemy
+        self._game_role      = role
         self._game_winrate   = f"{wr:.1f}% WR — {label}"
         self._game_wr_color  = tag_to_color.get(tag, "#aab4c8")
-        if self._in_game_overlay and self._game_wr_label:
-            self.root.after(0, lambda: self._game_wr_label.configure(
-                text=self._game_winrate, fg=self._game_wr_color))
-
-    def _on_matchup_tips(self, champ: str, enemy: str, role: str, tips: dict):
-        self._game_champ = champ
-        self._game_enemy = enemy
-        self._game_role  = role
-        self._game_tips  = tips
         if self._in_game_overlay:
             self.root.after(0, self._update_game_overlay)
 
@@ -786,55 +852,15 @@ class RuneSyncApp:
             hdr, text="", font=("Segoe UI", 13, "bold"), bg=BG, fg="#aab4c8")
         self._game_wr_label.pack(side="right", padx=12)
 
-        # Body: left tips + right log
-        body = tk.Frame(outer, bg=BG)
-        body.pack(fill="both", expand=True)
-
-        # Left panel — tips
-        left = tk.Frame(body, bg=BG)
-        left.pack(side="left", fill="both", expand=True)
-        tips_frame = tk.Frame(left, bg=DARK)
-        tips_frame.pack(fill="both", expand=True)
-
-        tips_sb = tk.Scrollbar(tips_frame, bg=PANEL)
-        self._game_tips_text = tk.Text(
-            tips_frame, bg=DARK, fg="#ccc",
-            font=("Segoe UI", 13), relief="flat",
-            state="disabled", wrap="word",
-            padx=14, pady=10,
-        )
-        tips_sb.configure(command=self._game_tips_text.yview)
-        self._game_tips_text.configure(yscrollcommand=tips_sb.set)
-        tips_sb.pack(side="right", fill="y")
-        self._game_tips_text.pack(fill="both", expand=True)
-
-        t = self._game_tips_text
-        t.tag_config("header",      font=("Segoe UI", 14, "bold"), foreground=GOLD)
-        t.tag_config("icon",        font=("Segoe UI", 16),         foreground=GOLD)
-        t.tag_config("body",        font=("Segoe UI", 13),         foreground="#ccc")
-        t.tag_config("label",       font=("Segoe UI", 11),         foreground="#7dbbff")
-        t.tag_config("warn",        font=("Segoe UI", 13),         foreground=GOLD)
-        t.tag_config("success",     font=("Segoe UI", 13),         foreground="#4caf73")
-        t.tag_config("bullet",      font=("Segoe UI", 13),         foreground=GOLD)
-        t.tag_config("diff_easy",   font=("Segoe UI", 13, "bold"), foreground="#4caf73")
-        t.tag_config("diff_medium", font=("Segoe UI", 13, "bold"), foreground=GOLD)
-        t.tag_config("diff_hard",   font=("Segoe UI", 13, "bold"), foreground="#e05252")
-        t.tag_config("diff_skill",  font=("Segoe UI", 13, "bold"), foreground="#c792ea")
-
-        # Right panel — activity log
-        right = tk.Frame(body, bg=PANEL, width=340)
-        right.pack(side="right", fill="y")
-        right.pack_propagate(False)
-        tk.Label(right, text="Activity", font=("Segoe UI", 10, "bold"),
-                 bg=PANEL, fg=GOLD).pack(anchor="w", padx=10, pady=(8, 4))
-        log_frame = tk.Frame(right, bg=DARK)
-        log_frame.pack(fill="both", expand=True, padx=6, pady=(0, 6))
+        # Body — activity log (full width)
+        log_frame = tk.Frame(outer, bg=DARK)
+        log_frame.pack(fill="both", expand=True)
         log_sb = tk.Scrollbar(log_frame, bg=PANEL)
         self._game_log_widget = tk.Text(
             log_frame, bg=DARK, fg="#ccc",
             font=("Segoe UI", 11), relief="flat",
             state="disabled", wrap="word",
-            padx=6, pady=4,
+            padx=8, pady=6,
         )
         log_sb.configure(command=self._game_log_widget.yview)
         self._game_log_widget.configure(yscrollcommand=log_sb.set)
@@ -845,8 +871,6 @@ class RuneSyncApp:
             self._game_log_widget.tag_config(tag, foreground=col)
 
     def _update_game_overlay(self):
-        if not self._game_tips_text:
-            return
         if self._game_match_label:
             role_str = f" ({self._game_role})" if self._game_role not in ("", "auto") else ""
             title = (f"{self._game_champ}{role_str}  vs  {self._game_enemy}"
@@ -854,78 +878,6 @@ class RuneSyncApp:
             self._game_match_label.configure(text=title)
         if self._game_wr_label:
             self._game_wr_label.configure(text=self._game_winrate, fg=self._game_wr_color)
-
-        w = self._game_tips_text
-        w.configure(state="normal")
-        w.delete("1.0", "end")
-
-        tips = self._game_tips
-        if not tips:
-            w.insert("end", "\n  No matchup tips yet.\n  Tips will appear here after champion select.", "label")
-            w.configure(state="disabled")
-            return
-
-        def section(icon, title, *body_parts):
-            w.insert("end", icon + "  ", "icon")
-            w.insert("end", title + "\n", "header")
-            for text, tag in body_parts:
-                if text:
-                    w.insert("end", "    " + text + "\n", tag)
-            w.insert("end", "\n")
-
-        diff = tips.get("difficulty", "")
-        if diff:
-            diff_tag = {"easy": "diff_easy", "medium": "diff_medium",
-                        "hard": "diff_hard", "skill_matchup": "diff_skill"}.get(diff.lower(), "body")
-            early = tips.get("who_wins_early", "")
-            w.insert("end", "Difficulty:  ", "header")
-            w.insert("end", diff.replace("_", " ").title(), diff_tag)
-            if early:
-                w.insert("end", "    •    Early winner:  ", "label")
-                w.insert("end", early, "body")
-            w.insert("end", "\n\n")
-
-        section("⚔", "Trading Pattern", (tips.get("trading_pattern"), "body"))
-        section("⚠", "Ability to Dodge", (tips.get("ability_to_dodge"), "warn"))
-
-        spikes = tips.get("power_spikes", {})
-        spike_parts = []
-        if spikes.get("you"):
-            spike_parts.append((f"You:    {spikes['you']}", "success"))
-        if spikes.get("enemy"):
-            spike_parts.append((f"Enemy:  {spikes['enemy']}", "warn"))
-        if spike_parts:
-            section("⚡", "Power Spikes", *spike_parts)
-
-        phase_parts = []
-        for label, key in [("Early", "early_game"), ("Mid", "mid_game"), ("Late", "late_game")]:
-            val = tips.get(key)
-            if val:
-                phase_parts.append((f"▸ {label}:  {val}", "body"))
-        if phase_parts:
-            section("▸", "Game Phases", *phase_parts)
-
-        section("◆", "Win Condition", (tips.get("win_condition"), "success"))
-
-        items = tips.get("counter_items", [])
-        if items:
-            w.insert("end", "●  ", "icon")
-            w.insert("end", "Counter Items\n", "header")
-            for item in items:
-                w.insert("end", f"    ●  {item}\n", "bullet")
-            w.insert("end", "\n")
-
-        section("↔", "Positioning", (tips.get("positioning"), "body"))
-        section("↑", "Scaling",     (tips.get("scaling"), "body"))
-
-        gankable = tips.get("jungle_gankable")
-        if gankable is not None:
-            gank_text = "Easy to gank ✓" if gankable else "Hard to gank"
-            gank_tag  = "success" if gankable else "warn"
-            w.insert("end", "    Jungle:  ", "label")
-            w.insert("end", gank_text + "\n", gank_tag)
-
-        w.configure(state="disabled")
 
     def _on_game_start(self):
         self.nb.select(0)
@@ -980,13 +932,13 @@ class RuneSyncApp:
             ))
 
     def _add_ov(self):
-        OverrideDialog(self.root, self.overrides, on_save=self._refresh_tree, lcu=self.lcu)
+        self._show_override_editor("")
 
     def _edit_ov(self):
         sel = self.tree.selection()
         if not sel: return
         champ = self.tree.item(sel[0])["values"][0]
-        OverrideDialog(self.root, self.overrides, champ=champ, on_save=self._refresh_tree, lcu=self.lcu)
+        self._show_override_editor(champ)
 
     def _rm_ov(self):
         sel = self.tree.selection()
@@ -995,6 +947,25 @@ class RuneSyncApp:
         if messagebox.askyesno("Remove", f"Remove custom build for {champ}?"):
             self.overrides.remove(champ); self._refresh_tree()
             self._emit(f"Removed override for {champ}", "warn")
+
+    def _show_override_editor(self, champ: str):
+        self.nb.pack_forget()
+        self._override_frame = tk.Frame(self.root, bg=PANEL)
+        self._override_frame.pack(fill="both", expand=True, padx=16, pady=(0, 10))
+        OverrideEditorPage(
+            self._override_frame, self.overrides,
+            champ=champ,
+            on_save=self._refresh_tree,
+            on_back=self._close_override_editor,
+            lcu=self.lcu,
+        )
+
+    def _close_override_editor(self):
+        if getattr(self, "_override_frame", None):
+            self._override_frame.destroy()
+            self._override_frame = None
+        self.nb.pack(fill="both", expand=True, padx=16, pady=(0, 10))
+        self.nb.select(1)  # return to My Builds tab
 
     def _save_settings(self):
         new_url = self.server_url_v.get().strip().rstrip("/")
