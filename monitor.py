@@ -8,7 +8,6 @@ from lcu import LCUClient, LCUConnectionError, RUNE_TREE_IDS, KEYSTONE_IDS
 from ugg_api import UGGClient
 from overrides import OverrideManager
 from champion_roles import infer_roles, infer_full_assignment
-from matchup_data import get_matchup_tips, is_cache_loaded
 
 
 class ChampSelectMonitor:
@@ -18,7 +17,7 @@ class ChampSelectMonitor:
                  on_log: Callable, trigger: str = "hover", rank: str = "Platinum+",
                  region: str = "World", auto_role: bool = True,
                  on_game_start=None, on_game_end=None, on_league_closed=None,
-                 on_matchup_tips=None, on_matchup_winrate=None, on_item_build=None):
+                 on_matchup_winrate=None, on_item_build=None):
         self.lcu = lcu
         self.ugg = ugg
         self.overrides = overrides
@@ -30,7 +29,6 @@ class ChampSelectMonitor:
         self._on_game_start = on_game_start
         self._on_game_end = on_game_end
         self._on_league_closed = on_league_closed
-        self._on_matchup_tips = on_matchup_tips
         self._on_matchup_winrate = on_matchup_winrate
         self._on_item_build = on_item_build
         self._stop_event = threading.Event()
@@ -49,9 +47,9 @@ class ChampSelectMonitor:
         self._waiting_logged: bool = False   # whether we've logged "waiting for laner"
         self._pick_turn_fired: bool = False  # whether we've fired counterpick for this turn
         self._matchup_override: Optional[str] = None
+        self._all_picks_finalized: bool = False
         # Game state
         self._in_game: bool = False
-        self._claude_generating: set = set()
         self._lcu_fail_count: int = 0
         self._role_refresh_done: bool = False
 
@@ -144,6 +142,7 @@ class ChampSelectMonitor:
                 self._waiting_logged = False
                 self._pick_turn_fired = False
                 self._matchup_override = None
+                self._all_picks_finalized = False
                 self._my_champ = ""
             self._last_phase = phase
             return
@@ -158,6 +157,7 @@ class ChampSelectMonitor:
             self._waiting_logged = False
             self._pick_turn_fired = False
             self._matchup_override = None
+            self._all_picks_finalized = False
         self._last_phase = phase
 
         session = self.lcu.get_champ_select_session()
@@ -207,6 +207,11 @@ class ChampSelectMonitor:
                         ).start()
 
         # ── Enemy laner state machine (runs every tick, always) ────────────
+        # When all 5 enemy picks are locked in, force a fresh assignment regardless
+        # of cache — ensures the final pick always overrides any earlier guess.
+        if not self._all_picks_finalized and self._all_enemy_picks_complete(session):
+            self._all_picks_finalized = True
+            self._enemy_names_evaluated = frozenset()
         self._update_enemy_laner(session)
 
         # ── It's your pick turn and you haven't locked in yet ──────────────
@@ -385,51 +390,9 @@ class ChampSelectMonitor:
                     tag = "error"
                 self.log(f"  ⚔  vs {enemy_champ}: {wr:.1f}% WR — {label}", tag)
                 if self._on_matchup_winrate:
-                    self._on_matchup_winrate(my_champ, enemy_champ, wr, label, tag)
+                    self._on_matchup_winrate(my_champ, enemy_champ, role, wr, label, tag)
         except Exception as e:
             self.log(f"  ⚠ Matchup lookup failed: {e}", "warn")
-
-        # ── Matchup tips from local cache ───────────────────────────────────
-        if not is_cache_loaded():
-            return
-        try:
-            tips = get_matchup_tips(my_champ, enemy_champ, role)
-            if tips is None:
-                gen_key = f"{my_champ}|{role}|{enemy_champ}"
-                if gen_key not in self._claude_generating:
-                    self._claude_generating.add(gen_key)
-                    self.log(f"  → Matchup not in database. Generating {my_champ} vs {enemy_champ} with Claude...", "warn")
-                    threading.Thread(
-                        target=self._run_claude_generation,
-                        args=(my_champ, enemy_champ, role),
-                        daemon=True,
-                    ).start()
-                else:
-                    self.log(f"  → Claude generation already in progress for {my_champ} {role}", "info")
-                return
-            self._display_matchup_tips(my_champ, enemy_champ, tips)
-        except Exception as e:
-            self.log(f"  ⚠ Tips lookup failed: {e}", "warn")
-
-    def _display_matchup_tips(self, my_champ: str, enemy_champ: str, tips: dict):
-        """Pass matchup tips to the in-game overlay (not logged on monitor 1)."""
-        if self._on_matchup_tips:
-            self._on_matchup_tips(my_champ, enemy_champ, self._my_role, tips)
-
-    def _run_claude_generation(self, my_champ: str, enemy_champ: str, role: str):
-        """Background thread: call Claude API to generate a single matchup, then display tips."""
-        from claude_matchup import generate_single_matchup
-
-        def on_done(success: bool, champ: str, r: str):
-            self._claude_generating.discard(f"{champ}|{r}|{enemy_champ}")
-            if success:
-                tips = get_matchup_tips(my_champ, enemy_champ, role)
-                if tips is not None:
-                    self._display_matchup_tips(my_champ, enemy_champ, tips)
-                else:
-                    self.log(f"  ⚠ Tips for {enemy_champ} not found after generation", "warn")
-
-        generate_single_matchup(my_champ, enemy_champ, role, self.log, on_done)
 
     def _get_my_champ_id(self, session: dict) -> Optional[int]:
         my_cell = session.get("localPlayerCellId", -1)
@@ -537,7 +500,7 @@ class ChampSelectMonitor:
                 if ok:
                     self.log("  ✓ Role weights updated for new patch", "success")
                 else:
-                    self.log("  ⚠ Role weight update skipped (Brave not available)", "warn")
+                    self.log("  ⚠ Role weight update failed (server unreachable)", "warn")
         except Exception as e:
             self.log(f"  ⚠ Role weight check failed: {e}", "warn")
 
