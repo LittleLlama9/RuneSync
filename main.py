@@ -380,6 +380,7 @@ class RuneSyncApp:
         self._game_wr_label         = None
         self._game_winrate: str     = ""
         self._game_wr_color: str    = "#aab4c8"
+        self._log_buffer: list[tuple[str, str]] = []  # (msg, tag) — replayed into game overlay
         self._log_queue = _log_queue
 
         self._build_ui()
@@ -741,6 +742,7 @@ class RuneSyncApp:
 
     # ── helpers ──────────────────────────────────────────────────────────────
     def _emit(self, msg, tag="info"):
+        self._log_buffer.append((msg, tag))
         def _do():
             self.log.configure(state="normal")
             self.log.insert("end", msg+"\n", tag)
@@ -869,6 +871,12 @@ class RuneSyncApp:
         for tag, col in [("info","#aab4c8"),("success","#4caf73"),
                          ("warn",GOLD),("error","#e05252"),("champ","#7dbbff")]:
             self._game_log_widget.tag_config(tag, foreground=col)
+        # Populate with existing log history
+        self._game_log_widget.configure(state="normal")
+        for m, t in self._log_buffer:
+            self._game_log_widget.insert("end", m+"\n", t)
+        self._game_log_widget.see("end")
+        self._game_log_widget.configure(state="disabled")
 
     def _update_game_overlay(self):
         if self._game_match_label:
