@@ -137,4 +137,7 @@ def init_logging(log_path: str) -> queue.Queue:
     # sys.stderr is already the open file handle at this point.
     sys.stderr = _StderrInterceptor(sys.stderr, root)
 
+    # ── Silence noisy third-party loggers ─────────────────────────────────────
+    logging.getLogger("PIL").setLevel(logging.WARNING)
+
     return log_queue

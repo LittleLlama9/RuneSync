@@ -33,6 +33,7 @@ class LCUClient:
         self.connected = False
         self._port: Optional[int] = None
         self._password: Optional[str] = None
+        self._summoner_id: Optional[int] = None
         self._ssl_ctx = ssl.create_default_context()
         self._ssl_ctx.check_hostname = False
         self._ssl_ctx.verify_mode = ssl.CERT_NONE
@@ -45,7 +46,8 @@ class LCUClient:
             )
         self._parse_lockfile(lockfile_path)
         try:
-            self._get("/lol-summoner/v1/current-summoner")
+            summoner = self._get("/lol-summoner/v1/current-summoner")
+            self._summoner_id = summoner.get("summonerId") or summoner.get("accountId")
             self.connected = True
         except Exception as e:
             raise LCUConnectionError(f"LCU reachable but request failed: {e}")
@@ -165,6 +167,18 @@ class LCUClient:
         except urllib.error.HTTPError as e:
             raise LCUConnectionError(f"PATCH {path} failed {e.code}: {e.read().decode(errors='replace')}")
 
+    def _put(self, path: str, body: dict) -> dict:
+        url = self._base_url + path
+        data = json.dumps(body).encode()
+        req = urllib.request.Request(url, data=data, method="PUT", headers={
+            "Authorization": self._auth_header, "Content-Type": "application/json",
+        })
+        try:
+            with urllib.request.urlopen(req, context=self._ssl_ctx, timeout=5) as resp:
+                return json.loads(resp.read() or b"{}")
+        except urllib.error.HTTPError as e:
+            raise LCUConnectionError(f"PUT {path} failed {e.code}: {e.read().decode(errors='replace')}")
+
     def _delete(self, path: str):
         url = self._base_url + path
         req = urllib.request.Request(url, method="DELETE",
@@ -261,4 +275,62 @@ class LCUClient:
         except LCUConnectionError as e:
             print(f"[lcu] import_rune_page failed: {e}", file=sys.stderr)
             print(f"[lcu] body was: {body}", file=sys.stderr)
+            return False
+
+    def import_item_set(self, champion_name: str, champion_id: int, role: str,
+                        starter_ids: list, core_ids: list,
+                        fourth_ids: list = None, fifth_ids: list = None, sixth_ids: list = None) -> bool:
+        import sys, time
+        if not core_ids:
+            return False
+        slug = champion_name.lower().replace(" ", "-").replace("'", "").replace(".", "")
+        uid = f"runesync-{slug}-{role.lower()}"
+        blocks = []
+        if starter_ids:
+            blocks.append({
+                "items": [{"count": 1, "id": str(i)} for i in starter_ids],
+                "showIfSummonerSpell": "", "hideIfSummonerSpell": "",
+                "type": "Starter Items",
+            })
+        blocks.append({
+            "items": [{"count": 1, "id": str(i)} for i in core_ids],
+            "showIfSummonerSpell": "", "hideIfSummonerSpell": "",
+            "type": "Core Build",
+        })
+        for label, ids in [("4th Item Options", fourth_ids), ("5th Item Options", fifth_ids), ("6th Item Options", sixth_ids)]:
+            if ids:
+                blocks.append({
+                    "items": [{"count": 1, "id": str(i)} for i in ids],
+                    "showIfSummonerSpell": "", "hideIfSummonerSpell": "",
+                    "type": label,
+                })
+        new_set = {
+            "associatedChampions": [champion_id] if champion_id else [],
+            "associatedMaps": [11, 12],
+            "blocks": blocks,
+            "map": "any",
+            "mode": "any",
+            "preferredItemSlots": [],
+            "sortrank": 0,
+            "startedFrom": "blank",
+            "title": f"RuneSync \u2014 {champion_name} {role.title()}",
+            "type": "custom",
+            "uid": uid,
+        }
+        try:
+            sid = self._summoner_id
+            path = f"/lol-item-sets/v1/item-sets/{sid}/sets" if sid else "/lol-item-sets/v1/item-sets/sets"
+            existing = self._get(path)
+            item_sets = existing.get("itemSets", [])
+            # Replace any existing RuneSync set for this champion/role
+            item_sets = [s for s in item_sets if s.get("uid") != uid]
+            item_sets.insert(0, new_set)
+            # Trim oldest sets if payload exceeds ~80KB (LCU 413 limit)
+            payload = {"itemSets": item_sets, "timestamp": int(time.time() * 1000)}
+            while len(json.dumps(payload).encode()) > 30000 and len(payload["itemSets"]) > 1:
+                payload["itemSets"].pop()
+            self._put(path, payload)
+            return True
+        except Exception as e:
+            print(f"[lcu] import_item_set failed: {e}", file=sys.stderr)
             return False
