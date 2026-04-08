@@ -12,14 +12,21 @@ Public API (unchanged):
   cache_is_stale() -> bool
 """
 
-import json, time, threading, urllib.request, urllib.error, urllib.parse
+import json, os, sys, time, threading, urllib.request, urllib.error, urllib.parse
 from pathlib import Path
 from typing import Optional
 
 # ── config ─────────────────────────────────────────────────────────────────
 from ugg_api import SERVER_URL  # reuse the same server URL
 
-CACHE_PATH = Path(__file__).parent / "role_weights_cache.json"
+# When compiled by PyInstaller (--onefile), __file__ resolves to the temp
+# extraction dir, not the exe's directory. Use sys.executable's dir instead.
+if getattr(sys, "frozen", False):
+    _BASE = os.path.dirname(sys.executable)
+else:
+    _BASE = os.path.dirname(os.path.abspath(__file__))
+
+CACHE_PATH = Path(_BASE) / "role_weights_cache.json"
 
 
 # ── patch helpers ──────────────────────────────────────────────────────────
