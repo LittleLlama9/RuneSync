@@ -649,7 +649,8 @@ async def scrape_matchup(my_champ: str, enemy_champ: str, role: str) -> Optional
 
     wr = raw.get("winRate") if raw else None
     print(f"[scraper] matchup {my_champ} vs {enemy_champ}: {wr}", flush=True)
-    if wr is None:
+    if wr is None or not (35.0 <= wr <= 65.0):
+        print(f"[scraper] matchup {my_champ} vs {enemy_champ}: win rate {wr} out of range, ignoring", flush=True)
         return None
     return {"win_rate": wr, "enemy": enemy_champ}
 
