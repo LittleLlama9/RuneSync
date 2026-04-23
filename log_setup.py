@@ -113,16 +113,13 @@ def init_logging(log_path: str) -> queue.Queue:
 
     fmt = _StructuredFormatter()
 
-    # ── File handler: midnight rotation, backupCount=0 = delete on rotate ────
-    # At midnight: old log is renamed then immediately deleted → auto-clear.
-    fh = logging.handlers.TimedRotatingFileHandler(
-        log_path,
-        when="midnight",
-        interval=1,
-        backupCount=0,
-        encoding="utf-8",
-        delay=False,
-    )
+    # ── File handler: plain append, no rotation ───────────────────────────────
+    # TimedRotatingFileHandler was crashing on Windows: at midnight it tries to
+    # os.rename() the log file, but PyInstaller already has it open as sys.stderr,
+    # causing a PermissionError on every subsequent write for the rest of the session.
+    # Plain FileHandler avoids all of that. Log is cleared on each app restart because
+    # PyInstaller opens sys.stderr in write mode.
+    fh = logging.FileHandler(log_path, mode="a", encoding="utf-8", delay=False)
     fh.setFormatter(fmt)
     fh.setLevel(logging.DEBUG)
     root.addHandler(fh)
