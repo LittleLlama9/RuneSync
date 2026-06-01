@@ -12,7 +12,7 @@ timeout /t 1 /nobreak >nul
 
 :: Build main app
 echo [2/5] Building RuneSync.exe...
-cd /d C:\Users\Matth\RuneSync
+cd /d "%~dp0"
 if exist icon.ico (
     py -m PyInstaller --noconfirm --clean --onefile --windowed --name "RuneSync" --icon=icon.ico --add-data "assets/spells;assets/spells" --add-data "icon.ico;." main.py
 ) else (
@@ -44,7 +44,7 @@ xcopy /E /I /Q server dist\server
 
 :: Restart watcher
 echo [5/5] Restarting watcher...
-start "" "C:\Users\Matth\RuneSync\dist\RuneSyncWatcher.exe"
+start "" "%~dp0dist\RuneSyncWatcher.exe"
 
 echo.
 echo ================================

@@ -12,8 +12,14 @@ dist/
 build/
 .eggs/
 
-# Local Claude Code settings (contains machine-specific hooks/permissions)
-.claude/settings.local.json
+# Local Claude Code settings & hooks (user-specific dev environment)
+.claude/
+
+# Local AI assistant context (user/maintainer notes, not shipped)
+CLAUDE.md
+AGENTS.md
+GIT_WORKFLOW_GUIDE.md
+mock_instructions.md
 
 # Test / coverage artifacts
 .pytest_cache/
@@ -26,6 +32,16 @@ htmlcov/
 # Generated cache files (rebuilt automatically on startup)
 role_weights_cache.json
 server/cache.json
+server/server.log
+
+# Logs
+*.log
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+desktop.ini
 
 # OS
 .DS_Store
