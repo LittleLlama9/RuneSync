@@ -664,7 +664,16 @@ class RuneSyncApp:
             value=self.overrides.settings.get("anthropic_api_key", ""))
 
         tk.Frame(f,bg="#2a2a2a",height=1).pack(fill="x",padx=18,pady=12)
-        make_btn(f,"  Save Settings  ",self._save_settings).pack(anchor="w",padx=18)
+        save_row = tk.Frame(f, bg=PANEL); save_row.pack(fill="x", padx=18)
+        make_btn(save_row, "  Save Settings  ", self._save_settings).pack(side="left")
+        # Inline confirmation: "Saved ✓" appears after a successful save and
+        # fades after ~2.5s. Lives next to the button so it's visible whether
+        # or not the user switches back to the Monitor tab.
+        self._settings_saved_lbl = tk.Label(
+            save_row, text="", font=("Segoe UI", 9, "bold"),
+            bg=PANEL, fg="#4caf73")
+        self._settings_saved_lbl.pack(side="left", padx=(12, 0))
+        self._settings_saved_after_id = None
 
     def _tab_debug(self, nb):
         import queue as _q
@@ -1091,6 +1100,16 @@ class RuneSyncApp:
             "server_url": new_url,
             "anthropic_api_key": self.apikey_v.get().strip()})
         self._emit("Settings saved.", "success")
+        # Inline confirmation next to the button — visible on the Settings tab.
+        try:
+            if self._settings_saved_after_id is not None:
+                self.root.after_cancel(self._settings_saved_after_id)
+            self._settings_saved_lbl.configure(text="Saved ✓")
+            self._settings_saved_after_id = self.root.after(
+                2500,
+                lambda: self._settings_saved_lbl.configure(text=""))
+        except Exception:
+            pass
 
     def _submit_matchup_override(self):
         name = self.matchup_v.get().strip()
