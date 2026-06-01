@@ -35,7 +35,8 @@ IMPORTABLE = [
     "champion_roles",
     "merge_matchups",
     "monitor",
-    # item_data and item_builder are added back when the item-builder feature lands.
+    "item_data",
+    "item_builder",
 ]
 
 
