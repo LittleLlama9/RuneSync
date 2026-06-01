@@ -33,6 +33,8 @@ htmlcov/
 role_weights_cache.json
 server/cache.json
 server/server.log
+data_bundle.json
+data_bundle_cache.json
 
 # Logs
 *.log

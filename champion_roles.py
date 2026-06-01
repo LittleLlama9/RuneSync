@@ -198,16 +198,35 @@ ROLE_WEIGHTS: dict[str, dict[str, float]] = {
 }
 
 
+def _is_plausible_dist(roles: dict) -> bool:
+    """
+    A healthy lane% distribution sums to ~100% with no two roles near 100%.
+    Mirrors the scraper's sanity check so a corrupt cache entry (e.g. an old
+    cache scraped before the scraper fix) is rejected client-side too.
+    """
+    if not roles:
+        return False
+    total = sum(roles.values())
+    near_max = sum(1 for v in roles.values() if v >= 90.0)
+    return total <= 130.0 and near_max < 2
+
+
 def _load_weights() -> dict[str, dict[str, float]]:
     """
-    Return role weights from live cache if available, else fall back to
-    the hardcoded ROLE_WEIGHTS above.
+    Merge live-cache weights OVER the hardcoded ROLE_WEIGHTS per champion.
+    Cached entries win for champs they cover; any champ missing from the cache
+    — or whose cached dist is implausible (corrupt scrape) — keeps its solid
+    hardcoded weights rather than being lost or trusted blindly.
     """
     try:
         from role_updater import get_cached_weights
         cached = get_cached_weights()
         if cached:
-            return cached
+            merged = dict(ROLE_WEIGHTS)
+            for champ, roles in cached.items():
+                if _is_plausible_dist(roles):
+                    merged[champ] = roles
+            return merged
     except Exception:
         pass
     return ROLE_WEIGHTS  # fallback to hardcoded

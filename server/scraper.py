@@ -25,11 +25,11 @@ SHARD_IDS = {
     "statmodsattackspeedicon":    5005,
     "statmodscdrscalingicon":     5007,
     "statmodsmovementspeedicon":  5010,
-    "statmodshealthplusicon":     5001,
+    "statmodshealthplusicon":     5011,
     "statmodshealthscalingicon":  5001,
     "statmodsarmoricon":          5002,
     "statmodsmagicresicon":       5003,
-    "statmodstenacityicon":       5003,
+    "statmodstenacityicon":       5013,
 }
 DEFAULT_SHARDS = [5008, 5008, 5001]
 
@@ -655,6 +655,29 @@ async def scrape_matchup(my_champ: str, enemy_champ: str, role: str) -> Optional
     return {"win_rate": wr, "enemy": enemy_champ}
 
 
+def _sanitize_role_dist(name: str, roles: dict) -> dict:
+    """
+    Reject implausible role distributions so corrupt scrapes never reach the
+    cache. Lane% sums to ~100% across a champion's roles, so a healthy dist
+    sums to <=~101%. The known failure mode (e.g. Yuumi/Nami) drops the real
+    role and stamps the dominant pickrate onto every OTHER lane, yielding
+    multiple roles near 100% and a sum far above 100%.
+
+    Returns {} (champ dropped → client falls back to hardcoded weights) when:
+      - total > 130%  (impossible for real lane%), or
+      - 2+ roles are >= 90% (can't be 90%+ in two lanes at once).
+    """
+    if not roles:
+        return {}
+    total = sum(roles.values())
+    near_max = sum(1 for v in roles.values() if v >= 90.0)
+    if total > 130.0 or near_max >= 2:
+        print(f"[scraper] role weights — {name} dropped: implausible dist "
+              f"(sum={total:.1f}, roles={roles})", flush=True)
+        return {}
+    return roles
+
+
 async def scrape_role_weights() -> dict:
     """
     Scrape each champion's individual LoLalytics page for their full role
@@ -684,6 +707,7 @@ async def scrape_role_weights() -> dict:
                     for role, pct in raw.items()
                     if isinstance(pct, (int, float)) and 0.2 <= float(pct) <= 100.0
                 }
+                roles = _sanitize_role_dist(name, roles)
                 return name, roles
             except Exception as e:
                 print(f"[scraper] role weights — {name} failed: {e}", flush=True)

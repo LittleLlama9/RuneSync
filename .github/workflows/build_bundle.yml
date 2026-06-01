@@ -1,0 +1,59 @@
+name: Build Data Bundle
+
+# Runs the full u.gg / lolalytics scrape on a schedule and uploads the
+# resulting data_bundle.json as a GitHub Release asset. The RuneSync
+# client downloads this on startup, replacing the need for users to run
+# the local scraping server themselves.
+
+on:
+  schedule:
+    - cron: "0 8 * * *"   # daily at 08:00 UTC (~early morning NA)
+  workflow_dispatch:        # also allow manual trigger from the Actions tab
+
+permissions:
+  contents: write          # needed to upload to the "data-bundle" release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install server dependencies
+        run: |
+          pip install -r server/requirements.txt
+
+      - name: Install Playwright + Chromium
+        run: |
+          python -m playwright install --with-deps chromium
+
+      - name: Build data bundle
+        run: |
+          mkdir -p artifacts
+          python scripts/build_data_bundle.py \
+            --output artifacts/data_bundle.json
+
+      - name: Show bundle stats
+        run: |
+          ls -lh artifacts/data_bundle.json
+          python -c "import json; d=json.load(open('artifacts/data_bundle.json')); print('champs:', d['champion_count'], 'patch:', d['patch'], 'failures:', len(d.get('failures',[])))"
+
+      - name: Upload bundle as Release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: data-bundle
+          name: "Data Bundle (auto-updated)"
+          body: |
+            Auto-generated u.gg / lolalytics scrape, refreshed daily.
+            The RuneSync client downloads `data_bundle.json` from this
+            release on startup.
+          files: artifacts/data_bundle.json
+          prerelease: false
+          make_latest: false
