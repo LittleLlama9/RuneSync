@@ -1,9 +1,10 @@
 """
-role_updater.py — refresh champion role weight data from the RuneSync server.
+role_updater.py — refresh champion role weight data.
 
-The server handles all LoLalytics scraping. This module fetches the result
-and writes it to role_weights_cache.json exactly as before, so champion_roles.py
-needs no changes.
+Reads from the GitHub-hosted data bundle when available (post v1.0 model);
+falls back to the legacy localhost server otherwise. Writes to
+role_weights_cache.json exactly as before, so champion_roles.py needs
+no changes.
 
 Public API (unchanged):
   refresh_if_stale(background=True)
@@ -17,7 +18,8 @@ from pathlib import Path
 from typing import Optional
 
 # ── config ─────────────────────────────────────────────────────────────────
-from ugg_api import SERVER_URL  # reuse the same server URL
+import ugg_api
+from ugg_api import SERVER_URL  # legacy server fallback
 
 # When compiled by PyInstaller (--onefile), __file__ resolves to the temp
 # extraction dir, not the exe's directory. Use sys.executable's dir instead.
@@ -82,8 +84,18 @@ def get_cached_weights() -> Optional[dict[str, dict[str, float]]]:
 
 # ── fetch from server ──────────────────────────────────────────────────────
 
+def _fetch_from_bundle() -> Optional[dict]:
+    """Pull role weights from the in-memory data bundle if loaded."""
+    if not ugg_api.bundle_loaded():
+        return None
+    weights = ugg_api._bundle.get("role_weights") if ugg_api._bundle else None
+    if isinstance(weights, dict) and len(weights) > 10:
+        return weights
+    return None
+
+
 def _fetch_from_server() -> Optional[dict]:
-    """Call the server's /role-weights endpoint. This triggers scraping if not cached."""
+    """Legacy fallback: call /role-weights on the localhost server."""
     url = f"{SERVER_URL}/role-weights"
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "RuneSync/1.0"})
@@ -98,6 +110,11 @@ def _fetch_from_server() -> Optional[dict]:
         return None
 
 
+def _fetch_role_weights() -> Optional[dict]:
+    """Prefer the data bundle; fall back to the localhost server."""
+    return _fetch_from_bundle() or _fetch_from_server()
+
+
 # ── public functions (same signatures as before) ───────────────────────────
 
 def refresh_roles_now() -> bool:
@@ -105,8 +122,8 @@ def refresh_roles_now() -> bool:
     Fetch fresh role weights from the server and save to local cache.
     Returns True on success. Safe to call any time — no browser required.
     """
-    print("[RuneSync] Fetching role weights from server...", flush=True)
-    weights = _fetch_from_server()
+    print("[RuneSync] Fetching role weights (bundle preferred)...", flush=True)
+    weights = _fetch_role_weights()
     if weights:
         patch = get_latest_patch() or ""
         save_cache(weights, patch)
