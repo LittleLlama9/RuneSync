@@ -79,11 +79,12 @@ def set_autostart(enabled: bool) -> bool:
                             winreg.KEY_SET_VALUE) as k:
             if enabled:
                 exe = _exe_path()
+                # --minimized → RuneSync starts hidden in tray on Windows boot
+                # instead of popping the window on every login.
                 if not exe.lower().endswith(".exe"):
-                    # Dev mode — point at "py main.py"
-                    val = f'py "{exe}"'
+                    val = f'py "{exe}" --minimized'
                 else:
-                    val = f'"{exe}"'
+                    val = f'"{exe}" --minimized'
                 winreg.SetValueEx(k, _RUN_VALUE, 0, winreg.REG_SZ, val)
             else:
                 try:

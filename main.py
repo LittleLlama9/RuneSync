@@ -394,6 +394,11 @@ class RuneSyncApp:
         self._apply_dark_titlebar()
         threading.Thread(target=self._try_connect, daemon=True).start()
 
+        # If launched with --minimized (Windows autostart), start hidden in
+        # the system tray instead of popping the window on every login.
+        if "--minimized" in sys.argv:
+            self.root.after(50, self.root.withdraw)
+
         # ── System tray + League auto-detect ─────────────────────────────
         _icon_path = os.path.join(
             getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__))),
