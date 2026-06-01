@@ -459,6 +459,21 @@ class RuneSyncApp:
         """League just closed — stay in tray, no-op."""
         pass
 
+    def _toggle_debug_tab(self):
+        """Ctrl+Shift+D: build the Debug Log tab on first press, select it after."""
+        if not self._debug_tab_built:
+            self._tab_debug(self.nb)
+            self._debug_tab_built = True
+            self.nb.select(self.nb.tabs()[-1])
+            return
+        for tab_id in self.nb.tabs():
+            try:
+                if "Debug" in self.nb.tab(tab_id, "text"):
+                    self.nb.select(tab_id)
+                    return
+            except Exception:
+                continue
+
     def _apply_dark_titlebar(self):
         """Tell Windows to render the title bar in dark mode and tint the border."""
         try:
@@ -502,7 +517,10 @@ class RuneSyncApp:
         self._tab_monitor(nb)
         self._tab_overrides(nb)
         self._tab_settings(nb)
-        self._tab_debug(nb)
+        # Debug Log tab is lazy: only built when the user presses Ctrl+Shift+D.
+        # Keeps end-user UI uncluttered while preserving the dev tool.
+        self._debug_tab_built = False
+        self.root.bind_all("<Control-Shift-D>", lambda e: self._toggle_debug_tab())
 
     def _tab_monitor(self, nb):
         f = tk.Frame(nb, bg=PANEL); nb.add(f, text="  Monitor  ")
@@ -526,8 +544,6 @@ class RuneSyncApp:
         self.matchup_entry.bind("<Return>", lambda e: self._submit_matchup_override())
         make_btn(mf, "Look up", self._submit_matchup_override,
                  "#1a2a3a", "#2a3a4a").pack(side="left")
-        tk.Label(mf, text="  manually override enemy laner",
-                 font=("Segoe UI",8), bg=PANEL, fg="#444").pack(side="left", padx=(6,0))
 
         # Item build display bar
         ibf = tk.Frame(f, bg=PANEL); ibf.pack(side="bottom", fill="x", padx=14, pady=(0,2))
@@ -622,18 +638,31 @@ class RuneSyncApp:
                                bg=PANEL,activebackground=PANEL,selectcolor=BG,
                                fg="#ccc",font=("Segoe UI",9)).pack(side="left",padx=(0,12))
         row("Import trigger:", trig_w)
-        self.server_url_v = tk.StringVar(value=self.overrides.settings.get("server_url", ugg_api.SERVER_URL))
-        row("Server URL:", lambda p: tk.Entry(
-            p, textvariable=self.server_url_v,
-            bg=DARK, fg="#ccc", insertbackground="#ccc",
-            relief="flat", font=("Segoe UI", 9), width=38
-        ).pack(side="left"))
-        self.apikey_v = tk.StringVar(value=self.overrides.settings.get("anthropic_api_key", ""))
-        row("Anthropic API Key:", lambda p: tk.Entry(
-            p, textvariable=self.apikey_v,
-            bg=DARK, fg="#ccc", insertbackground="#ccc",
-            relief="flat", font=("Segoe UI", 9), width=38, show="*"
-        ).pack(side="left"))
+
+        # ── Start with Windows toggle (writes HKCU\\...\\Run) ────────────────
+        self.autostart_v = tk.BooleanVar(value=is_autostart_enabled())
+        def autostart_w(p):
+            box = tk.Label(p, font=("Segoe UI", 10), bg=PANEL, fg=GOLD, cursor="hand2")
+            def _refresh():
+                box.configure(text="☑" if self.autostart_v.get() else "☐")
+            def _toggle():
+                new = not self.autostart_v.get()
+                if set_autostart(new):
+                    self.autostart_v.set(new)
+                    _refresh()
+            box.bind("<Button-1>", lambda e: _toggle())
+            _refresh()
+            box.pack(side="left")
+        row("Start with Windows:", autostart_w)
+
+        # Server URL and Anthropic API key remain configurable via the
+        # settings JSON file, but are intentionally not surfaced in the UI
+        # — end users don't need to think about either.
+        self.server_url_v = tk.StringVar(
+            value=self.overrides.settings.get("server_url", ugg_api.SERVER_URL))
+        self.apikey_v = tk.StringVar(
+            value=self.overrides.settings.get("anthropic_api_key", ""))
+
         tk.Frame(f,bg="#2a2a2a",height=1).pack(fill="x",padx=18,pady=12)
         make_btn(f,"  Save Settings  ",self._save_settings).pack(anchor="w",padx=18)
 
