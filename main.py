@@ -365,6 +365,11 @@ class RuneSyncApp:
         self.lcu       = LCUClient()
         self.overrides = OverrideManager()
         ugg_api.SERVER_URL = self.overrides.settings.get("server_url", ugg_api.SERVER_URL)
+        # Load the GitHub-hosted data bundle in the background. Tries the
+        # local disk cache first (instant), falls back to a fresh download.
+        # If both fail, UGGClient transparently falls back to the localhost
+        # server — so devs running the FastAPI server keep working unchanged.
+        threading.Thread(target=ugg_api.init_bundle, daemon=True).start()
         self.ugg       = UGGClient()
         self.monitor   = None
         self.running   = False
@@ -743,6 +748,12 @@ class RuneSyncApp:
     # ── helpers ──────────────────────────────────────────────────────────────
     def _emit(self, msg, tag="info"):
         self._log_buffer.append((msg, tag))
+        # Mirror to runesync.log so the rune-import path is diagnosable from the
+        # log file (the GUI widgets below are otherwise the only sink).
+        try:
+            print(msg, file=sys.stderr)
+        except Exception:
+            pass
         def _do():
             self.log.configure(state="normal")
             self.log.insert("end", msg+"\n", tag)
