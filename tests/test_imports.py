@@ -30,13 +30,13 @@ IMPORTABLE = [
     "ugg_api",
     "lcu",
     "overrides",
-    "watcher",
     "claude_matchup",
     "champion_roles",
     "merge_matchups",
     "monitor",
     "item_data",
     "item_builder",
+    "tray",
 ]
 
 
