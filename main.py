@@ -8,6 +8,7 @@ import ugg_api
 from ugg_api import UGGClient
 from overrides import OverrideManager
 from monitor import ChampSelectMonitor
+from tray import TrayController, LeaguePoller, is_autostart_enabled, set_autostart
 
 _ASSETS_DIR = os.path.join(
     getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__))),
@@ -392,6 +393,71 @@ class RuneSyncApp:
         self.root.update_idletasks()
         self._apply_dark_titlebar()
         threading.Thread(target=self._try_connect, daemon=True).start()
+
+        # ── System tray + League auto-detect ─────────────────────────────
+        _icon_path = os.path.join(
+            getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__))),
+            "icon.ico",
+        )
+        self._tray = TrayController(
+            on_show=self._show_from_tray,
+            on_quit=self._real_quit,
+            icon_path=_icon_path,
+        )
+        self._tray.start()
+        self._league_poller = LeaguePoller(
+            on_open=self._on_league_open,
+            on_close=self._on_league_close,
+        )
+        self._league_poller.start()
+        # X button → hide to tray instead of quitting
+        self.root.protocol("WM_DELETE_WINDOW", self._hide_to_tray)
+
+    # ── tray / lifecycle ───────────────────────────────────────────────────
+
+    def _hide_to_tray(self):
+        """Minimize the window to the system tray (single-instance mutex keeps app alive)."""
+        try:
+            self.root.withdraw()
+        except Exception:
+            pass
+        if getattr(self, "_tray", None) and self._tray.available():
+            self._tray.notify(
+                "RuneSync",
+                "Still running in the system tray. Right-click the icon to quit.",
+            )
+
+    def _show_from_tray(self):
+        """Bring the window back from the tray (called from non-UI thread)."""
+        self.root.after(0, self._do_show_window)
+
+    def _do_show_window(self):
+        try:
+            self.root.deiconify()
+            self.root.lift()
+            self.root.focus_force()
+        except Exception:
+            pass
+
+    def _real_quit(self):
+        """Actually exit the app (from tray "Quit" or programmatic shutdown)."""
+        try:
+            self._league_poller.stop()
+        except Exception:
+            pass
+        try:
+            self._tray.stop()
+        except Exception:
+            pass
+        self.root.after(0, self.root.destroy)
+
+    def _on_league_open(self):
+        """League just launched — bring RuneSync to the foreground so the user sees it."""
+        self.root.after(0, self._do_show_window)
+
+    def _on_league_close(self):
+        """League just closed — stay in tray, no-op."""
+        pass
 
     def _apply_dark_titlebar(self):
         """Tell Windows to render the title bar in dark mode and tint the border."""
