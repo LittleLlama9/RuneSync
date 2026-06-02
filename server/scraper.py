@@ -344,11 +344,15 @@ CHAMP_ROLE_JS = r"""
 COUNTERS_JS = r"""
 (async () => {
     for (let i = 0; i < 75; i++) {
-        if (document.body.innerText.length > 3000) break;
+        if (document.body && document.body.innerText.length > 3000) break;
         await new Promise(r => setTimeout(r, 200));
     }
     await new Promise(r => setTimeout(r, 500));
     const results = [];
+    // Off-meta combos (e.g. Nidalee mid) sometimes load a stripped 404 page
+    // where document.body never gets populated. Bail with an empty result
+    // rather than throwing a TypeError on innerText.
+    if (!document.body) return JSON.stringify(results);
     const fullText = document.body.innerText;
     const bestStart = fullText.indexOf('Best Picks vs');
     const bestEnd   = fullText.indexOf('Worst Picks vs');
@@ -372,7 +376,19 @@ COUNTERS_JS = r"""
 
 # ── slug helpers ───────────────────────────────────────────────────────────
 
+# Both u.gg and lolalytics use the FIRST word for compound champion names —
+# the human-readable name has two words but the URL is just the first.
+# Without these overrides _champ_slug would produce 'nunu-willump' which
+# 404s on both sites.
+_SLUG_OVERRIDES = {
+    "Nunu & Willump": "nunu",
+    "Renata Glasc":   "renata",
+}
+
+
 def _champ_slug(name: str) -> str:
+    if name in _SLUG_OVERRIDES:
+        return _SLUG_OVERRIDES[name]
     s = name.lower()
     s = s.replace("'", "").replace(".", "")
     s = re.sub(r"[^a-z0-9\s-]", "", s)
@@ -418,7 +434,7 @@ SLUG_TO_NAME: dict[str, str] = {
     "ornn": "Ornn", "pantheon": "Pantheon", "poppy": "Poppy",
     "pyke": "Pyke", "qiyana": "Qiyana", "quinn": "Quinn",
     "rakan": "Rakan", "rammus": "Rammus", "reksai": "Rek'Sai",
-    "rell": "Rell", "renataglassc": "Renata Glasc", "renekton": "Renekton",
+    "rell": "Rell", "renata": "Renata Glasc", "renekton": "Renekton",
     "rengar": "Rengar", "riven": "Riven", "rumble": "Rumble",
     "ryze": "Ryze", "samira": "Samira", "sejuani": "Sejuani",
     "senna": "Senna", "seraphine": "Seraphine", "sett": "Sett",
@@ -618,6 +634,14 @@ async def scrape_build(champion: str, role: str) -> Optional[dict]:
           f"starter={items_start}, core={items_core}", flush=True)
 
     if len(selected_perk_ids) != 9:
+        # u.gg's page loaded but it returned no rune data — usually because
+        # the (champ, role) combo has too few games for them to publish a
+        # default build (e.g. Vi mid, Viego mid). Skip the entry rather
+        # than raising; the bundle just won't include that role.
+        if len(perk_ids) == 0:
+            print(f"[scraper] build {champion}/{role}: u.gg has no rune data "
+                  f"for this matchup — skipping", flush=True)
+            return None
         raise RuntimeError(
             f"Got {len(selected_perk_ids)}/9 runes for {champion} "
             f"(perk_ids={perk_ids}, shards={shard_perk_ids}). "

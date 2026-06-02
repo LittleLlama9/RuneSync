@@ -165,16 +165,33 @@ class UGGClient:
                       rank: str = "Platinum+", region: str = "World") -> Optional[dict]:
         # Bundle path
         if _bundle:
-            entry = (_bundle.get("builds", {})
-                            .get(champion_name.lower(), {})
-                            .get(role))
+            champ_builds = (_bundle.get("builds", {})
+                                   .get(champion_name.lower(), {}))
+            # Try the requested role first.
+            entry = champ_builds.get(role) if role and role != "auto" else None
             if entry:
                 return entry
-            # Bundle loaded but no entry — caller can decide what to do.
-            # We deliberately don't fall through to server here; the bundle
-            # is authoritative for what builds exist.
+            # Fallback: champ-select didn't report a position (autofill, custom
+            # game, undocumented queue) OR the requested role isn't bundled —
+            # pick the highest-pickrate role for this champ from role_weights.
+            weights = _bundle.get("role_weights", {}).get(champion_name) or {}
+            preferred = sorted(weights.items(), key=lambda kv: -kv[1])
+            for rname, _pct in preferred:
+                rkey = {"top": "top", "jungle": "jungle", "mid": "mid",
+                        "bot": "bot", "adc": "bot", "support": "support"}.get(rname, rname)
+                fallback = champ_builds.get(rkey)
+                if fallback:
+                    print(f"[ugg] no '{role}' build for {champion_name}; "
+                          f"using {rkey} ({_pct:.1f}% pickrate)", file=sys.stderr)
+                    return fallback
+            # Last resort: ANY role we have a build for.
+            if champ_builds:
+                rkey, fallback = next(iter(champ_builds.items()))
+                print(f"[ugg] no role_weights for {champion_name}; "
+                      f"using whatever bundle has ({rkey})", file=sys.stderr)
+                return fallback
             raise RuntimeError(
-                f"No bundled build for {champion_name}/{role} "
+                f"No bundled build for {champion_name} "
                 f"(patch {_bundle.get('patch','?')})."
             )
         # Legacy server path
