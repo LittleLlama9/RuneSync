@@ -501,6 +501,47 @@ async def _new_context():
     )
 
 
+async def _settle(page, timeout_ms: int = 8000) -> None:
+    """
+    Best-effort wait for SPA hydration to finish after navigation.
+    Many u.gg / lolalytics pages fire a client-side redirect after
+    domcontentloaded; if we evaluate during that window the execution
+    context is destroyed mid-call. Wait for networkidle, but don't
+    hard-fail if it times out (some pages keep long-poll connections
+    open forever).
+    """
+    try:
+        await page.wait_for_load_state("networkidle", timeout=timeout_ms)
+    except Exception:
+        pass
+
+
+async def _safe_evaluate(page, script: str, retries: int = 2):
+    """
+    page.evaluate wrapper that retries on the 'Execution context was
+    destroyed, most likely because of a navigation' error. This happens
+    on headless Ubuntu when a client-side redirect fires between goto()
+    returning and the script being injected. After a destruction, we
+    wait for the new context to settle and try again.
+    """
+    last_err: Optional[Exception] = None
+    for attempt in range(retries + 1):
+        try:
+            return await page.evaluate(script)
+        except Exception as e:
+            msg = str(e)
+            if ("Execution context was destroyed" in msg
+                    or "navigating and changing the document" in msg
+                    or "frame was detached" in msg.lower()):
+                last_err = e
+                await _settle(page, timeout_ms=10000)
+                continue
+            raise
+    if last_err:
+        raise last_err
+    raise RuntimeError("safe_evaluate: unknown error")
+
+
 # ── public scrape functions ────────────────────────────────────────────────
 
 async def scrape_build(champion: str, role: str) -> Optional[dict]:
@@ -519,7 +560,8 @@ async def scrape_build(champion: str, role: str) -> Optional[dict]:
     page.set_default_timeout(60000)
     try:
         await page.goto(url, wait_until="domcontentloaded", timeout=30000)
-        raw_str = await page.evaluate(EXTRACT_JS)
+        await _settle(page)
+        raw_str = await _safe_evaluate(page, EXTRACT_JS)
         raw = json.loads(raw_str) if isinstance(raw_str, str) else (raw_str or {})
     finally:
         await ctx.close()
@@ -602,6 +644,7 @@ async def scrape_counters(enemy_champ: str, role: str, top_n: int = 5) -> list:
     page.set_default_timeout(60000)
     try:
         await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+        await _settle(page)
 
         # 404 guard
         title = await page.title()
@@ -609,7 +652,7 @@ async def scrape_counters(enemy_champ: str, role: str, top_n: int = 5) -> list:
             print(f"[scraper] counters 404 for {enemy_champ}", flush=True)
             return []
 
-        raw_str = await page.evaluate(COUNTERS_JS)
+        raw_str = await _safe_evaluate(page, COUNTERS_JS)
         raw = json.loads(raw_str) if isinstance(raw_str, str) else (raw_str or [])
     finally:
         await ctx.close()
@@ -640,9 +683,10 @@ async def scrape_matchup(my_champ: str, enemy_champ: str, role: str) -> Optional
     page.set_default_timeout(60000)
     try:
         await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+        await _settle(page)
         enemy_safe = enemy_champ.replace("'", "\\'").replace("\\", "\\\\")
         js = MATCHUP_JS.replace("%%ENEMY%%", enemy_safe)
-        raw_str = await page.evaluate(js)
+        raw_str = await _safe_evaluate(page, js)
         raw = json.loads(raw_str) if isinstance(raw_str, str) else (raw_str or {})
     finally:
         await ctx.close()
@@ -700,7 +744,8 @@ async def scrape_role_weights() -> dict:
             page.set_default_timeout(25000)
             try:
                 await page.goto(url, wait_until="domcontentloaded", timeout=20000)
-                raw_str = await page.evaluate(CHAMP_ROLE_JS)
+                await _settle(page, timeout_ms=6000)
+                raw_str = await _safe_evaluate(page, CHAMP_ROLE_JS)
                 raw = json.loads(raw_str) if isinstance(raw_str, str) else {}
                 roles = {
                     role: round(float(pct), 2)
