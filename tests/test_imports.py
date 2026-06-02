@@ -26,13 +26,10 @@ ALL_PY = sorted(
 # main.py is excluded because it unconditionally calls tk.Tk() / mainloop().
 IMPORTABLE = [
     "log_setup",
-    "matchup_data",
     "ugg_api",
     "lcu",
     "overrides",
-    "claude_matchup",
     "champion_roles",
-    "merge_matchups",
     "monitor",
     "item_data",
     "item_builder",

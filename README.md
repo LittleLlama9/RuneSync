@@ -1,21 +1,21 @@
 # RuneSync
 
 A lightweight champion-select companion for League of Legends. Auto-imports
-runes for your locked-in champion and shows matchup tips during the draft.
+runes for your locked-in champion and shows your matchup win rate vs the
+opposing laner.
 
 ## What it does
 
 - Detects when you lock in a champion in champ select via the League Client API (LCU)
 - Pulls a rune page for your champion + role and pushes it into your client
-- Shows a small overlay with tips for the matchup against the opposing laner
+- Shows your matchup win rate vs the opposing laner during the game
 - Lives in the system tray; optionally starts with Windows
 
 ## Install / run
 
 **Easy path (recommended):**
-1. Download `RuneSync.exe` and `matchups.json` from the [Releases](../../releases) page
-2. Put them in the **same folder**
-3. Launch League of Legends, then run `RuneSync.exe`
+1. Download `RuneSync.exe` from the [Releases](../../releases) page
+2. Launch League of Legends, then run `RuneSync.exe`
 
 Optional: in Settings, toggle **"Start with Windows"** and RuneSync will live
 silently in your tray, popping up automatically when League opens.
@@ -38,15 +38,10 @@ Produces `dist/RuneSync.exe` via PyInstaller.
 
 ## Data sources
 
-Matchup tips and rune recommendations are aggregated with attribution from:
+Rune recommendations and matchup win rates are aggregated with attribution from:
 
 - [lolalytics.com](https://lolalytics.com)
 - [u.gg](https://u.gg)
-- [op.gg](https://op.gg)
-- [counterstats.net](https://counterstats.net)
-- [mobalytics.gg](https://mobalytics.gg)
-
-The bundled `matchups.json` is refreshed periodically and shipped with each release.
 
 ## License
 
