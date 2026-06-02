@@ -17,7 +17,7 @@ from typing import Optional
 
 # ── bundle config ──────────────────────────────────────────────────────────
 BUNDLE_URL = (
-    "https://github.com/Ninjayeti/RuneSync/releases/download/"
+    "https://github.com/LittleLlama9/RuneSync/releases/download/"
     "data-bundle/data_bundle.json"
 )
 # Local cache so the client doesn't re-download every launch.
