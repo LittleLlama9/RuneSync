@@ -16,7 +16,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 350    # max is 360 on GH-hosted runners; full scrape ~3-4h
 
     steps:
       - uses: actions/checkout@v4

@@ -109,31 +109,45 @@ async def build_bundle(limit: int | None, threshold: float, output_path: Path) -
         counters: dict[str, dict] = {}
         failures: list[str] = []
 
-        for i, champ in enumerate(champions, 1):
+        # Process champions in parallel — each (champ, role) opens its own
+        # browser context so they don't interfere. Concurrency of 6 fits well
+        # under the 2-CPU GitHub-hosted runner without thrashing.
+        CONCURRENCY = 6
+        sem = asyncio.Semaphore(CONCURRENCY)
+        done_count = [0]
+
+        async def _process_champ(i: int, champ: str) -> None:
             roles_for_champ = relevant_roles(champ, role_weights, threshold)
-            print(f"[bundle] [{i}/{len(champions)}] {champ} -> {roles_for_champ}", flush=True)
-
             ckey = champ.lower()
-            builds[ckey] = {}
-            counters[ckey] = {}
+            local_builds: dict = {}
+            local_counters: dict = {}
 
-            for role in roles_for_champ:
-                # Build
-                try:
-                    b = await scraper.scrape_build(champ, role)
-                    if b:
-                        builds[ckey][role] = b
-                except Exception as e:
-                    failures.append(f"build:{champ}:{role}:{e}")
-                    print(f"[bundle] FAIL build {champ}/{role}: {e}", flush=True)
-                # Counters
-                try:
-                    c = await scraper.scrape_counters(champ, role, top_n=5)
-                    if c:
-                        counters[ckey][role] = c
-                except Exception as e:
-                    failures.append(f"counters:{champ}:{role}:{e}")
-                    print(f"[bundle] FAIL counters {champ}/{role}: {e}", flush=True)
+            async with sem:
+                done_count[0] += 1
+                print(f"[bundle] [{done_count[0]}/{len(champions)}] "
+                      f"{champ} -> {roles_for_champ}", flush=True)
+                for role in roles_for_champ:
+                    try:
+                        b = await scraper.scrape_build(champ, role)
+                        if b:
+                            local_builds[role] = b
+                    except Exception as e:
+                        failures.append(f"build:{champ}:{role}:{e}")
+                        print(f"[bundle] FAIL build {champ}/{role}: {e}", flush=True)
+                    try:
+                        c = await scraper.scrape_counters(champ, role, top_n=5)
+                        if c:
+                            local_counters[role] = c
+                    except Exception as e:
+                        failures.append(f"counters:{champ}:{role}:{e}")
+                        print(f"[bundle] FAIL counters {champ}/{role}: {e}", flush=True)
+
+            builds[ckey] = local_builds
+            counters[ckey] = local_counters
+
+        await asyncio.gather(*[
+            _process_champ(i, champ) for i, champ in enumerate(champions, 1)
+        ])
 
         bundle = {
             "schema_version": 1,
