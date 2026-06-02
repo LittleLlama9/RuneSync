@@ -10,7 +10,7 @@ async def main():
     pw = await async_playwright().start()
     await scraper.init(pw)
     try:
-        url = "https://lolalytics.com/lol/aatrox/build/"
+        url = "https://lolalytics.com/lol/sett/build/"
         ctx = await scraper._new_context()
         page = await ctx.new_page()
         page.set_default_timeout(60000)

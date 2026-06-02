@@ -288,60 +288,55 @@ CHAMP_ROLE_JS = r"""
     }
     await new Promise(r => setTimeout(r, 1500));
 
+    // Lolalytics's /lol/{slug}/build/ page consistently displays the
+    // 5 lane play-rate percentages near the top of the page, in the
+    // fixed order [top, jungle, mid, bot, support], following the
+    // currently-selected lane label as a heading.
+    //
+    // Example innerText slice for Aatrox (currently on top tab):
+    //   top
+    //   81.5%
+    //   15.6%
+    //   2.1%
+    //   0.1%
+    //   0.6%
+    //
+    // We anchor on the active-lane label and read the next 5 %s in order.
+    const head = document.body.innerText.slice(0, 800);
+    const m = head.match(
+        /(^|\n)\s*(top|jungle|mid(?:dle)?|adc|bot(?:tom)?|support)\s*\n\s*((?:\d{1,3}(?:\.\d{1,2})?%\s*\n?){5})/i
+    );
+    if (m) {
+        const pcts = m[3].match(/(\d{1,3}(?:\.\d{1,2})?)%/g) || [];
+        const parsed = pcts.map(s => parseFloat(s));
+        if (parsed.length === 5 && parsed.every(v => !isNaN(v) && v >= 0 && v <= 100)) {
+            return JSON.stringify({
+                top: parsed[0], jungle: parsed[1], mid: parsed[2],
+                bot: parsed[3], support: parsed[4]
+            });
+        }
+    }
+
+    // Fallback (legacy text scan) — only fires if the structured block
+    // above doesn't match. Returns whatever lane labels it can find paired
+    // with a percentage in the first 3000 chars.
     const LANE_KEYS = {
         'top': 'top', 'jungle': 'jungle', 'jng': 'jungle',
         'mid': 'mid', 'middle': 'mid',
         'adc': 'bot', 'bot': 'bot', 'bottom': 'bot',
         'support': 'support', 'sup': 'support', 'supp': 'support'
     };
-
     const result = {};
-
-    // Strategy 1: lane tab links — LoLalytics renders tabs as
-    // <a href="/lol/kaisa/?lane=mid">…<span>1.8%</span></a>
-    for (const a of document.querySelectorAll('a[href]')) {
-        const href = a.href.toLowerCase();
-        let lane = null;
-        for (const [key, val] of Object.entries(LANE_KEYS)) {
-            if (href.includes('lane=' + key)) { lane = val; break; }
-        }
-        if (!lane || result[lane] !== undefined) continue;
-
-        // Walk up to 3 levels to find a percentage leaf near this link
-        let el = a;
-        outer: for (let d = 0; d < 3; d++) {
-            const leaves = [...el.querySelectorAll('*')].filter(e => e.children.length === 0);
-            for (const leaf of [el, ...leaves]) {
-                const txt = (leaf.textContent || '').trim();
-                const m = txt.match(/^(\d{1,3}(?:\.\d{1,2})?)%$/);
-                if (m) {
-                    const pct = parseFloat(m[1]);
-                    if (pct >= 0.1 && pct <= 100) { result[lane] = pct; break outer; }
-                }
-            }
-            el = el.parentElement;
-            if (!el || el === document.body) break;
+    const topText = document.body.innerText.slice(0, 3000);
+    for (const [key, val] of Object.entries(LANE_KEYS)) {
+        if (result[val] !== undefined) continue;
+        const re = new RegExp('\\b' + key + '\\b[\\s\\S]{0,40}?(\\d{1,3}(?:\\.\\d{1,2})?)%', 'i');
+        const mm = topText.match(re);
+        if (mm) {
+            const pct = parseFloat(mm[1]);
+            if (pct >= 0.1 && pct <= 100) result[val] = pct;
         }
     }
-
-    // Strategy 2: text scan of the first 3000 chars for "LaneName XX.X%" patterns.
-    // Always runs to backfill missing lanes — lolalytics now omits the
-    // currently-selected lane from its tab links (e.g. on /aatrox/build/
-    // the 'top' anchor doesn't have lane=top because top IS the current
-    // page), so strategy 1 always misses at least one lane.
-    {
-        const topText = document.body.innerText.slice(0, 3000);
-        for (const [key, val] of Object.entries(LANE_KEYS)) {
-            if (result[val] !== undefined) continue;
-            const re = new RegExp('\\b' + key + '\\b[\\s\\S]{0,40}?(\\d{1,3}(?:\\.\\d{1,2})?)%', 'i');
-            const m = topText.match(re);
-            if (m) {
-                const pct = parseFloat(m[1]);
-                if (pct >= 0.1 && pct <= 100) result[val] = pct;
-            }
-        }
-    }
-
     return JSON.stringify(result);
 })()
 """
