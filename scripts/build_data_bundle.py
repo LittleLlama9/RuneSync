@@ -111,7 +111,7 @@ async def build_bundle(limit: int | None, threshold: float, output_path: Path) -
 
         for i, champ in enumerate(champions, 1):
             roles_for_champ = relevant_roles(champ, role_weights, threshold)
-            print(f"[bundle] [{i}/{len(champions)}] {champ} → {roles_for_champ}", flush=True)
+            print(f"[bundle] [{i}/{len(champions)}] {champ} -> {roles_for_champ}", flush=True)
 
             ckey = champ.lower()
             builds[ckey] = {}

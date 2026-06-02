@@ -324,9 +324,12 @@ CHAMP_ROLE_JS = r"""
         }
     }
 
-    // Strategy 2: text scan of the first 3000 chars for "LaneName XX.X%" patterns
-    // Catches layouts where percentages aren't inside the link element itself
-    if (Object.keys(result).length < 2) {
+    // Strategy 2: text scan of the first 3000 chars for "LaneName XX.X%" patterns.
+    // Always runs to backfill missing lanes — lolalytics now omits the
+    // currently-selected lane from its tab links (e.g. on /aatrox/build/
+    // the 'top' anchor doesn't have lane=top because top IS the current
+    // page), so strategy 1 always misses at least one lane.
+    {
         const topText = document.body.innerText.slice(0, 3000);
         for (const [key, val] of Object.entries(LANE_KEYS)) {
             if (result[val] !== undefined) continue;
@@ -516,13 +519,15 @@ async def _settle(page, timeout_ms: int = 8000) -> None:
         pass
 
 
-async def _safe_evaluate(page, script: str, retries: int = 2):
+async def _safe_evaluate(page, script: str, retries: int = 3):
     """
-    page.evaluate wrapper that retries on the 'Execution context was
-    destroyed, most likely because of a navigation' error. This happens
-    on headless Ubuntu when a client-side redirect fires between goto()
-    returning and the script being injected. After a destruction, we
-    wait for the new context to settle and try again.
+    page.evaluate wrapper that retries on 'Execution context was
+    destroyed, most likely because of a navigation' errors. Headless
+    Chromium on Ubuntu often fires a client-side redirect between
+    goto() returning and the script being injected; the destroyed
+    context kills the call. We wait for the new context to settle and
+    try again. Each retry includes a longer settle (1s, 2s, 4s) so
+    chained redirects eventually quiesce.
     """
     last_err: Optional[Exception] = None
     for attempt in range(retries + 1):
@@ -530,13 +535,23 @@ async def _safe_evaluate(page, script: str, retries: int = 2):
             return await page.evaluate(script)
         except Exception as e:
             msg = str(e)
-            if ("Execution context was destroyed" in msg
-                    or "navigating and changing the document" in msg
-                    or "frame was detached" in msg.lower()):
-                last_err = e
+            is_nav = (
+                "Execution context was destroyed" in msg
+                or "navigating and changing the document" in msg
+                or "frame was detached" in msg.lower()
+                or "frame got detached" in msg.lower()
+            )
+            if not is_nav:
+                raise
+            last_err = e
+            backoff = 1.0 * (2 ** attempt)
+            print(f"[scraper] _safe_evaluate retry {attempt + 1}/{retries} after "
+                  f"context-destroyed (waiting {backoff}s)", flush=True)
+            try:
+                await asyncio.sleep(backoff)
                 await _settle(page, timeout_ms=10000)
-                continue
-            raise
+            except Exception:
+                pass
     if last_err:
         raise last_err
     raise RuntimeError("safe_evaluate: unknown error")
@@ -738,7 +753,9 @@ async def scrape_role_weights() -> dict:
 
     async def _scrape_one(slug: str, name: str) -> tuple[str, dict]:
         async with sem:
-            url = f"https://lolalytics.com/lol/{slug}/"
+            # /build/ is the canonical lolalytics page; the bare /lol/{slug}/
+            # URL now returns 404 (as of mid-2026).
+            url = f"https://lolalytics.com/lol/{slug}/build/"
             ctx = await _new_context()
             page = await ctx.new_page()
             page.set_default_timeout(25000)
