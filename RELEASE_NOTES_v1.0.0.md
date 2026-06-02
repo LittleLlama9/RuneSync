@@ -1,14 +1,14 @@
 ## RuneSync v1.0.0 — first public release
 
-Auto-imports runes for your locked-in champion and shows matchup tips during
-champ select. Works in the background, lives in the system tray.
+Auto-imports runes for your locked-in champion and shows your matchup
+win rate vs the opposing laner. Works in the background, lives in the
+system tray.
 
 ### Install
 
-1. Download both **`RuneSync.exe`** and **`matchups.json`** from this release
-2. Put them in the **same folder**
-3. Launch League of Legends
-4. Run `RuneSync.exe`
+1. Download **`RuneSync.exe`** from this release
+2. Launch League of Legends
+3. Run `RuneSync.exe`
 
 Optional: in Settings, toggle **"Start with Windows"** and RuneSync will live
 silently in your tray, popping up automatically when League opens.
@@ -18,7 +18,7 @@ silently in your tray, popping up automatically when League opens.
 - Detects when you lock in a champion in champ select via the League Client API
 - Pulls a rune page for your champion + role from a daily-refreshed data bundle
   and applies it to your client
-- Shows a small overlay with tips for the matchup against the opposing laner
+- Shows your matchup win rate vs the opposing laner during the game
 - Per-champion overrides if you have your own preferred rune setup
 
 ### Architecture notes (for the curious)
@@ -28,8 +28,7 @@ silently in your tray, popping up automatically when League opens.
   on GitHub Actions and publishes a static JSON bundle. Clients just download
   it. No Brave, no Chromium, no FastAPI server needed on the user side.
 - **Single process.** Tray icon, window, and League watcher are all one .exe.
-- **Open source.** GPL-3.0. Data attribution to lolalytics, u.gg, op.gg,
-  counterstats, and mobalytics in the README.
+- **Open source.** GPL-3.0. Data attribution to lolalytics and u.gg in the README.
 
 ### Disclaimer
 
