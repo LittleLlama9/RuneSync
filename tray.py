@@ -48,10 +48,10 @@ _RUN_VALUE = "RuneSync"
 
 
 def _exe_path() -> str:
-    """Path to RuneSync.exe (frozen) or the .py script (dev)."""
+    """Path to RuneSync.exe (frozen) or the main.py script (dev)."""
     if getattr(sys, "frozen", False):
         return sys.executable
-    return os.path.abspath(__file__).replace("tray.py", "main.py")
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "main.py")
 
 
 def is_autostart_enabled() -> bool:

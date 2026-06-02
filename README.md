@@ -8,13 +8,17 @@ runes for your locked-in champion and shows matchup tips during the draft.
 - Detects when you lock in a champion in champ select via the League Client API (LCU)
 - Pulls a rune page for your champion + role and pushes it into your client
 - Shows a small overlay with tips for the matchup against the opposing laner
+- Lives in the system tray; optionally starts with Windows
 
 ## Install / run
 
 **Easy path (recommended):**
-1. Download the latest `RuneSync.exe` from the [Releases](../../releases) page
-2. Launch League of Legends
-3. Run `RuneSync.exe`
+1. Download `RuneSync.exe` and `matchups.json` from the [Releases](../../releases) page
+2. Put them in the **same folder**
+3. Launch League of Legends, then run `RuneSync.exe`
+
+Optional: in Settings, toggle **"Start with Windows"** and RuneSync will live
+silently in your tray, popping up automatically when League opens.
 
 **From source:**
 ```
@@ -30,7 +34,7 @@ Requires Python 3.11+ on Windows. League must be running.
 build.bat
 ```
 
-Produces `dist/RuneSync.exe` and `dist/RuneSyncWatcher.exe` via PyInstaller.
+Produces `dist/RuneSync.exe` via PyInstaller.
 
 ## Data sources
 
