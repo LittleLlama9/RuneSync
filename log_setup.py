@@ -10,9 +10,7 @@ from datetime import datetime
 _TAG_LEVELS: dict = {
     "[ugg]":     logging.DEBUG,
     "[lcu]":     logging.DEBUG,
-    "[merge]":   logging.INFO,
     "[monitor]": logging.INFO,
-    "[claude]":  logging.INFO,
 }
 
 _ERROR_RE = re.compile(r"\b(error|failed|exception|traceback|✗)\b", re.IGNORECASE)

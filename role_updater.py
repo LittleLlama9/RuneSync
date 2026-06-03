@@ -21,14 +21,25 @@ from typing import Optional
 import ugg_api
 from ugg_api import SERVER_URL  # legacy server fallback
 
-# When compiled by PyInstaller (--onefile), __file__ resolves to the temp
-# extraction dir, not the exe's directory. Use sys.executable's dir instead.
-if getattr(sys, "frozen", False):
-    _BASE = os.path.dirname(sys.executable)
-else:
-    _BASE = os.path.dirname(os.path.abspath(__file__))
+# Cache path: %APPDATA%/RuneSync — writable on every install location,
+# including Program Files where the exe directory is read-only for non-admin
+# users. Falls back to the exe / repo dir if APPDATA isn't set (dev or odd
+# environments).
+def _resolve_cache_dir() -> str:
+    appdata = os.environ.get("APPDATA")
+    if appdata:
+        d = os.path.join(appdata, "RuneSync")
+        try:
+            os.makedirs(d, exist_ok=True)
+            return d
+        except Exception:
+            pass
+    if getattr(sys, "frozen", False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))
 
-CACHE_PATH = Path(_BASE) / "role_weights_cache.json"
+
+CACHE_PATH = Path(_resolve_cache_dir()) / "role_weights_cache.json"
 
 
 # ── patch helpers ──────────────────────────────────────────────────────────

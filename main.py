@@ -660,13 +660,11 @@ class RuneSyncApp:
             box.pack(side="left")
         row("Start with Windows:", autostart_w)
 
-        # Server URL and Anthropic API key remain configurable via the
-        # settings JSON file, but are intentionally not surfaced in the UI
-        # — end users don't need to think about either.
+        # Server URL is kept as a hidden setting for devs who want to point
+        # at a local FastAPI scraper instead of the GitHub data bundle.
+        # Not surfaced in the UI — end users don't need it.
         self.server_url_v = tk.StringVar(
             value=self.overrides.settings.get("server_url", ugg_api.SERVER_URL))
-        self.apikey_v = tk.StringVar(
-            value=self.overrides.settings.get("anthropic_api_key", ""))
 
         tk.Frame(f,bg="#2a2a2a",height=1).pack(fill="x",padx=18,pady=12)
         save_row = tk.Frame(f, bg=PANEL); save_row.pack(fill="x", padx=18)
@@ -698,7 +696,7 @@ class RuneSyncApp:
         tk.Label(flt, text="Show:", font=("Segoe UI", 8),
                  bg=PANEL, fg="#666").pack(side="left")
         self._debug_filters: dict = {}
-        for tag_label in ("[ugg]", "[lcu]", "[claude]", "[monitor]", "[merge]", "[unknown]"):
+        for tag_label in ("[ugg]", "[lcu]", "[monitor]", "[unknown]"):
             v = tk.BooleanVar(value=True)
             self._debug_filters[tag_label] = v
             tk.Checkbutton(flt, text=tag_label, variable=v,
@@ -1102,8 +1100,7 @@ class RuneSyncApp:
         self.overrides.save_settings({"rank": self.rank_v.get(),
             "region": self.region_v.get(), "auto_role": self.arole_v.get(),
             "trigger": self.trig_v.get(),
-            "server_url": new_url,
-            "anthropic_api_key": self.apikey_v.get().strip()})
+            "server_url": new_url})
         self._emit("Settings saved.", "success")
         # Inline confirmation next to the button — visible on the Settings tab.
         try:
@@ -1127,14 +1124,32 @@ class RuneSyncApp:
         self.monitor.set_matchup_override(name)
 
 
+def _user_data_dir() -> str:
+    """%APPDATA%/RuneSync — writable on any install (including Program Files)."""
+    base = os.environ.get("APPDATA") or os.path.expanduser("~")
+    d = os.path.join(base, "RuneSync")
+    try:
+        os.makedirs(d, exist_ok=True)
+    except Exception:
+        # Fallback to a tmp dir so we don't crash on launch
+        import tempfile
+        d = tempfile.gettempdir()
+    return d
+
+
 if __name__ == "__main__":
     import sys, os
     # Single-instance guard: silently exit if RuneSync is already running
     _mutex = ctypes.windll.kernel32.CreateMutexW(None, False, "RuneSyncSingleInstance")
     if ctypes.windll.kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
         sys.exit(0)
-    log_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "runesync.log")
-    sys.stderr = open(log_path, "a", buffering=1, encoding="utf-8")
+    # Log to %APPDATA%/RuneSync so install location (Program Files etc) doesn't
+    # matter — exe directory is write-protected for non-admin users there.
+    log_path = os.path.join(_user_data_dir(), "runesync.log")
+    try:
+        sys.stderr = open(log_path, "a", buffering=1, encoding="utf-8")
+    except Exception:
+        pass  # Worst case stderr stays attached to the console (none in --windowed)
     from log_setup import init_logging
     _log_queue = init_logging(log_path)
     root = tk.Tk()

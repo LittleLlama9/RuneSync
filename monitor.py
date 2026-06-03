@@ -370,7 +370,9 @@ class ChampSelectMonitor:
         try:
             result = self.ugg.get_matchup_winrate(my_champ, enemy_champ, role)
             if result is None:
-                self.log(f"  ⚠ Winrate unavailable for {enemy_champ} (server offline or champion not found)", "warn")
+                # Common case in bundle mode — the bundle only carries WRs for
+                # the top counters per (champ, role), not every pair. Stay quiet.
+                self.log(f"     No win-rate data for this matchup.", "info")
             else:
                 wr = result["win_rate"]
                 if wr >= 52:
