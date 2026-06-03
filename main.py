@@ -1049,13 +1049,23 @@ class RuneSyncApp:
         for r in self.tree.get_children():
             self.tree.delete(r)
         for champ, d in self.overrides.all().items():
-            photo = _make_spell_pair_icon(d.get("spell1", 0), d.get("spell2", 0))
-            self.tree.insert("", "end", image=photo, values=(
+            try:
+                photo = _make_spell_pair_icon(d.get("spell1", 0), d.get("spell2", 0))
+            except Exception:
+                photo = None
+            values = (
                 champ,
                 d.get("role", "auto"),
                 d.get("primary_tree", "—"),
                 d.get("secondary_tree", "—"),
-            ))
+            )
+            # ttk.Treeview.insert with image=None shifts the values tuple into
+            # the option-name slot ("Azir auto Precision Sorcery" → unknown
+            # option). Only pass image= when we actually have a PhotoImage.
+            if photo is not None:
+                self.tree.insert("", "end", image=photo, values=values)
+            else:
+                self.tree.insert("", "end", values=values)
 
     def _add_ov(self):
         self._show_override_editor("")

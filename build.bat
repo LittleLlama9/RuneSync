@@ -16,10 +16,12 @@ timeout /t 1 /nobreak >nul
 :: happens inside the main process via tray.py's LeaguePoller.
 echo [2/3] Building RuneSync.exe...
 cd /d "%~dp0"
+:: --hidden-import psutil: psutil is imported function-locally in tray.py /
+:: lcu.py, so PyInstaller's static analyzer can miss it.
 if exist icon.ico (
-    py -m PyInstaller --noconfirm --clean --onefile --windowed --name "RuneSync" --icon=icon.ico --add-data "assets/spells;assets/spells" --add-data "icon.ico;." main.py
+    py -m PyInstaller --noconfirm --clean --onefile --windowed --name "RuneSync" --icon=icon.ico --hidden-import psutil --add-data "assets/spells;assets/spells" --add-data "icon.ico;." main.py
 ) else (
-    py -m PyInstaller --noconfirm --clean --onefile --windowed --name "RuneSync" --add-data "assets/spells;assets/spells" --add-data "icon.ico;." main.py
+    py -m PyInstaller --noconfirm --clean --onefile --windowed --name "RuneSync" --hidden-import psutil --add-data "assets/spells;assets/spells" --add-data "icon.ico;." main.py
 )
 if errorlevel 1 (
     echo ERROR: RuneSync build failed!
