@@ -12,7 +12,7 @@ Architecture (post v1.0 public release):
     to install or run the server.
 """
 
-import json, os, sys, time, urllib.request, urllib.error, urllib.parse
+import json, os, sys, threading, time, urllib.request, urllib.error, urllib.parse
 from typing import Optional
 
 # ── bundle config ──────────────────────────────────────────────────────────
@@ -37,14 +37,44 @@ ROLE_MAP = {
 # ── module state ───────────────────────────────────────────────────────────
 _bundle: Optional[dict] = None
 _bundle_loaded_at: float = 0.0
+# Set once init_bundle has returned (success or failure). Lookups block on
+# this for a short window so first-launch champ-select doesn't race the
+# download. Stays unset in tests / dev usage where init_bundle is never
+# invoked — _bundle_init_started gates the wait so we don't deadlock.
+_bundle_init_started = False
+_bundle_ready_event = threading.Event()
 _WINRATE_CACHE: dict = {}   # key -> {"patch": str, "result": dict}
 _patch_value: str = ""
 _patch_fetched_at: float = 0.0
 _PATCH_TTL: float = 6 * 3600
 
 
+def _wait_for_bundle(timeout: float = 8.0) -> None:
+    """Block briefly waiting for an in-flight init_bundle() to finish.
+
+    No-op if init_bundle was never called (tests, dev REPL) or has already
+    returned. Caps at `timeout` so a hung download can't lock the caller.
+    """
+    if _bundle_init_started and not _bundle_ready_event.is_set():
+        _bundle_ready_event.wait(timeout)
+
+
 def _cache_path() -> str:
-    """Where the bundle is cached on disk (next to the exe / repo root)."""
+    """Where the bundle is cached on disk.
+
+    Uses %APPDATA%/RuneSync so the location is writable regardless of where
+    the exe lives — sitting in Program Files is read-only for non-admin
+    users and would silently break the cache. Falls back to the exe dir
+    (dev convenience).
+    """
+    appdata = os.environ.get("APPDATA")
+    if appdata:
+        d = os.path.join(appdata, "RuneSync")
+        try:
+            os.makedirs(d, exist_ok=True)
+            return os.path.join(d, _BUNDLE_CACHE_NAME)
+        except Exception:
+            pass
     if getattr(sys, "frozen", False):
         base = os.path.dirname(sys.executable)
     else:
@@ -92,24 +122,31 @@ def init_bundle(force_refresh: bool = False) -> bool:
       1. (unless force_refresh) recent on-disk cache
       2. fresh download from GitHub release
       3. give up — callers will fall back to the localhost server
+
+    Always sets _bundle_ready_event when done so synchronous callers don't
+    block forever on a network failure.
     """
-    global _bundle, _bundle_loaded_at
-    if not force_refresh:
-        cached = _try_load_disk_cache()
-        if cached:
-            _bundle = cached
+    global _bundle, _bundle_loaded_at, _bundle_init_started
+    _bundle_init_started = True
+    try:
+        if not force_refresh:
+            cached = _try_load_disk_cache()
+            if cached:
+                _bundle = cached
+                _bundle_loaded_at = time.time()
+                print(f"[ugg] bundle loaded from disk cache "
+                      f"(patch {cached.get('patch','?')})", file=sys.stderr)
+                return True
+        fresh = _download_bundle()
+        if fresh:
+            _bundle = fresh
             _bundle_loaded_at = time.time()
-            print(f"[ugg] bundle loaded from disk cache (patch {cached.get('patch','?')})",
-                  file=sys.stderr)
+            print(f"[ugg] bundle downloaded (patch {fresh.get('patch','?')}, "
+                  f"{fresh.get('champion_count','?')} champs)", file=sys.stderr)
             return True
-    fresh = _download_bundle()
-    if fresh:
-        _bundle = fresh
-        _bundle_loaded_at = time.time()
-        print(f"[ugg] bundle downloaded (patch {fresh.get('patch','?')}, "
-              f"{fresh.get('champion_count','?')} champs)", file=sys.stderr)
-        return True
-    return False
+        return False
+    finally:
+        _bundle_ready_event.set()
 
 
 def bundle_loaded() -> bool:
@@ -163,7 +200,11 @@ class UGGClient:
 
     def get_top_build(self, champion_name: str, role: str = "auto",
                       rank: str = "Platinum+", region: str = "World") -> Optional[dict]:
-        # Bundle path
+        # Bundle path. If the bundle download is still in flight (cold first
+        # launch + fast champ select), block briefly so we don't fall through
+        # to the localhost-server path while a perfectly good bundle is on
+        # its way.
+        _wait_for_bundle()
         if _bundle:
             champ_builds = (_bundle.get("builds", {})
                                    .get(champion_name.lower(), {}))
@@ -205,6 +246,7 @@ class UGGClient:
 
     def get_counters(self, enemy_champ: str, role: str = "auto",
                      top_n: int = 5) -> list[dict]:
+        _wait_for_bundle()
         if _bundle:
             entry = (_bundle.get("counters", {})
                             .get(enemy_champ.lower(), {})
@@ -219,10 +261,25 @@ class UGGClient:
 
     def get_matchup_winrate(self, my_champ: str, enemy_champ: str,
                             role: str = "auto") -> Optional[dict]:
-        # NOT in the bundle (too many combos). Try server; on failure return
-        # None, which monitor.py already handles gracefully.
+        # Bundle path: the bundle doesn't pre-scrape every (my, enemy, role)
+        # combo, but it does include a "best picks vs X" list per (champ, role)
+        # with each picker's win rate. If my_champ happens to be one of the
+        # top counters to enemy_champ in this role, we can pull the number
+        # straight from there. Otherwise we silently return None — the UI
+        # just won't show a WR for that matchup, which is fine.
+        _wait_for_bundle()
         if _bundle is not None:
-            # Bundle mode and no server — skip silently.
+            counters_for_enemy = (_bundle.get("counters", {})
+                                         .get(enemy_champ.lower(), {})
+                                         .get(role) or [])
+            if isinstance(counters_for_enemy, list):
+                my_lower = my_champ.lower()
+                for entry in counters_for_enemy:
+                    if isinstance(entry, dict) and \
+                            entry.get("champion", "").lower() == my_lower:
+                        wr = entry.get("win_rate")
+                        if isinstance(wr, (int, float)):
+                            return {"win_rate": float(wr), "enemy": enemy_champ}
             return None
         patch = _current_patch()
         key = (my_champ.lower(), enemy_champ.lower(), role.lower())
