@@ -261,16 +261,26 @@ class UGGClient:
 
     def get_matchup_winrate(self, my_champ: str, enemy_champ: str,
                             role: str = "auto") -> Optional[dict]:
-        # Bundle path: the bundle doesn't pre-scrape every (my, enemy, role)
-        # combo, but it does include a "best picks vs X" list per (champ, role)
-        # with each picker's win rate. If my_champ happens to be one of the
-        # top counters to enemy_champ in this role, we can pull the number
-        # straight from there. Otherwise we silently return None — the UI
-        # just won't show a WR for that matchup, which is fine.
+        # Bundle path. Schema 2+ ships a full per-(champ, role) matchup
+        # table, so most lookups hit on the first try.
         _wait_for_bundle()
         if _bundle is not None:
+            enemy_lower = enemy_champ.lower()
+            my_table = (_bundle.get("matchups", {})
+                               .get(my_champ.lower(), {})
+                               .get(role) or {})
+            if isinstance(my_table, dict):
+                # Try case-insensitive enemy lookup (the table is keyed by
+                # display name as scraped from u.gg).
+                for name, wr in my_table.items():
+                    if isinstance(name, str) and name.lower() == enemy_lower \
+                            and isinstance(wr, (int, float)):
+                        return {"win_rate": float(wr), "enemy": enemy_champ}
+            # Fallback for older bundles or rare combos: derive from the
+            # counters list ("best picks vs enemy" — hits when my_champ is a
+            # top counter to enemy_champ).
             counters_for_enemy = (_bundle.get("counters", {})
-                                         .get(enemy_champ.lower(), {})
+                                         .get(enemy_lower, {})
                                          .get(role) or [])
             if isinstance(counters_for_enemy, list):
                 my_lower = my_champ.lower()

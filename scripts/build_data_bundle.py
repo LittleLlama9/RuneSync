@@ -107,6 +107,7 @@ async def build_bundle(limit: int | None, threshold: float, output_path: Path) -
 
         builds: dict[str, dict] = {}
         counters: dict[str, dict] = {}
+        matchups: dict[str, dict] = {}
         failures: list[str] = []
 
         # Process champions in parallel — each (champ, role) opens its own
@@ -121,6 +122,7 @@ async def build_bundle(limit: int | None, threshold: float, output_path: Path) -
             ckey = champ.lower()
             local_builds: dict = {}
             local_counters: dict = {}
+            local_matchups: dict = {}
 
             async with sem:
                 done_count[0] += 1
@@ -141,22 +143,34 @@ async def build_bundle(limit: int | None, threshold: float, output_path: Path) -
                     except Exception as e:
                         failures.append(f"counters:{champ}:{role}:{e}")
                         print(f"[bundle] FAIL counters {champ}/{role}: {e}", flush=True)
+                    try:
+                        # Full per-(champ, role) matchup table — ~50 entries
+                        # of (enemy -> WR%). Powers the in-game WR display.
+                        m = await scraper.scrape_matchup_table(champ, role)
+                        if m:
+                            local_matchups[role] = m
+                    except Exception as e:
+                        failures.append(f"matchups:{champ}:{role}:{e}")
+                        print(f"[bundle] FAIL matchups {champ}/{role}: {e}",
+                              flush=True)
 
             builds[ckey] = local_builds
             counters[ckey] = local_counters
+            matchups[ckey] = local_matchups
 
         await asyncio.gather(*[
             _process_champ(i, champ) for i, champ in enumerate(champions, 1)
         ])
 
         bundle = {
-            "schema_version": 1,
+            "schema_version": 2,
             "generated_at": int(time.time()),
             "patch": patch,
             "champion_count": len(champions),
             "role_weights": role_weights,
             "builds": builds,
             "counters": counters,
+            "matchups": matchups,
             "failures": failures,
         }
     finally:
@@ -169,7 +183,9 @@ async def build_bundle(limit: int | None, threshold: float, output_path: Path) -
         f"[bundle] done in {elapsed}s — {len(builds)} champs, "
         f"{sum(len(r) for r in builds.values())} builds, "
         f"{sum(len(r) for r in counters.values())} counter sets, "
-        f"{len(failures)} failures. Wrote {output_path} ({output_path.stat().st_size//1024} KB)",
+        f"{sum(len(r) for r in matchups.values())} matchup tables, "
+        f"{len(failures)} failures. "
+        f"Wrote {output_path} ({output_path.stat().st_size//1024} KB)",
         flush=True,
     )
     return bundle

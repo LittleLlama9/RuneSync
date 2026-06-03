@@ -341,6 +341,52 @@ CHAMP_ROLE_JS = r"""
 })()
 """
 
+ALL_MATCHUPS_JS = r"""
+(async () => {
+    // Wait for the matchup table to render (a busy page with ads).
+    for (let i = 0; i < 100; i++) {
+        const n = document.querySelectorAll(
+            'a[href*="/lol/champions/"][href*="/build"]').length;
+        if (n > 30) break;
+        await new Promise(r => setTimeout(r, 200));
+    }
+    await new Promise(r => setTimeout(r, 600));
+    const out = {};
+    const seenSlugs = new Set();
+    for (const a of document.querySelectorAll(
+            'a[href*="/lol/champions/"][href*="/build"]')) {
+        const name = (a.textContent || '').trim();
+        if (!name || name.length < 2 || name === 'Build') continue;
+        // Use the slug from the href to avoid duplicate (name) collisions
+        // (e.g. "Renata Glasc" page shows "Renata" anchor text).
+        const slugMatch = a.getAttribute('href').match(/\/lol\/champions\/([\w-]+)\//);
+        const slug = slugMatch ? slugMatch[1] : name.toLowerCase();
+        if (seenSlugs.has(slug)) continue;
+        // Walk up the DOM to find the row container that holds this anchor's
+        // WR cell. Stops as soon as a percentage in [30, 70] is seen.
+        let row = a;
+        for (let d = 0; d < 6; d++) {
+            row = row.parentElement;
+            if (!row) break;
+            const txt = row.innerText || '';
+            // Restrict to small containers — large ones span the whole list
+            // and we'd grab the first row's WR for every anchor.
+            if (txt.length > 600) continue;
+            const m = txt.match(/(\d{2,3}\.\d{1,2})\s*%/);
+            if (m) {
+                const wr = parseFloat(m[1]);
+                if (wr >= 30 && wr <= 70) {
+                    out[name] = wr;
+                    seenSlugs.add(slug);
+                    break;
+                }
+            }
+        }
+    }
+    return JSON.stringify(out);
+})()
+"""
+
 COUNTERS_JS = r"""
 (async () => {
     for (let i = 0; i < 75; i++) {
@@ -703,6 +749,47 @@ async def scrape_counters(enemy_champ: str, role: str, top_n: int = 5) -> list:
     ]
     clean.sort(key=lambda x: x["win_rate"], reverse=True)
     return clean[:top_n]
+
+
+async def scrape_matchup_table(my_champ: str, role: str) -> dict:
+    """Scrape u.gg's matchups page for my_champ in role; return
+    {enemy_name: win_rate} for every common opponent listed.
+
+    This is the source for the bundled matchup matrix — one scrape per
+    (champ, role) yields ~50-100 entries, the full set of enemies u.gg
+    has reliable data on.
+    """
+    role_slug = ROLE_MAP.get(role.lower(), "")
+    url = f"https://u.gg/lol/champions/{_champ_slug(my_champ)}/matchups"
+    if role_slug:
+        url += f"?role={role_slug}"
+
+    ctx = await _new_context()
+    page = await ctx.new_page()
+    page.set_default_timeout(60000)
+    try:
+        await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+        await _settle(page)
+        title = await page.title()
+        if "not found" in title.lower():
+            print(f"[scraper] matchups 404 for {my_champ}", flush=True)
+            return {}
+        raw_str = await _safe_evaluate(page, ALL_MATCHUPS_JS)
+        raw = json.loads(raw_str) if isinstance(raw_str, str) else (raw_str or {})
+    finally:
+        await ctx.close()
+
+    if not isinstance(raw, dict):
+        return {}
+    cleaned: dict[str, float] = {}
+    for name, wr in raw.items():
+        if not isinstance(name, str) or not isinstance(wr, (int, float)):
+            continue
+        if 30.0 <= float(wr) <= 70.0:
+            cleaned[name] = round(float(wr), 2)
+    print(f"[scraper] matchup table {my_champ}/{role}: {len(cleaned)} entries",
+          flush=True)
+    return cleaned
 
 
 async def scrape_matchup(my_champ: str, enemy_champ: str, role: str) -> Optional[dict]:
