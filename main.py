@@ -457,8 +457,10 @@ class RuneSyncApp:
         self.root.after(0, self.root.destroy)
 
     def _on_league_open(self):
-        """League just launched — bring RuneSync to the foreground so the user sees it."""
+        """League just launched — bring RuneSync to the foreground and reconnect."""
         self.root.after(0, self._do_show_window)
+        if not self.lcu.connected:
+            threading.Thread(target=self._try_connect, kwargs={"startup": False}, daemon=True).start()
 
     def _on_league_close(self):
         """League just closed — stay in tray, no-op."""
@@ -884,19 +886,22 @@ class RuneSyncApp:
             self.dot.configure(fg=col)))
 
     # ── connect ───────────────────────────────────────────────────────────────
-    def _try_connect(self):
+    def _try_connect(self, *, startup: bool = True):
+        if self.lcu.connected:
+            return
         self._emit("Connecting to League client...", "info")
-        import time; time.sleep(15)  # Wait for League to finish loading before first attempt
-        for attempt in range(1, 3):  # 2 retries, 15s apart
+        if startup:
+            import time; time.sleep(15)
+        for attempt in range(1, 4):  # 3 retries, 15s apart
             try:
                 self.lcu.connect()
                 self._emit("✓ Connected to League Client", "success")
                 self._set_status("Connected", "#4caf73")
-                self.root.after(0, self._start)  # Auto-start monitoring on connect
+                self.root.after(0, self._start)
                 return
             except LCUConnectionError as e:
-                if attempt < 2:
-                    self._emit(f"  Attempt {attempt}/2 failed — retrying in 15s...", "info")
+                if attempt < 3:
+                    self._emit(f"  Attempt {attempt}/3 failed — retrying in 15s...", "info")
                     import time; time.sleep(15)
                 else:
                     self._emit(f"✗ {e}", "warn")
