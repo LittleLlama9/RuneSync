@@ -887,26 +887,30 @@ class RuneSyncApp:
 
     # ── connect ───────────────────────────────────────────────────────────────
     def _try_connect(self, *, startup: bool = True):
-        if self.lcu.connected:
+        if self.lcu.connected or getattr(self, '_connecting', False):
             return
-        self._emit("Connecting to League client...", "info")
-        if startup:
-            import time; time.sleep(15)
-        for attempt in range(1, 4):  # 3 retries, 15s apart
-            try:
-                self.lcu.connect()
-                self._emit("✓ Connected to League Client", "success")
-                self._set_status("Connected", "#4caf73")
-                self.root.after(0, self._start)
-                return
-            except LCUConnectionError as e:
-                if attempt < 3:
-                    self._emit(f"  Attempt {attempt}/3 failed — retrying in 15s...", "info")
-                    import time; time.sleep(15)
-                else:
-                    self._emit(f"✗ {e}", "warn")
-                    self._emit("  Open the League client then restart RuneSync.", "warn")
-                    self._set_status("Disconnected", GOLD)
+        self._connecting = True
+        try:
+            self._emit("Connecting to League client...", "info")
+            if startup:
+                import time; time.sleep(15)
+            for attempt in range(1, 4):  # 3 retries, 15s apart
+                try:
+                    self.lcu.connect()
+                    self._emit("✓ Connected to League Client", "success")
+                    self._set_status("Connected", "#4caf73")
+                    self.root.after(0, self._start)
+                    return
+                except LCUConnectionError as e:
+                    if attempt < 3:
+                        self._emit(f"  Attempt {attempt}/3 failed — retrying in 15s...", "info")
+                        import time; time.sleep(15)
+                    else:
+                        self._emit(f"✗ {e}", "warn")
+                        self._emit("  Open the League client then restart RuneSync.", "warn")
+                        self._set_status("Disconnected", GOLD)
+        finally:
+            self._connecting = False
 
     # ── monitor ───────────────────────────────────────────────────────────────
     def _toggle(self):
