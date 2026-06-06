@@ -49,7 +49,7 @@ _HEADERS = {"User-Agent": "RuneSync/1.0"}
 # Global throttle: minimum delay between any two HTTP requests to stats2.u.gg.
 _request_lock = threading.Lock()
 _last_request_time = 0.0
-_REQUEST_SPACING = 2.0  # seconds between requests — u.gg allows ~30 req/min
+_REQUEST_SPACING = 3.0  # seconds between requests — u.gg sliding-window limit
 _global_backoff_until = 0.0  # when a 429 hits, all threads pause until this time
 
 # ── HTTP helpers ──────────────────────────────────────────────────────────────
@@ -166,10 +166,12 @@ def fetch_role_weights(patch: str, api_ver: str, id_to_name: dict) -> dict:
 
 # ── build extraction from overview endpoint ───────────────────────────────────
 
-def fetch_build(patch: str, api_ver: str, champ_id: str, champ_name: str,
-                role: str) -> dict | None:
+def fetch_overview_data(patch: str, api_ver: str, champ_id: str) -> dict | None:
     url = _stats_url("overview", patch, api_ver, champ_id)
-    data = _fetch_json(url)
+    return _fetch_json(url)
+
+
+def extract_build(data: dict, champ_name: str, role: str) -> dict | None:
     if not data:
         return None
     role_id = str(ROLE_NAME_TO_ID.get(role, 4))
@@ -364,12 +366,18 @@ def build_bundle(limit: int | None, threshold: float, output_path: Path) -> dict
         print(f"[bundle] [{done_count[0]}/{len(champions)}] "
               f"{champ} -> {roles_for_champ}", flush=True)
 
-        # Builds — one HTTP call per champion (overview endpoint).
-        # fetch_build returns None on HTTP failures AND on legitimate
-        # low-sample-size roles, so we only flag it if ALL roles are empty.
+        # Builds — fetch the overview endpoint ONCE per champion, then
+        # extract each role from the cached response. This halves the
+        # total HTTP calls vs the old per-role fetch.
+        try:
+            overview_data = fetch_overview_data(patch, api_ver, champ_id)
+        except Exception as e:
+            overview_data = None
+            local_failures.append(f"build:{champ}:overview_fetch:{e}")
+            print(f"[bundle] FAIL overview {champ}: {e}", flush=True)
         for role in roles_for_champ:
             try:
-                b = fetch_build(patch, api_ver, champ_id, champ, role)
+                b = extract_build(overview_data, champ, role)
                 if b:
                     local_builds[role] = b
             except Exception as e:
@@ -391,8 +399,8 @@ def build_bundle(limit: int | None, threshold: float, output_path: Path) -> dict
         return champ, local_builds, local_counters, local_matchups, local_failures
 
     # Sequential with throttle — stats2.u.gg has an aggressive sliding-window
-    # rate limit (~30 req/min). 1 worker + 2.0s spacing stays well under
-    # the limit and avoids 429 backoff cascades. ~12 min for 172 champions.
+    # rate limit. 1 worker + 3.0s spacing, 2 requests per champion (overview
+    # + matchups). ~18 min for 172 champions.
     empty_champs = []
     with ThreadPoolExecutor(max_workers=1) as pool:
         futures = {pool.submit(_process_champ, c): c for c in champions}

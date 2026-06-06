@@ -14,7 +14,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 25     # HTTP-only with rate limiting, ~12-18 min
+    timeout-minutes: 30     # HTTP-only with rate limiting, ~18-22 min
 
     steps:
       - uses: actions/checkout@v4
