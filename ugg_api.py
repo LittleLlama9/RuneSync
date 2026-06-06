@@ -233,7 +233,8 @@ class UGGClient:
                 return fallback
             raise RuntimeError(
                 f"No bundled build for {champion_name} "
-                f"(patch {_bundle.get('patch','?')})."
+                f"(patch {_bundle.get('patch','?')}). "
+                f"Data bundle may be incomplete — try restarting RuneSync."
             )
         # Legacy server path
         result = _get("/build", {

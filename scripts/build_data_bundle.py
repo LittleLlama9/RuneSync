@@ -25,6 +25,7 @@ import json
 import ssl
 import sys
 import time
+import threading
 import urllib.request
 import urllib.error
 from pathlib import Path
@@ -45,14 +46,49 @@ ROLE_WEIGHT_THRESHOLD = 0.05
 _SSL_CTX = ssl.create_default_context()
 _HEADERS = {"User-Agent": "RuneSync/1.0"}
 
+# Global throttle: minimum delay between any two HTTP requests to stats2.u.gg.
+_request_lock = threading.Lock()
+_last_request_time = 0.0
+_REQUEST_SPACING = 2.0  # seconds between requests — u.gg allows ~30 req/min
+_global_backoff_until = 0.0  # when a 429 hits, all threads pause until this time
+
 # ── HTTP helpers ──────────────────────────────────────────────────────────────
 
-def _fetch_json(url: str, retries: int = 2) -> dict | list | None:
+def _throttle():
+    global _last_request_time, _global_backoff_until
+    # If another thread hit a 429 recently, wait for the global cooldown
+    now = time.time()
+    if now < _global_backoff_until:
+        time.sleep(_global_backoff_until - now)
+    with _request_lock:
+        now = time.time()
+        wait = _REQUEST_SPACING - (now - _last_request_time)
+        if wait > 0:
+            time.sleep(wait)
+        _last_request_time = time.time()
+
+
+def _fetch_json(url: str, retries: int = 4) -> dict | list | None:
+    global _global_backoff_until
+    _throttle()
     for attempt in range(retries + 1):
         try:
             req = urllib.request.Request(url, headers=_HEADERS)
             with urllib.request.urlopen(req, context=_SSL_CTX, timeout=30) as r:
                 return json.loads(r.read())
+        except urllib.error.HTTPError as e:
+            if e.code == 429:
+                backoff = min(2 ** attempt * 2, 30)
+                _global_backoff_until = time.time() + backoff
+                print(f"[fetch] 429 rate-limited, backing off {backoff}s "
+                      f"(attempt {attempt+1}/{retries+1})", flush=True)
+                time.sleep(backoff)
+                continue
+            if attempt < retries:
+                time.sleep(1)
+            else:
+                print(f"[fetch] FAIL {url}: HTTP {e.code}", flush=True)
+                return None
         except Exception as e:
             if attempt < retries:
                 time.sleep(1)
@@ -328,7 +364,9 @@ def build_bundle(limit: int | None, threshold: float, output_path: Path) -> dict
         print(f"[bundle] [{done_count[0]}/{len(champions)}] "
               f"{champ} -> {roles_for_champ}", flush=True)
 
-        # Builds — one HTTP call per champion (overview endpoint)
+        # Builds — one HTTP call per champion (overview endpoint).
+        # fetch_build returns None on HTTP failures AND on legitimate
+        # low-sample-size roles, so we only flag it if ALL roles are empty.
         for role in roles_for_champ:
             try:
                 b = fetch_build(patch, api_ver, champ_id, champ, role)
@@ -337,6 +375,8 @@ def build_bundle(limit: int | None, threshold: float, output_path: Path) -> dict
             except Exception as e:
                 local_failures.append(f"build:{champ}:{role}:{e}")
                 print(f"[bundle] FAIL build {champ}/{role}: {e}", flush=True)
+        if not local_builds:
+            local_failures.append(f"build:{champ}:all_roles_empty")
 
         # Matchups + counters — one HTTP call per champion
         try:
@@ -350,8 +390,11 @@ def build_bundle(limit: int | None, threshold: float, output_path: Path) -> dict
 
         return champ, local_builds, local_counters, local_matchups, local_failures
 
-    # 10 parallel threads — HTTP calls, no browser overhead
-    with ThreadPoolExecutor(max_workers=10) as pool:
+    # Sequential with throttle — stats2.u.gg has an aggressive sliding-window
+    # rate limit (~30 req/min). 1 worker + 2.0s spacing stays well under
+    # the limit and avoids 429 backoff cascades. ~12 min for 172 champions.
+    empty_champs = []
+    with ThreadPoolExecutor(max_workers=1) as pool:
         futures = {pool.submit(_process_champ, c): c for c in champions}
         for future in as_completed(futures):
             champ, b, c, m, f = future.result()
@@ -360,6 +403,13 @@ def build_bundle(limit: int | None, threshold: float, output_path: Path) -> dict
             counters[ckey] = c
             matchups[ckey] = m
             failures.extend(f)
+            if not b:
+                empty_champs.append(champ)
+
+    if empty_champs:
+        print(f"[bundle] WARNING: {len(empty_champs)} champions got no build data "
+              f"(likely rate-limited): {empty_champs[:10]}{'...' if len(empty_champs) > 10 else ''}",
+              flush=True)
 
     bundle = {
         "schema_version": 2,

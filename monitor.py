@@ -355,7 +355,7 @@ class ChampSelectMonitor:
         try:
             counters = self.ugg.get_counters(enemy_champ, role=role, top_n=5)
             if counters is None or len(counters) == 0:
-                self.log(f"  ⚠  No counter data for {enemy_champ} — may be a new/untracked champ on u.gg", "warn")
+                self.log(f"  ⚠  No counter data for {enemy_champ} — data bundle may be incomplete", "warn")
                 return
             self.log(f"  ✓  Top counters vs {enemy_champ}:", "success")
             for i, c in enumerate(counters, 1):

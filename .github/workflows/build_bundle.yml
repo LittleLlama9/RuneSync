@@ -14,7 +14,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10     # HTTP-only, typically finishes in ~30s
+    timeout-minutes: 25     # HTTP-only with rate limiting, ~12-18 min
 
     steps:
       - uses: actions/checkout@v4
@@ -30,10 +30,23 @@ jobs:
           python scripts/build_data_bundle.py \
             --output artifacts/data_bundle.json
 
-      - name: Show bundle stats
+      - name: Validate bundle completeness
         run: |
           ls -lh artifacts/data_bundle.json
-          python -c "import json; d=json.load(open('artifacts/data_bundle.json')); print('champs:', d['champion_count'], 'patch:', d['patch'], 'failures:', len(d.get('failures',[])))"
+          python -c "
+          import json, sys
+          d = json.load(open('artifacts/data_bundle.json'))
+          builds = d.get('builds', {})
+          total = len(builds)
+          with_data = sum(1 for v in builds.values() if v)
+          empty = total - with_data
+          pct = with_data / total * 100 if total else 0
+          print(f'patch: {d.get(\"patch\")}  champs: {total}  with_data: {with_data}  empty: {empty}  coverage: {pct:.0f}%')
+          print(f'failures: {len(d.get(\"failures\", []))}')
+          if pct < 90:
+              print(f'FAIL: only {pct:.0f}% coverage (need 90%+). Bundle likely rate-limited.')
+              sys.exit(1)
+          "
 
       - name: Upload bundle as Release asset
         uses: softprops/action-gh-release@v2
