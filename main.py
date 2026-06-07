@@ -1,5 +1,5 @@
 """RuneSync — auto rune importer with per-champion overrides."""
-import sys, threading, tkinter as tk, ctypes, ctypes.wintypes
+import sys, threading, tkinter as tk, ctypes
 from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 import os
@@ -27,8 +27,6 @@ BLUE    = "#1e4a8a"
 BLUE_H  = "#2560b0"
 RED     = "#5c1e1e"
 RED_H   = "#7a2525"
-
-GAME_SIZE = (1100, 750)
 
 import queue as _queue_mod
 _log_queue = _queue_mod.Queue()  # replaced by init_logging() at startup
@@ -96,35 +94,6 @@ def _make_spell_pair_icon(spell1_id: int, spell2_id: int) -> "ImageTk.PhotoImage
     photo = ImageTk.PhotoImage(composite)
     _spell_image_cache[cache_key] = photo
     return photo
-
-
-def _get_second_monitor_geometry():
-    """Return (left, top, width, height) of first non-primary monitor, or None."""
-    class RECT(ctypes.Structure):
-        _fields_ = [("left", ctypes.c_long), ("top", ctypes.c_long),
-                    ("right", ctypes.c_long), ("bottom", ctypes.c_long)]
-    class MONITORINFO(ctypes.Structure):
-        _fields_ = [("cbSize", ctypes.c_ulong), ("rcMonitor", RECT),
-                    ("rcWork", RECT), ("dwFlags", ctypes.c_ulong)]
-    result = []
-    # Use pointer-sized types for handles and LPARAM (64-bit Windows requires this)
-    MONITORENUMPROC = ctypes.WINFUNCTYPE(
-        ctypes.c_int, ctypes.c_size_t, ctypes.c_size_t,
-        ctypes.POINTER(RECT), ctypes.c_size_t)
-    def callback(hMon, hdc, lprc, data):
-        info = MONITORINFO()
-        info.cbSize = ctypes.sizeof(MONITORINFO)
-        ok = ctypes.windll.user32.GetMonitorInfoW(hMon, ctypes.byref(info))
-        if not ok:
-            return 1  # GetMonitorInfoW failed, skip this monitor
-        if info.dwFlags != 1:  # not primary
-            r = info.rcMonitor
-            result.append((r.left, r.top, r.right - r.left, r.bottom - r.top))
-            return 0  # stop after first secondary found
-        return 1
-    cb = MONITORENUMPROC(callback)  # keep reference alive
-    ctypes.windll.user32.EnumDisplayMonitors(None, None, cb, 0)
-    return result[0] if result else None
 
 
 def make_btn(parent, text, cmd, bg=BLUE, hov=BLUE_H, **kw):
@@ -374,7 +343,6 @@ class RuneSyncApp:
         self.ugg       = UGGClient()
         self.monitor   = None
         self.running   = False
-        self._saved_geometry: str | None = None
         # Game overlay state
         self._game_champ: str       = ""
         self._game_enemy: str       = ""
@@ -462,9 +430,19 @@ class RuneSyncApp:
         if not self.lcu.connected:
             threading.Thread(target=self._try_connect, kwargs={"startup": False}, daemon=True).start()
 
+    def _on_monitor_league_closed(self):
+        """Monitor detected LCU gone — stop monitoring, stay alive for reconnect."""
+        self._stop()
+        self.lcu.connected = False
+        self._set_status("Disconnected — waiting for League", GOLD)
+        self._emit("League client closed — waiting for it to reopen...", "warn")
+
     def _on_league_close(self):
-        """League just closed — stay in tray, no-op."""
-        pass
+        """League just closed — stop monitoring, reset LCU, stay in tray."""
+        if self.running:
+            self.root.after(0, self._stop)
+        self.lcu.connected = False
+        self.root.after(0, lambda: self._set_status("Disconnected", GOLD))
 
     def _toggle_debug_tab(self):
         """Ctrl+Shift+D: build the Debug Log tab on first press, select it after."""
@@ -933,7 +911,7 @@ class RuneSyncApp:
             auto_role=self.arole_v.get(),
             on_game_start=lambda: self.root.after(0, self._on_game_start),
             on_game_end=lambda: self.root.after(0, self._on_game_end),
-            on_league_closed=lambda: self.root.after(0, self.root.quit),
+            on_league_closed=lambda: self.root.after(0, self._on_monitor_league_closed),
             on_matchup_winrate=self._on_matchup_winrate,
             on_item_build=self._on_item_build,
         )
@@ -1023,22 +1001,9 @@ class RuneSyncApp:
         self._game_frame.pack(fill="both", expand=True, padx=16, pady=(0, 10))
         self._update_game_overlay()
 
-        mon = _get_second_monitor_geometry()
-        if mon is None:
-            self._emit("  ⚠ No second monitor — overlay shown on current screen", "warn")
-            return
-        self._saved_geometry = self.root.geometry()
-        ml, mt, mw, mh = mon
-        x = ml + mw - GAME_SIZE[0] - 40
-        y = mt + (mh - GAME_SIZE[1]) // 2 - 50
-        self._emit(f"  → Moving to monitor at ({ml},{mt}) → window +{x}+{y}", "info")
-        self.root.resizable(True, True)
-        self.root.geometry(f"{GAME_SIZE[0]}x{GAME_SIZE[1]}+{x}+{y}")
-        self.root.resizable(False, False)
         self.root.lift()
         self.root.attributes("-topmost", True)
         self.root.after(3000, lambda: self.root.attributes("-topmost", False))
-        self._emit("Game started — overlay active on second monitor", "success")
 
     def _on_game_end(self):
         self._in_game_overlay = False
@@ -1046,12 +1011,7 @@ class RuneSyncApp:
             self._game_frame.pack_forget()
         self.nb.pack(fill="both", expand=True, padx=16, pady=(0, 10))
         self.nb.select(0)
-        if self._saved_geometry:
-            self.root.resizable(True, True)
-            self.root.geometry(self._saved_geometry)
-            self.root.resizable(False, False)
-            self._saved_geometry = None
-        self._emit("Game ended — window restored", "info")
+        self._emit("Game ended.", "info")
 
     # ── overrides ─────────────────────────────────────────────────────────────
     def _refresh_tree(self):
