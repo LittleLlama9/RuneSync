@@ -516,6 +516,8 @@ class RuneSyncApp:
         bf = tk.Frame(f, bg=PANEL); bf.pack(side="bottom", fill="x", padx=14, pady=(0,10))
         self.sbtn = make_btn(bf, "▶  Start Monitoring", self._toggle, GREEN, GREEN_H)
         self.sbtn.pack(side="left")
+        self.reimport_btn = make_btn(bf, "↻ Reimport", self._reimport, BLUE, BLUE_H)
+        self.reimport_btn.pack(side="left", padx=(8, 0))
         make_btn(bf, "Clear Log", self._clear, "#2a2d3a","#3a3d4a").pack(side="right")
 
         # Matchup override bar
@@ -924,6 +926,23 @@ class RuneSyncApp:
         self.sbtn.bind("<Enter>", lambda e: self.sbtn.configure(bg=GREEN_H))
         self.sbtn.bind("<Leave>", lambda e: self.sbtn.configure(bg=GREEN))
         self._emit("──── Monitoring stopped ────", "warn")
+
+    def _reimport(self):
+        if not self.monitor or not self.running:
+            self._emit("Start monitoring first.", "warn")
+            return
+        champ = self.monitor._my_champ
+        if not champ:
+            self._emit("No champion detected yet — pick or hover a champion first.", "warn")
+            return
+        self._emit(f"Reimporting build for {champ}...", "info")
+        session = self.lcu.get_champ_select_session()
+        if not session:
+            self._emit("Not in champion select.", "warn")
+            return
+        threading.Thread(
+            target=self.monitor._import_runes, args=(champ, session), daemon=True
+        ).start()
 
     def _on_item_build(self, items: list, is_custom: bool):
         text = "  ▸  ".join(str(i) for i in items) if items else "—"
