@@ -3,7 +3,7 @@ LCU (League Client Update) API client.
 Connects to the League client's internal HTTPS server via the lockfile.
 """
 
-import os, ssl, json, base64, subprocess, urllib.request, urllib.error
+import os, ssl, json, base64, subprocess, sys, urllib.request, urllib.error
 from pathlib import Path
 from typing import Optional
 
@@ -34,6 +34,7 @@ class LCUClient:
         self._port: Optional[int] = None
         self._password: Optional[str] = None
         self._summoner_id: Optional[int] = None
+        self._perk_meta: dict = {}  # {perk_id: (tree_id, row_index)}
         self._ssl_ctx = ssl.create_default_context()
         self._ssl_ctx.check_hostname = False
         self._ssl_ctx.verify_mode = ssl.CERT_NONE
@@ -51,6 +52,50 @@ class LCUClient:
             self.connected = True
         except Exception as e:
             raise LCUConnectionError(f"LCU reachable but request failed: {e}")
+        self._load_perk_metadata()
+
+    def _load_perk_metadata(self):
+        """Fetch perk tree/row mapping from the LCU so we can sort selectedPerkIds."""
+        try:
+            styles = self._get("/lol-perks/v1/styles")
+            meta = {}
+            for style in styles:
+                tree_id = style.get("id", 0)
+                for row_idx, slot in enumerate(style.get("slots", [])):
+                    for perk in slot.get("perks", []):
+                        meta[perk] = (tree_id, row_idx)
+            self._perk_meta = meta
+        except Exception as e:
+            print(f"[lcu] perk metadata load failed (non-fatal): {e}", file=sys.stderr)
+
+    def _sort_perk_ids(self, perk_ids: list, primary_id: int, secondary_id: int) -> list:
+        """Sort selectedPerkIds into correct LCU positional order.
+
+        Order: [keystone, row1, row2, row3, secondary1, secondary2, shard1, shard2, shard3]
+        """
+        if not self._perk_meta or len(perk_ids) < 9:
+            return perk_ids
+
+        rune_perks = perk_ids[:6]
+        shard_perks = perk_ids[6:9]
+
+        primary = []
+        secondary = []
+        for pid in rune_perks:
+            tree_id, row = self._perk_meta.get(pid, (0, 99))
+            if tree_id == primary_id:
+                primary.append((row, pid))
+            elif tree_id == secondary_id:
+                secondary.append((row, pid))
+            else:
+                if len(primary) < 4:
+                    primary.append((row, pid))
+                else:
+                    secondary.append((row, pid))
+
+        primary.sort()
+        secondary.sort()
+        return [pid for _, pid in primary] + [pid for _, pid in secondary] + shard_perks
 
     def _find_lockfile(self) -> Optional[Path]:
         env_path = os.environ.get("RUNESYNC_LOCKFILE")
@@ -262,11 +307,12 @@ class LCUClient:
                 print(f"[lcu] deleted page '{to_delete.get('name')}' (id={to_delete['id']})", file=sys.stderr)
         except Exception as e:
             print(f"[lcu] page cleanup error: {e}", file=sys.stderr)
+        sorted_perks = self._sort_perk_ids(perk_ids, primary_id, secondary_id)
         body = {
             "name": name,
             "primaryStyleId": primary_id,
             "subStyleId": secondary_id,
-            "selectedPerkIds": perk_ids,
+            "selectedPerkIds": sorted_perks,
             "current": True,
         }
         try:

@@ -119,6 +119,25 @@ def fetch_champion_map(patch: str) -> dict:
     return id_to_name, name_to_id
 
 
+def fetch_perk_metadata(patch: str) -> dict:
+    """Return {perk_id: (tree_id, row_index)} from ddragon runesReforged."""
+    url = f"https://ddragon.leagueoflegends.com/cdn/{patch}/data/en_US/runesReforged.json"
+    data = _fetch_json(url)
+    if not data:
+        return {}
+    perk_meta = {}
+    for tree in data:
+        tree_id = tree["id"]
+        for row_idx, slot in enumerate(tree.get("slots", [])):
+            for rune in slot.get("runes", []):
+                perk_meta[rune["id"]] = (tree_id, row_idx)
+    return perk_meta
+
+
+# Module-level perk metadata, populated during build_bundle()
+_PERK_META: dict = {}
+
+
 # ── u.gg API version discovery ────────────────────────────────────────────────
 
 def fetch_api_version(patch: str) -> str:
@@ -164,6 +183,37 @@ def fetch_role_weights(patch: str, api_ver: str, id_to_name: dict) -> dict:
     return weights
 
 
+# ── perk sorting ─────────────────────────────────────────────────────────────
+
+def _sort_perk_ids(perk_ids: list, primary_tree: int, secondary_tree: int) -> list:
+    """Sort 6 rune perk IDs into LCU positional order.
+
+    Expected order: [keystone, row1, row2, row3, secondary1, secondary2]
+    where primary perks come first (sorted by row), then secondary (sorted by row).
+    """
+    if not _PERK_META or len(perk_ids) < 6:
+        return perk_ids  # no metadata available, return as-is
+
+    primary_perks = []
+    secondary_perks = []
+    for pid in perk_ids:
+        tree_id, row = _PERK_META.get(pid, (0, 99))
+        if tree_id == primary_tree:
+            primary_perks.append((row, pid))
+        elif tree_id == secondary_tree:
+            secondary_perks.append((row, pid))
+        else:
+            # Unknown tree — append to whichever has fewer to maintain count
+            if len(primary_perks) < 4:
+                primary_perks.append((row, pid))
+            else:
+                secondary_perks.append((row, pid))
+
+    primary_perks.sort()
+    secondary_perks.sort()
+    return [pid for _, pid in primary_perks] + [pid for _, pid in secondary_perks]
+
+
 # ── build extraction from overview endpoint ───────────────────────────────────
 
 def fetch_overview_data(patch: str, api_ver: str, champ_id: str) -> dict | None:
@@ -204,7 +254,15 @@ def extract_build(data: dict, champ_name: str, role: str) -> dict | None:
     shard_ids = []
     if isinstance(shards, list) and len(shards) > 2 and isinstance(shards[2], list):
         shard_ids = [int(s) for s in shards[2] if str(s).isdigit()]
-    selected_perk_ids = perk_ids[:6] + (shard_ids[:3] if shard_ids else [5008, 5008, 5001])
+
+    primary_tree = runes[2] if len(runes) > 2 else 8000
+    secondary_tree = runes[3] if len(runes) > 3 else 8100
+
+    # Sort perk IDs into correct LCU order: [keystone, row1, row2, row3, sec1, sec2].
+    # The u.gg API returns them in arbitrary (numeric) order, but the LCU
+    # interprets selectedPerkIds positionally.
+    sorted_perks = _sort_perk_ids(perk_ids[:6], primary_tree, secondary_tree)
+    selected_perk_ids = sorted_perks + (shard_ids[:3] if shard_ids else [5008, 5008, 5001])
 
     if len(selected_perk_ids) < 9:
         print(f"[bundle] build {champ_name}/{role}: only {len(selected_perk_ids)} perks, skipping", flush=True)
@@ -322,6 +380,7 @@ def relevant_roles(champ: str, role_weights: dict, threshold: float) -> list[str
 
 
 def build_bundle(limit: int | None, threshold: float, output_path: Path) -> dict:
+    global _PERK_META
     started_at = time.time()
     print(f"[bundle] starting at {time.strftime('%Y-%m-%d %H:%M:%S')}", flush=True)
 
@@ -330,6 +389,9 @@ def build_bundle(limit: int | None, threshold: float, output_path: Path) -> dict
 
     api_ver = fetch_api_version(patch)
     print(f"[bundle] API version: {api_ver}", flush=True)
+
+    _PERK_META = fetch_perk_metadata(patch)
+    print(f"[bundle] perk metadata: {len(_PERK_META)} perks loaded", flush=True)
 
     id_to_name, name_to_id = fetch_champion_map(patch)
     champions = sorted(id_to_name.values())
