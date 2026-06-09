@@ -2,7 +2,8 @@
 build_data_bundle.py — Pre-compute the full u.gg data bundle for RuneSync.
 
 Primary source: stats2.u.gg JSON API (static CDN endpoints).
-Fallback:       op.gg champion API (when u.gg is Cloudflare-blocked).
+Tier 2:         u.gg via headless Cloudflare bypass (solve challenge once, reuse cookie).
+Tier 3:         op.gg champion API (when u.gg is fully unreachable).
 
 What the bundle contains:
   - patch:        current patch string (from ddragon)
@@ -47,6 +48,70 @@ _global_backoff_until = 0.0
 
 # Module-level perk metadata, populated during build_bundle()
 _PERK_META: dict = {}
+
+# Cloudflare bypass: seleniumbase UC mode browser session (kept alive for reuse)
+_uc_sb = None   # SB context manager instance
+_uc_mgr = None  # the context manager itself (for cleanup)
+
+# ── Cloudflare bypass ────────────────────────────────────────────────────────
+
+def _init_uc_browser(probe_url: str) -> bool:
+    """Start a seleniumbase UC-mode browser and verify it bypasses Cloudflare.
+    The browser stays open so _fetch_json_uc() can reuse it.
+    Requires seleniumbase; skips silently if missing."""
+    global _uc_sb, _uc_mgr
+    try:
+        from seleniumbase import SB
+    except ImportError:
+        print("[cf-bypass] seleniumbase not installed, skipping", flush=True)
+        return False
+
+    print("[cf-bypass] launching UC-mode browser...", flush=True)
+    try:
+        _uc_mgr = SB(uc=True, headless=True, test=True)
+        _uc_sb = _uc_mgr.__enter__()
+        _uc_sb.uc_open_with_reconnect(probe_url, reconnect_time=4)
+        body = _uc_sb.execute_script("return document.body.innerText")
+        if body and len(body) > 100 and not body.startswith("<!"):
+            print(f"[cf-bypass] UC browser bypassed Cloudflare ({len(body)} chars)",
+                  flush=True)
+            return True
+        print(f"[cf-bypass] UC browser got challenge page, not data", flush=True)
+        _close_uc_browser()
+        return False
+    except Exception as e:
+        print(f"[cf-bypass] UC browser failed: {e}", flush=True)
+        _close_uc_browser()
+        return False
+
+
+def _close_uc_browser():
+    """Shut down the UC browser session if it's open."""
+    global _uc_sb, _uc_mgr
+    if _uc_mgr is not None:
+        try:
+            _uc_mgr.__exit__(None, None, None)
+        except Exception:
+            pass
+    _uc_sb = None
+    _uc_mgr = None
+
+
+def _fetch_json_uc(url: str) -> dict | list | None:
+    """Fetch a JSON URL through the UC-mode browser."""
+    if _uc_sb is None:
+        return None
+    _throttle()
+    try:
+        _uc_sb.open(url)
+        body = _uc_sb.execute_script("return document.body.innerText")
+        if not body:
+            return None
+        return json.loads(body)
+    except Exception as e:
+        print(f"[cf-bypass] fetch failed {url}: {e}", flush=True)
+        return None
+
 
 # ── HTTP helpers ─────────────────────────────────────────────────────────────
 
@@ -202,9 +267,16 @@ def ugg_is_available(patch: str, api_ver: str) -> bool:
         return True
 
 
+def _ugg_fetch(url: str) -> dict | list | None:
+    """Fetch a u.gg URL, routing through UC browser if active."""
+    if _uc_sb is not None:
+        return _fetch_json_uc(url)
+    return _fetch_json(url)
+
+
 def fetch_role_weights_ugg(patch: str, api_ver: str, id_to_name: dict) -> dict:
     url = _stats_url("primary_roles", patch, api_ver)
-    data = _fetch_json(url)
+    data = _ugg_fetch(url)
     if not data:
         return {}
     weights = {}
@@ -224,7 +296,7 @@ def fetch_role_weights_ugg(patch: str, api_ver: str, id_to_name: dict) -> dict:
 
 def fetch_overview_data(patch: str, api_ver: str, champ_id: str) -> dict | None:
     url = _stats_url("overview", patch, api_ver, champ_id)
-    return _fetch_json(url)
+    return _ugg_fetch(url)
 
 
 def extract_build_ugg(data: dict, champ_name: str, role: str) -> dict | None:
@@ -293,7 +365,7 @@ def fetch_matchups_and_counters_ugg(
     roles: list, id_to_name: dict, role_weights: dict = None
 ) -> tuple[dict, dict]:
     url = _stats_url("matchups", patch, api_ver, champ_id)
-    data = _fetch_json(url)
+    data = _ugg_fetch(url)
     if not data:
         return {}, {}
 
@@ -519,10 +591,20 @@ def build_bundle(limit: int | None, threshold: float, output_path: Path) -> dict
         print(f"[bundle] LIMITED to first {limit} champions: {champions}", flush=True)
     print(f"[bundle] {len(champions)} champions to process", flush=True)
 
-    # Detect data source: try u.gg first, fall back to op.gg
+    # Detect data source: u.gg direct -> u.gg via UC browser -> op.gg
     api_ver = fetch_api_version(patch)
     use_ugg = ugg_is_available(patch, api_ver)
-    source = "u.gg" if use_ugg else "op.gg"
+    use_uc = False
+    if use_ugg:
+        source = "u.gg"
+    else:
+        probe_url = _stats_url("primary_roles", patch, api_ver)
+        if _init_uc_browser(probe_url):
+            use_ugg = True
+            use_uc = True
+            source = "u.gg+uc"
+        else:
+            source = "op.gg"
     print(f"[bundle] source: {source}", flush=True)
 
     if use_ugg:
@@ -616,6 +698,9 @@ def build_bundle(limit: int | None, threshold: float, output_path: Path) -> dict
         "matchups": matchups,
         "failures": failures,
     }
+
+    if use_uc:
+        _close_uc_browser()
 
     output_path.write_text(json.dumps(bundle, separators=(",", ":")), encoding="utf-8")
     elapsed = int(time.time() - started_at)
