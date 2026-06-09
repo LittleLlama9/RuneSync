@@ -1,6 +1,6 @@
 name: Build Data Bundle
 
-# Fetches build, counter, and matchup data from u.gg's static JSON API
+# Fetches build/counter/matchup data from u.gg (primary) or op.gg (fallback)
 # and uploads data_bundle.json as a GitHub Release asset. No browser needed.
 
 on:
@@ -42,6 +42,7 @@ jobs:
           empty = total - with_data
           pct = with_data / total * 100 if total else 0
           print(f'patch: {d.get(\"patch\")}  champs: {total}  with_data: {with_data}  empty: {empty}  coverage: {pct:.0f}%')
+          print(f'source: {d.get(\"source\", \"unknown\")}')
           print(f'failures: {len(d.get(\"failures\", []))}')
           if pct < 90:
               print(f'FAIL: only {pct:.0f}% coverage (need 90%+). Bundle likely rate-limited.')
@@ -54,7 +55,7 @@ jobs:
           tag_name: data-bundle
           name: "Data Bundle (auto-updated)"
           body: |
-            Auto-generated from u.gg stats API, refreshed daily.
+            Auto-generated from u.gg (primary) or op.gg (fallback), refreshed daily.
             The RuneSync client downloads `data_bundle.json` from this
             release on startup.
           files: artifacts/data_bundle.json
