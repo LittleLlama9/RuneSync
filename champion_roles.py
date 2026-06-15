@@ -202,13 +202,17 @@ def _is_plausible_dist(roles: dict) -> bool:
     """
     A healthy lane% distribution sums to ~100% with no two roles near 100%.
     Mirrors the scraper's sanity check so a corrupt cache entry (e.g. an old
-    cache scraped before the scraper fix) is rejected client-side too.
+    cache scraped before the scraper fix, or synthetic WEIGHT_MAP values from
+    the bundle builder) is rejected client-side too.
     """
     if not roles:
         return False
     total = sum(roles.values())
     near_max = sum(1 for v in roles.values() if v >= 90.0)
-    return total <= 130.0 and near_max < 2
+    # Reject both inflated (>130%) and deflated (<50%) distributions.
+    # The bundle builder's WEIGHT_MAP produces totals ~1.43 — those are
+    # synthetic rank-order weights, not real percentages.
+    return 50.0 <= total <= 130.0 and near_max < 2
 
 
 def _load_weights() -> dict[str, dict[str, float]]:
@@ -276,6 +280,7 @@ def infer_roles(enemy_picks: list[str], my_role: str) -> str | None:
         return None
 
     CLAIM_THRESHOLD = 85.0  # above this %, a champ "claims" their role
+    CONFIDENT_WEIGHT_MIN = 35.0   # below this %, don't treat as a confident match
 
     # Build weight maps, skip unknowns
     champ_weights: dict[str, dict[str, float]] = {}
@@ -288,6 +293,7 @@ def infer_roles(enemy_picks: list[str], my_role: str) -> str | None:
         return None
 
     assigned: dict[str, str] = {}   # role -> champion name
+    low_confidence: dict[str, str] = {}  # role -> champ (weight too low)
 
     # Pass 1: high-confidence single-role claims
     # Collect ALL claimants per role, then pick the highest-confidence one.
@@ -310,12 +316,17 @@ def infer_roles(enemy_picks: list[str], my_role: str) -> str | None:
         key=lambda c: max(champ_weights[c].values()), reverse=True
     )
     for champ in unassigned:
-        for role, _ in sorted(champ_weights[champ].items(),
-                               key=lambda x: x[1], reverse=True):
-            if role not in assigned:
-                assigned[role] = champ
+        sorted_roles = sorted(champ_weights[champ].items(),
+                               key=lambda x: x[1], reverse=True)
+        for rank, (role, weight) in enumerate(sorted_roles):
+            if role not in assigned and role not in low_confidence:
+                if rank >= 2 or weight < CONFIDENT_WEIGHT_MIN:
+                    low_confidence[role] = champ
+                else:
+                    assigned[role] = champ
                 break
 
+    # Only return confident assignments — low-confidence ones aren't reliable
     return assigned.get(my_role)
 
 
@@ -336,6 +347,7 @@ def infer_full_assignment(enemy_picks: list[str]) -> tuple[dict[str, str], dict[
 
     CLAIM_THRESHOLD = 85.0
     GUESS_THRESHOLD = 10.0
+    CONFIDENT_WEIGHT_MIN = 35.0   # below this %, even 1st/2nd pref is a guess
 
     champ_weights: dict[str, dict[str, float]] = {}
     for c in enemy_picks:
@@ -361,18 +373,19 @@ def infer_full_assignment(enemy_picks: list[str]) -> tuple[dict[str, str], dict[
     unassigned = [c for c in champ_weights if c not in assigned.values()]
     unassigned.sort(key=lambda c: max(champ_weights[c].values()), reverse=True)
 
-    # Track champions forced onto their 3rd+ role — these are low-confidence
-    # and will be demoted to guesses rather than treated as confident picks.
+    # Track champions forced onto low-confidence roles — either their 3rd+
+    # preference OR any role where their weight is below CONFIDENT_WEIGHT_MIN
+    # (e.g. Pantheon top at 28.6% when support is taken by Rell).
     forced: dict[str, str] = {}  # role -> champ
 
     for champ in unassigned:
         sorted_roles = sorted(champ_weights[champ].items(), key=lambda x: x[1], reverse=True)
-        for rank, (role, _) in enumerate(sorted_roles):
+        for rank, (role, weight) in enumerate(sorted_roles):
             if role not in assigned:
-                if rank >= 2:
-                    forced[role] = champ   # 3rd+ preference — low confidence
+                if rank >= 2 or weight < CONFIDENT_WEIGHT_MIN:
+                    forced[role] = champ   # low confidence
                 else:
-                    assigned[role] = champ  # 1st or 2nd preference — confident
+                    assigned[role] = champ  # confident
                 break
 
     # Pass 3: for roles still unfilled, find any enemy champ with >= 10% in
