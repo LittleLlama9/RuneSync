@@ -8,11 +8,14 @@ of a champion's games are played in each role — this is the authoritative sign
 Key insight: a champion with 95% top / 5% jungle is almost certainly top lane.
 A champion with 55% top / 45% jungle is a genuine flex pick — context matters.
 
-The infer_roles() function uses a weighted constraint satisfaction algorithm:
-  1. Build a probability distribution over roles for each enemy champ.
-  2. Champions with very high role concentration (>80%) get strong priority.
-  3. Remaining ambiguous picks are resolved by highest remaining weight.
+The infer_roles() function uses optimal assignment:
+  1. Champions with very high role concentration (>85%) claim their role.
+  2. Remaining champions are assigned by brute-force search over all possible
+     role permutations, picking the assignment that maximizes total play-rate
+     weight. With at most 5 champions this is at most 120 candidates.
 """
+
+from itertools import permutations
 
 # Format: { "Champion": {"role": lane_pct, ...} }
 # lane_pct = % of games played in that role (from LoLalytics lane% column)
@@ -262,6 +265,40 @@ def get_primary_role(champion_name: str) -> str:
     return max(weights, key=weights.__getitem__)
 
 
+def _optimal_assign(champ_weights: dict, claimed: dict) -> dict[str, str]:
+    """
+    Assign remaining champions to remaining roles by maximizing total
+    play-rate weight. Prefers assignments where every champion has nonzero
+    weight (a 0-weight slot means we have no data for that champ in that
+    position). At most 5! = 120 candidates, so brute-force is fine.
+    """
+    ROLES = ("top", "jungle", "mid", "bot", "support")
+    champs = [c for c in champ_weights if c not in claimed.values()]
+    roles = [r for r in ROLES if r not in claimed]
+
+    if not champs or not roles:
+        return {}
+
+    best = (False, -1, {})  # (all_nonzero, score, mapping)
+
+    if len(champs) <= len(roles):
+        for rp in permutations(roles, len(champs)):
+            pairs = list(zip(champs, rp))
+            score = sum(champ_weights[c].get(r, 0) for c, r in pairs)
+            nz = all(champ_weights[c].get(r, 0) > 0 for c, r in pairs)
+            if (nz, score) > (best[0], best[1]):
+                best = (nz, score, {r: c for c, r in pairs})
+    else:
+        for cp in permutations(champs, len(roles)):
+            pairs = list(zip(cp, roles))
+            score = sum(champ_weights[c].get(r, 0) for c, r in pairs)
+            nz = all(champ_weights[c].get(r, 0) > 0 for c, r in pairs)
+            if (nz, score) > (best[0], best[1]):
+                best = (nz, score, {r: c for c, r in pairs})
+
+    return best[2]
+
+
 def infer_roles(enemy_picks: list[str], my_role: str) -> str | None:
     """
     Given a list of enemy champion names and your role, use weighted constraint
@@ -293,7 +330,6 @@ def infer_roles(enemy_picks: list[str], my_role: str) -> str | None:
         return None
 
     assigned: dict[str, str] = {}   # role -> champion name
-    low_confidence: dict[str, str] = {}  # role -> champ (weight too low)
 
     # Pass 1: high-confidence single-role claims
     # Collect ALL claimants per role, then pick the highest-confidence one.
@@ -309,24 +345,12 @@ def infer_roles(enemy_picks: list[str], my_role: str) -> str | None:
         _, best_champ = max(candidates, key=lambda x: x[0])
         assigned[role] = best_champ
 
-    # Pass 2: remaining champs fill best available unclaimed role
-    unassigned = [c for c in champ_weights if c not in assigned.values()]
-    # Sort by their best-role confidence descending so most certain picks go first
-    unassigned.sort(
-        key=lambda c: max(champ_weights[c].values()), reverse=True
-    )
-    for champ in unassigned:
-        sorted_roles = sorted(champ_weights[champ].items(),
-                               key=lambda x: x[1], reverse=True)
-        for rank, (role, weight) in enumerate(sorted_roles):
-            if role not in assigned and role not in low_confidence:
-                if rank >= 2 or weight < CONFIDENT_WEIGHT_MIN:
-                    low_confidence[role] = champ
-                else:
-                    assigned[role] = champ
-                break
+    # Pass 2: optimal assignment for remaining champions
+    optimal = _optimal_assign(champ_weights, assigned)
+    for role, champ in optimal.items():
+        if champ_weights[champ].get(role, 0) >= CONFIDENT_WEIGHT_MIN:
+            assigned[role] = champ
 
-    # Only return confident assignments — low-confidence ones aren't reliable
     return assigned.get(my_role)
 
 
@@ -370,29 +394,20 @@ def infer_full_assignment(enemy_picks: list[str]) -> tuple[dict[str, str], dict[
         _, best_champ = max(candidates, key=lambda x: x[0])
         assigned[role] = best_champ
 
-    unassigned = [c for c in champ_weights if c not in assigned.values()]
-    unassigned.sort(key=lambda c: max(champ_weights[c].values()), reverse=True)
-
-    # Track champions forced onto low-confidence roles — either their 3rd+
-    # preference OR any role where their weight is below CONFIDENT_WEIGHT_MIN
-    # (e.g. Pantheon top at 28.6% when support is taken by Rell).
-    forced: dict[str, str] = {}  # role -> champ
-
-    for champ in unassigned:
-        sorted_roles = sorted(champ_weights[champ].items(), key=lambda x: x[1], reverse=True)
-        for rank, (role, weight) in enumerate(sorted_roles):
-            if role not in assigned:
-                if rank >= 2 or weight < CONFIDENT_WEIGHT_MIN:
-                    forced[role] = champ   # low confidence
-                else:
-                    assigned[role] = champ  # confident
-                break
-
-    # Pass 3: for roles still unfilled, find any enemy champ with >= 10% in
-    # that role (including champs already assigned elsewhere — flex picks).
+    # Pass 2: optimal assignment for remaining champions
+    optimal = _optimal_assign(champ_weights, assigned)
     guesses: dict[str, str] = {}
+    for role, champ in optimal.items():
+        weight = champ_weights[champ].get(role, 0)
+        if weight >= CONFIDENT_WEIGHT_MIN:
+            assigned[role] = champ
+        elif weight > 0:
+            guesses[role] = champ
+
+    # Pass 3: for roles still unfilled (fewer enemies than roles), find any
+    # enemy champ with >= 10% in that role as a flex-pick guess.
     for role in ("top", "jungle", "mid", "bot", "support"):
-        if role in assigned:
+        if role in assigned or role in guesses:
             continue
         candidates = [
             (weights.get(role, 0.0), champ)
@@ -401,10 +416,5 @@ def infer_full_assignment(enemy_picks: list[str]) -> tuple[dict[str, str], dict[
         ]
         if candidates:
             guesses[role] = max(candidates)[1]
-
-    # Forced (3rd+ role) assignments fill guesses only when no better candidate exists
-    for role, champ in forced.items():
-        if role not in guesses:
-            guesses[role] = champ
 
     return assigned, guesses
