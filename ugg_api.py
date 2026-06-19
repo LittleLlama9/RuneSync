@@ -94,7 +94,15 @@ def _cache_path() -> str:
 
 
 def _try_load_disk_cache() -> Optional[dict]:
-    """Load the most recent bundle from disk if it's not too old."""
+    """Load the most recent bundle from disk if it's not too old.
+
+    Note: staleness is TIME-based (12h TTL), deliberately NOT patch-based. The
+    bundle's `patch` legitimately lags ddragon — CI rebuilds it on a cron after
+    a patch ships — so comparing to ddragon's latest patch would reject the disk
+    cache on every launch during that lag window and re-download a bundle that
+    is STILL on the old patch (you can't get fresher data than CI has
+    published). The TTL already bounds staleness without that churn.
+    """
     path = _cache_path()
     if not os.path.exists(path):
         return None
@@ -226,15 +234,18 @@ class UGGClient:
             # Fallback: champ-select didn't report a position (autofill, custom
             # game, undocumented queue) OR the requested role isn't bundled —
             # pick the highest-pickrate role for this champ from role_weights.
+            # Bundle role_weights are FRACTIONS 0-1 (see role_updater's scale
+            # contract); only the ordering matters here, but x100 keeps the log
+            # readable as a real percentage.
             weights = _bundle.get("role_weights", {}).get(champion_name) or {}
             preferred = sorted(weights.items(), key=lambda kv: -kv[1])
-            for rname, _pct in preferred:
+            for rname, _frac in preferred:
                 rkey = {"top": "top", "jungle": "jungle", "mid": "mid",
                         "bot": "bot", "adc": "bot", "support": "support"}.get(rname, rname)
                 fallback = champ_builds.get(rkey)
                 if fallback:
                     print(f"[ugg] no '{role}' build for {champion_name}; "
-                          f"using {rkey} ({_pct:.1f}% pickrate)", file=sys.stderr)
+                          f"using {rkey} ({_frac * 100:.1f}% pickrate)", file=sys.stderr)
                     return fallback
             # Last resort: ANY role we have a build for.
             if champ_builds:

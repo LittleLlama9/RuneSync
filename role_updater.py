@@ -6,6 +6,19 @@ falls back to the legacy localhost server otherwise. Writes to
 role_weights_cache.json exactly as before, so champion_roles.py needs
 no changes.
 
+SCALE CONTRACT (the subtle bit): the cache — and therefore everything in
+champion_roles — is PERCENT scale (0-100), matching the hardcoded
+ROLE_WEIGHTS fallback table and champion_roles._is_plausible_dist()'s
+50-130 plausibility band. But the two upstream sources disagree:
+  - the data bundle ships FRACTIONS 0-1 (op.gg role_rate / u.gg synthetic
+    weights), because the bundle builder's role filters work on that scale;
+  - the legacy localhost scraper already returns PERCENT.
+So every fetched dict is run through _normalize_to_percent() at the single
+boundary (_fetch_role_weights) before it touches the cache. Before this was
+added the bundle's fraction weights were copied verbatim, _is_plausible_dist
+rejected all of them (total ~1.0 < 50), and the role cache silently fell back
+to the stale hardcoded table forever.
+
 Public API (unchanged):
   refresh_if_stale(background=True)
   refresh_roles_now() -> bool
@@ -41,6 +54,13 @@ def _resolve_cache_dir() -> str:
 
 CACHE_PATH = Path(_resolve_cache_dir()) / "role_weights_cache.json"
 
+# Bump when the SHAPE or SCALE of cached weights changes. A cache written by a
+# build that predates the fraction->percent normalization stores fraction-scale
+# weights that champion_roles rejects; treating any non-current format as stale
+# forces a one-time refresh so existing installs self-heal without waiting for a
+# patch rollover (which is otherwise the only thing that invalidates the cache).
+ROLE_CACHE_FORMAT = 2
+
 
 # ── patch helpers ──────────────────────────────────────────────────────────
 
@@ -67,6 +87,7 @@ def load_cache() -> Optional[dict]:
 
 def save_cache(weights: dict, patch: str = "") -> None:
     data = {
+        "format_version": ROLE_CACHE_FORMAT,
         "updated_at": time.time(),
         "patch": patch or (get_latest_patch() or ""),
         "weights": weights,
@@ -78,6 +99,10 @@ def save_cache(weights: dict, patch: str = "") -> None:
 def cache_is_stale() -> bool:
     data = load_cache()
     if data is None:
+        return True
+    # A pre-normalization cache holds fraction-scale weights that the runtime
+    # rejects; force a refresh by treating any non-current format as stale.
+    if data.get("format_version") != ROLE_CACHE_FORMAT:
         return True
     cached_patch = data.get("patch", "")
     if cached_patch:
@@ -121,9 +146,45 @@ def _fetch_from_server() -> Optional[dict]:
         return None
 
 
+def _normalize_to_percent(weights: dict) -> dict:
+    """Coerce a role-weight dict to PERCENT scale (0-100), per the module's
+    scale contract.
+
+    Detection is per-champion and scale-aware: a real percent distribution sums
+    to roughly 40-150 (one dominant role plus secondaries), while a fraction one
+    sums to ~1 (op.gg role_rate) or up to ~1.43 (u.gg synthetic). Those bands are
+    far apart, so any champ whose weights sum at or below the cutoff is treated as
+    fractions and scaled up. Idempotent: already-percent data (e.g. from the
+    legacy scraper) passes through untouched, so this is safe to run on any
+    source's output.
+    """
+    if not isinstance(weights, dict):
+        return weights
+    FRACTION_CUTOFF = 5.0  # well above the ~1.43 max fraction total, well below
+                           # the ~40 min percent total — nothing lands between.
+    out = {}
+    for champ, roles in weights.items():
+        if isinstance(roles, dict) and roles:
+            nums = [v for v in roles.values() if isinstance(v, (int, float))]
+            total = sum(nums)
+            if 0 < total <= FRACTION_CUTOFF:
+                roles = {r: round(v * 100, 2)
+                         for r, v in roles.items()
+                         if isinstance(v, (int, float))}
+            else:
+                roles = dict(roles)  # copy: never alias the live _bundle's dicts
+        out[champ] = roles
+    return out
+
+
 def _fetch_role_weights() -> Optional[dict]:
-    """Prefer the data bundle; fall back to the localhost server."""
-    return _fetch_from_bundle() or _fetch_from_server()
+    """Prefer the data bundle; fall back to the localhost server.
+
+    Always returns PERCENT-scale weights regardless of source (the bundle ships
+    fractions, the server ships percent) — see _normalize_to_percent.
+    """
+    raw = _fetch_from_bundle() or _fetch_from_server()
+    return _normalize_to_percent(raw) if raw else None
 
 
 # ── public functions (same signatures as before) ───────────────────────────
