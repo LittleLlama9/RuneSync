@@ -252,6 +252,14 @@ class ChampSelectMonitor:
              b. Our role is NOT assigned yet (e.g. only Lux/Jinx/Zed picked,
                 we're top) → log "Waiting for enemy top laner..." once.
         """
+        # State 2: a manual override is active — the laner the user typed wins
+        # until they clear it or champ select resets (both null _matchup_override
+        # at lines 61/144/159). Without this guard the next enemy pick change
+        # re-runs inference and silently clobbers the override, defeating the
+        # "type a different name to override" feature.
+        if self._matchup_override:
+            return
+
         enemy_names = self._get_enemy_champ_names(session)
         if not enemy_names:
             return

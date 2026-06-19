@@ -406,13 +406,18 @@ def infer_full_assignment(enemy_picks: list[str]) -> tuple[dict[str, str], dict[
 
     # Pass 3: for roles still unfilled (fewer enemies than roles), find any
     # enemy champ with >= 10% in that role as a flex-pick guess.
+    # Exclude champs already placed (assigned OR guessed elsewhere) — otherwise
+    # a champ confidently in their main role also gets offered as a low-confidence
+    # guess for an empty role, producing a wrong enemy laner (e.g. 4 enemies
+    # locked, jungle empty -> a locked top laner gets guessed as enemy jungle).
     for role in ("top", "jungle", "mid", "bot", "support"):
         if role in assigned or role in guesses:
             continue
+        taken = set(assigned.values()) | set(guesses.values())
         candidates = [
             (weights.get(role, 0.0), champ)
             for champ, weights in champ_weights.items()
-            if weights.get(role, 0.0) >= GUESS_THRESHOLD
+            if champ not in taken and weights.get(role, 0.0) >= GUESS_THRESHOLD
         ]
         if candidates:
             guesses[role] = max(candidates)[1]

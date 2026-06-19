@@ -44,6 +44,17 @@ _bundle_loaded_at: float = 0.0
 _bundle_init_started = False
 _bundle_ready_event = threading.Event()
 _WINRATE_CACHE: dict = {}   # key -> {"patch": str, "result": dict}
+
+# Read-time winrate sanity backstop. The builder already clamps, but a stale or
+# pre-fix cached bundle can carry out-of-range values — the old op.gg path
+# shipped counter winrates up to 82% off ~10-game samples. These bounds mirror
+# the builder's clamps so such values can never reach the UI, even before a
+# client re-downloads a corrected bundle. Counters are one-sided (>50), so a
+# tight band; matchups get a wide garbage-only guard so legitimate lopsided
+# lanes still show.
+_COUNTER_WR_MIN, _COUNTER_WR_MAX = 40.0, 70.0
+_MATCHUP_WR_MIN, _MATCHUP_WR_MAX = 25.0, 75.0
+
 _patch_value: str = ""
 _patch_fetched_at: float = 0.0
 _PATCH_TTL: float = 6 * 3600
@@ -252,7 +263,13 @@ class UGGClient:
             entry = (_bundle.get("counters", {})
                             .get(enemy_champ.lower(), {})
                             .get(role) or [])
-            return entry[:top_n] if isinstance(entry, list) else []
+            if not isinstance(entry, list):
+                return []
+            entry = [c for c in entry
+                     if isinstance(c, dict)
+                     and isinstance(c.get("win_rate"), (int, float))
+                     and _COUNTER_WR_MIN <= c["win_rate"] <= _COUNTER_WR_MAX]
+            return entry[:top_n]
         result = _get("/counters", {
             "champion": enemy_champ, "role": role, "top_n": top_n,
         }, timeout=45)
@@ -275,7 +292,8 @@ class UGGClient:
                 # display name as scraped from u.gg).
                 for name, wr in my_table.items():
                     if isinstance(name, str) and name.lower() == enemy_lower \
-                            and isinstance(wr, (int, float)):
+                            and isinstance(wr, (int, float)) \
+                            and _MATCHUP_WR_MIN <= wr <= _MATCHUP_WR_MAX:
                         return {"win_rate": float(wr), "enemy": enemy_champ}
             # Fallback for older bundles or rare combos: derive from the
             # counters list ("best picks vs enemy" — hits when my_champ is a
@@ -289,7 +307,8 @@ class UGGClient:
                     if isinstance(entry, dict) and \
                             entry.get("champion", "").lower() == my_lower:
                         wr = entry.get("win_rate")
-                        if isinstance(wr, (int, float)):
+                        if isinstance(wr, (int, float)) \
+                                and _MATCHUP_WR_MIN <= wr <= _MATCHUP_WR_MAX:
                             return {"win_rate": float(wr), "enemy": enemy_champ}
             return None
         patch = _current_patch()
