@@ -4,6 +4,11 @@ echo  RuneSync Build Script
 echo ================================
 echo.
 
+:: Clear any previous completion sentinel so a stale result can't fool a
+:: poller (e.g. Claude Code's background-task watcher) into thinking we
+:: already finished. The sentinel is (re)written only when this run ends.
+del /q build_status.txt >nul 2>&1
+
 :: Kill running instances first
 echo [1/3] Stopping RuneSync processes...
 taskkill /F /IM RuneSync.exe /T >nul 2>&1
@@ -25,13 +30,20 @@ if exist icon.ico (
 )
 if errorlevel 1 (
     echo ERROR: RuneSync build failed!
-    pause
+    >build_status.txt echo FAIL
+    :: Only wait for a keypress when launched interactively (double-click).
+    :: Automation must pass "nopause" so the script EXITS instead of hanging
+    :: forever at "Press any key..." — that hang is what leaves Claude Code
+    :: background tasks "running" indefinitely.
+    if /i not "%~1"=="nopause" pause
     exit /b 1
 )
 
 echo [3/3] Build complete.
+>build_status.txt echo OK
 echo.
 echo ================================
 echo  RuneSync.exe is in dist\
 echo ================================
-pause
+:: See note above: skip the interactive pause under automation.
+if /i not "%~1"=="nopause" pause
