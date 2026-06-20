@@ -270,8 +270,14 @@ class OverrideEditorPage:
                 self.champ_v.set(detected)
             self._import_status.configure(
                 text=f"✓ Imported '{self._imported_page_name or 'page'}'", fg="#4caf73")
-        except Exception as ex:
+        except LCUConnectionError as ex:
+            # LCUConnectionError messages are already user-friendly (e.g. "Is the
+            # League client open?").
             self._import_status.configure(text=f"✗ {ex}", fg="#e05252")
+        except Exception:
+            # Anything else (KeyError, parse error, …) would dump Python jargon.
+            self._import_status.configure(
+                text="✗ Couldn't read your rune page — is League open?", fg="#e05252")
 
     def _detect_champ_in_name(self, page_name: str) -> str:
         if not page_name: return ""
