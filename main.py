@@ -432,7 +432,7 @@ class RuneSyncApp:
         """League just launched — bring RuneSync to the foreground and reconnect."""
         self.root.after(0, self._do_show_window)
         if not self.lcu.connected:
-            threading.Thread(target=self._try_connect, kwargs={"startup": False}, daemon=True).start()
+            threading.Thread(target=self._try_connect, daemon=True).start()
 
     def _on_monitor_league_closed(self):
         """Monitor detected LCU gone — stop monitoring, stay alive for reconnect.
@@ -881,7 +881,7 @@ class RuneSyncApp:
             self.dot.configure(fg=col)))
 
     # ── connect ───────────────────────────────────────────────────────────────
-    def _try_connect(self, *, startup: bool = True):
+    def _try_connect(self):
         # Atomic check-and-set: two callers (startup thread + _on_league_open)
         # racing here would otherwise both pass the check and double-connect.
         with self._connect_lock:
@@ -889,10 +889,17 @@ class RuneSyncApp:
                 return
             self._connecting = True
         try:
+            import time
             self._emit("Connecting to League client...", "info")
-            if startup:
-                import time; time.sleep(15)
-            for attempt in range(1, 4):  # 3 retries, 15s apart
+            self._set_status("Connecting…", GOLD)
+            # Try immediately (League is usually already running when the user
+            # opens RuneSync), then exponential backoff for the boot case where
+            # the client process is up but its LCU lockfile isn't written yet.
+            # No upfront blind wait. If we exhaust attempts, the LeaguePoller
+            # re-fires _on_league_open the next time League launches.
+            delay = 2
+            MAX_ATTEMPTS = 8  # ~1 min of backoff (2,4,8,10,10,...) before yielding
+            for attempt in range(1, MAX_ATTEMPTS + 1):
                 try:
                     self.lcu.connect()
                     self._emit("✓ Connected to League Client", "success")
@@ -900,13 +907,14 @@ class RuneSyncApp:
                     self.root.after(0, self._start)
                     return
                 except LCUConnectionError as e:
-                    if attempt < 3:
-                        self._emit(f"  Attempt {attempt}/3 failed — retrying in 15s...", "info")
-                        import time; time.sleep(15)
+                    if attempt < MAX_ATTEMPTS:
+                        self._set_status("Waiting for League…", GOLD)
+                        time.sleep(delay)
+                        delay = min(delay * 2, 10)
                     else:
-                        self._emit(f"✗ {e}", "warn")
-                        self._emit("  Open the League client then restart RuneSync.", "warn")
-                        self._set_status("Disconnected", GOLD)
+                        self._emit("League client not detected — RuneSync will "
+                                   "auto-connect when you open League.", "warn")
+                        self._set_status("Waiting for League…", GOLD)
         finally:
             with self._connect_lock:
                 self._connecting = False
