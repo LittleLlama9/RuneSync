@@ -502,12 +502,16 @@ class ChampSelectMonitor:
     def _maybe_refresh_roles(self):
         """Background thread: refresh role weights if patch changed (Brave must be running)."""
         try:
-            from champion_roles import needs_role_refresh
+            from champion_roles import needs_role_refresh, reload_weights
             from role_updater import refresh_roles_now
             if needs_role_refresh():
                 self.log("  → New patch detected — updating role weights...", "info")
                 ok = refresh_roles_now()
                 if ok:
+                    # Pull the freshly-written cache into the in-memory weights;
+                    # otherwise inference keeps using the import-time table and
+                    # the success message below would be a lie.
+                    reload_weights()
                     self.log("  ✓ Role weights updated for new patch", "success")
                 else:
                     self.log("  ⚠ Role weight update failed (server unreachable)", "warn")

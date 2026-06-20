@@ -63,6 +63,16 @@ class TestNormalizeToPercent:
         out = role_updater._normalize_to_percent({"X": {}, "Y": None})
         assert out == {"X": {}, "Y": None}
 
+    def test_sparse_percent_not_rescaled(self):
+        # Peak-based detection: a percent champ with a small SUM but a peak > 1.5
+        # must NOT be treated as fractions (the sum-based check got this wrong).
+        out = role_updater._normalize_to_percent({"X": {"support": 2.46}})
+        assert out == {"X": {"support": 2.46}}
+
+    def test_single_role_fraction_scaled(self):
+        out = role_updater._normalize_to_percent({"Y": {"top": 0.99}})
+        assert out == {"Y": {"top": 99.0}}
+
 
 # ---------------------------------------------------------------------------
 # The core invariant: normalized bundle weights are accepted by the runtime.

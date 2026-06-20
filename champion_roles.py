@@ -252,6 +252,20 @@ def needs_role_refresh() -> bool:
 _WEIGHTS = _load_weights()
 
 
+def reload_weights() -> None:
+    """Recompute the merged weights from the (possibly just-refreshed) cache.
+
+    _WEIGHTS is computed once at import, so a mid-session role-weight refresh
+    (monitor._maybe_refresh_roles on a patch rollover) has no effect until this
+    is called. Rebinding the module global is atomic in CPython, and each
+    _load_weights() builds a fresh dict that's never mutated, so inference
+    running on monitor threads sees either the old or new dict — no torn read,
+    no lock needed.
+    """
+    global _WEIGHTS
+    _WEIGHTS = _load_weights()
+
+
 def get_role_weights(champion_name: str) -> dict[str, float]:
     """Return the role weight dict for a champion, or {} if unknown."""
     return _WEIGHTS.get(champion_name) or _WEIGHTS.get(champion_name.title(), {})
@@ -273,7 +287,11 @@ def _optimal_assign(champ_weights: dict, claimed: dict) -> dict[str, str]:
     position). At most 5! = 120 candidates, so brute-force is fine.
     """
     ROLES = ("top", "jungle", "mid", "bot", "support")
-    champs = [c for c in champ_weights if c not in claimed.values()]
+    # Sort champs so enumeration order is independent of champ-select pick order.
+    # The "first max wins" comparison below would otherwise resolve equal-score
+    # ties by pick order, making infer_*() non-deterministic for flex picks
+    # (e.g. two champs each 50/50 mid/bot). roles is already in fixed ROLES order.
+    champs = sorted(c for c in champ_weights if c not in claimed.values())
     roles = [r for r in ROLES if r not in claimed]
 
     if not champs or not roles:
@@ -401,7 +419,10 @@ def infer_full_assignment(enemy_picks: list[str]) -> tuple[dict[str, str], dict[
         weight = champ_weights[champ].get(role, 0)
         if weight >= CONFIDENT_WEIGHT_MIN:
             assigned[role] = champ
-        elif weight > 0:
+        elif weight >= GUESS_THRESHOLD:
+            # Use the same relevance floor as the pass-3 empty-role fill below,
+            # so an optimal-assignment placement isn't surfaced as a guess at a
+            # weight we'd reject elsewhere (e.g. a 5%-bot flex shown as enemy bot).
             guesses[role] = champ
 
     # Pass 3: for roles still unfilled (fewer enemies than roles), find any

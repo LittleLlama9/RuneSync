@@ -150,24 +150,26 @@ def _normalize_to_percent(weights: dict) -> dict:
     """Coerce a role-weight dict to PERCENT scale (0-100), per the module's
     scale contract.
 
-    Detection is per-champion and scale-aware: a real percent distribution sums
-    to roughly 40-150 (one dominant role plus secondaries), while a fraction one
-    sums to ~1 (op.gg role_rate) or up to ~1.43 (u.gg synthetic). Those bands are
-    far apart, so any champ whose weights sum at or below the cutoff is treated as
-    fractions and scaled up. Idempotent: already-percent data (e.g. from the
-    legacy scraper) passes through untouched, so this is safe to run on any
-    source's output.
+    Detection is per-champion and scale-aware, keyed on the LARGEST single role
+    weight (not the sum): a fraction distribution's biggest value is <=1.0
+    (op.gg role_rate is a share of the champ's games; u.gg synthetic peaks at
+    exactly 1.0), while any champ with real data has a dominant role well above
+    20 on the percent scale. So a peak at or below the cutoff means fractions.
+    Max-based avoids a sum-based false positive on a sparse percent champ (e.g.
+    {'support': 2.46}: sum 2.46 looks fraction-ish, but peak 2.46 is clearly
+    percent). Idempotent: already-percent data (e.g. from the legacy scraper)
+    passes through untouched, so this is safe to run on any source's output.
     """
     if not isinstance(weights, dict):
         return weights
-    FRACTION_CUTOFF = 5.0  # well above the ~1.43 max fraction total, well below
-                           # the ~40 min percent total — nothing lands between.
+    FRACTION_CUTOFF = 1.5  # between the 1.0 max fraction value and the ~20 min
+                           # percent dominant-role value — nothing lands between.
     out = {}
     for champ, roles in weights.items():
         if isinstance(roles, dict) and roles:
             nums = [v for v in roles.values() if isinstance(v, (int, float))]
-            total = sum(nums)
-            if 0 < total <= FRACTION_CUTOFF:
+            peak = max(nums) if nums else 0
+            if 0 < peak <= FRACTION_CUTOFF:
                 roles = {r: round(v * 100, 2)
                          for r, v in roles.items()
                          if isinstance(v, (int, float))}
