@@ -343,6 +343,10 @@ class RuneSyncApp:
         self.ugg       = UGGClient()
         self.monitor   = None
         self.running   = False
+        # Guards _try_connect's check-and-set so the startup thread and
+        # _on_league_open can't both slip past the guard and double-connect.
+        self._connect_lock = threading.Lock()
+        self._connecting   = False
         # Game overlay state
         self._game_champ: str       = ""
         self._game_enemy: str       = ""
@@ -431,7 +435,18 @@ class RuneSyncApp:
             threading.Thread(target=self._try_connect, kwargs={"startup": False}, daemon=True).start()
 
     def _on_monitor_league_closed(self):
-        """Monitor detected LCU gone — stop monitoring, stay alive for reconnect."""
+        """Monitor detected LCU gone — stop monitoring, stay alive for reconnect.
+
+        Runs on the Tk thread (scheduled via root.after in _start). If League
+        dropped mid-game, the monitor's tick aborts on the failed phase poll
+        before its game-end branch runs, so _on_game_end never fired and the UI
+        is pinned in the in-game overlay. Restore it here, and clear the monitor's
+        _in_game so a reused monitor object doesn't think a game is still live.
+        """
+        if self._in_game_overlay:
+            self._on_game_end()
+        if self.monitor:
+            self.monitor._in_game = False
         self._stop()
         self.lcu.connected = False
         self._set_status("Disconnected — waiting for League", GOLD)
@@ -867,9 +882,12 @@ class RuneSyncApp:
 
     # ── connect ───────────────────────────────────────────────────────────────
     def _try_connect(self, *, startup: bool = True):
-        if self.lcu.connected or getattr(self, '_connecting', False):
-            return
-        self._connecting = True
+        # Atomic check-and-set: two callers (startup thread + _on_league_open)
+        # racing here would otherwise both pass the check and double-connect.
+        with self._connect_lock:
+            if self.lcu.connected or self._connecting:
+                return
+            self._connecting = True
         try:
             self._emit("Connecting to League client...", "info")
             if startup:
@@ -890,7 +908,8 @@ class RuneSyncApp:
                         self._emit("  Open the League client then restart RuneSync.", "warn")
                         self._set_status("Disconnected", GOLD)
         finally:
-            self._connecting = False
+            with self._connect_lock:
+                self._connecting = False
 
     # ── monitor ───────────────────────────────────────────────────────────────
     def _toggle(self):
@@ -955,6 +974,14 @@ class RuneSyncApp:
         self.root.after(0, _do)
 
     def _on_matchup_winrate(self, champ: str, enemy: str, role: str, wr: float, label: str, tag: str):
+        # Called from a monitor background thread. Marshal the whole tuple onto
+        # the Tk thread so the fields are assigned and rendered together — two
+        # matchups resolving close together can't interleave into a title from
+        # one and a winrate from another (torn read).
+        self.root.after(0, self._apply_matchup_winrate, champ, enemy, role, wr, label, tag)
+
+    def _apply_matchup_winrate(self, champ: str, enemy: str, role: str, wr: float, label: str, tag: str):
+        """Runs on the Tk thread: assign overlay fields and repaint atomically."""
         tag_to_color = {"success": "#4caf73", "warn": GOLD, "error": "#e05252", "info": "#aab4c8"}
         self._game_champ     = champ
         self._game_enemy     = enemy
@@ -962,7 +989,7 @@ class RuneSyncApp:
         self._game_winrate   = f"{wr:.1f}% WR — {label}"
         self._game_wr_color  = tag_to_color.get(tag, "#aab4c8")
         if self._in_game_overlay:
-            self.root.after(0, self._update_game_overlay)
+            self._update_game_overlay()
 
     def _build_game_overlay(self):
         outer = tk.Frame(self.root, bg=BG)
