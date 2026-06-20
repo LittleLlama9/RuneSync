@@ -995,9 +995,12 @@ class RuneSyncApp:
         for tag, col in [("info","#aab4c8"),("success","#4caf73"),
                          ("warn",GOLD),("error","#e05252"),("champ","#7dbbff")]:
             self._game_log_widget.tag_config(tag, foreground=col)
-        # Populate with existing log history
+        # Populate with existing log history. Snapshot first: _emit appends to
+        # _log_buffer from background threads (connect/monitor), so iterating the
+        # live list here on the Tk thread can raise "list changed size during
+        # iteration". list() is atomic under the GIL, so the copy is race-free.
         self._game_log_widget.configure(state="normal")
-        for m, t in self._log_buffer:
+        for m, t in list(self._log_buffer):
             self._game_log_widget.insert("end", m+"\n", t)
         self._game_log_widget.see("end")
         self._game_log_widget.configure(state="disabled")
