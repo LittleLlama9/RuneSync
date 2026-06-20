@@ -32,6 +32,12 @@ class ChampSelectMonitor:
         self._on_matchup_winrate = on_matchup_winrate
         self._on_item_build = on_item_build
         self._stop_event = threading.Event()
+        # Serializes rune/item-set imports. The Reimport button (main.py) pushes
+        # _import_runes on its own thread while the poll loop also calls it on
+        # lane-swap / champ-detect; two threads driving the same LCUClient can
+        # interleave a half-applied item set or duplicate rune page. RLock (not
+        # Lock) so a same-thread re-entry can never self-deadlock.
+        self._import_lock = threading.RLock()
         self._last_champ_id: Optional[int] = None
         self._last_phase: Optional[str] = None
         self._champ_name_map: dict = {}
@@ -446,13 +452,23 @@ class ChampSelectMonitor:
         return "auto"
 
     def _import_runes(self, champ_name: str, session: dict):
-        override = self.overrides.get(champ_name)
-        if override:
-            self.log(f"  → Using YOUR custom build for {champ_name}", "success")
-            self._apply_override(champ_name, override)
-        else:
-            self.log(f"  → Fetching u.gg top build for {champ_name}...", "info")
-            self._apply_ugg(champ_name, session)
+        # Serialize: if another thread (Reimport button vs poll loop) is already
+        # mid-import, wait for it rather than racing two rune/item-set pushes
+        # through the same LCUClient. Non-blocking probe first so we can log the
+        # contention; the real acquire below still blocks until it's our turn.
+        if not self._import_lock.acquire(blocking=False):
+            self.log(f"  → Import already in progress — queuing {champ_name}...", "info")
+            self._import_lock.acquire()
+        try:
+            override = self.overrides.get(champ_name)
+            if override:
+                self.log(f"  → Using YOUR custom build for {champ_name}", "success")
+                self._apply_override(champ_name, override)
+            else:
+                self.log(f"  → Fetching u.gg top build for {champ_name}...", "info")
+                self._apply_ugg(champ_name, session)
+        finally:
+            self._import_lock.release()
 
     def _apply_ugg(self, champ_name: str, session: dict):
         role = self._detect_role(session) if self.auto_role else "auto"
