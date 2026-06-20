@@ -62,6 +62,7 @@ ROLE_WEIGHTS: dict[str, dict[str, float]] = {
     "Urgot":               {"top": 96.41},
     "Volibear":            {"top": 56.72, "jungle": 42.16},
     "Yorick":              {"top": 93.74, "mid": 3.69, "jungle": 2.12},
+    "Zaahen":              {"top": 82.37, "jungle": 13.0},
     # ── Jungle ───────────────────────────────────────────────────────────────
     "Amumu":               {"jungle": 84.2, "support": 14.95},
     "Bel'Veth":            {"jungle": 96.52},
@@ -100,7 +101,6 @@ ROLE_WEIGHTS: dict[str, dict[str, float]] = {
     "Warwick":             {"jungle": 66.36, "top": 32.41},
     "Wukong":              {"jungle": 72.99, "top": 22.54, "mid": 2.04, "support": 2.03},
     "Xin Zhao":            {"jungle": 92.82, "top": 5.03},
-    "Zaahen":              {"jungle": 50.01, "top": 48.74},
     "Zac":                 {"jungle": 72.57, "top": 14.38, "support": 8.09, "mid": 4.86},
     # ── Mid ──────────────────────────────────────────────────────────────────
     "Ahri":                {"mid": 98.11},
