@@ -341,11 +341,6 @@ class RuneSyncApp:
         self.lcu       = LCUClient()
         self.overrides = OverrideManager()
         ugg_api.SERVER_URL = self.overrides.settings.get("server_url", ugg_api.SERVER_URL)
-        # Load the GitHub-hosted data bundle in the background. Tries the
-        # local disk cache first (instant), falls back to a fresh download.
-        # If both fail, UGGClient transparently falls back to the localhost
-        # server — so devs running the FastAPI server keep working unchanged.
-        threading.Thread(target=ugg_api.init_bundle, daemon=True).start()
         self.ugg       = UGGClient()
         self.monitor   = None
         self.running   = False
@@ -370,6 +365,14 @@ class RuneSyncApp:
         self._build_ui()
         self.root.update_idletasks()
         self._apply_dark_titlebar()
+
+        # Load the data bundle in the background, surfacing load state so missing
+        # builds/winrates are explainable instead of silently absent. Tries the
+        # local disk cache first (instant), then a fresh download; UGGClient
+        # falls back to the localhost server if both fail. Started after the UI
+        # exists so the status banner has something to attach to.
+        threading.Thread(target=self._load_bundle_with_status, daemon=True).start()
+
         threading.Thread(target=self._try_connect, daemon=True).start()
 
         # If launched with --minimized (Windows autostart), start hidden in
@@ -509,6 +512,12 @@ class RuneSyncApp:
         self.slbl = tk.Label(top, text="Disconnected", font=("Segoe UI",10), bg=BG, fg="#888")
         self.slbl.pack(side="right", padx=(0,6))
         tk.Frame(self.root, bg="#2a2a2a", height=1).pack(fill="x", padx=16, pady=8)
+
+        # Transient notification banner (import success / data-load status).
+        # Created hidden; _show_banner packs it above the notebook on demand.
+        self._banner = tk.Label(self.root, font=("Segoe UI", 10, "bold"),
+                                bg=BG, fg="white", anchor="center", pady=6)
+        self._banner_after = None
 
         s = ttk.Style(); s.theme_use("default")
         s.configure("D.TNotebook",          background=BG, borderwidth=0)
@@ -886,6 +895,53 @@ class RuneSyncApp:
             self.slbl.configure(text=txt),
             self.dot.configure(fg=col)))
 
+    # ── notification banner ─────────────────────────────────────────────────
+    def _show_banner(self, text, kind="success", auto_hide_ms=6000):
+        """Prominent bar below the title. kind: success|info|warn. Thread-safe
+        (marshals onto the Tk thread)."""
+        palette = {
+            "success": ("#1e6b3c", "#e6ffe6"),
+            "info":    ("#1e3a5a", "#cfe3ff"),
+            "warn":    ("#5c4a1e", "#ffe9b0"),
+        }
+        bg_c, fg_c = palette.get(kind, palette["info"])
+        def _do():
+            self._banner.configure(text=text, bg=bg_c, fg=fg_c)
+            if not self._banner.winfo_ismapped():
+                self._banner.pack(fill="x", before=self.nb)
+            if self._banner_after is not None:
+                try: self.root.after_cancel(self._banner_after)
+                except Exception: pass
+                self._banner_after = None
+            if auto_hide_ms:
+                self._banner_after = self.root.after(auto_hide_ms, self._hide_banner)
+        self.root.after(0, _do)
+
+    def _hide_banner(self):
+        """Runs on the Tk thread (timer callback or marshalled)."""
+        self._banner_after = None
+        try:
+            if self._banner.winfo_ismapped():
+                self._banner.pack_forget()
+        except Exception:
+            pass
+
+    def _load_bundle_with_status(self):
+        self._show_banner("Loading build data…", "info", auto_hide_ms=0)
+        try:
+            ok = ugg_api.init_bundle()
+        except Exception:
+            ok = False
+        if ok:
+            self.root.after(0, self._hide_banner)  # silently clear once ready
+        else:
+            self._show_banner(
+                "Couldn't load build data — using fallback; some builds and "
+                "winrates may be missing.", "warn", auto_hide_ms=0)
+
+    def _on_import_success(self, champ: str):
+        self._show_banner(f"✓  Runes imported for {champ}", "success")
+
     # ── connect ───────────────────────────────────────────────────────────────
     def _try_connect(self):
         # Atomic check-and-set: two callers (startup thread + _on_league_open)
@@ -949,6 +1005,7 @@ class RuneSyncApp:
             on_league_closed=lambda: self.root.after(0, self._on_monitor_league_closed),
             on_matchup_winrate=self._on_matchup_winrate,
             on_item_build=self._on_item_build,
+            on_import=self._on_import_success,
         )
         threading.Thread(target=self.monitor.run, daemon=True).start()
 

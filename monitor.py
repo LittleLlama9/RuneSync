@@ -17,7 +17,7 @@ class ChampSelectMonitor:
                  on_log: Callable, trigger: str = "hover", rank: str = "Platinum+",
                  region: str = "World", auto_role: bool = True,
                  on_game_start=None, on_game_end=None, on_league_closed=None,
-                 on_matchup_winrate=None, on_item_build=None):
+                 on_matchup_winrate=None, on_item_build=None, on_import=None):
         self.lcu = lcu
         self.ugg = ugg
         self.overrides = overrides
@@ -31,6 +31,7 @@ class ChampSelectMonitor:
         self._on_league_closed = on_league_closed
         self._on_matchup_winrate = on_matchup_winrate
         self._on_item_build = on_item_build
+        self._on_import = on_import   # (champ_name) -> shown as a success banner
         self._stop_event = threading.Event()
         # Serializes rune/item-set imports. The Reimport button (main.py) pushes
         # _import_runes on its own thread while the poll loop also calls it on
@@ -489,6 +490,8 @@ class ChampSelectMonitor:
                                        build["sub_style_id"], build["selected_perk_ids"])
         if ok:
             self.log(f"  ✓ Runes imported for {champ_name} ({build['role']})", "success")
+            if self._on_import:
+                self._on_import(champ_name)
             if build.get("items_core_ids"):
                 champ_id = next((k for k, v in self._champ_name_map.items() if v == champ_name), 0)
                 set_ok = self.lcu.import_item_set(champ_name, champ_id, role,
@@ -563,6 +566,8 @@ class ChampSelectMonitor:
                                        primary_id, secondary_id, perk_ids)
         if ok:
             self.log(f"  ✓ Custom runes imported for {champ_name}", "success")
+            if self._on_import:
+                self._on_import(champ_name)
             if override.get("note"):
                 self.log(f"     Note: {override['note']}", "info")
             spell1 = override.get("spell1", 0)
