@@ -28,6 +28,7 @@ htmlcov/
 
 # PyInstaller
 *.spec.bak
+build_status.txt
 
 # Generated cache files (rebuilt automatically on startup)
 role_weights_cache.json
