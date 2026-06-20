@@ -224,7 +224,11 @@ class TrayController:
 
     def _on_autostart_toggle(self, icon, item):
         new = not self.get_autostart()
-        self.set_autostart(new)
+        if not self.set_autostart(new):
+            # Registry write failed (e.g. policy/permissions). The checkmark
+            # re-reads the real key and stays put, so without this the toggle
+            # would silently do nothing and the user would think it worked.
+            self.notify("RuneSync", "Couldn't change the Start-with-Windows setting.")
 
     @staticmethod
     def _safe(fn):

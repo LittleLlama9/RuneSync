@@ -80,6 +80,11 @@ def init():
     threading.Thread(target=_load_catalog_blocking, daemon=True).start()
 
 
+def is_ready() -> bool:
+    """True once the item catalog has finished loading (or failed to)."""
+    return _catalog_loaded.is_set()
+
+
 def search(query: str, max_results: int = 12) -> list:
     """Return items whose name contains query (case-insensitive)."""
     if not query or not _catalog_loaded.is_set():

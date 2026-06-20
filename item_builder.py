@@ -295,9 +295,35 @@ class BuildEditorPage:
         if not query:
             self._close_popup()
             return
+        if not item_data.is_ready():
+            # Catalog still downloading on first-ever open — without this the
+            # dropdown is empty and search looks broken. Next keystroke after it
+            # loads will search normally.
+            self._show_message("Loading item list…")
+            return
         results = item_data.search(query, max_results=10)
         self._results = results
         self._show_popup(results)
+
+    def _show_message(self, text: str):
+        """Show a single non-interactive info row under the search box."""
+        self._close_popup()
+        self._search_entry.update_idletasks()
+        x = self._search_entry.winfo_rootx()
+        y = self._search_entry.winfo_rooty() + self._search_entry.winfo_height() + 2
+        w = self._search_entry.winfo_width() + 160
+        try:
+            root = self._search_entry.winfo_toplevel()
+        except Exception:
+            return
+        popup = tk.Toplevel(root)
+        popup.wm_overrideredirect(True)
+        popup.wm_geometry(f"{w}x42+{x}+{y}")
+        popup.configure(bg="#0a0d14")
+        popup.attributes("-topmost", True)
+        self._popup = popup
+        tk.Label(popup, text=text, font=("Segoe UI", 9), bg=DROP_BG,
+                 fg="#888", anchor="w", padx=10).pack(fill="both", expand=True)
 
     def _show_popup(self, results: list):
         self._close_popup()
