@@ -48,3 +48,12 @@ def test_set_and_get_roundtrip(tmp_path, monkeypatch):
     m.set("Garen", {"primary_tree": "Precision"})
     assert m.get("garen") == {"primary_tree": "Precision"}
     assert "Garen" in m.all()
+
+
+def test_save_is_atomic_no_tmp_left(tmp_path, monkeypatch):
+    m = _mgr(tmp_path, monkeypatch)
+    m.set("Garen", {"primary_tree": "Precision"})
+    # The temp file must be replaced onto the target, not left behind.
+    assert not (tmp_path / "overrides.json.tmp").exists()
+    data = json.loads((tmp_path / "overrides.json").read_text(encoding="utf-8"))
+    assert data["overrides"]["garen"] == {"primary_tree": "Precision"}

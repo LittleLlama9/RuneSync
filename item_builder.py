@@ -4,7 +4,7 @@ BuildEditorPage renders into any parent frame (used as a Toplevel by BuildEditor
 """
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import item_data
 
 # ── Colour palette (mirrors main.py) ──────────────────────────────────────────
@@ -62,6 +62,7 @@ class BuildEditorPage:
         self._results  = []
         self._slot_lbls  = {}
         self._slot_pills = {}
+        self._dirty      = False  # unsaved edits since open/save
 
         item_data.init()
         self._build_ui()
@@ -258,22 +259,33 @@ class BuildEditorPage:
 
     def _remove_item(self, slot_key: str, item: dict):
         self._build[slot_key] = [i for i in self._build[slot_key] if i["id"] != item["id"]]
+        self._dirty = True
         self._rebuild_pills(slot_key)
 
     def _clear_slot(self, slot_key: str):
         self._build[slot_key] = []
+        self._dirty = True
         self._rebuild_pills(slot_key)
 
     def _clear_all(self):
+        # Destructive: confirm before wiping a built-out set.
+        if any(self._build.get(k) for k, _ in SLOT_DEFS):
+            if not messagebox.askyesno(
+                "Clear all items?", "Remove every item from all slots?",
+                parent=self._toplevel(), icon="warning", default="no",
+            ):
+                return
         for k, _ in SLOT_DEFS:
             self._build[k] = []
             self._rebuild_pills(k)
+        self._dirty = True
 
     def _add_item(self, slot_key: str, item: dict):
         slot = self._build.setdefault(slot_key, [])
         if any(i["id"] == item["id"] for i in slot):
             return
         slot.append({"id": item["id"], "name": item["name"]})
+        self._dirty = True
         self._rebuild_pills(slot_key)
 
     # ── Search / autocomplete ──────────────────────────────────────────────────
@@ -369,16 +381,30 @@ class BuildEditorPage:
 
     def _do_save(self):
         self._close_popup()
+        self._dirty = False
         if self.on_save:
             self.on_save(self._build)
         # on_save is expected to call on_back / clean up the frame
 
     def _do_back(self):
+        # Guard against losing a built-out set on a reflexive Cancel / window [X].
+        if self._dirty and not messagebox.askyesno(
+            "Discard changes?",
+            "You have unsaved changes to this build. Discard them?",
+            parent=self._toplevel(), icon="warning", default="no",
+        ):
+            return
         self._close_popup()
         if self.on_back:
             self.on_back()
 
     # ── Helpers ───────────────────────────────────────────────────────────────
+
+    def _toplevel(self):
+        try:
+            return self.parent.winfo_toplevel()
+        except Exception:
+            return None
 
     def _safe_after(self, fn, delay=0):
         try:
@@ -411,9 +437,11 @@ class BuildEditorWindow:
                 on_save(build)
             self.win.destroy()
 
-        BuildEditorPage(
+        self.page = BuildEditorPage(
             self.win, champion, role, current_build,
             on_save=_on_save,
             on_back=self.win.destroy,
         )
+        # OS window [X] routes through the same unsaved-changes guard as Cancel.
+        self.win.protocol("WM_DELETE_WINDOW", self.page._do_back)
 

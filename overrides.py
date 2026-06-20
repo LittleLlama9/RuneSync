@@ -43,10 +43,16 @@ class OverrideManager:
         return data
 
     def _save(self):
-        self._path.write_text(
+        # Atomic write: a crash/kill mid-write must not leave a truncated file,
+        # which _load() would then silently reset to empty — wiping every saved
+        # override. Write to a temp file, then os.replace() (atomic on Windows
+        # within the same directory).
+        tmp = self._path.with_name(self._path.name + ".tmp")
+        tmp.write_text(
             json.dumps(self._data, indent=2, ensure_ascii=False),
-            encoding="utf-8"
+            encoding="utf-8",
         )
+        os.replace(tmp, self._path)
 
     def get(self, champion: str) -> Optional[dict]:
         key = champion.lower().strip()
