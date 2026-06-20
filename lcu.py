@@ -128,34 +128,20 @@ class LCUClient:
             if p.exists():
                 return p
 
-        # Try reading install path from LeagueClientUx.exe process args via PowerShell
+        # Read install path directly from the running LeagueClientUx.exe via psutil
         try:
-            out = subprocess.check_output(
-                ["powershell", "-WindowStyle", "Hidden", "-Command",
-                 "(Get-Process LeagueClientUx -ErrorAction SilentlyContinue).Path"],
-                text=True, stderr=subprocess.DEVNULL, creationflags=0x08000000,
-            ).strip()
-            if out:
-                install_dir = Path(out).parent
-                candidate = install_dir / "lockfile"
-                if candidate.exists():
-                    return candidate
-        except Exception:
-            pass
-
-        # Fallback: wmic
-        try:
-            out = subprocess.check_output(
-                ["wmic", "process", "where", "name='LeagueClientUx.exe'",
-                 "get", "ExecutablePath", "/format:list"],
-                text=True, stderr=subprocess.DEVNULL, creationflags=0x08000000,
-            )
-            for line in out.splitlines():
-                if "ExecutablePath=" in line:
-                    exe = line.split("=", 1)[1].strip()
-                    candidate = Path(exe).parent / "lockfile"
-                    if candidate.exists():
-                        return candidate
+            import psutil
+            for proc in psutil.process_iter(["name", "exe"]):
+                try:
+                    name = proc.info["name"]
+                    if name and name.lower() == "leagueclientux.exe":
+                        exe = proc.info["exe"]
+                        if exe:
+                            candidate = Path(exe).parent / "lockfile"
+                            if candidate.exists():
+                                return candidate
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
         except Exception:
             pass
 

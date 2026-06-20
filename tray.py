@@ -104,13 +104,16 @@ def _league_is_running() -> bool:
     if sys.platform != "win32":
         return False
     try:
-        out = subprocess.run(
-            ["tasklist", "/FI", f"IMAGENAME eq {LEAGUE_EXE}", "/NH"],
-            capture_output=True, text=True,
-            creationflags=0x08000000,  # CREATE_NO_WINDOW
-            timeout=5,
-        )
-        return LEAGUE_EXE.lower() in out.stdout.lower()
+        import psutil
+        target = LEAGUE_EXE.lower()
+        for proc in psutil.process_iter(["name"]):
+            try:
+                name = proc.info["name"]
+                if name and name.lower() == target:
+                    return True
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                continue
+        return False
     except Exception:
         return False
 
