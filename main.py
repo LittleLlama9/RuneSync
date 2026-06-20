@@ -1136,20 +1136,27 @@ def _user_data_dir() -> str:
 
 
 if __name__ == "__main__":
-    import sys, os
+    import sys, os, logging
     # Single-instance guard: silently exit if RuneSync is already running
     _mutex = ctypes.windll.kernel32.CreateMutexW(None, False, "RuneSyncSingleInstance")
     if ctypes.windll.kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
         sys.exit(0)
     # Log to %APPDATA%/RuneSync so install location (Program Files etc) doesn't
     # matter — exe directory is write-protected for non-admin users there.
+    # init_logging owns the file (RotatingFileHandler) and replaces sys.stderr;
+    # we no longer open the file here, which is what caused every line to be
+    # logged twice. If setup fails, keep the module-level default queue.
     log_path = os.path.join(_user_data_dir(), "runesync.log")
-    try:
-        sys.stderr = open(log_path, "a", buffering=1, encoding="utf-8")
-    except Exception:
-        pass  # Worst case stderr stays attached to the console (none in --windowed)
     from log_setup import init_logging
-    _log_queue = init_logging(log_path)
+    try:
+        _log_queue = init_logging(log_path)
+    except Exception:
+        pass  # never let logging setup crash launch
     root = tk.Tk()
+    # Tk swallows callback exceptions by default — route them to the log instead.
+    root.report_callback_exception = lambda exc, val, tb: logging.getLogger().error(
+        "Uncaught exception in Tk callback", exc_info=(exc, val, tb),
+        extra={"rs_tag": "[crash]", "rs_severity": "error"},
+    )
     RuneSyncApp(root)
     root.mainloop()
