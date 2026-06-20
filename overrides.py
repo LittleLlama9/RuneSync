@@ -25,12 +25,22 @@ class OverrideManager:
         self._data: dict = self._load()
 
     def _load(self) -> dict:
+        data: dict = {"overrides": {}, "settings": {}}
         if self._path.exists():
             try:
-                return json.loads(self._path.read_text(encoding="utf-8"))
+                loaded = json.loads(self._path.read_text(encoding="utf-8"))
+                if isinstance(loaded, dict):
+                    data.update(loaded)
             except Exception:
                 pass
-        return {"overrides": {}, "settings": {}}
+        # A hand-edited or partially-written file can parse yet be missing a key
+        # (or have it as null/non-dict); get()/set() index these directly, so
+        # normalize before returning rather than crashing on first access.
+        if not isinstance(data.get("overrides"), dict):
+            data["overrides"] = {}
+        if not isinstance(data.get("settings"), dict):
+            data["settings"] = {}
+        return data
 
     def _save(self):
         self._path.write_text(
