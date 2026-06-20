@@ -148,11 +148,20 @@ class LCUClient:
         return None
 
     def _parse_lockfile(self, path: Path):
-        content = path.read_text().strip()
+        try:
+            content = path.read_text(encoding="utf-8", errors="replace").strip()
+        except OSError as e:
+            raise LCUConnectionError(f"Could not read lockfile: {e}")
         parts = content.split(":")
         if len(parts) < 5:
             raise LCUConnectionError("Lockfile format unexpected.")
-        self._port = int(parts[2])
+        try:
+            self._port = int(parts[2])
+        except ValueError:
+            # Partially-written lockfile during client launch: surface as a
+            # connection error (connect() is outside any try here) so the caller
+            # retries instead of a raw ValueError crashing the thread.
+            raise LCUConnectionError("Lockfile port not yet written.")
         self._password = parts[3]
 
     @property
@@ -217,7 +226,9 @@ class LCUClient:
         try:
             urllib.request.urlopen(req, context=self._ssl_ctx, timeout=5)
         except urllib.error.HTTPError as e:
-            if e.code not in (200, 204):
+            # urlopen only enters this block for status >= 400; a 404 means the
+            # page is already gone, which is success for an idempotent delete.
+            if e.code != 404:
                 raise LCUConnectionError(f"DELETE {path} failed {e.code}")
 
     def get_champ_select_session(self) -> Optional[dict]:
@@ -251,11 +262,14 @@ class LCUClient:
         # Guard: only valid during ChampSelect
         try:
             phase = self.get_game_flow_phase()
-            if phase != "ChampSelect":
-                print(f"[lcu] set_summoner_spells skipped — phase is '{phase}'", file=sys.stderr)
-                return False
-        except Exception:
-            pass
+        except Exception as e:
+            # Couldn't confirm the phase (client unreachable). Don't PATCH blind —
+            # falling through here is exactly what the guard exists to prevent.
+            print(f"[lcu] set_summoner_spells skipped — phase check failed: {e}", file=sys.stderr)
+            return False
+        if phase != "ChampSelect":
+            print(f"[lcu] set_summoner_spells skipped — phase is '{phase}'", file=sys.stderr)
+            return False
         try:
             self._patch("/lol-champ-select/v1/session/my-selection", {
                 "spell1Id": spell1_id,
