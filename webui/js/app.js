@@ -91,9 +91,14 @@
           (b.tag ? `<span class="btag">${esc(b.tag)}</span>` : '') + `</div>`).join('')
       : `<div class="brow"><span class="bi">—</span></div>`;
 
-    $('logBox').innerHTML = state.log.map(l =>
+    renderLog();
+  }
+
+  function renderLog() {
+    const box = $('logBox');
+    box.innerHTML = state.log.map(l =>
       `<div><span class="ts">${l.ts}</span>&nbsp; <span class="${l.cls}">${esc(l.msg)}</span></div>`).join('');
-    $('logBox').scrollTop = $('logBox').scrollHeight;
+    box.scrollTop = box.scrollHeight;
   }
 
   function renderBuilds() {
@@ -152,9 +157,14 @@
 
   // ── commands ────────────────────────────────────────────────────────────
   function toggleMonitoring() {
-    state.monitoring = !state.monitoring;
-    $('startWord').textContent = state.monitoring ? 'stop' : 'start';
-    window.API.call(state.monitoring ? 'start_monitoring' : 'stop_monitoring');
+    if (window.API.ready()) {
+      // backend confirms via the 'running' push — don't flip optimistically,
+      // so a failed start (not connected) doesn't leave a wrong label.
+      window.API.call(state.monitoring ? 'stop_monitoring' : 'start_monitoring');
+    } else {
+      state.monitoring = !state.monitoring;
+      $('startWord').textContent = state.monitoring ? 'stop' : 'start';
+    }
   }
   function toggleOverlay() { state.inGame = !state.inGame; renderOverlay(); }
   function cmd(action) {
@@ -211,7 +221,11 @@
     // settings (P1: client-side cycling/toggles; P4 wires to backend + menus)
     $('setRank').addEventListener('click', () => { state.settings.rank = cycle(RANKS, state.settings.rank); renderSettings(); });
     $('setRegion').addEventListener('click', () => { state.settings.region = cycle(REGIONS, state.settings.region); renderSettings(); });
-    $('setPhosphor').addEventListener('click', () => applyTheme(cycle(PHOSPHORS, state.settings.phosphor)));
+    $('setPhosphor').addEventListener('click', () => {
+      const next = cycle(PHOSPHORS, state.settings.phosphor);
+      applyTheme(next);
+      window.API.call('set_theme', next);   // persist immediately
+    });
     $('setAutoRole').addEventListener('click', () => { state.settings.auto_role = !state.settings.auto_role; renderSettings(); });
     $('setAutostart').addEventListener('click', () => { state.settings.autostart = !state.settings.autostart; renderSettings(); });
     document.querySelectorAll('[data-trig]').forEach(el =>
@@ -230,14 +244,69 @@
     window.API.call('set_matchup_override', v);
   }
 
-  // ── Python → JS push channel (used in P2) ──────────────────────────────────
+  // ── Python → JS push channel ───────────────────────────────────────────────
   window.rs_push = function (event, payload) {
     try { handlePush(event, payload || {}); }
     catch (e) { console.error('rs_push error', event, e); }
   };
+  function pushLog(rec) {
+    state.log.push({ ts: rec.ts, msg: rec.msg, cls: rec.cls || '' });
+    if (state.log.length > 300) state.log = state.log.slice(-250);
+  }
   function handlePush(event, p) {
-    // P2 will populate state from these and re-render. Stub for now.
-    console.log('push', event, p);
+    switch (event) {
+      case 'status': state.status = p.kind; renderStatus(); break;
+      case 'running': state.monitoring = !!p.on; $('startWord').textContent = p.on ? 'stop' : 'start'; break;
+      case 'log': pushLog(p); renderLog(); break;
+      case 'champ': state.champ = p.champ; state.champMeta = p.meta; state.imported = false; renderMonitor(); break;
+      case 'matchup':
+        state.champ = p.champ || state.champ; state.enemy = p.enemy; state.wr = p.wr;
+        state.wrLabel = p.label; state.wrTag = p.tag; state.sample = p.sample;
+        renderMonitor(); renderOverlay(); break;
+      case 'rune_page': state.runes = p; renderMonitor(); break;
+      case 'build': state.buildSrc = p.src; state.build = p.items || []; renderMonitor(); break;
+      case 'import_ok': state.imported = true; renderMonitor(); break;
+      case 'game': state.inGame = !!p.in_game; renderOverlay(); break;
+      default: console.log('push?', event, p);
+    }
+  }
+
+  // ── backend state hydration ────────────────────────────────────────────────
+  function applyState(s) {
+    if (!s) return;
+    state.status = s.status; state.monitoring = !!s.running;
+    state.settings = s.settings || state.settings;
+    state.builds = s.builds || []; state.sel = 0;
+    state.log = (s.log || []).map(r => ({ ts: r.ts, msg: r.msg, cls: r.cls || '' }));
+    state.champ = s.champ || ''; state.champMeta = s.champMeta || '[ awaiting champ select ]';
+    state.imported = !!s.imported;
+    state.enemy = s.enemy || ''; state.wr = (s.wr == null ? null : s.wr);
+    state.wrLabel = s.wrLabel || ''; state.wrTag = s.wrTag || 'info'; state.sample = s.sample || '';
+    if (s.runes) state.runes = s.runes;
+    state.buildSrc = s.buildSrc || 'idle'; state.build = s.build || []; state.inGame = !!s.inGame;
+    $('startWord').textContent = state.monitoring ? 'stop' : 'start';
+    applyTheme(s.theme || state.settings.phosphor);
+    renderAll();
+  }
+  function idle() {
+    Object.assign(state, {
+      champ: '', champMeta: '[ awaiting champ select ]', imported: false,
+      enemy: '', wr: null, wrLabel: '', sample: '', buildSrc: 'idle', build: [], log: [], inGame: false,
+      runes: { keystone: '', primary: '', secondary: '', primaryMinor: '', secondaryMinor: '', summoners: '' }
+    });
+  }
+  let _pollTimer = null;
+  function connectBackend() {
+    idle(); renderAll();
+    window.API.call('get_state').then(applyState);
+    // PULL model: drain queued Python->JS events on a timer (the backend can't
+    // safely call evaluate_js from its monitor threads under edgechromium).
+    if (_pollTimer) clearInterval(_pollTimer);
+    _pollTimer = setInterval(() => {
+      window.API.call('poll_events').then(evts => {
+        if (evts && evts.length) evts.forEach(e => handlePush(e.event, e.payload));
+      });
+    }, 200);
   }
 
   // ── boot ───────────────────────────────────────────────────────────────────
@@ -246,6 +315,10 @@
     wire();
     setScreen(state.screen);
     renderAll();
+    // Under pywebview, pull real state (and clear the placeholder seed). The
+    // api may attach slightly after DOMContentLoaded → wait for pywebviewready.
+    if (window.pywebview && window.pywebview.api) connectBackend();
+    else window.addEventListener('pywebviewready', connectBackend, { once: true });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();

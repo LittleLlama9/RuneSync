@@ -85,12 +85,43 @@ def is_ready() -> bool:
     return _catalog_loaded.is_set()
 
 
+def wait_ready(timeout: float = 4.0) -> bool:
+    """Block up to `timeout`s for the catalog (so name_for resolves real names
+    even if an import fires before the async load finishes). Safe off the UI thread."""
+    return _catalog_loaded.wait(timeout)
+
+
 def search(query: str, max_results: int = 12) -> list:
     """Return items whose name contains query (case-insensitive)."""
     if not query or not _catalog_loaded.is_set():
         return []
     q = query.lower()
     return [i for i in _ITEM_CATALOG if q in i["name"].lower()][:max_results]
+
+
+def name_for(item_id) -> str:
+    """Item display name from the catalog (or 'Item <id>' if unknown/not ready)."""
+    try:
+        iid = int(item_id)
+    except (TypeError, ValueError):
+        return str(item_id)
+    for i in _ITEM_CATALOG:
+        if i["id"] == iid:
+            return i["name"]
+    return f"Item {iid}"
+
+
+def icon_url(item_id) -> str:
+    """ddragon CDN icon URL for an item id (empty string if unknown)."""
+    try:
+        iid = int(item_id)
+    except (TypeError, ValueError):
+        return ""
+    for i in _ITEM_CATALOG:
+        if i["id"] == iid:
+            return (f"https://ddragon.leagueoflegends.com/cdn/{_PATCH}"
+                    f"/img/item/{i['image']}")
+    return ""
 
 
 def get_icon_async(item_id: int, callback) -> None:

@@ -18,7 +18,7 @@ class ChampSelectMonitor:
                  region: str = "World", auto_role: bool = True,
                  on_game_start=None, on_game_end=None, on_league_closed=None,
                  on_matchup_winrate=None, on_item_build=None, on_import=None,
-                 on_runes_imported=None):
+                 on_runes_imported=None, on_champ_detected=None, on_build_detail=None):
         self.lcu = lcu
         self.ugg = ugg
         self.overrides = overrides
@@ -36,6 +36,11 @@ class ChampSelectMonitor:
         # (info dict) -> populates the RUNE PAGE panel with what was just pushed.
         # Read-only: fired after a successful import, never drives import logic.
         self._on_runes_imported = on_runes_imported
+        # (champ, role) when a champion is detected; (build_dict, is_custom) with
+        # the full build (section ID lists) so the UI can show start/core tags.
+        # Both read-only/additive — the legacy on_item_build(list) still fires.
+        self._on_champ_detected = on_champ_detected
+        self._on_build_detail = on_build_detail
         self._stop_event = threading.Event()
         # Serializes rune/item-set imports. The Reimport button (main.py) pushes
         # _import_runes on its own thread while the poll loop also calls it on
@@ -205,6 +210,8 @@ class ChampSelectMonitor:
                 self._my_champ = self._champ_name_map.get(champ_id, f"Champion#{champ_id}")
                 self._my_role = self._detect_role(session)
                 self.log(f"Champion detected: {self._my_champ}", "champ")
+                if self._on_champ_detected:
+                    self._on_champ_detected(self._my_champ, self._my_role)
                 self._import_runes(self._my_champ, session)
                 # If we already know the enemy laner, run matchup now
                 if self._enemy_laner:
@@ -488,6 +495,7 @@ class ChampSelectMonitor:
                 "primary":   id_to_tree.get(primary_id, ""),
                 "secondary": id_to_tree.get(secondary_id, ""),
                 "spell1": spell1 or 0, "spell2": spell2 or 0,
+                "perk_ids": list(perk_ids or []),
             })
         except Exception:
             pass
@@ -507,6 +515,8 @@ class ChampSelectMonitor:
             self.log(f"  → Core items: {build['items_core']}", "info")
             if self._on_item_build:
                 self._on_item_build(build["items_core"], False)
+            if self._on_build_detail:
+                self._on_build_detail(build, False)
         ok = self.lcu.import_rune_page(champ_name, build["primary_style_id"],
                                        build["sub_style_id"], build["selected_perk_ids"])
         if ok:
