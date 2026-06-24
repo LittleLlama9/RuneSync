@@ -1,9 +1,10 @@
-"""PHOSPHOR — auto rune importer with per-champion overrides.
+"""DAEMON — auto rune importer with per-champion overrides.
 
 Amber-CRT terminal skin over the RuneSync engine. The window title and in-UI
-brand read "PHOSPHOR"; the repo/exe stay RuneSync. All League logic
-(monitor.py, lcu.py, ugg_api.py, tray, autostart) is unchanged — this module
-is the presentation layer plus a small live-theming engine.
+brand read "DAEMON"; the repo/exe stay RuneSync. The CRT colour themes are
+still called "phosphors" (amber/green/ice) — that's screen terminology, not
+the brand. All League logic (monitor.py, lcu.py, ugg_api.py, tray, autostart)
+is unchanged — this module is the presentation layer plus a live-theming engine.
 """
 import sys, threading, tkinter as tk, ctypes
 from tkinter import ttk, messagebox
@@ -431,7 +432,7 @@ class RuneSyncApp:
     def __init__(self, root):
         self.root = root
         self.theme = Theme(name="amber")  # real value loaded from settings below
-        root.title("PHOSPHOR"); root.geometry("880x720")
+        root.title("DAEMON"); root.geometry("880x720")
         root.resizable(False, False); root.configure(bg=BG)
         try:
             root.iconbitmap(os.path.join(_BASE_DIR, "icon.ico"))
@@ -502,7 +503,7 @@ class RuneSyncApp:
             pass
         if getattr(self, "_tray", None) and self._tray.available():
             self._tray.notify(
-                "PHOSPHOR",
+                "DAEMON",
                 "Still running in the system tray. Right-click the icon to quit.")
 
     def _show_from_tray(self):
@@ -573,7 +574,7 @@ class RuneSyncApp:
         # ── Top bar: brand · menu · status ───────────────────────────────────
         top = t.frame(self.root); top.pack(fill="x", padx=16, pady=(11, 0))
         brand = t.frame(top); brand.pack(side="left")
-        t.label(brand, text="PHOSPHOR", kind="bright", font=F(24)).pack(side="left")
+        t.label(brand, text="DAEMON", kind="bright", font=F(24)).pack(side="left")
         t.label(brand, text="v1.0.0", kind="dim", font=F(9, fine=True)).pack(side="left", padx=(8, 0), anchor="s")
 
         menu = t.frame(top); menu.pack(side="left", expand=True)
@@ -608,7 +609,7 @@ class RuneSyncApp:
         t.rule(self.root).pack(fill="x", padx=16, pady=(8, 0))
         cmd = t.frame(self.root); cmd.pack(fill="x", padx=16, pady=(7, 10))
         left = t.frame(cmd); left.pack(side="left")
-        t.label(left, text="phosphor:~$", kind="bright", font=F(15)).pack(side="left")
+        t.label(left, text="daemon:~$", kind="bright", font=F(15)).pack(side="left")
         self._prompt_lbl = t.label(left, text="", kind="dim", font=F(15))
         self._prompt_lbl.pack(side="left", padx=(6, 0))
         self._cursor = t.label(left, text="█", kind="body", font=F(15))
@@ -661,7 +662,7 @@ class RuneSyncApp:
 
     # ── screen routing ─────────────────────────────────────────────────────────
     _PROMPTS = {"monitor": "watch --champ-select", "builds": "edit builds.ledger",
-                "settings": "vim phosphor.conf", "debug": "tail -f runesync.log"}
+                "settings": "vim daemon.conf", "debug": "tail -f runesync.log"}
 
     def _show_screen(self, key):
         if key not in self._screens or self._in_game_overlay:
@@ -886,7 +887,7 @@ class RuneSyncApp:
         f = t.frame(self._content); self._screens["settings"] = f
 
         head = t.frame(f); head.pack(fill="x")
-        t.label(head, text="~/phosphor.conf", kind="bright", font=F(28)).pack(side="left")
+        t.label(head, text="~/daemon.conf", kind="bright", font=F(28)).pack(side="left")
         t.label(head, text="%APPDATA%\\RuneSync\\overrides.json", kind="dim",
                 font=F(10, fine=True)).pack(side="right", anchor="s")
 
@@ -963,7 +964,7 @@ class RuneSyncApp:
         t.rule(f).pack(fill="x", pady=(24, 8))
         t.label(f, text="data aggregated with attribution from lolalytics & u.gg · not endorsed by riot games",
                 kind="dim", font=F(9, fine=True)).pack(anchor="w")
-        t.label(f, text="league of legends © riot games, inc. · phosphor is gpl-3.0",
+        t.label(f, text="league of legends © riot games, inc. · daemon is gpl-3.0",
                 kind="dim", font=F(9, fine=True)).pack(anchor="w")
 
     def _dropdown(self, parent, var, options):
@@ -1303,7 +1304,7 @@ class RuneSyncApp:
                         time.sleep(delay)
                         delay = min(delay * 2, 10)
                     else:
-                        self._emit("League client not detected — PHOSPHOR will "
+                        self._emit("League client not detected — DAEMON will "
                                    "auto-connect when you open League.", "warn")
                         self._set_status("waiting")
         finally:
@@ -1544,7 +1545,7 @@ class RuneSyncApp:
         try:
             if self._settings_saved_after_id is not None:
                 self.root.after_cancel(self._settings_saved_after_id)
-            self._settings_saved_lbl.configure(text='"phosphor.conf" written ✓')
+            self._settings_saved_lbl.configure(text='"daemon.conf" written ✓')
             self._settings_saved_after_id = self.root.after(
                 2600, lambda: self._settings_saved_lbl.configure(text=""))
         except Exception:
@@ -1591,9 +1592,14 @@ class MatchupGauge(tk.Canvas):
         self.create_text(4, cy, text="[", fill=theme.PD, anchor="w", font=F(15))
         self.create_text(w - 4, cy, text="]", fill=theme.PD, anchor="e", font=F(15))
         self.create_rectangle(x0, cy - 6, x1, cy + 6, outline=theme.BD)
+        # Segmented fill (▮▮▮·····) to match the mock's dashed bar, not a solid block.
         fw = (x1 - x0) * (self._wr / 100.0)
-        if fw > 0:
-            self.create_rectangle(x0, cy - 6, x0 + fw, cy + 6, outline="", fill=fill)
+        seg, gap = 7, 2
+        x = x0
+        while x < x0 + fw:
+            self.create_rectangle(x, cy - 6, min(x + seg, x0 + fw), cy + 6,
+                                  outline="", fill=fill)
+            x += seg + gap
 
 
 def _user_data_dir() -> str:
