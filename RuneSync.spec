@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('assets/spells', 'assets/spells'), ('icon.ico', '.')],
+    datas=[('assets/spells', 'assets/spells'), ('assets/fonts', 'assets/fonts'), ('icon.ico', '.')],
     hiddenimports=['psutil'],
     hookspath=[],
     hooksconfig={},
