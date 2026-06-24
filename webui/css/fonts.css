@@ -1,0 +1,19 @@
+/* Bundled faces — loaded from local ttf, not Google Fonts (offline desktop app). */
+@font-face {
+  font-family: 'VT323';
+  src: url('../fonts/VT323-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Space Mono';
+  src: url('../fonts/SpaceMono-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Space Mono';
+  src: url('../fonts/SpaceMono-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-display: block;
+}

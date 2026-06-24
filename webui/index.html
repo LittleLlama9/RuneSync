@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html data-phosphor="amber">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/app.css">
+  <title>DAEMON</title>
+</head>
+<body>
+  <div class="frame">
+    <div class="screen">
+      <div class="vignette"></div>
+      <div class="scanlines" id="scanlines"></div>
+      <div class="content">
+
+        <!-- top bar (draggable region for the frameless window) -->
+        <div class="topbar pywebview-drag-region">
+          <div class="brand">
+            <span class="brand-name">DAEMON</span>
+            <span class="brand-ver">v1.0.0</span>
+          </div>
+          <div class="menu">
+            <span class="tab" data-screen="monitor">[1] MONITOR</span>
+            <span class="tab" data-screen="builds">[2] BUILDS</span>
+            <span class="tab" data-screen="settings">[3] SETTINGS</span>
+          </div>
+          <div class="status" id="status">
+            <span id="statusLabel">LEAGUE: WAITING</span>
+            <span class="dot"></span>
+          </div>
+        </div>
+
+        <!-- body -->
+        <div class="body">
+
+          <!-- ===================== MONITOR ===================== -->
+          <section class="view" data-view="monitor">
+            <div class="monitor-grid">
+
+              <div class="panel">
+                <span class="ptitle">CHAMPION</span>
+                <div class="champ-name" id="champName">—</div>
+                <div class="champ-meta" id="champMeta">[ awaiting champ select ]</div>
+                <div class="champ-badge" id="champBadge" hidden>&gt;&gt; RUNES IMPORTED OK</div>
+              </div>
+
+              <div class="panel">
+                <span class="ptitle" id="matchupTitle">MATCHUP // idle</span>
+                <div class="wr-num" id="wrNum">—</div>
+                <div class="wr-dir" id="wrDir">awaiting matchup</div>
+                <div class="gauge">
+                  <span class="bk">[</span>
+                  <div class="track"><div class="fill" id="wrFill" style="width:0%"></div></div>
+                  <span class="bk">]</span>
+                </div>
+                <div class="wr-sample" id="wrSample"></div>
+                <div class="mo">
+                  <label>vs:</label>
+                  <input id="moInput" type="text" spellcheck="false" autocomplete="off">
+                  <span class="go" id="moGo">[look up]</span>
+                </div>
+              </div>
+
+              <div class="panel">
+                <span class="ptitle">RUNE PAGE</span>
+                <div class="runes" id="runePage">
+                  <div class="lrow"><span>keystone</span><span class="leader"></span><span class="val" id="rKeystone">—</span></div>
+                  <div class="lrow"><span>primary</span><span class="leader"></span><span class="val dim" id="rPrimary">—</span></div>
+                  <div class="subrune" id="rPrimaryMinor"></div>
+                  <div class="lrow"><span>secondary</span><span class="leader"></span><span class="val dim" id="rSecondary">—</span></div>
+                  <div class="subrune" id="rSecondaryMinor"></div>
+                  <div class="lrow"><span>summoners</span><span class="leader"></span><span class="val" id="rSummoners">—</span></div>
+                </div>
+              </div>
+
+              <div class="panel">
+                <span class="ptitle" id="buildTitle">BUILD // idle</span>
+                <div class="build-list" id="buildList"><div class="brow"><span class="bi">—</span></div></div>
+              </div>
+
+              <div class="panel span2">
+                <span class="ptitle">DISPATCH LOG</span>
+                <span class="pactions">
+                  <span data-cmd="reimport">reimport</span>
+                  <span data-cmd="clear">clear</span>
+                </span>
+                <div class="log" id="logBox"></div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- ===================== BUILDS ===================== -->
+          <section class="view" data-view="builds" hidden>
+            <div class="page-head">
+              <span class="page-title">~/builds.ledger</span>
+              <span class="page-note" id="buildsCount"></span>
+            </div>
+            <div class="page-sub">champions here import YOUR runes instead of the crowd's top build.</div>
+            <div class="ledger">
+              <div class="ledger-head">
+                <span>№</span><span>CHAMPION</span><span>ROLE</span><span>PATH</span><span>SUMMONERS</span>
+              </div>
+              <div id="ledgerRows"></div>
+            </div>
+            <div class="hints">
+              <span data-cmd="add"><b>[a]</b> inscribe</span>
+              <span data-cmd="edit"><b>[e]</b> edit</span>
+              <span data-cmd="delete"><b>[d]</b> delete</span>
+              <span><b>[↑↓]</b> select</span>
+            </div>
+          </section>
+
+          <!-- ===================== SETTINGS ===================== -->
+          <section class="view" data-view="settings" hidden>
+            <div class="page-head">
+              <span class="page-title">~/daemon.conf</span>
+              <span class="page-note" style="font-family:'Space Mono',monospace;font-size:10px">%APPDATA%\RuneSync\overrides.json</span>
+            </div>
+            <div class="conf">
+              <div class="comment"># where the numbers come from</div>
+              <div class="crow"><span class="k">rank_filter</span><span>=</span><span class="v" id="setRank" data-set="rank">Platinum+ ▾</span></div>
+              <div class="crow"><span class="k">region</span><span>=</span><span class="v" id="setRegion" data-set="region">World ▾</span></div>
+
+              <div class="comment"># how it behaves</div>
+              <div class="crow"><span class="k">auto_detect_role</span><span>=</span><span class="vlit" id="setAutoRole" data-set="auto_role">[x]</span></div>
+              <div class="crow"><span class="k">import_on</span><span>=</span>
+                <span class="radio" data-trig="hover">(•)&nbsp;hover</span><span class="radio" data-trig="lock">( )&nbsp;lock-in</span></div>
+
+              <div class="comment"># appearance</div>
+              <div class="crow"><span class="k">phosphor</span><span>=</span><span class="v" id="setPhosphor" data-set="phosphor">amber ▾</span></div>
+
+              <div class="comment"># system</div>
+              <div class="crow"><span class="k">start_with_windows</span><span>=</span><span class="vlit" id="setAutostart" data-set="autostart">[ ]</span>
+                <span class="note"># lives in tray, wakes when league opens</span></div>
+
+              <div class="save-row">
+                <span class="save-btn" id="saveBtn">:w  write config</span>
+                <span class="save-msg" id="saveMsg" hidden>"daemon.conf" written ✓</span>
+              </div>
+            </div>
+            <div class="legal">
+              data aggregated with attribution from lolalytics &amp; u.gg · not endorsed by riot games<br>
+              league of legends © riot games, inc. · daemon is gpl-3.0
+            </div>
+          </section>
+
+        </div>
+
+        <!-- in-game overlay -->
+        <div class="overlay" id="overlay" hidden>
+          <div class="ov-head"><span>IN-GAME</span><span class="ov-live">live<span class="dot"></span></span></div>
+          <div class="ov-match" id="ovMatch">— <span class="vs">vs</span> —</div>
+          <div class="ov-wr" id="ovWr">—%  <span class="arr">▲</span></div>
+          <div class="ov-ctx" id="ovCtx">awaiting matchup</div>
+        </div>
+
+        <!-- command line -->
+        <div class="cmdbar">
+          <div class="cmd-left">
+            <span class="prompt">daemon:~$</span>
+            <span class="hint" id="promptHint">watch --champ-select</span>
+            <span class="cursor"></span>
+          </div>
+          <div class="cmd-right">
+            <span class="cmd" data-cmd="toggle"><b>[s]</b> <span id="startWord">start</span></span>
+            <span class="cmd" data-cmd="overlay"><b>[g]</b> overlay</span>
+            <span class="cmd" data-cmd="tray"><b>[q]</b> tray</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- bezel footer -->
+    <div class="bezel-foot">
+      <span class="foot-name">DAEMON</span>
+      <span class="foot-pwr">PWR <i class="pwr-dot"></i></span>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

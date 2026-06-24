@@ -2,3 +2,4 @@ Pillow
 pystray
 psutil
 pytest
+pywebview
