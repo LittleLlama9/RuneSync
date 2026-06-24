@@ -8,8 +8,23 @@
   const RANKS = ['Iron+', 'Bronze+', 'Silver+', 'Gold+', 'Platinum+', 'Emerald+', 'Diamond+', 'Master+'];
   const REGIONS = ['World', 'NA', 'EUW', 'EUNE', 'KR', 'BR', 'JP', 'OCE', 'LAS', 'LAN', 'TR', 'RU'];
   const PROMPTS = {
-    monitor: 'watch --champ-select', builds: 'edit builds.ledger', settings: 'vim daemon.conf'
+    monitor: 'watch --champ-select', builds: 'edit builds.ledger',
+    settings: 'vim daemon.conf', editor: 'vim override'
   };
+  // static game data (mirrors lcu.py / main.py; rarely changes)
+  const TREES = ['Precision', 'Domination', 'Sorcery', 'Resolve', 'Inspiration'];
+  const KEYSTONES = {
+    Precision: ['Press the Attack', 'Lethal Tempo', 'Fleet Footwork', 'Conqueror'],
+    Domination: ['Electrocute', 'Predator', 'Dark Harvest', 'Hail of Blades'],
+    Sorcery: ['Summon Aery', 'Arcane Comet', 'Phase Rush'],
+    Resolve: ['Grasp of the Undying', 'Aftershock', 'Guardian'],
+    Inspiration: ['Glacial Augment', 'First Strike', 'Unsealed Spellbook']
+  };
+  const SPELLS = [
+    ['— (u.gg default)', 0], ['Flash', 4], ['Ignite', 14], ['Exhaust', 3], ['Barrier', 21],
+    ['Heal', 7], ['Ghost', 6], ['Teleport', 12], ['Cleanse', 1], ['Smite', 11], ['Clarity', 13]
+  ];
+  const SPELL_NAME = id => (SPELLS.find(s => s[1] === (id || 0)) || SPELLS[0])[0];
 
   // ── state (placeholder seed = the mock's sample data) ─────────────────────
   const state = {
@@ -173,9 +188,23 @@
     else if (action === 'tray') window.API.call('hide_to_tray');
     else if (action === 'reimport') window.API.call('reimport');
     else if (action === 'clear') { state.log = []; renderMonitor(); }
-    else if (action === 'add' || action === 'edit' || action === 'delete') {
-      console.log('builds action (wired in a later phase):', action);
-    }
+    else if (action === 'add') openEditor('', true);
+    else if (action === 'edit') { const c = state.builds[state.sel]; if (c) openEditor(c.champ, false); }
+    else if (action === 'delete') { const c = state.builds[state.sel]; if (c) confirmDelete(c.champ); }
+  }
+
+  function refreshBuilds() {
+    if (!window.API.ready()) { renderBuilds(); return; }
+    window.API.call('get_builds').then(b => {
+      state.builds = b || [];
+      if (state.sel >= state.builds.length) state.sel = Math.max(0, state.builds.length - 1);
+      renderBuilds();
+    });
+  }
+
+  function confirmDelete(champ) {
+    if (!window.confirm(`Remove custom build for ${champ}?`)) return;
+    window.API.call('remove_override', champ).then(() => refreshBuilds());
   }
   function moveSel(d) {
     if (!state.builds.length) return;
@@ -189,8 +218,9 @@
     return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
   }
   function onKey(e) {
+    const k = (e.key || '').toLowerCase();
+    if (k === 'escape' && state.screen === 'editor') { setScreen('builds'); return; }
     if (e.ctrlKey || e.altKey || e.metaKey || typing(e)) return;
-    const k = e.key.toLowerCase();
     if (k === '1') setScreen('monitor');
     else if (k === '2') setScreen('builds');
     else if (k === '3') setScreen('settings');
@@ -236,12 +266,118 @@
     });
     $('moGo').addEventListener('click', submitMatchup);
     $('moInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') submitMatchup(); });
+    wireEditor();
     window.addEventListener('keydown', onKey);
   }
   function submitMatchup() {
     const v = $('moInput').value.trim(); if (!v) return;
     $('moInput').value = '';
     window.API.call('set_matchup_override', v);
+  }
+
+  // ── override editor ─────────────────────────────────────────────────────────
+  const ed = { champ: '', role: 'auto', primary_tree: 'Precision', keystone: '',
+               secondary_tree: 'Domination', rune_ids: [], note: '', page_name: '',
+               spell1: 0, spell2: 0, items_build: {} };
+  let edNew = true;
+
+  function openEditor(champ, isNew) {
+    edNew = isNew;
+    const fill = (o) => {
+      Object.assign(ed, {
+        champ: isNew ? '' : (o.champ || champ || ''),
+        role: o.role || 'auto', primary_tree: o.primary_tree || 'Precision',
+        keystone: o.keystone || '', secondary_tree: o.secondary_tree || 'Domination',
+        rune_ids: o.rune_ids || [], note: o.note || '', page_name: o.page_name || '',
+        spell1: o.spell1 || 0, spell2: o.spell2 || 0, items_build: o.items_build || {}
+      });
+      renderEditor(); setScreen('editor'); $('edChamp').focus();
+    };
+    if (window.API.ready()) window.API.call('get_override', champ || '').then(o => fill(o || {}));
+    else fill({ champ: champ || '' });
+  }
+
+  function renderEditor() {
+    $('edTitle').textContent = edNew ? '~/inscribe override' : '~/edit override';
+    $('edChamp').value = ed.champ || '';
+    $('edRole').textContent = (ed.role || 'auto') + ' ▾';
+    $('edPrimary').textContent = (ed.primary_tree || 'Precision') + ' ▾';
+    $('edKeystone').textContent = (ed.keystone || '—') + ' ▾';
+    $('edSecondary').textContent = (ed.secondary_tree || 'Domination') + ' ▾';
+    $('edSpell1').textContent = SPELL_NAME(ed.spell1) + ' ▾';
+    $('edSpell2').textContent = SPELL_NAME(ed.spell2) + ' ▾';
+    $('edRunes').value = (ed.rune_ids || []).join(',');
+    $('edNote').value = ed.note || '';
+    $('edStatus').textContent = '';
+  }
+
+  function saveEditor() {
+    ed.champ = $('edChamp').value.trim();
+    ed.note = $('edNote').value;
+    const runesStr = $('edRunes').value.trim();   // string; backend parses/validates
+    if (!ed.champ) { $('edStatus').textContent = '✗ enter a champion name'; return; }
+    if (!window.API.ready()) { setScreen('builds'); return; }
+    window.API.call('save_override', ed.champ, {
+      role: ed.role, primary_tree: ed.primary_tree, keystone: ed.keystone,
+      secondary_tree: ed.secondary_tree, rune_ids: runesStr, note: ed.note,
+      page_name: ed.page_name, spell1: ed.spell1, spell2: ed.spell2, items_build: ed.items_build
+    }).then(r => {
+      if (r && r.ok) { refreshBuilds(); setScreen('builds'); }
+      else $('edStatus').textContent = '✗ ' + ((r && r.error) || 'save failed');
+    });
+  }
+
+  function importFromClient() {
+    $('edStatus').textContent = '… reading client';
+    window.API.call('import_rune_page_from_client').then(r => {
+      if (r && r.ok) {
+        ed.primary_tree = r.primary_tree || ed.primary_tree;
+        ed.secondary_tree = r.secondary_tree || ed.secondary_tree;
+        if (r.keystone) ed.keystone = r.keystone;
+        ed.rune_ids = r.rune_ids || []; ed.page_name = r.page_name || '';
+        renderEditor();
+        $('edStatus').textContent = '✓ imported ' + (r.page_name || 'page');
+      } else $('edStatus').textContent = '✗ ' + ((r && r.error) || 'failed');
+    });
+  }
+
+  // floating dropdown (editor + future settings menus)
+  let _menuEl = null;
+  function closeMenu() {
+    if (_menuEl) { _menuEl.remove(); _menuEl = null; document.removeEventListener('mousedown', _menuOutside, true); }
+  }
+  function _menuOutside(e) { if (_menuEl && !_menuEl.contains(e.target)) closeMenu(); }
+  function openMenu(anchor, options, current, onPick) {
+    closeMenu();
+    const m = document.createElement('div'); m.className = 'menu-pop';
+    options.forEach(opt => {
+      const label = Array.isArray(opt) ? opt[0] : opt;
+      const value = Array.isArray(opt) ? opt[1] : opt;
+      const it = document.createElement('div');
+      it.className = 'mi' + (value === current ? ' on' : ''); it.textContent = label;
+      it.addEventListener('click', () => { onPick(value); closeMenu(); });
+      m.appendChild(it);
+    });
+    document.body.appendChild(m);
+    const r = anchor.getBoundingClientRect();
+    m.style.left = r.left + 'px'; m.style.top = (r.bottom + 2) + 'px';
+    setTimeout(() => document.addEventListener('mousedown', _menuOutside, true), 0);
+    _menuEl = m;
+  }
+
+  function wireEditor() {
+    $('edBack').addEventListener('click', () => setScreen('builds'));
+    $('edCancel').addEventListener('click', () => setScreen('builds'));
+    $('edSave').addEventListener('click', saveEditor);
+    $('edImport').addEventListener('click', importFromClient);
+    $('edRole').addEventListener('click', () => openMenu($('edRole'), ROLES, ed.role, v => { ed.role = v; renderEditor(); }));
+    $('edPrimary').addEventListener('click', () => openMenu($('edPrimary'), TREES, ed.primary_tree, v => {
+      ed.primary_tree = v; if (!(KEYSTONES[v] || []).includes(ed.keystone)) ed.keystone = ''; renderEditor();
+    }));
+    $('edKeystone').addEventListener('click', () => openMenu($('edKeystone'), KEYSTONES[ed.primary_tree] || [], ed.keystone, v => { ed.keystone = v; renderEditor(); }));
+    $('edSecondary').addEventListener('click', () => openMenu($('edSecondary'), TREES, ed.secondary_tree, v => { ed.secondary_tree = v; renderEditor(); }));
+    $('edSpell1').addEventListener('click', () => openMenu($('edSpell1'), SPELLS, ed.spell1, v => { ed.spell1 = v; renderEditor(); }));
+    $('edSpell2').addEventListener('click', () => openMenu($('edSpell2'), SPELLS, ed.spell2, v => { ed.spell2 = v; renderEditor(); }));
   }
 
   // ── Python → JS push channel ───────────────────────────────────────────────
@@ -319,6 +455,7 @@
     // api may attach slightly after DOMContentLoaded → wait for pywebviewready.
     if (window.pywebview && window.pywebview.api) connectBackend();
     else window.addEventListener('pywebviewready', connectBackend, { once: true });
+    if (location.search.indexOf('shot=editor') >= 0) setTimeout(() => openEditor('', true), 2200);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();

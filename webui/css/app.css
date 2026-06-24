@@ -169,6 +169,29 @@ body {
 .legal { font-family:'Space Mono',monospace; font-size:9px; color:var(--pd); margin-top:38px;
   border-top:1px solid var(--pdd); padding-top:12px; line-height:1.7; opacity:.8; }
 
+/* ── override editor ── */
+.ed-back { font-size:17px; color:var(--pd); cursor:pointer; }
+.ed-back:hover { color:var(--pb); }
+.ed-form { margin-top:20px; display:flex; flex-direction:column; gap:12px; max-width:640px; font-size:19px; }
+.ed-row { display:flex; align-items:baseline; gap:10px; }
+.ed-k { width:130px; color:var(--pd); flex-shrink:0; }
+.ed-in { flex:1; background:#0c0a06; color:var(--pb); border:1px solid var(--pdd); outline:none;
+  font-family:'VT323',monospace; font-size:19px; padding:1px 8px; }
+.ed-in:focus { border-color:var(--p); }
+.ed-in::placeholder { color:var(--pdd); }
+.ed-val { color:var(--pb); cursor:pointer; }
+.ed-val:hover { color:var(--p); }
+.ed-stub { color:var(--pd); }
+.ed-imp { color:var(--p); cursor:pointer; }
+.ed-imp:hover { color:var(--pb); }
+.ed-status { font-family:'Space Mono',monospace; font-size:11px; color:var(--pd); margin-left:10px; }
+
+/* floating dropdown menu (editor + settings) */
+.menu-pop { position:absolute; z-index:20; background:#0c0a06; border:1px solid var(--p);
+  max-height:260px; overflow-y:auto; box-shadow:0 0 18px var(--glow); font-size:18px; }
+.menu-pop .mi { padding:3px 14px; cursor:pointer; color:var(--pb); white-space:nowrap; }
+.menu-pop .mi:hover, .menu-pop .mi.on { background:var(--p); color:#0c0a06; text-shadow:none; }
+
 /* ── in-game overlay ── */
 .overlay { position:absolute; right:18px; bottom:54px; z-index:8; width:230px;
   border:1px solid var(--p); background:#0c0a06; padding:12px 14px; box-shadow:0 0 22px var(--glow); }

@@ -147,6 +147,85 @@ class Api:
             })
         return out
 
+    def get_override(self, champ: str) -> dict:
+        d = self.overrides.get(champ) or {}
+        return {
+            "champ": champ,
+            "role": d.get("role", "auto"),
+            "primary_tree": d.get("primary_tree", "Precision"),
+            "keystone": d.get("keystone", ""),
+            "secondary_tree": d.get("secondary_tree", "Domination"),
+            "rune_ids": d.get("rune_ids", []),
+            "note": d.get("note", ""),
+            "page_name": d.get("page_name", ""),
+            "spell1": d.get("spell1", 0),
+            "spell2": d.get("spell2", 0),
+            "items_build": d.get("items_build", {}),   # preserved; edited in P5
+        }
+
+    def save_override(self, champ: str, data: dict) -> dict:
+        champ = (champ or "").strip()
+        if not champ:
+            return {"ok": False, "error": "Enter a champion name."}
+        # rune_ids may arrive as a comma string (from the input) or a list.
+        rids = []
+        raw = data.get("rune_ids")
+        if isinstance(raw, str):
+            raw = raw.strip()
+            if raw:
+                try:
+                    rids = [int(x.strip()) for x in raw.split(",") if x.strip()]
+                except ValueError:
+                    return {"ok": False, "error": "Rune IDs must be integers."}
+        elif isinstance(raw, list):
+            try:
+                rids = [int(x) for x in raw]
+            except (TypeError, ValueError):
+                rids = []
+        existing = self.overrides.get(champ) or {}
+        self.overrides.set(champ, {
+            "role": data.get("role", "auto"),
+            "primary_tree": data.get("primary_tree", "Precision"),
+            "keystone": data.get("keystone", ""),
+            "secondary_tree": data.get("secondary_tree", "Domination"),
+            "rune_ids": rids,
+            "note": (data.get("note") or "").strip(),
+            "page_name": data.get("page_name", existing.get("page_name", "")),
+            "spell1": int(data.get("spell1", 0) or 0),
+            "spell2": int(data.get("spell2", 0) or 0),
+            "items_build": data.get("items_build", existing.get("items_build", {})),
+        })
+        return {"ok": True}
+
+    def remove_override(self, champ: str) -> dict:
+        self.overrides.remove(champ)
+        return {"ok": True}
+
+    def import_rune_page_from_client(self) -> dict:
+        from lcu import LCUClient, RUNE_TREE_IDS, KEYSTONE_IDS
+        try:
+            lcu = self.lcu
+            if not lcu.connected:
+                lcu = LCUClient(); lcu.connect()
+            page = lcu.get_current_rune_page()
+            if not page:
+                return {"ok": False, "error": "No rune page found."}
+            id_to_tree = {v: k for k, v in RUNE_TREE_IDS.items()}
+            id_to_ks = {v: k for k, v in KEYSTONE_IDS.items()}
+            perk_ids = page.get("selectedPerkIds", [])
+            return {
+                "ok": True,
+                "primary_tree": id_to_tree.get(page.get("primaryStyleId", 0), ""),
+                "secondary_tree": id_to_tree.get(page.get("subStyleId", 0), ""),
+                "keystone": id_to_ks.get(perk_ids[0], "") if perk_ids else "",
+                "rune_ids": perk_ids,
+                "page_name": page.get("name", ""),
+            }
+        except LCUConnectionError as ex:
+            return {"ok": False, "error": str(ex)}
+        except Exception:
+            return {"ok": False, "error": "Couldn't read your rune page — is League open?"}
+
     def start_monitoring(self) -> dict:
         if not self.lcu.connected:
             return {"ok": False, "error": "League not connected."}

@@ -146,6 +146,31 @@
             </div>
           </section>
 
+          <!-- ===================== OVERRIDE EDITOR ===================== -->
+          <section class="view" data-view="editor" hidden>
+            <div class="page-head">
+              <span class="page-title" id="edTitle">~/inscribe override</span>
+              <span class="ed-back" id="edBack">‹ back</span>
+            </div>
+            <div class="ed-form">
+              <div class="ed-row"><span class="ed-k">champion</span><input id="edChamp" class="ed-in" spellcheck="false" autocomplete="off"></div>
+              <div class="ed-row"><span class="ed-k">role</span><span class="ed-val" id="edRole" data-f="role"></span></div>
+              <div class="ed-row"><span class="ed-k">primary tree</span><span class="ed-val" id="edPrimary" data-f="primary_tree"></span></div>
+              <div class="ed-row"><span class="ed-k">keystone</span><span class="ed-val" id="edKeystone" data-f="keystone"></span></div>
+              <div class="ed-row"><span class="ed-k">secondary tree</span><span class="ed-val" id="edSecondary" data-f="secondary_tree"></span></div>
+              <div class="ed-row"><span class="ed-k">summoner 1</span><span class="ed-val" id="edSpell1" data-f="spell1"></span></div>
+              <div class="ed-row"><span class="ed-k">summoner 2</span><span class="ed-val" id="edSpell2" data-f="spell2"></span></div>
+              <div class="ed-row"><span class="ed-k">rune IDs</span><input id="edRunes" class="ed-in" spellcheck="false" autocomplete="off" placeholder="optional · 9 comma-sep ints"></div>
+              <div class="ed-row"><span class="ed-k">note</span><input id="edNote" class="ed-in" spellcheck="false" autocomplete="off"></div>
+              <div class="ed-row"><span class="ed-k">item build</span><span class="ed-stub" id="edBuild">[ edit build · coming soon ]</span></div>
+              <div class="ed-row"><span class="ed-imp" id="edImport">[ import active rune page from client ]</span><span class="ed-status" id="edStatus"></span></div>
+            </div>
+            <div class="hints" style="margin-top:18px">
+              <span id="edSave"><b>[:w]</b> save</span>
+              <span id="edCancel"><b>[:q]</b> cancel</span>
+            </div>
+          </section>
+
         </div>
 
         <!-- in-game overlay -->
