@@ -24,9 +24,9 @@ cd /d "%~dp0"
 :: --hidden-import psutil: psutil is imported function-locally in tray.py /
 :: lcu.py, so PyInstaller's static analyzer can miss it.
 if exist icon.ico (
-    py -m PyInstaller --noconfirm --clean --onefile --windowed --name "RuneSync" --icon=icon.ico --hidden-import psutil --add-data "assets/spells;assets/spells" --add-data "icon.ico;." main.py
+    py -m PyInstaller --noconfirm --clean --onefile --windowed --name "RuneSync" --icon=icon.ico --hidden-import psutil --add-data "assets/spells;assets/spells" --add-data "assets/fonts;assets/fonts" --add-data "icon.ico;." main.py
 ) else (
-    py -m PyInstaller --noconfirm --clean --onefile --windowed --name "RuneSync" --hidden-import psutil --add-data "assets/spells;assets/spells" --add-data "icon.ico;." main.py
+    py -m PyInstaller --noconfirm --clean --onefile --windowed --name "RuneSync" --hidden-import psutil --add-data "assets/spells;assets/spells" --add-data "assets/fonts;assets/fonts" --add-data "icon.ico;." main.py
 )
 if errorlevel 1 (
     echo ERROR: RuneSync build failed!
