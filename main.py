@@ -58,9 +58,8 @@ def F(size, fine=False, bold=False):
 # ── Palette ──────────────────────────────────────────────────────────────────
 # One ink colour on near-black; brightness (not hue) encodes hierarchy:
 # P_DIM < P < P_BRIGHT. BG and DANGER stay constant across all three phosphors.
-BG       = "#0c0a06"   # screen background (near-black, warm)
-DANGER   = "#ff5544"   # stop / errors / unfavorable
-DANGER_H = "#ff7766"
+BG       = "#0c0a06"   # screen background (near-black, warm; constant across phosphors)
+DANGER   = "#ff5544"   # stop / errors / unfavorable (constant across phosphors)
 
 PHOSPHORS = {
     "amber": dict(P="#ffb000", P_BRIGHT="#ffd87a", P_DIM="#c98a2e", BORDER="#6b4a00"),
@@ -68,16 +67,11 @@ PHOSPHORS = {
     "ice":   dict(P="#7fdfff", P_BRIGHT="#d2f4ff", P_DIM="#4fa8cf", BORDER="#1a4a5e"),
 }
 
-# Static amber aliases for secondary surfaces that aren't wired into the live
-# theme registry (the dev Debug console, the build sub-editor). They render in
-# amber regardless of the active phosphor — an accepted, documented limitation.
+# Static amber palette for the two surfaces NOT wired into the live theme
+# registry — the dev Debug console (Ctrl+Shift+D) and the build sub-editor.
+# They always render amber regardless of the active phosphor (accepted limit).
 _AMBER = PHOSPHORS["amber"]
 P, P_BRIGHT, P_DIM, BORDER = _AMBER["P"], _AMBER["P_BRIGHT"], _AMBER["P_DIM"], _AMBER["BORDER"]
-DARK = PANEL = PANELDK = BG
-GOLD = P
-GREEN, GREEN_H = P, P_BRIGHT
-RED, RED_H = DANGER, DANGER_H
-BLUE, BLUE_H = BORDER, P_DIM
 
 import queue as _queue_mod
 _log_queue = _queue_mod.Queue()  # replaced by init_logging() at startup
@@ -125,7 +119,7 @@ def _hex_to_bgr(hex_color: str) -> int:
     return r | (g << 8) | (b << 16)
 
 
-def make_btn(parent, text, cmd, bg=BLUE, hov=BLUE_H, fg="white", **kw):
+def make_btn(parent, text, cmd, bg=BORDER, hov=P_DIM, fg=P_DIM, **kw):
     """Legacy flat button — used only by the static-amber Debug console."""
     b = tk.Label(parent, text=text, font=("Segoe UI", 9),
                  bg=bg, fg=fg, padx=10, pady=5, cursor="hand2", **kw)
@@ -168,7 +162,13 @@ class Theme:
             try:
                 painter(self); alive.append((w, painter))
             except tk.TclError:
-                pass  # widget destroyed since last paint
+                pass  # widget destroyed since last paint — drop it
+            except Exception:
+                # A buggy painter must not abort the whole re-theme or strand
+                # the registry in its pre-switch state; keep the widget and
+                # surface the error rather than half-applying the palette.
+                import traceback; traceback.print_exc()
+                alive.append((w, painter))
         self._painters = alive
 
     # ── widget factories ──
@@ -466,7 +466,10 @@ class RuneSyncApp:
         self._screen = "monitor"
         self._sel_build = 0
         self._build_champs: list = []
-        self._status_col = self.theme.PD
+        self._status_kind = "booting"      # booting|connecting|connected|monitoring|waiting
+        self._panel_champ = None           # champ the CHAMPION panel currently shows
+        self._override_frame = None        # transient editor frame (non-screen)
+        self._last_items = None            # (items, is_custom) for re-render on theme switch
 
         self._build_ui()
         self.root.update_idletasks()
@@ -530,14 +533,14 @@ class RuneSyncApp:
             self.monitor._in_game = False
         self._stop()
         self.lcu.connected = False
-        self._set_status("waiting", DANGER)
+        self._set_status("waiting")
         self._emit("League client closed — waiting for it to reopen...", "warn")
 
     def _on_league_close(self):
         if self.running:
             self.root.after(0, self._stop)
         self.lcu.connected = False
-        self.root.after(0, lambda: self._set_status("waiting", DANGER))
+        self.root.after(0, lambda: self._set_status("waiting"))
 
     def _apply_dark_titlebar(self):
         """Dark title bar + a warm border tinted to the active phosphor."""
@@ -663,6 +666,10 @@ class RuneSyncApp:
     def _show_screen(self, key):
         if key not in self._screens or self._in_game_overlay:
             return
+        # Navigating away from an open editor must destroy it, not just hide it
+        # (it's a transient non-screen frame). _discard nulls _current_frame if
+        # it was the editor, so the pack_forget below never hits a dead widget.
+        self._discard_override_frame()
         if self._current_frame is not None:
             self._current_frame.pack_forget()
         self._screens[key].pack(fill="both", expand=True)
@@ -670,6 +677,14 @@ class RuneSyncApp:
         self._screen = key
         self._refresh_menu()
         self._prompt_lbl.configure(text=self._PROMPTS.get(key, ""))
+
+    def _discard_override_frame(self):
+        """Destroy the transient override-editor frame if one is open."""
+        if self._override_frame is not None:
+            if self._current_frame is self._override_frame:
+                self._current_frame = None
+            self._override_frame.destroy()
+            self._override_frame = None
 
     def _refresh_menu(self):
         t = self.theme
@@ -689,8 +704,9 @@ class RuneSyncApp:
 
     def _pulse_status(self):
         try:
+            base = self._status_color(self._status_kind)
             cur = self._status_dot.cget("fg")
-            self._status_dot.configure(fg=self.theme.PD if cur != self.theme.PD else self._status_col)
+            self._status_dot.configure(fg=self.theme.PD if cur != self.theme.PD else base)
         except Exception:
             pass
         self.root.after(800, self._pulse_status)
@@ -1009,10 +1025,12 @@ class RuneSyncApp:
         self._refresh_menu()
         self._refresh_builds()
         self._recolor_log_tags()
-        self._status_col = self.theme.PD
+        self._set_status(self._status_kind)          # recompute dot hue for new palette
         self._apply_dark_titlebar()
         if hasattr(self, "_gauge"):
             self._gauge.repaint(self.theme)
+        if self._last_items and self._last_items[0]:  # re-render plain item rows
+            self._apply_item_build(*self._last_items)
 
     # ════════════════════════════ DEBUG (lazy, static amber) ═══════════════════
     def _toggle_debug(self):
@@ -1180,12 +1198,21 @@ class RuneSyncApp:
         self.log.delete("1.0", "end")
         self.log.configure(state="disabled")
 
-    def _set_status(self, txt, col):
-        """Top-bar status. txt is a short state word ('connected', 'waiting'…)."""
+    def _status_color(self, kind):
+        if kind == "waiting":
+            return self.theme.DANGER
+        if kind in ("connected", "monitoring"):
+            return self.theme.PB
+        return self.theme.PD  # booting / connecting
+
+    def _set_status(self, kind):
+        """Top-bar status. kind is one of booting|connecting|connected|
+        monitoring|waiting — the single source for both label and dot colour,
+        so theme switches and the pulse always recompute the right hue."""
         def _do():
-            self._status_lbl.configure(text="LEAGUE: " + txt.upper())
-            self._status_col = col
-            self._status_dot.configure(fg=col)
+            self._status_kind = kind
+            self._status_lbl.configure(text="LEAGUE: " + kind.upper())
+            self._status_dot.configure(fg=self._status_color(kind))
         self.root.after(0, _do)
 
     # ── notification banner ─────────────────────────────────────────────────
@@ -1228,10 +1255,16 @@ class RuneSyncApp:
     def _on_import_success(self, champ: str):
         self._show_banner(f">> runes imported for {champ}", "success")
         def _do():
+            self._panel_champ = champ  # the tag asserts THIS champ's runes are in
             if not self._imported_tag_packed:
                 self._imported_tag.pack(anchor="w", pady=(14, 0))
                 self._imported_tag_packed = True
         self.root.after(0, _do)
+
+    def _hide_imported_tag(self):
+        if self._imported_tag_packed:
+            self._imported_tag.pack_forget()
+            self._imported_tag_packed = False
 
     def _on_runes_imported(self, info: dict):
         """Marshal the rune-page info onto the Tk thread (called from monitor)."""
@@ -1254,25 +1287,25 @@ class RuneSyncApp:
         try:
             import time
             self._emit("Connecting to League client...", "info")
-            self._set_status("connecting", self.theme.PD)
+            self._set_status("connecting")
             delay = 2
             MAX_ATTEMPTS = 8
             for attempt in range(1, MAX_ATTEMPTS + 1):
                 try:
                     self.lcu.connect()
                     self._emit("✓ Connected to League Client", "success")
-                    self._set_status("connected", self.theme.PB)
+                    self._set_status("connected")
                     self.root.after(0, self._start)
                     return
                 except LCUConnectionError:
                     if attempt < MAX_ATTEMPTS:
-                        self._set_status("waiting", DANGER)
+                        self._set_status("waiting")
                         time.sleep(delay)
                         delay = min(delay * 2, 10)
                     else:
                         self._emit("League client not detected — PHOSPHOR will "
                                    "auto-connect when you open League.", "warn")
-                        self._set_status("waiting", DANGER)
+                        self._set_status("waiting")
         finally:
             with self._connect_lock:
                 self._connecting = False
@@ -1288,7 +1321,7 @@ class RuneSyncApp:
                 "League client not connected.\nOpen League and try again."); return
         self.running = True
         self._start_word.set("stop")
-        self._set_status("monitoring", self.theme.PB)
+        self._set_status("monitoring")
         self._emit("──── Monitoring started ────", "warn")
         self.monitor = ChampSelectMonitor(
             lcu=self.lcu, ugg=self.ugg, overrides=self.overrides,
@@ -1309,8 +1342,7 @@ class RuneSyncApp:
         self.running = False
         if self.monitor: self.monitor.stop()
         self._start_word.set("start")
-        self._set_status("connected" if self.lcu.connected else "waiting",
-                         self.theme.PB if self.lcu.connected else DANGER)
+        self._set_status("connected" if self.lcu.connected else "waiting")
         self._emit("──── Monitoring stopped ────", "warn")
 
     def _reimport(self):
@@ -1333,7 +1365,11 @@ class RuneSyncApp:
         self.root.after(0, self._apply_item_build, items, is_custom)
 
     def _apply_item_build(self, items: list, is_custom: bool):
+        # Plain (untracked) widgets, rebuilt on every champ-select. Tracked
+        # factory widgets would leak painters into the theme registry on each
+        # rebuild; instead we recolor by re-rendering from _last_items on switch.
         t = self.theme
+        self._last_items = (items, is_custom)
         self._build_title.configure(text=f"BUILD // {'custom' if is_custom else 'u.gg'}")
         for w in self._build_item_lbls:
             w.destroy()
@@ -1344,10 +1380,10 @@ class RuneSyncApp:
             return
         self._build_placeholder.pack_forget()
         for i, name in enumerate(items, 1):
-            row = t.frame(self._build_body); row.pack(fill="x")
-            t.label(row, text=f"{i}", kind="dim", font=F(15)).pack(side="left")
-            t.label(row, text=f"  {name}", kind="bright" if i == 1 else "body",
-                    font=F(15), anchor="w").pack(side="left")
+            row = tk.Frame(self._build_body, bg=t.BG); row.pack(fill="x")
+            tk.Label(row, text=f"{i}", bg=t.BG, fg=t.PD, font=F(15)).pack(side="left")
+            tk.Label(row, text=f"  {name}", bg=t.BG, fg=(t.PB if i == 1 else t.P),
+                     font=F(15), anchor="w").pack(side="left")
             self._build_item_lbls.append(row)
 
     def _on_matchup_winrate(self, champ, enemy, role, wr, label, tag):
@@ -1359,6 +1395,10 @@ class RuneSyncApp:
         # CHAMPION panel
         self._game_champ, self._game_enemy, self._game_role = champ, enemy, role
         if champ:
+            # A new champion invalidates the previous "RUNES IMPORTED OK" badge.
+            if champ != self._panel_champ:
+                self._panel_champ = champ
+                self._hide_imported_tag()
             self._champ_name.configure(text=champ.upper())
             lane = f"{role} lane" if role and role not in ("auto", "") else "lane"
             self._champ_sub.configure(text=f"[ locked · {lane} ]")
@@ -1385,7 +1425,10 @@ class RuneSyncApp:
 
     def _build_game_overlay(self):
         t = self.theme
-        outer = t.frame(self.root)
+        # Child of _content so it occupies the same region the screens do —
+        # packing into root would leave the (empty) _content + command bar
+        # mapped above it and squeeze the overlay into leftover space.
+        outer = t.frame(self._content)
         self._game_frame = outer
         cell, body, _ = self._panel(outer, "IN-GAME")
         cell.pack(fill="both", expand=True)
@@ -1426,6 +1469,7 @@ class RuneSyncApp:
     def _on_game_start(self):
         if self._game_frame is None:
             self._build_game_overlay()
+        self._discard_override_frame()
         if self._current_frame is not None:
             self._current_frame.pack_forget()
             self._current_frame = None
@@ -1440,6 +1484,8 @@ class RuneSyncApp:
         self._in_game_overlay = False
         if self._game_frame:
             self._game_frame.pack_forget()
+        self._hide_imported_tag()
+        self._panel_champ = None
         self._show_screen("monitor")
         self._emit("Game ended.", "info")
 
@@ -1468,9 +1514,12 @@ class RuneSyncApp:
             self._emit(f"Removed override for {champ}", "warn")
 
     def _show_override_editor(self, champ: str):
+        self._discard_override_frame()
         if self._current_frame is not None:
             self._current_frame.pack_forget()
-        self._override_frame = self.theme.frame(self._content)
+        # Plain frame (not theme-tracked): the editor paints itself from a
+        # palette snapshot, so the container needs no painter in the registry.
+        self._override_frame = tk.Frame(self._content, bg=self.theme.BG)
         self._override_frame.pack(fill="both", expand=True)
         self._current_frame = self._override_frame
         OverrideEditorPage(
@@ -1479,10 +1528,7 @@ class RuneSyncApp:
             on_back=self._close_override_editor, lcu=self.lcu)
 
     def _close_override_editor(self):
-        if getattr(self, "_override_frame", None):
-            self._override_frame.destroy()
-            self._override_frame = None
-        self._current_frame = None
+        self._discard_override_frame()
         self._show_screen("builds")
 
     def _save_settings(self):
