@@ -1,19 +1,15 @@
 """
-item_data.py — Riot Data Dragon item catalog + async icon loading.
-Icons and catalog are cached in %APPDATA%/RuneSync/items/.
+item_data.py — Riot Data Dragon item catalog: names + icon URLs.
+Catalog cached in %APPDATA%/RuneSync/items/. No Tkinter/PIL — icons are served
+to the webview UI as ddragon CDN URLs (icon_url), loaded by the browser.
 """
-
 import json, os, threading, urllib.request
-from PIL import Image, ImageTk
 
 _FALLBACK_PATCH = "15.6.1"
 _PATCH = _FALLBACK_PATCH
 _ITEM_CATALOG: list = []           # [{id, name, image}]
-_ICON_TK_CACHE: dict = {}          # item_id -> PhotoImage | None
-_ICON_LOAD_LOCK = threading.Lock()
 _catalog_loaded = threading.Event()
 _init_started = False
-_ICON_SIZE = (32, 32)
 
 
 def _cache_dir() -> str:
@@ -91,14 +87,6 @@ def wait_ready(timeout: float = 4.0) -> bool:
     return _catalog_loaded.wait(timeout)
 
 
-def search(query: str, max_results: int = 12) -> list:
-    """Return items whose name contains query (case-insensitive)."""
-    if not query or not _catalog_loaded.is_set():
-        return []
-    q = query.lower()
-    return [i for i in _ITEM_CATALOG if q in i["name"].lower()][:max_results]
-
-
 def name_for(item_id) -> str:
     """Item display name from the catalog (or 'Item <id>' if unknown/not ready)."""
     try:
@@ -124,50 +112,9 @@ def icon_url(item_id) -> str:
     return ""
 
 
-def get_icon_async(item_id: int, callback) -> None:
-    """
-    Fetch icon for item_id. Calls callback(ImageTk.PhotoImage | None).
-    If already cached, callback fires immediately in the calling thread.
-    Otherwise downloads in a background thread.
-    """
-    if item_id in _ICON_TK_CACHE:
-        callback(_ICON_TK_CACHE[item_id])
-        return
-
-    def _work():
-        photo = _load_icon_blocking(item_id)
-        callback(photo)
-
-    threading.Thread(target=_work, daemon=True).start()
-
-
-def _load_icon_blocking(item_id: int):
-    with _ICON_LOAD_LOCK:
-        if item_id in _ICON_TK_CACHE:
-            return _ICON_TK_CACHE[item_id]
-
-        path = os.path.join(_cache_dir(), f"{item_id}.png")
-        if not os.path.exists(path):
-            try:
-                item = next((i for i in _ITEM_CATALOG if i["id"] == item_id), None)
-                if not item:
-                    _ICON_TK_CACHE[item_id] = None
-                    return None
-                url = (f"https://ddragon.leagueoflegends.com/cdn/{_PATCH}"
-                       f"/img/item/{item['image']}")
-                req = urllib.request.Request(url, headers={"User-Agent": "RuneSync/1.0"})
-                raw = urllib.request.urlopen(req, timeout=8).read()
-                with open(path, "wb") as f:
-                    f.write(raw)
-            except Exception:
-                _ICON_TK_CACHE[item_id] = None
-                return None
-
-        try:
-            img = Image.open(path).resize(_ICON_SIZE, Image.LANCZOS)
-            photo = ImageTk.PhotoImage(img)
-            _ICON_TK_CACHE[item_id] = photo
-            return photo
-        except Exception:
-            _ICON_TK_CACHE[item_id] = None
-            return None
+def search(query: str, max_results: int = 12) -> list:
+    """Return items whose name contains query (case-insensitive)."""
+    if not query or not _catalog_loaded.is_set():
+        return []
+    q = query.lower()
+    return [i for i in _ITEM_CATALOG if q in i["name"].lower()][:max_results]

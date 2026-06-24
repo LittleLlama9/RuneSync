@@ -22,8 +22,9 @@ ALL_PY = sorted(
     and not (p.name.startswith("_") and not p.name.startswith("__"))
 )
 
-# Modules safe to import: no tk.Tk() at module level, no blocking startup code.
-# main.py is excluded because it unconditionally calls tk.Tk() / mainloop().
+# Modules safe to import: no blocking startup code, no heavy GUI deps.
+# app.py / bridge.py are parse-checked only (they import pywebview, which may be
+# absent in a headless runner); the UI now lives in webui/ + app.py + bridge.py.
 IMPORTABLE = [
     "log_setup",
     "ugg_api",
@@ -32,7 +33,7 @@ IMPORTABLE = [
     "champion_roles",
     "monitor",
     "item_data",
-    "item_builder",
+    "perks",
     "tray",
 ]
 

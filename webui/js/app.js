@@ -606,13 +606,6 @@
     // api may attach slightly after DOMContentLoaded → wait for pywebviewready.
     if (window.pywebview && window.pywebview.api) connectBackend();
     else window.addEventListener('pywebviewready', connectBackend, { once: true });
-    const shot = (location.search.match(/shot=(\w+)/) || [])[1];
-    if (shot === 'editor') setTimeout(() => openEditor('', true), 2200);
-    if (shot === 'builder') setTimeout(() => {
-      openEditor('', true);
-      setTimeout(() => { openBuilder(); $('blQuery').value = 'boots'; blSearch(); }, 900);
-    }, 2200);
-    if (shot === 'debug') setTimeout(toggleDebug, 9000);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();

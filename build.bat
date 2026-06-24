@@ -23,10 +23,13 @@ echo [2/3] Building RuneSync.exe...
 cd /d "%~dp0"
 :: --hidden-import psutil: psutil is imported function-locally in tray.py /
 :: lcu.py, so PyInstaller's static analyzer can miss it.
+:: pywebview UI (app.py). --collect-all webview pulls the EdgeChromium backend
+:: DLLs + JS shim (without it the onefile exe shows a blank window). --hidden-import
+:: clr for pythonnet. webui/ is the HTML/CSS/JS/fonts frontend, bundled as data.
 if exist icon.ico (
-    py -m PyInstaller --noconfirm --clean --onefile --windowed --name "RuneSync" --icon=icon.ico --hidden-import psutil --add-data "assets/spells;assets/spells" --add-data "assets/fonts;assets/fonts" --add-data "icon.ico;." main.py
+    py -m PyInstaller --noconfirm --clean --onefile --windowed --name "RuneSync" --icon=icon.ico --hidden-import psutil --hidden-import clr --collect-all webview --add-data "webui;webui" --add-data "icon.ico;." app.py
 ) else (
-    py -m PyInstaller --noconfirm --clean --onefile --windowed --name "RuneSync" --hidden-import psutil --add-data "assets/spells;assets/spells" --add-data "assets/fonts;assets/fonts" --add-data "icon.ico;." main.py
+    py -m PyInstaller --noconfirm --clean --onefile --windowed --name "RuneSync" --hidden-import psutil --hidden-import clr --collect-all webview --add-data "webui;webui" --add-data "icon.ico;." app.py
 )
 if errorlevel 1 (
     echo ERROR: RuneSync build failed!
