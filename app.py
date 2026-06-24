@@ -35,7 +35,7 @@ def main():
     if ctypes.windll.kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
         sys.exit(0)
 
-    import logging
+    import logging, threading
     from log_setup import init_logging
     log_queue = None
     try:
@@ -43,6 +43,14 @@ def main():
     except Exception:
         pass
     logging.getLogger().info("DAEMON starting", extra={"rs_tag": "[app]", "rs_severity": "info"})
+
+    # Route uncaught exceptions (main + daemon threads) to the log file. The
+    # windowed exe has no console, so this is the only crash trail in the field.
+    def _log_uncaught(et, ev, tb):
+        logging.getLogger().error("Uncaught exception", exc_info=(et, ev, tb),
+                                  extra={"rs_tag": "[crash]", "rs_severity": "error"})
+    sys.excepthook = _log_uncaught
+    threading.excepthook = lambda a: _log_uncaught(a.exc_type, a.exc_value, a.exc_traceback)
 
     minimized = "--minimized" in sys.argv
     pusher = Pusher()

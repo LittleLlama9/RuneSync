@@ -1,6 +1,6 @@
-/* DAEMON frontend logic. P1: state-driven render + routing + theme + keys,
-   seeded with placeholder data so the shell matches the mock. P2 feeds real
-   data through window.rs_push() and the API wrappers. */
+/* DAEMON frontend logic — state-driven render + routing + theme + keys.
+   Seeded with placeholder data (preview/standalone); under pywebview, get_state
+   hydrates and a 200ms poll loop drains live events via poll_events() -> handlePush. */
 (function () {
   'use strict';
 
@@ -12,7 +12,8 @@
     settings: 'vim daemon.conf', editor: 'vim override', builder: 'edit build',
     debug: 'tail -f runesync.log'
   };
-  // static game data (mirrors lcu.py / main.py; rarely changes)
+  // static game data (mirrors lcu.py; rarely changes)
+  const ROLES = ['auto', 'top', 'jungle', 'mid', 'bot', 'support'];
   const TREES = ['Precision', 'Domination', 'Sorcery', 'Resolve', 'Inspiration'];
   const KEYSTONES = {
     Precision: ['Press the Attack', 'Lethal Tempo', 'Fleet Footwork', 'Conqueror'],
@@ -67,7 +68,8 @@
   };
 
   const $ = (id) => document.getElementById(id);
-  const esc = (s) => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const esc = (s) => String(s).replace(/[&<>"']/g,
+    c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   // ── render ────────────────────────────────────────────────────────────────
   function renderStatus() {
@@ -113,7 +115,7 @@
   function renderLog() {
     const box = $('logBox');
     box.innerHTML = state.log.map(l =>
-      `<div><span class="ts">${l.ts}</span>&nbsp; <span class="${l.cls}">${esc(l.msg)}</span></div>`).join('');
+      `<div><span class="ts">${esc(l.ts)}</span>&nbsp; <span class="${l.cls}">${esc(l.msg)}</span></div>`).join('');
     box.scrollTop = box.scrollHeight;
   }
 
@@ -479,7 +481,7 @@
     return tagOk && (LVL[r.sev] || 0) >= (LVL[dbg.minLevel] || 0);
   }
   function dbgLine(r) {
-    return `<div><span class="ts">${r.ts}</span>  <span class="tg">${esc((r.tag || '').padEnd(10))}</span>  ` +
+    return `<div><span class="ts">${esc(r.ts)}</span>  <span class="tg">${esc((r.tag || '').padEnd(10))}</span>  ` +
            `<span class="sev-${esc(r.sev)}">${esc((r.sev || '').toUpperCase().padEnd(5))}  ${esc(r.msg)}</span></div>`;
   }
   function dbgCount() {
@@ -530,11 +532,7 @@
     });
   }
 
-  // ── Python → JS push channel ───────────────────────────────────────────────
-  window.rs_push = function (event, payload) {
-    try { handlePush(event, payload || {}); }
-    catch (e) { console.error('rs_push error', event, e); }
-  };
+  // ── Python → JS events (drained from poll_events by the poll loop) ──────────
   function pushLog(rec) {
     state.log.push({ ts: rec.ts, msg: rec.msg, cls: rec.cls || '' });
     if (state.log.length > 300) state.log = state.log.slice(-250);
@@ -544,7 +542,9 @@
       case 'status': state.status = p.kind; renderStatus(); break;
       case 'running': state.monitoring = !!p.on; $('startWord').textContent = p.on ? 'stop' : 'start'; break;
       case 'log': pushLog(p); renderLog(); break;
-      case 'champ': state.champ = p.champ; state.champMeta = p.meta; state.imported = false; renderMonitor(); break;
+      case 'champ':
+        if (p.champ !== state.champ) state.imported = false;  // only invalidate the badge on a real champ change
+        state.champ = p.champ; state.champMeta = p.meta; renderMonitor(); break;
       case 'matchup':
         state.champ = p.champ || state.champ; state.enemy = p.enemy; state.wr = p.wr;
         state.wrLabel = p.label; state.wrTag = p.tag; state.sample = p.sample;

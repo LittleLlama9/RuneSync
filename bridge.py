@@ -72,6 +72,7 @@ class Api:
         self._quitting = False
         self._connect_lock = threading.Lock()
         self._connecting = False
+        self._monitor_lock = threading.Lock()   # makes _start's check-and-set atomic
         self.tray = None
         self.poller = None
         self.log_queue = None   # set by app.py; drained to the debug console
@@ -155,9 +156,6 @@ class Api:
               "log": self.log_buf[-80:]}
         st.update(self.snap)
         return st
-
-    def get_settings(self) -> dict:
-        return self._settings()
 
     def get_builds(self) -> list:
         out = []
@@ -386,9 +384,13 @@ class Api:
         self._set_status("waiting")
 
     def _start(self):
-        if not self.lcu.connected or self.running:
-            return
-        self.running = True
+        # Both the connect thread (_try_connect) and the JS worker thread
+        # (start_monitoring) can call this; the lock makes the running guard
+        # atomic so we never spawn two monitor threads against one LCU.
+        with self._monitor_lock:
+            if not self.lcu.connected or self.running:
+                return
+            self.running = True
         self.pusher.push("running", {"on": True})
         self._set_status("monitoring")
         self._emit("──── Monitoring started ────", "warn")
