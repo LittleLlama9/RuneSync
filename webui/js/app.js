@@ -236,8 +236,6 @@
     }
   }
 
-  function cycle(arr, cur) { return arr[(arr.indexOf(cur) + 1) % arr.length]; }
-
   function wire() {
     document.querySelectorAll('.tab').forEach(t =>
       t.addEventListener('click', () => setScreen(t.dataset.screen)));
@@ -249,15 +247,23 @@
       const row = e.target.closest('.ledger-row'); if (row) { state.sel = +row.dataset.idx; renderBuilds(); }
     });
     // settings (P1: client-side cycling/toggles; P4 wires to backend + menus)
-    $('setRank').addEventListener('click', () => { state.settings.rank = cycle(RANKS, state.settings.rank); renderSettings(); });
-    $('setRegion').addEventListener('click', () => { state.settings.region = cycle(REGIONS, state.settings.region); renderSettings(); });
-    $('setPhosphor').addEventListener('click', () => {
-      const next = cycle(PHOSPHORS, state.settings.phosphor);
-      applyTheme(next);
-      window.API.call('set_theme', next);   // persist immediately
-    });
+    $('setRank').addEventListener('click', () =>
+      openMenu($('setRank'), RANKS, state.settings.rank, v => { state.settings.rank = v; renderSettings(); }));
+    $('setRegion').addEventListener('click', () =>
+      openMenu($('setRegion'), REGIONS, state.settings.region, v => { state.settings.region = v; renderSettings(); }));
+    $('setPhosphor').addEventListener('click', () =>
+      openMenu($('setPhosphor'), PHOSPHORS, state.settings.phosphor, v => {
+        applyTheme(v); window.API.call('set_theme', v);   // theme persists immediately
+      }));
     $('setAutoRole').addEventListener('click', () => { state.settings.auto_role = !state.settings.auto_role; renderSettings(); });
-    $('setAutostart').addEventListener('click', () => { state.settings.autostart = !state.settings.autostart; renderSettings(); });
+    $('setAutostart').addEventListener('click', () => {
+      const next = !state.settings.autostart;
+      if (window.API.ready()) {
+        window.API.call('set_autostart', next).then(r => {
+          state.settings.autostart = r ? !!r.enabled : state.settings.autostart; renderSettings();
+        });
+      } else { state.settings.autostart = next; renderSettings(); }
+    });
     document.querySelectorAll('[data-trig]').forEach(el =>
       el.addEventListener('click', () => { state.settings.trigger = el.dataset.trig; renderSettings(); }));
     $('saveBtn').addEventListener('click', () => {

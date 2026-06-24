@@ -17,7 +17,7 @@ from lcu import LCUClient, LCUConnectionError
 from ugg_api import UGGClient
 from overrides import OverrideManager
 from monitor import ChampSelectMonitor
-from tray import is_autostart_enabled, set_autostart
+from tray import is_autostart_enabled, set_autostart as _reg_set_autostart
 
 SUMMONER_SPELLS = {
     "Flash": 4, "Ignite": 14, "Exhaust": 3, "Barrier": 21, "Heal": 7,
@@ -263,6 +263,27 @@ class Api:
         s["phosphor"] = name
         self.overrides.save_settings(s)
         return {"ok": True}
+
+    def save_settings(self, data: dict) -> dict:
+        # Start from the existing dict so unknown keys (server_url, phosphor) survive
+        # — OverrideManager.save_settings replaces the whole dict. autostart is NOT
+        # a settings key (it lives in the registry) so it is deliberately ignored.
+        s = dict(self.overrides.settings)
+        for k in ("rank", "region", "auto_role", "trigger", "phosphor"):
+            if k in data:
+                s[k] = data[k]
+        self.overrides.save_settings(s)
+        # live-apply to a running monitor (plain attributes)
+        if self.monitor:
+            self.monitor.rank = s.get("rank", "Platinum+")
+            self.monitor.region = s.get("region", "World")
+            self.monitor.auto_role = s.get("auto_role", True)
+            self.monitor.trigger = s.get("trigger", "hover")
+        return {"ok": True}
+
+    def set_autostart(self, enabled: bool) -> dict:
+        ok = bool(_reg_set_autostart(bool(enabled)))
+        return {"ok": ok, "enabled": is_autostart_enabled()}
 
     def hide_to_tray(self) -> dict:
         try:
