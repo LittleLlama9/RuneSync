@@ -17,7 +17,8 @@ class ChampSelectMonitor:
                  on_log: Callable, trigger: str = "hover", rank: str = "Platinum+",
                  region: str = "World", auto_role: bool = True,
                  on_game_start=None, on_game_end=None, on_league_closed=None,
-                 on_matchup_winrate=None, on_item_build=None, on_import=None):
+                 on_matchup_winrate=None, on_item_build=None, on_import=None,
+                 on_runes_imported=None):
         self.lcu = lcu
         self.ugg = ugg
         self.overrides = overrides
@@ -32,6 +33,9 @@ class ChampSelectMonitor:
         self._on_matchup_winrate = on_matchup_winrate
         self._on_item_build = on_item_build
         self._on_import = on_import   # (champ_name) -> shown as a success banner
+        # (info dict) -> populates the RUNE PAGE panel with what was just pushed.
+        # Read-only: fired after a successful import, never drives import logic.
+        self._on_runes_imported = on_runes_imported
         self._stop_event = threading.Event()
         # Serializes rune/item-set imports. The Reimport button (main.py) pushes
         # _import_runes on its own thread while the poll loop also calls it on
@@ -471,6 +475,23 @@ class ChampSelectMonitor:
         finally:
             self._import_lock.release()
 
+    def _report_rune_page(self, primary_id, secondary_id, perk_ids, spell1=0, spell2=0):
+        """Fire on_runes_imported with display-ready rune-page info (names, not IDs).
+        Best-effort and read-only — a failure here must never break an import."""
+        if not self._on_runes_imported:
+            return
+        try:
+            id_to_tree = {v: k for k, v in RUNE_TREE_IDS.items()}
+            id_to_ks = {v: k for k, v in KEYSTONE_IDS.items()}
+            self._on_runes_imported({
+                "keystone":  id_to_ks.get(perk_ids[0], "") if perk_ids else "",
+                "primary":   id_to_tree.get(primary_id, ""),
+                "secondary": id_to_tree.get(secondary_id, ""),
+                "spell1": spell1 or 0, "spell2": spell2 or 0,
+            })
+        except Exception:
+            pass
+
     def _apply_ugg(self, champ_name: str, session: dict):
         role = self._detect_role(session) if self.auto_role else "auto"
         if role != "auto":
@@ -492,6 +513,11 @@ class ChampSelectMonitor:
             self.log(f"  ✓ Runes imported for {champ_name} ({build['role']})", "success")
             if self._on_import:
                 self._on_import(champ_name)
+            _sm = build.get("summoners", [])
+            self._report_rune_page(build["primary_style_id"], build["sub_style_id"],
+                                   build["selected_perk_ids"],
+                                   _sm[0] if len(_sm) >= 1 else 0,
+                                   _sm[1] if len(_sm) >= 2 else 0)
             if build.get("items_core_ids"):
                 champ_id = next((k for k, v in self._champ_name_map.items() if v == champ_name), 0)
                 set_ok = self.lcu.import_item_set(champ_name, champ_id, role,
@@ -568,6 +594,8 @@ class ChampSelectMonitor:
             self.log(f"  ✓ Custom runes imported for {champ_name}", "success")
             if self._on_import:
                 self._on_import(champ_name)
+            self._report_rune_page(primary_id, secondary_id, perk_ids,
+                                   override.get("spell1", 0), override.get("spell2", 0))
             if override.get("note"):
                 self.log(f"     Note: {override['note']}", "info")
             spell1 = override.get("spell1", 0)
