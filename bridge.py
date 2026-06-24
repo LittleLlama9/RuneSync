@@ -147,6 +147,14 @@ class Api:
             })
         return out
 
+    def items_ready(self) -> bool:
+        return item_data.is_ready()
+
+    def search_items(self, query: str) -> list:
+        item_data.wait_ready(2.0)
+        return [{"id": i["id"], "name": i["name"], "icon": item_data.icon_url(i["id"])}
+                for i in item_data.search(query or "", 14)]
+
     def get_override(self, champ: str) -> dict:
         d = self.overrides.get(champ) or {}
         return {

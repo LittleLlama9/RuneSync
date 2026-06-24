@@ -9,7 +9,7 @@
   const REGIONS = ['World', 'NA', 'EUW', 'EUNE', 'KR', 'BR', 'JP', 'OCE', 'LAS', 'LAN', 'TR', 'RU'];
   const PROMPTS = {
     monitor: 'watch --champ-select', builds: 'edit builds.ledger',
-    settings: 'vim daemon.conf', editor: 'vim override'
+    settings: 'vim daemon.conf', editor: 'vim override', builder: 'edit build'
   };
   // static game data (mirrors lcu.py / main.py; rarely changes)
   const TREES = ['Precision', 'Domination', 'Sorcery', 'Resolve', 'Inspiration'];
@@ -219,6 +219,7 @@
   }
   function onKey(e) {
     const k = (e.key || '').toLowerCase();
+    if (k === 'escape' && state.screen === 'builder') { setScreen('editor'); return; }
     if (k === 'escape' && state.screen === 'editor') { setScreen('builds'); return; }
     if (e.ctrlKey || e.altKey || e.metaKey || typing(e)) return;
     if (k === '1') setScreen('monitor');
@@ -273,6 +274,7 @@
     $('moGo').addEventListener('click', submitMatchup);
     $('moInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') submitMatchup(); });
     wireEditor();
+    wireBuilder();
     window.addEventListener('keydown', onKey);
   }
   function submitMatchup() {
@@ -314,6 +316,8 @@
     $('edSpell2').textContent = SPELL_NAME(ed.spell2) + ' ▾';
     $('edRunes').value = (ed.rune_ids || []).join(',');
     $('edNote').value = ed.note || '';
+    const ni = Object.values(ed.items_build || {}).reduce((a, v) => a + (Array.isArray(v) ? v.length : 0), 0);
+    $('edBuild').textContent = ni ? `[ edit build · ${ni} items ]` : '[ edit build ]';
     $('edStatus').textContent = '';
   }
 
@@ -384,6 +388,81 @@
     $('edSecondary').addEventListener('click', () => openMenu($('edSecondary'), TREES, ed.secondary_tree, v => { ed.secondary_tree = v; renderEditor(); }));
     $('edSpell1').addEventListener('click', () => openMenu($('edSpell1'), SPELLS, ed.spell1, v => { ed.spell1 = v; renderEditor(); }));
     $('edSpell2').addEventListener('click', () => openMenu($('edSpell2'), SPELLS, ed.spell2, v => { ed.spell2 = v; renderEditor(); }));
+    $('edBuild').addEventListener('click', openBuilder);
+  }
+
+  // ── item-build editor ───────────────────────────────────────────────────────
+  const SLOTS = [['starter', 'STARTER'], ['core', 'CORE'], ['fourth', '4TH'], ['fifth', '5TH'], ['sixth', '6TH']];
+  const SLOT_LABEL = k => (SLOTS.find(s => s[0] === k) || ['', '?'])[1];
+  const bld = { starter: [], core: [], fourth: [], fifth: [], sixth: [], target: 'core' };
+  let _blResults = [], _blDebounce = null;
+
+  function openBuilder() {
+    const ib = ed.items_build || {};
+    SLOTS.forEach(([k]) => { bld[k] = (ib[k] || []).map(x => ({ id: x.id, name: x.name })); });
+    bld.target = 'core';
+    $('blTitle').textContent = '~/edit build · ' + (ed.champ || $('edChamp').value.trim() || 'champion');
+    $('blQuery').value = ''; $('blResults').innerHTML = '';
+    $('blTarget').textContent = SLOT_LABEL(bld.target) + ' ▾';
+    renderBuilderSlots();
+    setScreen('builder'); $('blQuery').focus();
+  }
+
+  function renderBuilderSlots() {
+    $('blSlots').innerHTML = SLOTS.map(([k, label]) => {
+      const items = bld[k] || [];
+      const pills = items.length
+        ? items.map((it, i) =>
+            `<span class="bl-pill" data-slot="${k}" data-idx="${i}">` +
+            (it.icon ? `<img src="${esc(it.icon)}" onerror="this.style.display='none'">` : '') +
+            `${esc(it.name)} ✕</span>`).join('')
+        : `<span class="bl-empty">—</span>`;
+      return `<div class="bl-slot"><span class="bl-slot-k">${label}</span>${pills}</div>`;
+    }).join('');
+  }
+
+  function renderResults(list) {
+    _blResults = list || [];
+    $('blResults').innerHTML = _blResults.map((it, i) =>
+      `<span class="bl-result" data-i="${i}">` +
+      (it.icon ? `<img src="${esc(it.icon)}" onerror="this.style.display='none'">` : '') +
+      `${esc(it.name)}</span>`).join('');
+  }
+
+  function blSearch() {
+    const q = $('blQuery').value.trim();
+    clearTimeout(_blDebounce);
+    if (!q) { $('blResults').innerHTML = ''; return; }
+    _blDebounce = setTimeout(() => {
+      if (window.API.ready()) window.API.call('search_items', q).then(renderResults);
+    }, 250);
+  }
+
+  function saveBuilder() {
+    const out = {};
+    SLOTS.forEach(([k]) => { out[k] = bld[k].map(x => ({ id: x.id, name: x.name })); });
+    ed.items_build = out;
+    renderEditor();
+    setScreen('editor');
+  }
+
+  function wireBuilder() {
+    $('blBack').addEventListener('click', () => setScreen('editor'));
+    $('blCancel').addEventListener('click', () => setScreen('editor'));
+    $('blSave').addEventListener('click', saveBuilder);
+    $('blQuery').addEventListener('input', blSearch);
+    $('blTarget').addEventListener('click', () =>
+      openMenu($('blTarget'), SLOTS.map(([k, l]) => [l, k]), bld.target,
+        v => { bld.target = v; $('blTarget').textContent = SLOT_LABEL(v) + ' ▾'; }));
+    $('blResults').addEventListener('click', e => {
+      const r = e.target.closest('.bl-result'); if (!r) return;
+      const it = _blResults[+r.dataset.i];
+      if (it) { bld[bld.target].push({ id: it.id, name: it.name, icon: it.icon }); renderBuilderSlots(); }
+    });
+    $('blSlots').addEventListener('click', e => {
+      const p = e.target.closest('.bl-pill'); if (!p) return;
+      bld[p.dataset.slot].splice(+p.dataset.idx, 1); renderBuilderSlots();
+    });
   }
 
   // ── Python → JS push channel ───────────────────────────────────────────────
@@ -461,7 +540,12 @@
     // api may attach slightly after DOMContentLoaded → wait for pywebviewready.
     if (window.pywebview && window.pywebview.api) connectBackend();
     else window.addEventListener('pywebviewready', connectBackend, { once: true });
-    if (location.search.indexOf('shot=editor') >= 0) setTimeout(() => openEditor('', true), 2200);
+    const shot = (location.search.match(/shot=(\w+)/) || [])[1];
+    if (shot === 'editor') setTimeout(() => openEditor('', true), 2200);
+    if (shot === 'builder') setTimeout(() => {
+      openEditor('', true);
+      setTimeout(() => { openBuilder(); $('blQuery').value = 'boots'; blSearch(); }, 900);
+    }, 2200);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();

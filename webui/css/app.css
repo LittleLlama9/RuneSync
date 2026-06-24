@@ -186,6 +186,22 @@ body {
 .ed-imp:hover { color:var(--pb); }
 .ed-status { font-family:'Space Mono',monospace; font-size:11px; color:var(--pd); margin-left:10px; }
 
+/* ── item-build editor ── */
+.bl-search { display:flex; align-items:baseline; gap:10px; margin-top:18px; font-size:19px; }
+.bl-search .ed-in { flex:0 1 280px; }
+.bl-target-k { color:var(--pd); }
+.bl-results { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; min-height:22px;
+  max-height:118px; overflow-y:auto; }
+.bl-result, .bl-pill { display:flex; align-items:center; gap:5px; border:1px solid var(--pdd);
+  padding:2px 8px; cursor:pointer; font-size:16px; color:var(--pb); }
+.bl-result:hover { background:var(--p); color:#0c0a06; text-shadow:none; }
+.bl-result img, .bl-pill img { width:18px; height:18px; }
+.bl-pill:hover { border-color:var(--danger); color:var(--danger); }
+.bl-slots { margin-top:16px; display:flex; flex-direction:column; gap:10px; }
+.bl-slot { display:flex; align-items:center; gap:8px; flex-wrap:wrap; min-height:24px; }
+.bl-slot-k { width:90px; color:var(--pd); font-size:16px; flex-shrink:0; }
+.bl-empty { color:var(--pdd); font-size:15px; }
+
 /* floating dropdown menu (editor + settings) */
 .menu-pop { position:absolute; z-index:20; background:#0c0a06; border:1px solid var(--p);
   max-height:260px; overflow-y:auto; box-shadow:0 0 18px var(--glow); font-size:18px; }
