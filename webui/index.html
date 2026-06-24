@@ -15,8 +15,8 @@
       <div class="content">
 
         <!-- top bar (draggable region for the frameless window) -->
-        <div class="topbar pywebview-drag-region">
-          <div class="brand">
+        <div class="topbar">
+          <div class="brand pywebview-drag-region">
             <span class="brand-name">DAEMON</span>
             <span class="brand-ver">v1.03</span>
           </div>
@@ -25,9 +25,16 @@
             <span class="tab" data-screen="builds">[2] BUILDS</span>
             <span class="tab" data-screen="settings">[3] SETTINGS</span>
           </div>
-          <div class="status" id="status">
-            <span id="statusLabel">LEAGUE: WAITING</span>
-            <span class="dot"></span>
+          <div class="topright">
+            <div class="status" id="status">
+              <span id="statusLabel">LEAGUE: WAITING</span>
+              <span class="dot"></span>
+            </div>
+            <div class="wctl">
+              <span class="wbtn" id="wMin" title="Minimize">&minus;</span>
+              <span class="wbtn" id="wMax" title="Toggle fullscreen">&#9633;</span>
+              <span class="wbtn close" id="wClose" title="Hide to tray">&times;</span>
+            </div>
           </div>
         </div>
 

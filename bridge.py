@@ -313,6 +313,20 @@ class Api:
         ok = bool(_reg_set_autostart(bool(enabled)))
         return {"ok": ok, "enabled": is_autostart_enabled()}
 
+    def minimize(self) -> dict:
+        w = self._win()
+        if w:
+            try: w.minimize()
+            except Exception: pass
+        return {"ok": True}
+
+    def toggle_fullscreen(self) -> dict:
+        w = self._win()
+        if w:
+            try: w.toggle_fullscreen()
+            except Exception: pass
+        return {"ok": True}
+
     def hide_to_tray(self) -> dict:
         try:
             w = self._win()

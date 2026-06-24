@@ -245,6 +245,9 @@
     document.querySelectorAll('[data-cmd]').forEach(el =>
       el.addEventListener('click', () => cmd(el.dataset.cmd)));
     $('status').addEventListener('click', toggleMonitoring);
+    $('wMin').addEventListener('click', () => window.API.call('minimize'));
+    $('wMax').addEventListener('click', () => window.API.call('toggle_fullscreen'));
+    $('wClose').addEventListener('click', () => window.API.call('hide_to_tray'));
     document.querySelectorAll('.ledger-row, #ledgerRows').forEach(() => {});
     $('ledgerRows').addEventListener('click', (e) => {
       const row = e.target.closest('.ledger-row'); if (row) { state.sel = +row.dataset.idx; renderBuilds(); }

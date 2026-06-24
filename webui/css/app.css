@@ -55,6 +55,11 @@ body {
 .menu { display:flex; gap:5px; font-size:19px; }
 .tab  { cursor:pointer; padding:1px 11px; color:var(--pd); }
 .tab.active { background:var(--p); color:var(--bg); }
+.topright { display:flex; align-items:center; gap:14px; }
+.wctl { display:flex; gap:2px; }
+.wbtn { cursor:pointer; color:var(--pd); font-size:17px; padding:0 7px; line-height:1; }
+.wbtn:hover { color:var(--pb); }
+.wbtn.close:hover { color:var(--danger); }
 .status { display:flex; align-items:center; gap:8px; font-size:18px; cursor:pointer; color:var(--pb); }
 .status.waiting { color:var(--danger); }
 .dot { width:10px; height:10px; border-radius:50%; background:var(--pb);
