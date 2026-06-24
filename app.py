@@ -37,8 +37,9 @@ def main():
 
     import logging
     from log_setup import init_logging
+    log_queue = None
     try:
-        init_logging(os.path.join(_user_data_dir(), "runesync.log"))
+        log_queue = init_logging(os.path.join(_user_data_dir(), "runesync.log"))
     except Exception:
         pass
     logging.getLogger().info("DAEMON starting", extra={"rs_tag": "[app]", "rs_severity": "info"})
@@ -46,6 +47,7 @@ def main():
     minimized = "--minimized" in sys.argv
     pusher = Pusher()
     api = Api(pusher)
+    api.log_queue = log_queue   # feeds the debug console drain
 
     window = webview.create_window(
         "DAEMON",

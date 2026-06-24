@@ -208,6 +208,25 @@ body {
 .menu-pop .mi { padding:3px 14px; cursor:pointer; color:var(--pb); white-space:nowrap; }
 .menu-pop .mi:hover, .menu-pop .mi.on { background:var(--p); color:#0c0a06; text-shadow:none; }
 
+/* ── debug console ── */
+.dbg-act { cursor:pointer; color:var(--pd); font-size:16px; margin-left:12px; }
+.dbg-act:hover { color:var(--pb); }
+.dbg-filters { display:flex; align-items:center; gap:8px; margin-top:14px;
+  font-family:'Space Mono',monospace; font-size:11px; flex-wrap:wrap; }
+.dbg-lbl { color:var(--pd); }
+.dbg-tag, .dbg-lvl { cursor:pointer; color:var(--pdd); padding:1px 5px; }
+.dbg-tag.on, .dbg-lvl.on { color:var(--bg); background:var(--p); text-shadow:none; }
+.dbg-log { margin-top:10px; font-family:'Space Mono',monospace; font-size:11px; line-height:1.65;
+  height:336px; overflow-y:auto; white-space:pre-wrap; word-break:break-word; }
+.dbg-log .ts { color:var(--pdd); }
+.dbg-log .tg { color:var(--pd); }
+.dbg-log .sev-error { color:var(--danger); }
+.dbg-log .sev-warn  { color:var(--pd); }
+.dbg-log .sev-info  { color:var(--p); }
+.dbg-log .sev-debug { color:var(--pdd); }
+.dbg-count { margin-top:6px; font-family:'Space Mono',monospace; font-size:10px;
+  color:var(--pdd); text-align:right; }
+
 /* ── in-game overlay ── */
 .overlay { position:absolute; right:18px; bottom:54px; z-index:8; width:230px;
   border:1px solid var(--p); background:#0c0a06; padding:12px 14px; box-shadow:0 0 22px var(--glow); }

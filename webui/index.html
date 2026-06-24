@@ -191,6 +191,31 @@
             </div>
           </section>
 
+          <!-- ===================== DEBUG CONSOLE (Ctrl+Shift+D) ===================== -->
+          <section class="view" data-view="debug" hidden>
+            <div class="page-head">
+              <span class="page-title">debug console</span>
+              <span>
+                <span class="dbg-act" id="dbgCopy">[copy]</span>
+                <span class="dbg-act" id="dbgClear">[clear]</span>
+              </span>
+            </div>
+            <div class="dbg-filters">
+              <span class="dbg-lbl">show</span>
+              <span class="dbg-tag on" data-tag="[ugg]">[ugg]</span>
+              <span class="dbg-tag on" data-tag="[lcu]">[lcu]</span>
+              <span class="dbg-tag on" data-tag="[monitor]">[monitor]</span>
+              <span class="dbg-tag on" data-tag="[unknown]">[unknown]</span>
+              <span class="dbg-lbl" style="margin-left:14px">level</span>
+              <span class="dbg-lvl on" data-lvl="debug">debug</span>
+              <span class="dbg-lvl" data-lvl="info">info</span>
+              <span class="dbg-lvl" data-lvl="warn">warn</span>
+              <span class="dbg-lvl" data-lvl="error">error</span>
+            </div>
+            <div class="dbg-log" id="dbgLog"></div>
+            <div class="dbg-count" id="dbgCount">0 entries</div>
+          </section>
+
         </div>
 
         <!-- in-game overlay -->

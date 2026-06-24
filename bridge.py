@@ -74,6 +74,7 @@ class Api:
         self._connecting = False
         self.tray = None
         self.poller = None
+        self.log_queue = None   # set by app.py; drained to the debug console
         # snapshot of the live panels so a reload (get_state) rehydrates them
         self.snap = self._idle_snapshot()
         self.log_buf: list[dict] = []
@@ -114,8 +115,29 @@ class Api:
     def boot(self):
         perks.warm()
         item_data.init()
+        if self.log_queue is not None:
+            threading.Thread(target=self._drain_log, daemon=True).start()
         threading.Thread(target=self._load_bundle, daemon=True).start()
         threading.Thread(target=self._try_connect, daemon=True).start()
+
+    def _drain_log(self):
+        """Pump the logging queue into the debug console (logrec events)."""
+        q = self.log_queue
+        while True:
+            try:
+                rec = q.get(timeout=1.0)
+            except Exception:
+                continue
+            try:
+                ts = datetime.datetime.fromtimestamp(rec.created).strftime("%H:%M:%S")
+                self.pusher.push("logrec", {
+                    "ts": ts,
+                    "tag": getattr(rec, "rs_tag", "[unknown]"),
+                    "sev": getattr(rec, "rs_severity", "debug"),
+                    "msg": rec.getMessage(),
+                })
+            except Exception:
+                pass
 
     def _load_bundle(self):
         try:

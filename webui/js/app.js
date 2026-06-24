@@ -9,7 +9,8 @@
   const REGIONS = ['World', 'NA', 'EUW', 'EUNE', 'KR', 'BR', 'JP', 'OCE', 'LAS', 'LAN', 'TR', 'RU'];
   const PROMPTS = {
     monitor: 'watch --champ-select', builds: 'edit builds.ledger',
-    settings: 'vim daemon.conf', editor: 'vim override', builder: 'edit build'
+    settings: 'vim daemon.conf', editor: 'vim override', builder: 'edit build',
+    debug: 'tail -f runesync.log'
   };
   // static game data (mirrors lcu.py / main.py; rarely changes)
   const TREES = ['Precision', 'Domination', 'Sorcery', 'Resolve', 'Inspiration'];
@@ -275,6 +276,7 @@
     $('moInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') submitMatchup(); });
     wireEditor();
     wireBuilder();
+    wireDebug();
     window.addEventListener('keydown', onKey);
   }
   function submitMatchup() {
@@ -465,6 +467,69 @@
     });
   }
 
+  // ── debug console (Ctrl+Shift+D) ────────────────────────────────────────────
+  const LVL = { debug: 0, info: 1, warn: 2, error: 3 };
+  const TAGGABLE = new Set(['[ugg]', '[lcu]', '[monitor]', '[unknown]']);
+  const dbg = { records: [], tags: new Set(TAGGABLE), minLevel: 'debug', prev: 'monitor' };
+
+  function dbgPass(r) {
+    // untracked tags ([app]/[crash]/[merge]/…) always show, so uncaught
+    // exceptions can never be silently filtered out (matches the old console).
+    const tagOk = TAGGABLE.has(r.tag) ? dbg.tags.has(r.tag) : true;
+    return tagOk && (LVL[r.sev] || 0) >= (LVL[dbg.minLevel] || 0);
+  }
+  function dbgLine(r) {
+    return `<div><span class="ts">${r.ts}</span>  <span class="tg">${esc((r.tag || '').padEnd(10))}</span>  ` +
+           `<span class="sev-${esc(r.sev)}">${esc((r.sev || '').toUpperCase().padEnd(5))}  ${esc(r.msg)}</span></div>`;
+  }
+  function dbgCount() {
+    $('dbgCount').textContent = `${dbg.records.filter(dbgPass).length} shown · ${dbg.records.length} total`;
+  }
+  function renderDebug() {
+    $('dbgLog').innerHTML = dbg.records.filter(dbgPass).map(dbgLine).join('');
+    $('dbgLog').scrollTop = $('dbgLog').scrollHeight;
+    dbgCount();
+  }
+  function onLogrec(r) {
+    dbg.records.push(r);
+    if (dbg.records.length > 2000) dbg.records = dbg.records.slice(-1500);
+    if (state.screen === 'debug' && dbgPass(r)) {
+      $('dbgLog').insertAdjacentHTML('beforeend', dbgLine(r));
+      $('dbgLog').scrollTop = $('dbgLog').scrollHeight;
+      dbgCount();
+    }
+  }
+  function toggleDebug() {
+    if (state.screen === 'debug') setScreen(dbg.prev || 'monitor');
+    else { dbg.prev = state.screen; setScreen('debug'); renderDebug(); }
+  }
+  function wireDebug() {
+    document.querySelectorAll('.dbg-tag').forEach(el => el.addEventListener('click', () => {
+      const t = el.dataset.tag;
+      if (dbg.tags.has(t)) dbg.tags.delete(t); else dbg.tags.add(t);
+      el.classList.toggle('on'); renderDebug();
+    }));
+    document.querySelectorAll('.dbg-lvl').forEach(el => el.addEventListener('click', () => {
+      dbg.minLevel = el.dataset.lvl;
+      document.querySelectorAll('.dbg-lvl').forEach(x => x.classList.toggle('on', x === el));
+      renderDebug();
+    }));
+    $('dbgClear').addEventListener('click', () => { dbg.records = []; renderDebug(); });
+    $('dbgCopy').addEventListener('click', () => {
+      const text = dbg.records.filter(dbgPass)
+        .map(r => `${r.ts}  ${r.tag}  ${(r.sev || '').toUpperCase()}  ${r.msg}`).join('\n');
+      try { navigator.clipboard.writeText(text); }
+      catch (e) {
+        const ta = document.createElement('textarea'); ta.value = text;
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); } catch (_) {} ta.remove();
+      }
+    });
+    window.addEventListener('keydown', e => {
+      if (e.ctrlKey && e.shiftKey && (e.key || '').toLowerCase() === 'd') { e.preventDefault(); toggleDebug(); }
+    });
+  }
+
   // ── Python → JS push channel ───────────────────────────────────────────────
   window.rs_push = function (event, payload) {
     try { handlePush(event, payload || {}); }
@@ -488,6 +553,7 @@
       case 'build': state.buildSrc = p.src; state.build = p.items || []; renderMonitor(); break;
       case 'import_ok': state.imported = true; renderMonitor(); break;
       case 'game': state.inGame = !!p.in_game; renderOverlay(); break;
+      case 'logrec': onLogrec(p); break;
       default: console.log('push?', event, p);
     }
   }
@@ -546,6 +612,7 @@
       openEditor('', true);
       setTimeout(() => { openBuilder(); $('blQuery').value = 'boots'; blSearch(); }, 900);
     }, 2200);
+    if (shot === 'debug') setTimeout(toggleDebug, 9000);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
