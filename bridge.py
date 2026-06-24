@@ -451,6 +451,16 @@ class Api:
         if len(self.log_buf) > 400:
             self.log_buf = self.log_buf[-300:]
         self.pusher.push("log", rec)
+        # Also persist to runesync.log (+ the debug console) so the import path
+        # is diagnosable from the file, not just the in-window dispatch log.
+        try:
+            import logging
+            lvl = {"warn": logging.WARNING, "error": logging.ERROR}.get(tag, logging.INFO)
+            logging.getLogger().log(lvl, msg, extra={
+                "rs_tag": "[monitor]",
+                "rs_severity": {"warn": "warn", "error": "error"}.get(tag, "info")})
+        except Exception:
+            pass
 
     def _on_champ(self, champ, role):
         lane = f"{role} lane" if role and role not in ("auto", "") else "lane"

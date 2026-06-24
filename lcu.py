@@ -97,18 +97,41 @@ class LCUClient:
         secondary.sort()
         return [pid for _, pid in primary] + [pid for _, pid in secondary] + shard_perks
 
+    @staticmethod
+    def _lockfile_port_open(path: Path) -> bool:
+        """True if the port named in a lockfile (name:pid:port:pw:proto) is
+        accepting connections — used to ignore a stale mock lockfile."""
+        try:
+            port = int(path.read_text().strip().split(":")[2])
+        except Exception:
+            return False
+        import socket
+        try:
+            with socket.create_connection(("127.0.0.1", port), timeout=0.3):
+                return True
+        except Exception:
+            return False
+
     def _find_lockfile(self) -> Optional[Path]:
         env_path = os.environ.get("RUNESYNC_LOCKFILE")
         if env_path:
             p = Path(env_path)
             if p.exists():
                 return p
-        # Check mock lockfile in APPDATA/RuneSync (written by mock_lcu.py)
+        # Mock lockfile in APPDATA/RuneSync (written by mock_lcu.py) — only honour
+        # it if the mock server is actually listening. A stale mock lockfile left
+        # by a force-killed test run must NOT hijack a real League client; if the
+        # port is dead, delete it and fall through to the real install.
         appdata = os.environ.get("APPDATA", "")
         if appdata:
             mock_lock = Path(appdata) / "RuneSync" / "lockfile"
             if mock_lock.exists():
-                return mock_lock
+                if self._lockfile_port_open(mock_lock):
+                    return mock_lock
+                try:
+                    mock_lock.unlink()
+                except Exception:
+                    pass
         # Common install locations — checked in order
         candidates = [
             Path("C:/Riot Games/League of Legends/lockfile"),
