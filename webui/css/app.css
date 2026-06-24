@@ -20,7 +20,6 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--pdd); }
 ::-webkit-scrollbar-track { background: transparent; }
 
-@keyframes rs-blink   { 0%,48% {opacity:1} 49%,100% {opacity:0} }
 @keyframes rs-pulse   { 0%,100% {opacity:1} 50% {opacity:.25} }
 @keyframes rs-flicker { 0%,93%,100% {opacity:1} 95% {opacity:.9} 96% {opacity:1} 97% {opacity:.94} }
 
@@ -246,12 +245,6 @@ body {
 .cmd-left { display:flex; align-items:center; gap:2px; }
 .cmd-left .prompt { color:var(--pb); }
 .cmd-left .hint { color:var(--pd); margin-left:6px; }
-.cursor { display:inline-block; width:9px; height:17px; background:var(--p); margin-left:4px;
-  vertical-align:-2px; animation:rs-blink 1s steps(1) infinite; }
-.cmd-right { display:flex; gap:18px; color:var(--pd); }
-.cmd-right .cmd { cursor:pointer; }
-.cmd-right .cmd:hover { color:var(--pb); }
-.cmd-right b { color:var(--p); font-weight:normal; }
 
 /* ── bezel footer ── */
 .bezel-foot { flex-shrink:0; display:flex; align-items:center; justify-content:center;

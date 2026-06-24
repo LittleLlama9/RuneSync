@@ -181,7 +181,6 @@
       window.API.call(state.monitoring ? 'stop_monitoring' : 'start_monitoring');
     } else {
       state.monitoring = !state.monitoring;
-      $('startWord').textContent = state.monitoring ? 'stop' : 'start';
     }
   }
   function toggleOverlay() { state.inGame = !state.inGame; renderOverlay(); }
@@ -540,7 +539,7 @@
   function handlePush(event, p) {
     switch (event) {
       case 'status': state.status = p.kind; renderStatus(); break;
-      case 'running': state.monitoring = !!p.on; $('startWord').textContent = p.on ? 'stop' : 'start'; break;
+      case 'running': state.monitoring = !!p.on; break;
       case 'log': pushLog(p); renderLog(); break;
       case 'champ':
         if (p.champ !== state.champ) state.imported = false;  // only invalidate the badge on a real champ change
@@ -571,7 +570,6 @@
     state.wrLabel = s.wrLabel || ''; state.wrTag = s.wrTag || 'info'; state.sample = s.sample || '';
     if (s.runes) state.runes = s.runes;
     state.buildSrc = s.buildSrc || 'idle'; state.build = s.build || []; state.inGame = !!s.inGame;
-    $('startWord').textContent = state.monitoring ? 'stop' : 'start';
     applyTheme(s.theme || state.settings.phosphor);
     renderAll();
   }
