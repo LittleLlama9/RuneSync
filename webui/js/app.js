@@ -45,10 +45,12 @@
     },
     buildSrc: 'u.gg',
     build: [
-      { i: 1, name: "Doran's Blade", tag: 'start' },
-      { i: 2, name: 'Kraken Slayer', tag: 'core ←', core: true },
-      { i: 3, name: "Berserker's Greaves", tag: 'boots' },
-      { i: 4, name: 'Infinity Edge', tag: 'core' }
+      { i: 1, name: "Doran's Blade", tag: 'start', icon: 'https://ddragon.leagueoflegends.com/cdn/15.6.1/img/item/1055.png' },
+      { i: 2, name: 'Health Potion', tag: 'start', icon: 'https://ddragon.leagueoflegends.com/cdn/15.6.1/img/item/2003.png' },
+      { i: 3, name: 'Health Potion', tag: 'start', icon: 'https://ddragon.leagueoflegends.com/cdn/15.6.1/img/item/2003.png' },
+      { i: 4, name: 'Kraken Slayer', tag: 'core ←', core: true, icon: 'https://ddragon.leagueoflegends.com/cdn/15.6.1/img/item/6672.png' },
+      { i: 5, name: "Berserker's Greaves", tag: 'boots', icon: 'https://ddragon.leagueoflegends.com/cdn/15.6.1/img/item/3006.png' },
+      { i: 6, name: 'Infinity Edge', tag: 'core', icon: 'https://ddragon.leagueoflegends.com/cdn/15.6.1/img/item/3031.png' }
     ],
     log: [
       { ts: '14:31:58', cls: '', msg: 'connected to league client' },
@@ -103,13 +105,40 @@
     $('rSummoners').textContent = r.summoners || '—';
 
     $('buildTitle').textContent = `BUILD // ${state.buildSrc}`;
-    $('buildList').innerHTML = state.build.length
-      ? state.build.map(b =>
-          `<div class="brow${b.core ? ' core' : ''}"><span class="bi">${b.i}</span>&nbsp; ${esc(b.name)}` +
-          (b.tag ? `<span class="btag">${esc(b.tag)}</span>` : '') + `</div>`).join('')
-      : `<div class="brow"><span class="bi">—</span></div>`;
+    $('buildList').innerHTML = renderBuildList(state.build);
 
     renderLog();
+  }
+
+  function renderBuildList(items) {
+    if (!items.length) return `<div class="brow"><span class="bi">—</span></div>`;
+    const starters = items.filter(b => b.tag === 'start');
+    const rest = items.filter(b => b.tag !== 'start');
+    const rows = [];
+
+    if (starters.length) {
+      const seen = [], counts = {};
+      for (const s of starters) {
+        if (!counts[s.name]) { seen.push(s); counts[s.name] = 0; }
+        counts[s.name]++;
+      }
+      const parts = seen.map(s => {
+        const img = s.icon ? `<img class="bitem-icon" src="${esc(s.icon)}" onerror="this.style.display='none'">` : '';
+        const count = counts[s.name] > 1 ? `<span class="bcount">${counts[s.name]}x</span>` : '';
+        return `${img}<span class="bitem-name">${esc(s.name)}</span>${count}`;
+      });
+      rows.push(`<div class="brow brow-start"><span class="btag">start</span>${parts.join('<span class="bsep"> + </span>')}</div>`);
+    }
+
+    let coreN = 0;
+    for (const b of rest) {
+      coreN++;
+      const img = b.icon ? `<img class="bitem-icon" src="${esc(b.icon)}" onerror="this.style.display='none'">` : '';
+      rows.push(`<div class="brow${b.core ? ' core' : ''}">` +
+        `<span class="bi">${coreN}</span>&nbsp;${img}<span class="bitem-name">${esc(b.name)}</span>` +
+        (b.tag ? `<span class="btag">${esc(b.tag)}</span>` : '') + `</div>`);
+    }
+    return rows.join('');
   }
 
   function renderLog() {
@@ -123,7 +152,7 @@
     $('buildsCount').textContent = `${state.builds.length} champions · everyone else follows u.gg`;
     const rows = $('ledgerRows');
     if (!state.builds.length) {
-      rows.innerHTML = `<div class="ledger-empty">no custom builds yet — press [a] to inscribe one</div>`;
+      rows.innerHTML = `<div class="ledger-empty">no custom builds yet — press [a] to add one</div>`;
       return;
     }
     rows.innerHTML = state.builds.map((b, i) =>
@@ -312,7 +341,7 @@
   }
 
   function renderEditor() {
-    $('edTitle').textContent = edNew ? '~/inscribe override' : '~/edit override';
+    $('edTitle').textContent = edNew ? '~/add override' : '~/edit override';
     $('edChamp').value = ed.champ || '';
     $('edRole').textContent = (ed.role || 'auto') + ' ▾';
     $('edPrimary').textContent = (ed.primary_tree || 'Precision') + ' ▾';

@@ -501,11 +501,13 @@ class Api:
         n = 0
         for iid in (build.get("items_start_ids") or []):
             n += 1
-            items.append({"i": n, "name": item_data.name_for(iid), "tag": "start"})
+            items.append({"i": n, "name": item_data.name_for(iid), "tag": "start",
+                          "icon": item_data.icon_url(iid)})
         for j, iid in enumerate(build.get("items_core_ids") or []):
             n += 1
             items.append({"i": n, "name": item_data.name_for(iid),
-                          "tag": "core ←" if j == 0 else "core", "core": j == 0})
+                          "tag": "core ←" if j == 0 else "core", "core": j == 0,
+                          "icon": item_data.icon_url(iid)})
         src = "custom" if is_custom else "u.gg"
         self.snap["buildSrc"] = src
         self.snap["build"] = items

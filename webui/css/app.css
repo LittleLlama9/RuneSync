@@ -121,10 +121,19 @@ body {
 
 /* build panel */
 .build-list { font-size:19px; line-height:1.62; }
-.build-list .brow { }
+.build-list .brow { display:flex; align-items:center; flex-wrap:wrap; }
 .build-list .brow.core { color:var(--pb); }
-.build-list .bi { color:var(--pd); }
-.build-list .btag { float:right; color:var(--pd); font-size:14px; }
+.build-list .bi { color:var(--pd); flex-shrink:0; min-width:22px; }
+.build-list .btag { margin-left:auto; padding-left:8px; color:var(--pd); font-size:14px; flex-shrink:0; }
+.build-list .brow-start { font-size:16px; line-height:1.5; gap:2px; }
+.build-list .bsep { color:var(--pdd); margin:0 3px; }
+.build-list .bcount { color:var(--pd); font-size:13px; margin-left:2px; }
+.build-list .bitem-icon {
+  width:20px; height:20px; vertical-align:middle; margin-right:4px; flex-shrink:0;
+  filter: sepia(1) saturate(2.2) hue-rotate(5deg) brightness(0.82);
+  border-radius:2px; image-rendering: pixelated;
+}
+.build-list .bitem-name { }
 
 /* dispatch log */
 .log { font-family:'Space Mono',monospace; font-size:11px; line-height:1.95; color:var(--p);
