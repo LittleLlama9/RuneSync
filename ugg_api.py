@@ -110,17 +110,105 @@ def _try_load_disk_cache() -> Optional[dict]:
         return None
 
 
+def _meta_path() -> str:
+    """Sidecar file storing the cached bundle's ETag / Last-Modified."""
+    return _cache_path() + ".meta"
+
+
+def _load_cache_meta() -> dict:
+    """Return {'etag':..., 'last_modified':...} for the on-disk cache, or {}."""
+    try:
+        with open(_meta_path(), "r", encoding="utf-8") as f:
+            m = json.load(f)
+        return m if isinstance(m, dict) else {}
+    except Exception:
+        return {}
+
+
+def _save_cache_meta(etag: Optional[str], last_modified: Optional[str]) -> None:
+    try:
+        with open(_meta_path(), "w", encoding="utf-8") as f:
+            json.dump({"etag": etag or "", "last_modified": last_modified or ""}, f)
+    except Exception as e:
+        print(f"[ugg] could not write bundle meta: {e}", file=sys.stderr)
+
+
+def _read_cached_bundle() -> Optional[dict]:
+    """Parse whatever bundle is currently on disk, regardless of age."""
+    try:
+        with open(_cache_path(), "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+
 def _download_bundle() -> Optional[dict]:
-    """Pull a fresh bundle from the GitHub release and cache to disk."""
+    """Refresh the bundle from the GitHub release, using a conditional GET.
+
+    If we already have a cached copy, we send its ETag / Last-Modified so the
+    CDN can answer 304 Not Modified (zero-byte body) when the published bundle
+    hasn't changed. On 304 we just keep the existing cache and reset its mtime
+    so the TTL clock restarts -- no ~370KB re-download for unchanged data. Only
+    a genuine change pulls the full file.
+    """
+    headers = {"User-Agent": "RuneSync/1.0"}
+    have_cache = os.path.exists(_cache_path())
+    if have_cache:
+        meta = _load_cache_meta()
+        if meta.get("etag"):
+            headers["If-None-Match"] = meta["etag"]
+        if meta.get("last_modified"):
+            headers["If-Modified-Since"] = meta["last_modified"]
+    try:
+        req = urllib.request.Request(BUNDLE_URL, headers=headers)
+        with urllib.request.urlopen(req, timeout=30) as r:
+            raw = r.read()
+            etag = r.headers.get("ETag")
+            last_modified = r.headers.get("Last-Modified")
+        data = json.loads(raw)
+        try:
+            with open(_cache_path(), "wb") as f:
+                f.write(raw)
+            _save_cache_meta(etag, last_modified)
+        except Exception as e:
+            print(f"[ugg] could not write bundle cache: {e}", file=sys.stderr)
+        return data
+    except urllib.error.HTTPError as e:
+        if e.code == 304:
+            # Unchanged on the server -- reuse the disk cache and restart its TTL.
+            cached = _read_cached_bundle()
+            if cached is not None:
+                try:
+                    os.utime(_cache_path(), None)
+                except Exception:
+                    pass
+                print("[ugg] bundle unchanged (304) -- reusing cache", file=sys.stderr)
+                return cached
+            # 304 but the cache vanished; fall through to a plain re-fetch.
+            print("[ugg] 304 but cache missing; retrying full download",
+                  file=sys.stderr)
+            return _force_full_download()
+        print(f"[ugg] bundle download failed: HTTP {e.code}", file=sys.stderr)
+        return None
+    except Exception as e:
+        print(f"[ugg] bundle download failed: {e}", file=sys.stderr)
+        return None
+
+
+def _force_full_download() -> Optional[dict]:
+    """Unconditional GET (no validators). Used only to recover from a 304 whose
+    cache disappeared underneath us."""
     try:
         req = urllib.request.Request(BUNDLE_URL, headers={"User-Agent": "RuneSync/1.0"})
         with urllib.request.urlopen(req, timeout=30) as r:
             raw = r.read()
+            etag = r.headers.get("ETag")
+            last_modified = r.headers.get("Last-Modified")
         data = json.loads(raw)
-        # Persist to disk so subsequent launches are instant.
         try:
             with open(_cache_path(), "wb") as f:
                 f.write(raw)
+            _save_cache_meta(etag, last_modified)
         except Exception as e:
             print(f"[ugg] could not write bundle cache: {e}", file=sys.stderr)
         return data

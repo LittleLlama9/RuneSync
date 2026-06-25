@@ -35,12 +35,15 @@ role_weights_cache.json
 server/cache.json
 server/server.log
 data_bundle.json
+data_bundle.test.json
 data_bundle_cache.json
 
 # Local-only data tooling (not part of the public client)
 server/
 scripts/build_data_bundle.py
 scripts/_verify_opgg_bundle.py
+scripts/refresh_and_publish.ps1
+scripts/.last_published_sha
 
 # Logs
 *.log
