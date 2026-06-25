@@ -1,15 +1,11 @@
 """
-u.gg build data client — reads from a GitHub-hosted data bundle by default,
-falls back to a local scraping server when the bundle is unavailable.
+Build data client — reads from a hosted data bundle by default, with a
+local dev server fallback when the bundle is unavailable.
 
-Architecture (post v1.0 public release):
-  - `.github/workflows/build_bundle.yml` runs the server scraper on a cron
-    and uploads `data_bundle.json` as a GitHub Release asset.
-  - Clients fetch the bundle on startup (init_bundle()) and answer all
-    queries from the in-memory dict.
-  - The legacy localhost:8000 server path is kept for developers and as
-    a fallback when the bundle is unreachable. End users do not need
-    to install or run the server.
+  - Clients fetch `data_bundle.json` on startup (init_bundle()) and answer
+    all queries from the in-memory dict.
+  - The localhost:8000 path is a developer-only fallback. End users only
+    ever read the hosted bundle; they never install or run a server.
 """
 
 import json, os, sys, threading, time, urllib.request, urllib.error, urllib.parse
@@ -24,9 +20,8 @@ BUNDLE_URL = (
 _BUNDLE_CACHE_NAME = "data_bundle_cache.json"
 _BUNDLE_CACHE_TTL  = 12 * 3600          # re-fetch every 12 hours
 
-# ── legacy server config (fallback path) ───────────────────────────────────
-# Used only when the bundle is unavailable. Default to localhost so the
-# old "run the FastAPI server" workflow still works for devs.
+# ── dev server config (fallback path) ──────────────────────────────────────
+# Used only when the hosted bundle is unavailable. Developer-only.
 SERVER_URL = "http://localhost:8000"
 
 ROLE_MAP = {
@@ -97,11 +92,11 @@ def _try_load_disk_cache() -> Optional[dict]:
     """Load the most recent bundle from disk if it's not too old.
 
     Note: staleness is TIME-based (12h TTL), deliberately NOT patch-based. The
-    bundle's `patch` legitimately lags ddragon — CI rebuilds it on a cron after
-    a patch ships — so comparing to ddragon's latest patch would reject the disk
-    cache on every launch during that lag window and re-download a bundle that
-    is STILL on the old patch (you can't get fresher data than CI has
-    published). The TTL already bounds staleness without that churn.
+    bundle's `patch` legitimately lags ddragon — the bundle is rebuilt and
+    published after a patch ships — so comparing to ddragon's latest patch would
+    reject the disk cache on every launch during that lag window and re-download
+    a bundle that is STILL on the old patch (you can't get fresher data than has
+    been published). The TTL already bounds staleness without that churn.
     """
     path = _cache_path()
     if not os.path.exists(path):

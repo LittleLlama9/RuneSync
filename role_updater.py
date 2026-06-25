@@ -32,7 +32,7 @@ from typing import Optional
 
 # ── config ─────────────────────────────────────────────────────────────────
 import ugg_api
-from ugg_api import SERVER_URL  # legacy server fallback
+from ugg_api import SERVER_URL  # dev server fallback
 
 # Cache path: %APPDATA%/RuneSync — writable on every install location,
 # including Program Files where the exe directory is read-only for non-admin
@@ -131,11 +131,11 @@ def _fetch_from_bundle() -> Optional[dict]:
 
 
 def _fetch_from_server() -> Optional[dict]:
-    """Legacy fallback: call /role-weights on the localhost server."""
+    """Dev fallback: call /role-weights on the localhost server."""
     url = f"{SERVER_URL}/role-weights"
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "RuneSync/1.0"})
-        # Role weights scraping is slow (5 LoLalytics pages), allow generous timeout
+        # The dev endpoint can be slow, allow a generous timeout
         resp = urllib.request.urlopen(req, timeout=300)
         data = json.loads(resp.read())
         if isinstance(data, dict) and len(data) > 10:
@@ -157,7 +157,7 @@ def _normalize_to_percent(weights: dict) -> dict:
     20 on the percent scale. So a peak at or below the cutoff means fractions.
     Max-based avoids a sum-based false positive on a sparse percent champ (e.g.
     {'support': 2.46}: sum 2.46 looks fraction-ish, but peak 2.46 is clearly
-    percent). Idempotent: already-percent data (e.g. from the legacy scraper)
+    percent). Idempotent: already-percent data (e.g. from an upstream source)
     passes through untouched, so this is safe to run on any source's output.
     """
     if not isinstance(weights, dict):
