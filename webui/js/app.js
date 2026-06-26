@@ -35,6 +35,7 @@
     monitoring: false,
     inGame: false,
     champ: 'JINX', champMeta: '[ locked · bottom lane · marksman ]', imported: true,
+    selecting: false, _logAnchorCount: 0,
     enemy: 'CAITLYN', wr: 52.8, wrLabel: 'FAVORABLE', wrTag: 'success',
     sample: 'PLATINUM+ · WORLD',
     runes: {
@@ -81,15 +82,23 @@
   }
 
   function renderMonitor() {
-    $('champName').textContent = state.champ || '—';
-    $('champMeta').textContent = state.champMeta || '[ awaiting champ select ]';
+    const selecting = state.selecting && !state.champ;
+    $('champName').textContent = state.champ || (selecting ? 'SELECTING…' : '—');
+    $('champMeta').textContent = state.champ
+      ? (state.champMeta || '')
+      : (selecting ? '[ in champ select · pick a champion ]'
+                   : (state.champMeta || '[ awaiting champ select ]'));
     $('champBadge').hidden = !state.imported;
 
-    $('matchupTitle').textContent = state.enemy ? `MATCHUP // vs ${state.enemy}` : 'MATCHUP // idle';
+    $('matchupTitle').textContent = state.enemy
+      ? `MATCHUP // vs ${state.enemy}`
+      : (state.selecting ? 'MATCHUP // awaiting pick' : 'MATCHUP // idle');
     const down = state.wr != null && state.wr < 50;
     $('wrNum').innerHTML = state.wr == null ? '—' : `${state.wr.toFixed(1)}<small>%</small>`;
     const dir = $('wrDir');
-    dir.textContent = state.wr == null ? 'awaiting matchup' : `${down ? '▼' : '▲'} ${state.wrLabel || ''}`.trim();
+    dir.textContent = state.wr == null
+      ? (state.selecting ? 'awaiting pick' : 'awaiting matchup')
+      : `${down ? '▼' : '▲'} ${state.wrLabel || ''}`.trim();
     dir.classList.toggle('down', !!down);
     const fill = $('wrFill');
     fill.style.width = (state.wr == null ? 0 : Math.max(0, Math.min(100, state.wr))) + '%';
@@ -141,11 +150,28 @@
     return rows.join('');
   }
 
+  // Enemy-laner and matchup result lines are tagged with the crossed-swords
+  // glyph in the backend log text; we anchor-scroll to those when they appear.
+  const isAnchorLog = (msg) => !!msg && msg.indexOf('⚔') !== -1;
+
   function renderLog() {
     const box = $('logBox');
-    box.innerHTML = state.log.map(l =>
-      `<div><span class="ts">${esc(l.ts)}</span>&nbsp; <span class="${l.cls}">${esc(l.msg)}</span></div>`).join('');
-    box.scrollTop = box.scrollHeight;
+    if (!box) return;
+    // Was the user parked at the bottom before this re-render? (sticky bottom)
+    const pinned = box.scrollHeight - box.scrollTop - box.clientHeight < 16;
+    let lastAnchor = -1, anchorCount = 0;
+    state.log.forEach((l, i) => { if (isAnchorLog(l.msg)) { lastAnchor = i; anchorCount++; } });
+    box.innerHTML = state.log.map((l, i) =>
+      `<div data-li="${i}"><span class="ts">${esc(l.ts)}</span>&nbsp; <span class="${l.cls}">${esc(l.msg)}</span></div>`).join('');
+    if (anchorCount > (state._logAnchorCount || 0) && lastAnchor >= 0) {
+      // A new enemy laner / matchup just locked in — bring it into view.
+      const el = box.querySelector(`[data-li="${lastAnchor}"]`);
+      if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+      else box.scrollTop = box.scrollHeight;
+    } else if (pinned) {
+      box.scrollTop = box.scrollHeight;
+    }
+    state._logAnchorCount = anchorCount;
   }
 
   function renderBuilds() {
@@ -573,17 +599,18 @@
       case 'status': state.status = p.kind; renderStatus(); break;
       case 'running': state.monitoring = !!p.on; break;
       case 'log': pushLog(p); renderLog(); break;
+      case 'champ_select': enterSelecting(); renderMonitor(); renderOverlay(); break;
       case 'champ':
         if (p.champ !== state.champ) state.imported = false;  // only invalidate the badge on a real champ change
-        state.champ = p.champ; state.champMeta = p.meta; renderMonitor(); break;
+        state.champ = p.champ; state.champMeta = p.meta; state.selecting = false; renderMonitor(); break;
       case 'matchup':
         state.champ = p.champ || state.champ; state.enemy = p.enemy; state.wr = p.wr;
-        state.wrLabel = p.label; state.wrTag = p.tag; state.sample = p.sample;
+        state.wrLabel = p.label; state.wrTag = p.tag; state.sample = p.sample; state.selecting = false;
         renderMonitor(); renderOverlay(); break;
       case 'rune_page': state.runes = p; renderMonitor(); break;
       case 'build': state.buildSrc = p.src; state.build = p.items || []; renderMonitor(); break;
       case 'import_ok': state.imported = true; renderMonitor(); break;
-      case 'game': state.inGame = !!p.in_game; renderOverlay(); break;
+      case 'game': state.inGame = !!p.in_game; if (p.in_game) state.selecting = false; renderOverlay(); break;
       case 'logrec': onLogrec(p); break;
       default: console.log('push?', event, p);
     }
@@ -596,8 +623,11 @@
     state.settings = s.settings || state.settings;
     state.builds = s.builds || []; state.sel = 0;
     state.log = (s.log || []).map(r => ({ ts: r.ts, msg: r.msg, cls: r.cls || '' }));
+    // Seed the anchor count from hydrated history so reloading doesn't yank the
+    // log down to an old matchup line — only genuinely new ones should scroll.
+    state._logAnchorCount = state.log.reduce((n, l) => n + (isAnchorLog(l.msg) ? 1 : 0), 0);
     state.champ = s.champ || ''; state.champMeta = s.champMeta || '[ awaiting champ select ]';
-    state.imported = !!s.imported;
+    state.imported = !!s.imported; state.selecting = !!s.selecting;
     state.enemy = s.enemy || ''; state.wr = (s.wr == null ? null : s.wr);
     state.wrLabel = s.wrLabel || ''; state.wrTag = s.wrTag || 'info'; state.sample = s.sample || '';
     if (s.runes) state.runes = s.runes;
@@ -605,9 +635,17 @@
     applyTheme(s.theme || state.settings.phosphor);
     renderAll();
   }
+  function enterSelecting() {
+    Object.assign(state, {
+      selecting: true,
+      champ: '', champMeta: '[ in champ select · selecting… ]', imported: false,
+      enemy: '', wr: null, wrLabel: '', wrTag: 'info', sample: '', buildSrc: 'idle', build: [],
+      runes: { keystone: '', primary: '', secondary: '', primaryMinor: '', secondaryMinor: '', summoners: '' }
+    });
+  }
   function idle() {
     Object.assign(state, {
-      champ: '', champMeta: '[ awaiting champ select ]', imported: false,
+      champ: '', champMeta: '[ awaiting champ select ]', imported: false, selecting: false,
       enemy: '', wr: null, wrLabel: '', sample: '', buildSrc: 'idle', build: [], log: [], inGame: false,
       runes: { keystone: '', primary: '', secondary: '', primaryMinor: '', secondaryMinor: '', summoners: '' }
     });

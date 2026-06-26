@@ -18,7 +18,8 @@ class ChampSelectMonitor:
                  region: str = "World", auto_role: bool = True,
                  on_game_start=None, on_game_end=None, on_league_closed=None,
                  on_matchup_winrate=None, on_item_build=None, on_import=None,
-                 on_runes_imported=None, on_champ_detected=None, on_build_detail=None):
+                 on_runes_imported=None, on_champ_detected=None, on_build_detail=None,
+                 on_champ_select_enter=None):
         self.lcu = lcu
         self.ugg = ugg
         self.overrides = overrides
@@ -41,6 +42,9 @@ class ChampSelectMonitor:
         # Both read-only/additive — the legacy on_item_build(list) still fires.
         self._on_champ_detected = on_champ_detected
         self._on_build_detail = on_build_detail
+        # () fired once each time we freshly enter champ select, so the UI can
+        # clear last game's champ/matchup panels back to a "selecting" state.
+        self._on_champ_select_enter = on_champ_select_enter
         self._stop_event = threading.Event()
         # Serializes rune/item-set imports. The Reimport button (main.py) pushes
         # _import_runes on its own thread while the poll loop also calls it on
@@ -174,6 +178,8 @@ class ChampSelectMonitor:
             self._pick_turn_fired = False
             self._matchup_override = None
             self._all_picks_finalized = False
+            if self._on_champ_select_enter:
+                self._on_champ_select_enter()
         self._last_phase = phase
 
         session = self.lcu.get_champ_select_session()

@@ -85,6 +85,7 @@ class Api:
     def _idle_snapshot() -> dict:
         return {
             "champ": "", "champMeta": "[ awaiting champ select ]", "imported": False,
+            "selecting": False,
             "enemy": "", "wr": None, "wrLabel": "", "wrTag": "info", "sample": "",
             "runes": {"keystone": "", "primary": "", "secondary": "",
                       "primaryMinor": "", "secondaryMinor": "", "summoners": ""},
@@ -422,6 +423,7 @@ class Api:
             on_runes_imported=self._on_runes,
             on_champ_detected=self._on_champ,
             on_build_detail=self._on_build,
+            on_champ_select_enter=self._on_champ_select_enter,
         )
         threading.Thread(target=self.monitor.run, daemon=True).start()
 
@@ -462,18 +464,29 @@ class Api:
         except Exception:
             pass
 
+    def _on_champ_select_enter(self):
+        # Fresh champ select: wipe last game's panels back to a "selecting" state
+        # so the UI doesn't show the previous champ/matchup until new data lands.
+        fresh = self._idle_snapshot()
+        fresh["selecting"] = True
+        fresh["champMeta"] = "[ in champ select · selecting… ]"
+        fresh["inGame"] = self.snap.get("inGame", False)
+        self.snap.update(fresh)
+        self.pusher.push("champ_select", {"active": True})
+
     def _on_champ(self, champ, role):
         lane = f"{role} lane" if role and role not in ("auto", "") else "lane"
         self.snap["champ"] = champ
         self.snap["champMeta"] = f"[ locked · {lane} ]"
         self.snap["imported"] = False
+        self.snap["selecting"] = False
         self.pusher.push("champ", {"champ": champ, "meta": self.snap["champMeta"]})
 
     def _on_matchup(self, champ, enemy, role, wr, label, tag):
         clean = label.replace("✓", "").replace("✗", "").strip().upper()
         s = self.overrides.settings
         sample = f"{s.get('rank', 'Platinum+')} · {s.get('region', 'World')}".upper()
-        self.snap.update({"champ": champ, "enemy": enemy, "wr": wr,
+        self.snap.update({"champ": champ, "enemy": enemy, "wr": wr, "selecting": False,
                           "wrLabel": clean, "wrTag": tag, "sample": sample})
         self.pusher.push("matchup", {"champ": champ, "enemy": enemy, "wr": wr,
                                      "label": clean, "tag": tag, "sample": sample})
