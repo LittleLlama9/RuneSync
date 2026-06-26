@@ -49,6 +49,9 @@ body {
 /* ── top bar ── */
 .topbar { flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
   padding:11px 18px 9px; border-bottom:1px solid var(--pdd); }
+/* The whole bar drags the frameless window; interactive children below opt back
+   to a pointer cursor so they still read as clickable. */
+.topbar.pywebview-drag-region { cursor:move; }
 .brand { display:flex; align-items:baseline; gap:9px; }
 .brand-name { font-size:24px; letter-spacing:.12em; color:var(--pb); }
 .brand-ver  { font-family:'Space Mono',monospace; font-size:9px; color:var(--pd); }
