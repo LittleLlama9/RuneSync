@@ -296,6 +296,35 @@ def _get(path: str, params: dict, timeout: int = 35) -> Optional[dict | list]:
 
 # ── public client ──────────────────────────────────────────────────────────
 
+
+def _derive_counters_from_matchups(enemy_champ: str, role: str,
+                                   top_n: int) -> list[dict]:
+    """Build a counter list for `enemy_champ` from its matchup table.
+
+    Used when the bundle's curated counter list is empty. The matchup table is
+    {opponent: enemy_champ's WR vs that opponent}, so opponents that beat
+    `enemy_champ` are those where its WR < 50; the counter's WR is 100 - that.
+    Returns the strongest such opponents (highest counter WR), clamped to the
+    same sane band as the curated list. Empty if no losing matchups are known.
+    """
+    if not _bundle:
+        return []
+    table = (_bundle.get("matchups", {})
+                    .get(enemy_champ.lower(), {})
+                    .get(role) or {})
+    if not isinstance(table, dict):
+        return []
+    derived = []
+    for opp, champ_wr in table.items():
+        if not isinstance(opp, str) or not isinstance(champ_wr, (int, float)):
+            continue
+        opp_wr = round(100 - champ_wr, 2)
+        if opp_wr > 50.0 and _COUNTER_WR_MIN <= opp_wr <= _COUNTER_WR_MAX:
+            derived.append({"champion": opp, "win_rate": opp_wr})
+    derived.sort(key=lambda c: c["win_rate"], reverse=True)
+    return derived[:top_n]
+
+
 class UGGClient:
     def __init__(self):
         pass  # no local state needed
@@ -357,13 +386,21 @@ class UGGClient:
             entry = (_bundle.get("counters", {})
                             .get(enemy_champ.lower(), {})
                             .get(role) or [])
-            if not isinstance(entry, list):
-                return []
-            entry = [c for c in entry
-                     if isinstance(c, dict)
-                     and isinstance(c.get("win_rate"), (int, float))
-                     and _COUNTER_WR_MIN <= c["win_rate"] <= _COUNTER_WR_MAX]
-            return entry[:top_n]
+            if isinstance(entry, list):
+                entry = [c for c in entry
+                         if isinstance(c, dict)
+                         and isinstance(c.get("win_rate"), (int, float))
+                         and _COUNTER_WR_MIN <= c["win_rate"] <= _COUNTER_WR_MAX]
+                if entry:
+                    return entry[:top_n]
+            # Fallback: the curated top-5 counter list is empty for this champ
+            # (common for lower-popularity picks the bundle builder couldn't fill
+            # with 250+ game samples). Derive counters from the full matchup
+            # table instead — it's keyed {opponent: ENEMY_champ's WR vs them}, so
+            # an opponent that beats this champ is one where the champ's WR sits
+            # below 50; the counter's WR is the complement. Real data, just a
+            # lower sample floor, so it self-heals champs the curated list skips.
+            return _derive_counters_from_matchups(enemy_champ, role, top_n)
         result = _get("/counters", {
             "champion": enemy_champ, "role": role, "top_n": top_n,
         }, timeout=45)

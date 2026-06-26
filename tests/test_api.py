@@ -163,6 +163,49 @@ class TestGetCounters:
         assert captured["top_n"] == 10
 
 
+class TestGetCountersBundleFallback:
+    """When the bundle's curated counter list is empty, counters are derived
+    from the matchup table so champs the builder skipped still resolve."""
+
+    def setup_method(self):
+        self.client = UGGClient()
+
+    def teardown_method(self):
+        ugg_api._bundle = None
+
+    def test_derives_counters_from_matchups_when_curated_list_empty(self):
+        # Cho'gath has no curated counters but a full matchup table. Opponents
+        # with cho'gath WR < 50 should surface as counters (WR = 100 - that).
+        ugg_api._bundle = {
+            "counters": {"cho'gath": {}},
+            "matchups": {"cho'gath": {"top": {
+                "Sett": 43.75,      # -> counter 56.25
+                "Dr. Mundo": 45.07,  # -> counter 54.93
+                "Shen": 51.43,       # not a counter (cho'gath wins)
+            }}},
+        }
+        result = self.client.get_counters("Cho'Gath", "top", top_n=5)
+        names = [c["champion"] for c in result]
+        assert names == ["Sett", "Dr. Mundo"]   # sorted by counter WR desc
+        assert result[0]["win_rate"] == 56.25
+        assert "Shen" not in names
+
+    def test_prefers_curated_list_over_derivation(self):
+        ugg_api._bundle = {
+            "counters": {"garen": {"top": [{"champion": "Vayne", "win_rate": 55.0}]}},
+            "matchups": {"garen": {"top": {"Teemo": 40.0}}},
+        }
+        result = self.client.get_counters("Garen", "top")
+        assert [c["champion"] for c in result] == ["Vayne"]
+
+    def test_empty_when_no_losing_matchups(self):
+        ugg_api._bundle = {
+            "counters": {"sona": {}},
+            "matchups": {"sona": {"support": {"Lux": 52.0, "Brand": 55.0}}},
+        }
+        assert self.client.get_counters("Sona", "support") == []
+
+
 # ---------------------------------------------------------------------------
 # UGGClient.get_matchup_winrate
 # ---------------------------------------------------------------------------
