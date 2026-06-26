@@ -82,3 +82,25 @@ def test_import_runes_is_reentrant_same_thread():
 
     assert done.is_set(), "re-entrant _import_runes deadlocked — needs RLock, not Lock"
     assert calls == ["Outer", "Inner"]
+
+
+# ── off-role fallback summoner fix ──────────────────────────────────────────
+
+def test_offrole_summoners_swap_smite_for_lane_spell():
+    """A jungle fallback build imported for a laner must drop Smite (11) for the
+    lane's standard second summoner, keeping Flash."""
+    mon = _make_monitor()
+    assert mon._fix_offrole_summoners([4, 11], "top") == [4, 12]      # Flash + TP
+    assert mon._fix_offrole_summoners([4, 11], "mid") == [4, 14]      # Flash + Ignite
+    assert mon._fix_offrole_summoners([4, 11], "bot") == [4, 7]       # Flash + Heal
+    assert mon._fix_offrole_summoners([4, 11], "support") == [4, 3]   # Flash + Exhaust
+
+
+def test_offrole_summoners_untouched_when_no_smite_or_jungle():
+    mon = _make_monitor()
+    # No Smite present — leave as-is.
+    assert mon._fix_offrole_summoners([4, 12], "top") == [4, 12]
+    # Jungle role legitimately keeps Smite.
+    assert mon._fix_offrole_summoners([4, 11], "jungle") == [4, 11]
+    # Unknown/auto role — don't guess.
+    assert mon._fix_offrole_summoners([4, 11], "auto") == [4, 11]

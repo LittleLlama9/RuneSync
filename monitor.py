@@ -9,6 +9,12 @@ from ugg_api import UGGClient
 from overrides import OverrideManager
 from champion_roles import infer_roles, infer_full_assignment
 
+# Standard lane second-summoner (paired with Flash) used to replace a jungle
+# Smite when an off-role fallback build is imported for a laner. Smite is
+# useless outside the jungle, so a top Sejuani should never have it set.
+_LANE_SECOND_SPELL = {"top": 12, "mid": 14, "bot": 7, "support": 3}  # TP/Ignite/Heal/Exhaust
+_SMITE_SPELL_ID = 11
+
 
 class ChampSelectMonitor:
     POLL_INTERVAL = 1.0
@@ -191,6 +197,16 @@ class ChampSelectMonitor:
         if detected_role != "auto":
             if self._my_role == "auto":
                 self._my_role = detected_role  # initial lock-in
+                # A champ picked before assignedPosition was available imported
+                # under the placeholder "auto" role, which falls back to the
+                # champ's highest-pickrate role (e.g. Sejuani -> jungle). Now the
+                # real lane is known, re-import so a top laner doesn't keep a
+                # jungle rune page / Smite.
+                if self._my_champ:
+                    self.log(f"  → Role resolved: {detected_role} — re-importing", "info")
+                    if self._on_champ_detected:
+                        self._on_champ_detected(self._my_champ, detected_role)
+                    self._import_runes(self._my_champ, session)
             elif detected_role != self._my_role:
                 # assignedPosition changed — teammate lane swap in the draft UI
                 old_role = self._my_role
@@ -204,6 +220,8 @@ class ChampSelectMonitor:
                 self._matchup_done_for = ""
                 self._waiting_logged = False
                 if self._my_champ:
+                    if self._on_champ_detected:
+                        self._on_champ_detected(self._my_champ, detected_role)
                     self._import_runes(self._my_champ, session)
 
         # ── My champion detection ──────────────────────────────────────────
@@ -460,6 +478,21 @@ class ChampSelectMonitor:
                     return True
         return False
 
+    def _fix_offrole_summoners(self, summoners: list, role: str) -> list:
+        """Strip a jungle Smite from an off-role fallback build's summoners.
+
+        When the bundle has no data for the player's lane and falls back to a
+        jungle build, the jungle Smite is nonsense in lane. Swap it for the
+        lane's standard second summoner (Flash + TP/Ignite/Heal/Exhaust),
+        leaving Flash and any non-Smite spell untouched.
+        """
+        if role in ("", "auto", "jungle") or _SMITE_SPELL_ID not in summoners:
+            return summoners
+        repl = _LANE_SECOND_SPELL.get(role, 4)
+        fixed = [repl if s == _SMITE_SPELL_ID else s for s in summoners]
+        self.log(f"  → Dropped jungle Smite for {role} (set spell {repl})", "info")
+        return fixed
+
     def _detect_role(self, session: dict) -> str:
         my_cell = session.get("localPlayerCellId", -1)
         for p in session.get("myTeam", []):
@@ -507,7 +540,15 @@ class ChampSelectMonitor:
             pass
 
     def _apply_ugg(self, champ_name: str, session: dict):
-        role = self._detect_role(session) if self.auto_role else "auto"
+        # Prefer the resolved lane (self._my_role) over a fresh detect: the role
+        # state machine in run() accounts for assignedPosition arriving late, so
+        # re-detecting here could momentarily read "auto" and pull the champ's
+        # off-role highest-pickrate build.
+        if self.auto_role:
+            role = self._my_role if self._my_role not in ("", "auto") \
+                else self._detect_role(session)
+        else:
+            role = "auto"
         if role != "auto":
             self.log(f"  → Detected role: {role}", "info")
         try:
@@ -516,6 +557,17 @@ class ChampSelectMonitor:
         except Exception as e:
             self.log(f"  ✗ Could not fetch u.gg build: {e}", "error")
             return
+        # The bundle may have no data for the requested lane (e.g. off-meta
+        # Sejuani top) and fall back to another role's build. Flag it so the user
+        # knows, and strip a jungle Smite that's nonsense in a lane.
+        build_role = build.get("role", role)
+        off_role = role not in ("", "auto") and build_role != role
+        if off_role:
+            self.log(f"  ⚠ No {role} data for {champ_name} — using {build_role} "
+                     f"build as a fallback", "warn")
+        summoners = list(build.get("summoners", []) or [])
+        if off_role:
+            summoners = self._fix_offrole_summoners(summoners, role)
         self.log(f"  → {build['role']} | perks: {build['selected_perk_ids'][:4]}...", "info")
         if build.get("items_core"):
             self.log(f"  → Core items: {build['items_core']}", "info")
@@ -529,11 +581,10 @@ class ChampSelectMonitor:
             self.log(f"  ✓ Runes imported for {champ_name} ({build['role']})", "success")
             if self._on_import:
                 self._on_import(champ_name)
-            _sm = build.get("summoners", [])
             self._report_rune_page(build["primary_style_id"], build["sub_style_id"],
                                    build["selected_perk_ids"],
-                                   _sm[0] if len(_sm) >= 1 else 0,
-                                   _sm[1] if len(_sm) >= 2 else 0)
+                                   summoners[0] if len(summoners) >= 1 else 0,
+                                   summoners[1] if len(summoners) >= 2 else 0)
             if build.get("items_core_ids"):
                 champ_id = next((k for k, v in self._champ_name_map.items() if v == champ_name), 0)
                 set_ok = self.lcu.import_item_set(champ_name, champ_id, role,
@@ -544,7 +595,6 @@ class ChampSelectMonitor:
                                                   build.get("items_sixth_ids"))
                 if set_ok:
                     self.log(f"  ✓ Item set imported for {champ_name}", "success")
-            summoners = build.get("summoners", [])
             if len(summoners) >= 2:
                 spell_ok = self.lcu.set_summoner_spells(summoners[0], summoners[1])
                 if spell_ok:
