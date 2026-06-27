@@ -295,6 +295,12 @@
   }
 
   function wire() {
+    // The whole .topbar is the window drag handle (pywebview-drag-region), but
+    // the interactive controls inside it must act like buttons, not drag the
+    // window. Swallowing mousedown stops pywebview's drag from starting on them
+    // while leaving their click handlers intact — normal title-bar behaviour.
+    document.querySelectorAll('.topbar .tab, .topbar .status, .topbar .wbtn')
+      .forEach(el => el.addEventListener('mousedown', e => e.stopPropagation()));
     document.querySelectorAll('.tab').forEach(t =>
       t.addEventListener('click', () => setScreen(t.dataset.screen)));
     document.querySelectorAll('[data-cmd]').forEach(el =>
