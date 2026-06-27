@@ -8,7 +8,7 @@ local dev server fallback when the bundle is unavailable.
     ever read the hosted bundle; they never install or run a server.
 """
 
-import json, os, sys, threading, time, urllib.request, urllib.error, urllib.parse
+import json, os, ssl, sys, threading, time, urllib.request, urllib.error, urllib.parse
 from typing import Optional
 
 # ── bundle config ──────────────────────────────────────────────────────────
@@ -325,6 +325,168 @@ def _derive_counters_from_matchups(enemy_champ: str, role: str,
     return derived[:top_n]
 
 
+# ── on-demand live build fetch ─────────────────────────────────────────────
+# The prebuilt bundle only ships roles above a games floor, so niche off-role
+# picks (e.g. Sejuani top) have no bundled build and would otherwise fall back
+# to the champ's main-role build — wrong runes AND wrong summoners (a jungle
+# build drags Smite into a lane). When the bundle lacks the EXACT requested
+# lane, we fetch that lane's build live from op.gg / u.gg, mirroring the
+# sources and extraction the bundle builder uses (scripts/build_data_bundle.py).
+# op.gg is primary because u.gg's stats CDN is frequently Cloudflare-blocked
+# (403) for direct requests.
+
+_LIVE_HEADERS = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
+_OPGG_BUILD_BASE = "https://lol-api-champion.op.gg/api/GLOBAL/champions/ranked"
+_OPGG_POS = {"top": "TOP", "jungle": "JUNGLE", "mid": "MID",
+             "bot": "ADC", "adc": "ADC", "support": "SUPPORT"}
+_LIVE_DEFAULT_SHARDS = [5008, 5008, 5001]
+
+_live_ssl_ctx: Optional[ssl.SSLContext] = None
+_live_lock = threading.Lock()
+_live_build_cache: dict = {}     # (champ_lower, role_norm) -> {"patch","build","at"}
+_LIVE_BUILD_TTL = 6 * 3600
+_champ_name_to_id: dict = {}     # display name (and lower) -> numeric id str
+_champ_map_patch: str = ""
+_champ_map_at: float = 0.0
+_CHAMP_MAP_TTL = 12 * 3600
+
+
+def _norm_role(role: str) -> str:
+    r = (role or "").lower()
+    return "bot" if r == "adc" else r
+
+
+def _get_live_ssl() -> ssl.SSLContext:
+    global _live_ssl_ctx
+    if _live_ssl_ctx is None:
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        _live_ssl_ctx = ctx
+    return _live_ssl_ctx
+
+
+def _live_json(url: str, timeout: float = 10.0):
+    """GET a JSON URL for the live build fallback. Returns parsed JSON or None."""
+    try:
+        req = urllib.request.Request(url, headers=_LIVE_HEADERS)
+        with urllib.request.urlopen(req, context=_get_live_ssl(), timeout=timeout) as r:
+            return json.loads(r.read())
+    except Exception as e:
+        print(f"[ugg] live fetch failed {url}: {e}", file=sys.stderr)
+        return None
+
+
+def _ensure_champ_id_map() -> dict:
+    """Display-name -> numeric champion id, from ddragon. Cached per patch/TTL."""
+    global _champ_name_to_id, _champ_map_patch, _champ_map_at
+    patch = _current_patch() or ""
+    now = time.time()
+    with _live_lock:
+        fresh = (_champ_name_to_id and _champ_map_patch == patch
+                 and now - _champ_map_at < _CHAMP_MAP_TTL)
+    if fresh:
+        return _champ_name_to_id
+    url = (f"https://ddragon.leagueoflegends.com/cdn/{patch}/data/en_US/champion.json"
+           if patch else
+           "https://ddragon.leagueoflegends.com/cdn/15.1.1/data/en_US/champion.json")
+    data = _live_json(url, timeout=10.0)
+    if not data or "data" not in data:
+        return _champ_name_to_id  # keep any prior map rather than wipe it
+    mapping = {}
+    for v in data["data"].values():
+        cid = str(v.get("key", ""))
+        name = v.get("name", "")
+        if cid and name:
+            mapping[name] = cid
+            mapping[name.lower()] = cid
+    with _live_lock:
+        _champ_name_to_id = mapping
+        _champ_map_patch = patch
+        _champ_map_at = now
+    return mapping
+
+
+def _extract_opgg_build(d: dict, champ_name: str, role: str) -> Optional[dict]:
+    """Turn an op.gg champion/role payload into the app's build dict shape."""
+    rune_pages = d.get("rune_pages") or []
+    if not rune_pages:
+        return None
+    builds_list = rune_pages[0].get("builds") or []
+    if not builds_list:
+        return None
+    b = builds_list[0]
+    selected = (list(b.get("primary_rune_ids", []))
+                + list(b.get("secondary_rune_ids", []))
+                + list(b.get("stat_mod_ids") or _LIVE_DEFAULT_SHARDS))[:9]
+    if len(selected) < 9:
+        return None
+    spells = (d.get("summoner_spells") or [{}])[0].get("ids", []) if d.get("summoner_spells") else []
+    starter = (d.get("starter_items") or [{}])[0].get("ids", []) if d.get("starter_items") else []
+    core = (d.get("core_items") or [{}])[0].get("ids", []) if d.get("core_items") else []
+    last = d.get("last_items") or []
+    fourth_ids = [li["ids"][0] for li in last[:3] if li.get("ids")]
+    return {
+        "champion": champ_name, "role": role,
+        "primary_style_id": b.get("primary_page_id", 8000),
+        "sub_style_id": b.get("secondary_page_id", 8100),
+        "selected_perk_ids": selected,
+        "summoners": list(spells),
+        "items_start": [str(i) for i in starter],
+        "items_core": [str(i) for i in core],
+        "items_start_ids": list(starter),
+        "items_core_ids": list(core),
+        "items_fourth_ids": fourth_ids,
+        "items_fifth_ids": [], "items_sixth_ids": [],
+        "skill_order": [],
+        "_source": "live:op.gg",
+    }
+
+
+def _fetch_build_opgg(champ_name: str, role: str) -> Optional[dict]:
+    pos = _OPGG_POS.get((role or "").lower())
+    if not pos:
+        return None
+    cid = _ensure_champ_id_map().get(champ_name) or _ensure_champ_id_map().get(champ_name.lower())
+    if not cid:
+        return None
+    data = _live_json(f"{_OPGG_BUILD_BASE}/{cid}/{pos}", timeout=10.0)
+    if not data or "data" not in data:
+        return None
+    return _extract_opgg_build(data["data"], champ_name, role)
+
+
+def _fetch_live_build(champion_name: str, role: str) -> Optional[dict]:
+    """Fetch the build for an exact champ+lane the bundle doesn't cover.
+
+    Returns a build dict (app shape) whose 'role' equals the requested role, or
+    None if no live source has data. Cached per (champ, role) for the patch so a
+    hover storm in champ select doesn't hammer op.gg. Never raises.
+    """
+    rnorm = _norm_role(role)
+    if rnorm not in _OPGG_POS and rnorm != "bot":
+        return None
+    patch = _current_patch() or ""
+    key = (champion_name.lower(), rnorm)
+    now = time.time()
+    with _live_lock:
+        cached = _live_build_cache.get(key)
+        if cached and cached["patch"] == patch and now - cached["at"] < _LIVE_BUILD_TTL:
+            return cached["build"]
+    build = None
+    try:
+        build = _fetch_build_opgg(champion_name, rnorm)
+    except Exception as e:
+        print(f"[ugg] live op.gg build error for {champion_name} {rnorm}: {e}",
+              file=sys.stderr)
+    if build:
+        print(f"[ugg] live build fetched for {champion_name} {rnorm} "
+              f"(op.gg) — bundle had no {rnorm} data", file=sys.stderr)
+    with _live_lock:
+        _live_build_cache[key] = {"patch": patch, "build": build, "at": now}
+    return build
+
+
 class UGGClient:
     def __init__(self):
         pass  # no local state needed
@@ -343,6 +505,15 @@ class UGGClient:
             entry = champ_builds.get(role) if role and role != "auto" else None
             if entry:
                 return entry
+            # The bundle has no build for this exact lane. Before falling back to
+            # the champ's off-role (highest-pickrate) build — which imports the
+            # wrong runes and drags Smite into a lane — fetch the real lane build
+            # live from op.gg/u.gg. Niche picks (e.g. Sejuani top) genuinely have
+            # data upstream even when the bundle's games floor excluded them.
+            if role and role != "auto":
+                live = _fetch_live_build(champion_name, role)
+                if live:
+                    return live
             # Fallback: champ-select didn't report a position (autofill, custom
             # game, undocumented queue) OR the requested role isn't bundled —
             # pick the highest-pickrate role for this champ from role_weights.

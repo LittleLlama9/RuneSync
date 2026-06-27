@@ -207,6 +207,84 @@ class TestGetCountersBundleFallback:
 
 
 # ---------------------------------------------------------------------------
+# Live off-role build fetch (niche lanes the bundle's games floor excluded)
+# ---------------------------------------------------------------------------
+
+class TestLiveOffRoleBuild:
+    """When the bundle has no build for the requested lane, get_top_build fetches
+    that lane live (op.gg) rather than importing the champ's main-role build
+    (wrong runes + Smite dragged into a lane)."""
+
+    def setup_method(self):
+        self.client = UGGClient()
+        ugg_api._live_build_cache.clear()
+
+    def teardown_method(self):
+        ugg_api._bundle = None
+        ugg_api._live_build_cache.clear()
+
+    def test_live_fetch_used_when_role_missing(self):
+        ugg_api._bundle = {
+            "patch": "16.13.1",
+            "builds": {"sejuani": {"jungle": {"role": "jungle", "summoners": [4, 11]}}},
+            "role_weights": {"Sejuani": {"jungle": 0.9}},
+        }
+        live = {"champion": "Sejuani", "role": "top", "summoners": [12, 14],
+                "selected_perk_ids": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                "primary_style_id": 8400, "sub_style_id": 8000,
+                "items_core": ["2525"], "_source": "live:op.gg"}
+        with patch("ugg_api._fetch_live_build", return_value=live) as m:
+            b = self.client.get_top_build("Sejuani", role="top")
+        m.assert_called_once_with("Sejuani", "top")
+        assert b["role"] == "top"
+        assert 11 not in b["summoners"]   # no Smite in a lane build
+
+    def test_bundle_role_skips_live_fetch(self):
+        ugg_api._bundle = {
+            "patch": "16.13.1",
+            "builds": {"sejuani": {"jungle": {"role": "jungle", "summoners": [4, 11]}}},
+        }
+        with patch("ugg_api._fetch_live_build") as m:
+            b = self.client.get_top_build("Sejuani", role="jungle")
+        m.assert_not_called()
+        assert b["role"] == "jungle"
+
+    def test_falls_back_to_offrole_when_live_unavailable(self):
+        ugg_api._bundle = {
+            "patch": "16.13.1",
+            "builds": {"sejuani": {"jungle": {"role": "jungle", "summoners": [4, 11]}}},
+            "role_weights": {"Sejuani": {"jungle": 0.9}},
+        }
+        with patch("ugg_api._fetch_live_build", return_value=None):
+            b = self.client.get_top_build("Sejuani", role="top")
+        assert b["role"] == "jungle"   # off-role bundle fallback preserved
+
+    def test_extract_opgg_build_shape(self):
+        d = {
+            "rune_pages": [{"builds": [{
+                "primary_page_id": 8400, "secondary_page_id": 8000,
+                "primary_rune_ids": [8437, 8446, 8444, 8451],
+                "secondary_rune_ids": [8226, 8237],
+                "stat_mod_ids": [5005, 5001, 5001],
+            }]}],
+            "summoner_spells": [{"ids": [12, 14]}],
+            "starter_items": [{"ids": [1054, 2003]}],
+            "core_items": [{"ids": [2525, 3050, 2502]}],
+            "last_items": [{"ids": [3075]}, {"ids": [3193]}],
+        }
+        b = ugg_api._extract_opgg_build(d, "Sejuani", "top")
+        assert b["role"] == "top"
+        assert b["summoners"] == [12, 14]
+        assert len(b["selected_perk_ids"]) == 9
+        assert b["items_core"] == ["2525", "3050", "2502"]
+        assert b["primary_style_id"] == 8400
+        assert b["_source"] == "live:op.gg"
+
+    def test_extract_opgg_build_none_when_no_runes(self):
+        assert ugg_api._extract_opgg_build({"rune_pages": []}, "Sejuani", "top") is None
+
+
+# ---------------------------------------------------------------------------
 # UGGClient.get_matchup_winrate
 # ---------------------------------------------------------------------------
 
