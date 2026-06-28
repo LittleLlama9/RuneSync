@@ -42,12 +42,13 @@ _WINRATE_CACHE: dict = {}   # key -> {"patch": str, "result": dict}
 
 # Read-time winrate sanity backstop. The builder already clamps, but a stale or
 # pre-fix cached bundle can carry out-of-range values — the old op.gg path
-# shipped counter winrates up to 82% off ~10-game samples. These bounds mirror
-# the builder's clamps so such values can never reach the UI, even before a
-# client re-downloads a corrected bundle. Counters are one-sided (>50), so a
-# tight band; matchups get a wide garbage-only guard so legitimate lopsided
-# lanes still show.
-_COUNTER_WR_MIN, _COUNTER_WR_MAX = 40.0, 70.0
+# shipped counter winrates up to 82% off ~10-game samples, and an earlier builder
+# band let sub-50% lanes (champs that LOSE to the target) into curated counter
+# lists. A counter must, by definition, WIN the matchup, so the floor is a hard
+# 50 — anything at or below is not a counter and is dropped here even before a
+# client re-downloads a corrected bundle. Matchups get a wide garbage-only guard
+# so legitimate lopsided lanes still show.
+_COUNTER_WR_MIN, _COUNTER_WR_MAX = 50.0, 70.0
 _MATCHUP_WR_MIN, _MATCHUP_WR_MAX = 25.0, 75.0
 
 _patch_value: str = ""
@@ -554,24 +555,31 @@ class UGGClient:
                      top_n: int = 5) -> list[dict]:
         _wait_for_bundle()
         if _bundle:
-            entry = (_bundle.get("counters", {})
-                            .get(enemy_champ.lower(), {})
-                            .get(role) or [])
-            if isinstance(entry, list):
-                entry = [c for c in entry
-                         if isinstance(c, dict)
-                         and isinstance(c.get("win_rate"), (int, float))
-                         and _COUNTER_WR_MIN <= c["win_rate"] <= _COUNTER_WR_MAX]
-                if entry:
-                    return entry[:top_n]
-            # Fallback: the curated top-5 counter list is empty for this champ
-            # (common for lower-popularity picks the bundle builder couldn't fill
-            # with 250+ game samples). Derive counters from the full matchup
-            # table instead — it's keyed {opponent: ENEMY_champ's WR vs them}, so
-            # an opponent that beats this champ is one where the champ's WR sits
-            # below 50; the counter's WR is the complement. Real data, just a
-            # lower sample floor, so it self-heals champs the curated list skips.
-            return _derive_counters_from_matchups(enemy_champ, role, top_n)
+            # Curated counter list — keep only entries that actually WIN the lane
+            # (>50). An earlier builder band let sub-50% popular lanes (champs
+            # that LOSE to the target, e.g. Darius/Jayce ~45% vs Malphite) slip in,
+            # and the 250-game floor surfaced exactly those high-playrate losers
+            # while excluding the real, moderately-played counters. So the curated
+            # list alone is unreliable; we merge it with counters DERIVED from the
+            # matchup table, which is correct and far more complete (50-game floor,
+            # real per-lane WRs). Derived is the workhorse; curated only supplies
+            # any high-confidence value for champs both sources share.
+            curated_raw = (_bundle.get("counters", {})
+                                  .get(enemy_champ.lower(), {})
+                                  .get(role) or [])
+            curated = [c for c in curated_raw
+                       if isinstance(c, dict)
+                       and isinstance(c.get("win_rate"), (int, float))
+                       and _COUNTER_WR_MIN < c["win_rate"] <= _COUNTER_WR_MAX]
+            derived = _derive_counters_from_matchups(enemy_champ, role, top_n * 4)
+            by_name: dict[str, dict] = {}
+            for c in derived:
+                by_name[c["champion"]] = c
+            for c in curated:  # curated WR (250+ games) overrides derived value
+                by_name[c["champion"]] = c
+            merged = sorted(by_name.values(),
+                            key=lambda c: c["win_rate"], reverse=True)
+            return merged[:top_n]
         result = _get("/counters", {
             "champion": enemy_champ, "role": role, "top_n": top_n,
         }, timeout=45)

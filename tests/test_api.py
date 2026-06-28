@@ -190,13 +190,43 @@ class TestGetCountersBundleFallback:
         assert result[0]["win_rate"] == 56.25
         assert "Shen" not in names
 
-    def test_prefers_curated_list_over_derivation(self):
+    def test_merges_curated_with_derived(self):
+        # Curated and matchup-derived counters are merged; both surface, sorted
+        # by WR desc. Teemo (garen WR 40 -> counter 60) outranks curated Vayne 55.
         ugg_api._bundle = {
             "counters": {"garen": {"top": [{"champion": "Vayne", "win_rate": 55.0}]}},
             "matchups": {"garen": {"top": {"Teemo": 40.0}}},
         }
         result = self.client.get_counters("Garen", "top")
-        assert [c["champion"] for c in result] == ["Vayne"]
+        assert [c["champion"] for c in result] == ["Teemo", "Vayne"]
+        assert result[0]["win_rate"] == 60.0
+
+    def test_curated_value_overrides_derived_for_shared_champ(self):
+        # When a champ is in both lists, the curated (higher-sample) WR wins.
+        ugg_api._bundle = {
+            "counters": {"garen": {"top": [{"champion": "Teemo", "win_rate": 58.0}]}},
+            "matchups": {"garen": {"top": {"Teemo": 40.0}}},  # derived would be 60.0
+        }
+        result = self.client.get_counters("Garen", "top")
+        assert result == [{"champion": "Teemo", "win_rate": 58.0}]
+
+    def test_drops_sub_50_curated_counters(self):
+        # Regression: a curated list polluted with sub-50% "counters" (champs that
+        # LOSE to the target — the Malphite bug) must drop them. Only the real
+        # winning lane survives; nothing in the result may sit at or below 50.
+        ugg_api._bundle = {
+            "counters": {"malphite": {"top": [
+                {"champion": "Garen", "win_rate": 53.61},   # real counter
+                {"champion": "Yone", "win_rate": 49.52},    # LOSES -> drop
+                {"champion": "Aatrox", "win_rate": 48.43},  # LOSES -> drop
+                {"champion": "Darius", "win_rate": 44.81},  # LOSES -> drop
+            ]}},
+            "matchups": {"malphite": {}},
+        }
+        result = self.client.get_counters("Malphite", "top", top_n=5)
+        names = [c["champion"] for c in result]
+        assert names == ["Garen"]
+        assert all(c["win_rate"] > 50.0 for c in result)
 
     def test_empty_when_no_losing_matchups(self):
         ugg_api._bundle = {
