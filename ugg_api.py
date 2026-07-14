@@ -11,6 +11,8 @@ local dev server fallback when the bundle is unavailable.
 import json, os, ssl, sys, threading, time, urllib.request, urllib.error, urllib.parse
 from typing import Optional
 
+from matchup_bands import is_counter_wr, is_matchup_wr
+
 # ── bundle config ──────────────────────────────────────────────────────────
 BUNDLE_URL = (
     "https://github.com/LittleLlama9/RuneSync/releases/download/"
@@ -40,16 +42,11 @@ _bundle_init_started = False
 _bundle_ready_event = threading.Event()
 _WINRATE_CACHE: dict = {}   # key -> {"patch": str, "result": dict}
 
-# Read-time winrate sanity backstop. The builder already clamps, but a stale or
-# pre-fix cached bundle can carry out-of-range values — the old op.gg path
-# shipped counter winrates up to 82% off ~10-game samples, and an earlier builder
-# band let sub-50% lanes (champs that LOSE to the target) into curated counter
-# lists. A counter must, by definition, WIN the matchup, so the floor is a hard
-# 50 — anything at or below is not a counter and is dropped here even before a
-# client re-downloads a corrected bundle. Matchups get a wide garbage-only guard
-# so legitimate lopsided lanes still show.
-_COUNTER_WR_MIN, _COUNTER_WR_MAX = 50.0, 70.0
-_MATCHUP_WR_MIN, _MATCHUP_WR_MAX = 25.0, 75.0
+# Read-time winrate sanity backstop. The band constants, predicates, and full
+# rationale live in the tracked `matchup_bands` module (shared with the local
+# bundle builder). A stale or pre-fix cached bundle can carry out-of-range
+# values, so counters/matchups are re-validated via `is_counter_wr` /
+# `is_matchup_wr` even before a client re-downloads a corrected bundle.
 
 _patch_value: str = ""
 _patch_fetched_at: float = 0.0
@@ -320,7 +317,7 @@ def _derive_counters_from_matchups(enemy_champ: str, role: str,
         if not isinstance(opp, str) or not isinstance(champ_wr, (int, float)):
             continue
         opp_wr = round(100 - champ_wr, 2)
-        if opp_wr > 50.0 and _COUNTER_WR_MIN <= opp_wr <= _COUNTER_WR_MAX:
+        if is_counter_wr(opp_wr):
             derived.append({"champion": opp, "win_rate": opp_wr})
     derived.sort(key=lambda c: c["win_rate"], reverse=True)
     return derived[:top_n]
@@ -569,8 +566,7 @@ class UGGClient:
                                   .get(role) or [])
             curated = [c for c in curated_raw
                        if isinstance(c, dict)
-                       and isinstance(c.get("win_rate"), (int, float))
-                       and _COUNTER_WR_MIN < c["win_rate"] <= _COUNTER_WR_MAX]
+                       and is_counter_wr(c.get("win_rate"))]
             derived = _derive_counters_from_matchups(enemy_champ, role, top_n * 4)
             by_name: dict[str, dict] = {}
             for c in derived:
@@ -602,8 +598,7 @@ class UGGClient:
                 # display name as scraped from u.gg).
                 for name, wr in my_table.items():
                     if isinstance(name, str) and name.lower() == enemy_lower \
-                            and isinstance(wr, (int, float)) \
-                            and _MATCHUP_WR_MIN <= wr <= _MATCHUP_WR_MAX:
+                            and is_matchup_wr(wr):
                         return {"win_rate": float(wr), "enemy": enemy_champ}
             # Fallback for older bundles or rare combos: derive from the
             # counters list ("best picks vs enemy" — hits when my_champ is a
@@ -617,8 +612,7 @@ class UGGClient:
                     if isinstance(entry, dict) and \
                             entry.get("champion", "").lower() == my_lower:
                         wr = entry.get("win_rate")
-                        if isinstance(wr, (int, float)) \
-                                and _MATCHUP_WR_MIN <= wr <= _MATCHUP_WR_MAX:
+                        if is_matchup_wr(wr):
                             return {"win_rate": float(wr), "enemy": enemy_champ}
             return None
         patch = _current_patch()
