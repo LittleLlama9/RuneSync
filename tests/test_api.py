@@ -228,6 +228,23 @@ class TestGetCountersBundleFallback:
         assert names == ["Garen"]
         assert all(c["win_rate"] > 50.0 for c in result)
 
+    def test_drops_out_of_band_high_curated_counters(self):
+        # Regression: the legacy op.gg path shipped counter WRs up to ~82% off
+        # ~10-game samples. Such garbage-high entries must be dropped by the
+        # read-time band (> _COUNTER_WR_MAX) so the UI never surfaces a bogus
+        # "82% WR counter" even if a stale/broken bundle carries one.
+        ugg_api._bundle = {
+            "counters": {"malphite": {"top": [
+                {"champion": "Swain", "win_rate": 56.0},   # real counter
+                {"champion": "Kayle", "win_rate": 82.0},   # garbage sample -> drop
+            ]}},
+            "matchups": {"malphite": {}},
+        }
+        result = self.client.get_counters("Malphite", "top", top_n=5)
+        names = [c["champion"] for c in result]
+        assert names == ["Swain"]
+        assert all(c["win_rate"] <= 70.0 for c in result)
+
     def test_empty_when_no_losing_matchups(self):
         ugg_api._bundle = {
             "counters": {"sona": {}},
@@ -415,6 +432,87 @@ class TestGetMatchupWinrate:
         assert captured["my_champ"] == "Darius"
         assert captured["enemy_champ"] == "Garen"
         assert captured["role"] == "top"
+
+
+# ---------------------------------------------------------------------------
+# UGGClient.get_matchup_winrate — bundle path (what the shipped exe uses)
+# ---------------------------------------------------------------------------
+
+class TestGetMatchupWinrateBundle:
+    """The server-path tests above mock _get; the shipped exe never hits it —
+    it reads from the loaded bundle. These lock the bundle path's reliability
+    guards: the [25, 75] winrate band that surfaces "no data" instead of a
+    garbage default, case-insensitive enemy lookup, and the counters fallback."""
+
+    def setup_method(self):
+        self.client = UGGClient()
+
+    def teardown_method(self):
+        ugg_api._bundle = None
+
+    def test_returns_dict_for_in_band_matchup(self):
+        ugg_api._bundle = {
+            "matchups": {"darius": {"top": {"Garen": 53.5}}},
+            "counters": {},
+        }
+        # enemy lookup is case-insensitive against the display-name-keyed table
+        assert self.client.get_matchup_winrate("Darius", "garen", "top") == {
+            "win_rate": 53.5, "enemy": "garen",
+        }
+
+    def test_resolves_apostrophe_champion_key(self):
+        # Cho'Gath as my_champ: the table is keyed "cho'gath" (lowered display
+        # name). Regression for the apostrophe-keying class of bug.
+        ugg_api._bundle = {
+            "matchups": {"cho'gath": {"top": {"Sett": 47.0}}},
+            "counters": {},
+        }
+        assert self.client.get_matchup_winrate("Cho'Gath", "Sett", "top") == {
+            "win_rate": 47.0, "enemy": "Sett",
+        }
+
+    def test_out_of_band_high_winrate_surfaces_no_data(self):
+        # The historical op.gg bug shipped ~82% WRs off ~10-game samples. Such a
+        # value must NOT be returned as a real matchup (which the monitor would
+        # label "Favored"). Returning None makes the monitor log "No win-rate
+        # data" — surfacing the gap instead of silently defaulting to garbage.
+        ugg_api._bundle = {
+            "matchups": {"darius": {"top": {"Garen": 82.0}}},
+            "counters": {},
+        }
+        assert self.client.get_matchup_winrate("Darius", "Garen", "top") is None
+
+    def test_out_of_band_low_winrate_surfaces_no_data(self):
+        ugg_api._bundle = {
+            "matchups": {"darius": {"top": {"Garen": 12.0}}},
+            "counters": {},
+        }
+        assert self.client.get_matchup_winrate("Darius", "Garen", "top") is None
+
+    def test_falls_back_to_counters_when_matchup_pair_missing(self):
+        # Older bundles / rare combos: pair absent from the matchup table but my
+        # champ is a listed counter to the enemy — reuse that WR.
+        ugg_api._bundle = {
+            "matchups": {"darius": {"top": {}}},
+            "counters": {"garen": {"top": [{"champion": "Darius", "win_rate": 54.0}]}},
+        }
+        assert self.client.get_matchup_winrate("Darius", "Garen", "top") == {
+            "win_rate": 54.0, "enemy": "Garen",
+        }
+
+    def test_counters_fallback_also_clamps_out_of_band(self):
+        ugg_api._bundle = {
+            "matchups": {"darius": {"top": {}}},
+            "counters": {"garen": {"top": [{"champion": "Darius", "win_rate": 82.0}]}},
+        }
+        assert self.client.get_matchup_winrate("Darius", "Garen", "top") is None
+
+    def test_returns_none_on_total_miss(self):
+        ugg_api._bundle = {
+            "matchups": {"darius": {"top": {"Sett": 51.0}}},
+            "counters": {},
+        }
+        assert self.client.get_matchup_winrate("Darius", "Garen", "top") is None
 
 
 # ---------------------------------------------------------------------------
