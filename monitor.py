@@ -14,6 +14,10 @@ from champion_roles import infer_roles, infer_full_assignment
 # useless outside the jungle, so a top Sejuani should never have it set.
 _LANE_SECOND_SPELL = {"top": 12, "mid": 14, "bot": 7, "support": 3}  # TP/Ignite/Heal/Exhaust
 _SMITE_SPELL_ID = 11
+_LCU_POSITION_TO_ROLE = {
+    "top": "top", "jungle": "jungle", "middle": "mid",
+    "bottom": "bot", "utility": "support",
+}
 
 
 class ChampSelectMonitor:
@@ -67,6 +71,7 @@ class ChampSelectMonitor:
         # Matchup / counterpick state
         self._enemy_laner: str = ""          # confirmed enemy laner name
         self._enemy_laner_is_guess: bool = False  # True if set from guess, not confident assignment
+        self._enemy_role_confirmed: bool = False  # True when Riot supplied the assigned position
         self._enemy_names_evaluated: frozenset = frozenset()  # picks that produced current assignment
         self._counters_done_for: str = ""    # enemy we already ran counters for
         self._matchup_done_for: str = ""     # "mychamp|enemy" we already ran matchup for
@@ -88,6 +93,7 @@ class ChampSelectMonitor:
         if not self._matchup_override:
             return
         self._enemy_laner = self._matchup_override
+        self._enemy_role_confirmed = True
         self.log(f"  → Matchup override: {self._matchup_override}", "info")
         if self._my_champ:
             # We already have our champ — run matchup directly
@@ -162,6 +168,7 @@ class ChampSelectMonitor:
                 self._last_champ_id = None
                 self._enemy_laner = ""
                 self._enemy_laner_is_guess = False
+                self._enemy_role_confirmed = False
                 self._enemy_names_evaluated = frozenset()
                 self._counters_done_for = ""
                 self._matchup_done_for = ""
@@ -177,6 +184,7 @@ class ChampSelectMonitor:
             self._last_champ_id = None
             self._enemy_laner = ""
             self._enemy_laner_is_guess = False
+            self._enemy_role_confirmed = False
             self._enemy_names_evaluated = frozenset()
             self._counters_done_for = ""
             self._matchup_done_for = ""
@@ -215,6 +223,7 @@ class ChampSelectMonitor:
                 # Reset matchup state so it re-runs for the new lane
                 self._enemy_laner = ""
                 self._enemy_laner_is_guess = False
+                self._enemy_role_confirmed = False
                 self._enemy_names_evaluated = frozenset()
                 self._counters_done_for = ""
                 self._matchup_done_for = ""
@@ -310,21 +319,29 @@ class ChampSelectMonitor:
         if self._my_role in ("auto", ""):
             return
 
-        # Don't re-run if the enemy pick set hasn't changed since last evaluation
         current_names = frozenset(enemy_names)
-        if current_names == self._enemy_names_evaluated:
+        assigned_laner = None
+        if (not self._enemy_role_confirmed
+                or current_names != self._enemy_names_evaluated):
+            assigned_laner = self._get_assigned_enemy_laner(session, current_names)
+
+        # Don't re-run unchanged statistical inference. Assigned-position lookup
+        # is attempted first because gameflow can fill in after the picks do.
+        if current_names == self._enemy_names_evaluated and not assigned_laner:
             return
 
-        assignment, guesses = infer_full_assignment(enemy_names)
-        detected = assignment.get(self._my_role)
+        detected = assigned_laner
         is_guess = False
 
         if not detected:
-            # Use guesses immediately rather than waiting for all 5 picks.
-            # Guesses are shown with a warning already; no info is worse than
-            # an uncertain guess (e.g. Brand 18% mid when only Briar + Brand visible).
-            detected = guesses.get(self._my_role)
-            is_guess = detected is not None
+            assignment, guesses = infer_full_assignment(enemy_names)
+            detected = assignment.get(self._my_role)
+            if not detected:
+                # Use guesses immediately rather than waiting for all 5 picks.
+                # Guesses are shown with a warning already; no info is worse than
+                # an uncertain guess (e.g. Brand 18% mid when only Briar + Brand visible).
+                detected = guesses.get(self._my_role)
+                is_guess = detected is not None
 
         if not detected:
             # No enemy laner assigned to our role yet
@@ -338,6 +355,7 @@ class ChampSelectMonitor:
         # Laner found — record it (guess or confident)
         self._enemy_laner = detected
         self._enemy_laner_is_guess = is_guess
+        self._enemy_role_confirmed = assigned_laner is not None
         self._enemy_names_evaluated = current_names
         self._waiting_logged = False
         role_label = self._my_role.title() if self._my_role != "auto" else "lane"
@@ -365,6 +383,25 @@ class ChampSelectMonitor:
                     args=(detected, self._my_role),
                     daemon=True,
                 ).start()
+
+    def _get_assigned_enemy_laner(
+            self, session: dict, enemy_names: frozenset[str]) -> Optional[str]:
+        """Prefer Riot's assigned position over statistical role inference."""
+        for player in session.get("theirTeam", []):
+            position = (player.get("assignedPosition") or "").lower()
+            if _LCU_POSITION_TO_ROLE.get(position) != self._my_role:
+                continue
+            champion_id = player.get("championId", 0)
+            name = self._champ_name_map.get(champion_id, "")
+            if name in enemy_names:
+                return name
+
+        try:
+            champion_id = self.lcu.get_enemy_champion_id_for_role(self._my_role)
+        except Exception:
+            champion_id = None
+        name = self._champ_name_map.get(champion_id, "")
+        return name if name in enemy_names else None
 
     def _get_enemy_champ_names(self, session: dict) -> list[str]:
         """Return names of all enemy champions that have been locked in (completed=True)."""
@@ -420,9 +457,12 @@ class ChampSelectMonitor:
         try:
             result = self.ugg.get_matchup_winrate(my_champ, enemy_champ, role)
             if result is None:
-                # Common case in bundle mode — the bundle only carries WRs for
-                # the top counters per (champ, role), not every pair. Stay quiet.
                 self.log(f"     No win-rate data for this matchup.", "info")
+                if self._on_matchup_winrate:
+                    self._on_matchup_winrate(
+                        my_champ, enemy_champ, role, None,
+                        "Win rate unavailable", "info",
+                    )
             else:
                 wr = result["win_rate"]
                 if wr >= 52:

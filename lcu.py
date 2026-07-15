@@ -34,6 +34,7 @@ class LCUClient:
         self._port: Optional[int] = None
         self._password: Optional[str] = None
         self._summoner_id: Optional[int] = None
+        self._puuid: Optional[str] = None
         self._perk_meta: dict = {}  # {perk_id: (tree_id, row_index)}
         self._ssl_ctx = ssl.create_default_context()
         self._ssl_ctx.check_hostname = False
@@ -49,6 +50,7 @@ class LCUClient:
         try:
             summoner = self._get("/lol-summoner/v1/current-summoner")
             self._summoner_id = summoner.get("summonerId") or summoner.get("accountId")
+            self._puuid = summoner.get("puuid")
             self.connected = True
         except Exception as e:
             raise LCUConnectionError(f"LCU reachable but request failed: {e}")
@@ -268,6 +270,42 @@ class LCUClient:
             raise LCUConnectionError(f"League client not reachable: {e}")
         except Exception:
             return "None"
+
+    def get_enemy_champion_id_for_role(self, role: str) -> Optional[int]:
+        """Return the enemy champion assigned to ``role`` when gameflow exposes it."""
+        target = {
+            "top": "TOP", "jungle": "JUNGLE", "mid": "MIDDLE",
+            "bot": "BOTTOM", "support": "UTILITY",
+        }.get(role)
+        if not target or (not self._summoner_id and not self._puuid):
+            return None
+
+        try:
+            game_data = self._get("/lol-gameflow/v1/session").get("gameData") or {}
+            teams = [game_data.get("teamOne") or [], game_data.get("teamTwo") or []]
+            own_index = next(
+                (
+                    i for i, team in enumerate(teams)
+                    if any(
+                        (self._summoner_id and p.get("summonerId") == self._summoner_id)
+                        or (self._puuid and p.get("puuid") == self._puuid)
+                        for p in team
+                    )
+                ),
+                None,
+            )
+            if own_index is None:
+                return None
+
+            for player in teams[1 - own_index]:
+                position = (player.get("selectedPosition")
+                            or player.get("assignedPosition") or "").upper()
+                champion_id = player.get("championId", 0)
+                if position == target and isinstance(champion_id, int) and champion_id > 0:
+                    return champion_id
+        except Exception:
+            return None
+        return None
 
     def get_champion_name_map(self) -> dict:
         try:

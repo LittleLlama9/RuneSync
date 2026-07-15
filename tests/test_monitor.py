@@ -104,3 +104,74 @@ def test_offrole_summoners_untouched_when_no_smite_or_jungle():
     assert mon._fix_offrole_summoners([4, 11], "jungle") == [4, 11]
     # Unknown/auto role — don't guess.
     assert mon._fix_offrole_summoners([4, 11], "auto") == [4, 11]
+
+
+def test_assigned_enemy_role_beats_ambiguous_role_weights(monkeypatch):
+    """Two ADCs must not hide the matchup when Riot exposes the real mid."""
+    callback = MagicMock()
+    mon = ChampSelectMonitor(
+        lcu=MagicMock(), ugg=MagicMock(), overrides=MagicMock(),
+        on_log=lambda *a, **k: None, on_matchup_winrate=callback,
+    )
+    mon._my_role = "mid"
+    mon._my_champ = "Sion"
+    mon._champ_name_map = {
+        902: "Milio", 145: "Kai'Sa", 154: "Zac", 360: "Samira", 86: "Garen",
+    }
+    mon.lcu.get_enemy_champion_id_for_role.return_value = 360
+    mon.ugg.get_matchup_winrate.return_value = {"win_rate": 48.5}
+
+    class ImmediateThread:
+        def __init__(self, target, args, daemon):
+            self.target = target
+            self.args = args
+
+        def start(self):
+            self.target(*self.args)
+
+    monkeypatch.setattr(threading, "Thread", ImmediateThread)
+    session = {
+        "myTeam": [{"cellId": 0}],
+        "theirTeam": [],
+        "actions": [[
+            {"actorCellId": cell, "type": "pick", "championId": champion_id,
+             "completed": True}
+            for cell, champion_id in enumerate((902, 145, 154, 360, 86), 5)
+        ]],
+    }
+
+    mon._update_enemy_laner(session)
+
+    assert mon._enemy_laner == "Samira"
+    callback.assert_called_once()
+    assert callback.call_args.args[:3] == ("Sion", "Samira", "mid")
+
+
+def test_champ_select_assigned_position_is_used_before_gameflow():
+    mon = _make_monitor()
+    mon._my_role = "mid"
+    mon._champ_name_map = {360: "Samira"}
+    mon.lcu.get_enemy_champion_id_for_role.return_value = None
+    session = {
+        "theirTeam": [
+            {"cellId": 8, "championId": 360, "assignedPosition": "MIDDLE"},
+        ],
+    }
+
+    assert mon._get_assigned_enemy_laner(session, frozenset({"Samira"})) == "Samira"
+    mon.lcu.get_enemy_champion_id_for_role.assert_not_called()
+
+
+def test_matchup_callback_still_fires_without_winrate_data():
+    callback = MagicMock()
+    mon = ChampSelectMonitor(
+        lcu=MagicMock(), ugg=MagicMock(), overrides=MagicMock(),
+        on_log=lambda *a, **k: None, on_matchup_winrate=callback,
+    )
+    mon.ugg.get_matchup_winrate.return_value = None
+
+    mon._run_matchup_lookup("Sion", "Samira", "mid")
+
+    callback.assert_called_once_with(
+        "Sion", "Samira", "mid", None, "Win rate unavailable", "info",
+    )

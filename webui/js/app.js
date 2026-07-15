@@ -97,7 +97,8 @@
     $('wrNum').innerHTML = state.wr == null ? '—' : `${state.wr.toFixed(1)}<small>%</small>`;
     const dir = $('wrDir');
     dir.textContent = state.wr == null
-      ? (state.selecting ? 'awaiting pick' : 'awaiting matchup')
+      ? (state.enemy ? (state.wrLabel || 'win rate unavailable')
+                     : (state.selecting ? 'awaiting pick' : 'awaiting matchup'))
       : `${down ? '▼' : '▲'} ${state.wrLabel || ''}`.trim();
     dir.classList.toggle('down', !!down);
     const fill = $('wrFill');
@@ -206,8 +207,12 @@
     if (!state.inGame) return;
     $('ovMatch').innerHTML = `${esc(state.champ || '—')} <span class="vs">vs</span> ${esc(state.enemy || '—')}`;
     const down = state.wr != null && state.wr < 50;
-    $('ovWr').innerHTML = `${state.wr == null ? '—' : state.wr.toFixed(1)}%  <span class="arr">${down ? '▼' : '▲'}</span>`;
-    $('ovCtx').textContent = state.wrLabel ? state.wrLabel.toLowerCase() : 'awaiting matchup';
+    $('ovWr').innerHTML = state.wr == null
+      ? '—'
+      : `${state.wr.toFixed(1)}%  <span class="arr">${down ? '▼' : '▲'}</span>`;
+    $('ovCtx').textContent = state.wrLabel
+      ? state.wrLabel.toLowerCase()
+      : (state.enemy ? 'win rate unavailable' : 'awaiting matchup');
   }
 
   function setScreen(name) {
