@@ -69,8 +69,11 @@
     ],
     sel: 0,
     history: {
-      loaded: false, syncing: false, error: '', offset: 0, rows: [],
-      summary: { overall: {}, recent20: {}, champions: [], roles: [] }
+      loaded: false, loading: false, syncing: false, error: '', offset: 0,
+      rows: [], hasMore: true,
+      summary: {
+        overall: {}, recent20: {}, champions: [], roles: [], performance: {}
+      }
     },
     report: null,
     settings: { rank: 'Platinum+', region: 'World', auto_role: true, trigger: 'hover', phosphor: 'amber', autostart: false }
@@ -217,10 +220,37 @@
   }
   function renderBreakdown(rows) {
     if (!rows || !rows.length) return '<div class="h-empty">no data</div>';
-    return rows.slice(0, 6).map(row =>
+    return rows.slice(0, 4).map(row =>
       `<div class="hbreak-row"><span>${esc(row.name)}</span>` +
       `<span>${row.win_rate.toFixed(1)}% <i>${row.games}g</i></span></div>`
     ).join('');
+  }
+  function rankClass(rank) {
+    if (rank === 1) return 'rank-first';
+    if (rank <= 3) return 'rank-podium';
+    if (rank <= 5) return 'rank-upper';
+    return 'rank-lower';
+  }
+  function rankLabel(rank) {
+    if (rank === 1) return 'MVP';
+    if (rank === 2) return 'ELITE';
+    if (rank === 3) return 'PODIUM';
+    if (rank <= 5) return 'UPPER HALF';
+    if (rank <= 8) return 'MID PACK';
+    return 'ROUGH GAME';
+  }
+  function scoreBand(score) {
+    if (score >= 80) return 'S-TIER';
+    if (score >= 65) return 'A-TIER';
+    if (score >= 50) return 'B-TIER';
+    if (score >= 35) return 'C-TIER';
+    return 'D-TIER';
+  }
+  function queueLabel(queueId) {
+    return ({
+      400: 'DRAFT', 420: 'RANKED SOLO', 430: 'BLIND',
+      440: 'RANKED FLEX', 480: 'SWIFTPLAY', 490: 'QUICKPLAY'
+    })[queueId] || `QUEUE ${queueId}`;
   }
   function historyWhen(value) {
     const d = new Date(value);
@@ -238,37 +268,75 @@
     $('historyRecentMeta').textContent = recordText(summary.recent20);
     $('historyChampions').innerHTML = renderBreakdown(summary.champions);
     $('historyRoles').innerHTML = renderBreakdown(summary.roles);
+    const total = Number((summary.overall || {}).games || 0);
+    const performance = summary.performance || {};
+    $('historyArchiveCount').textContent = total;
+    $('historyBestRank').textContent = performance.best_rank ? `#${performance.best_rank}` : '#—';
+    $('historyAverageScore').textContent = performance.average_score == null
+      ? 'avg score —'
+      : `avg score ${Number(performance.average_score).toFixed(1)} · avg rank #${Number(performance.average_rank).toFixed(1)}`;
+    $('historyLoaded').textContent = `${h.rows.length} / ${total} loaded`;
     const rows = $('historyRows');
     if (!h.rows.length) {
       rows.innerHTML = `<div class="history-empty">${h.syncing ? 'syncing match history…' : 'no scored Summoner’s Rift games yet'}</div>`;
     } else {
       rows.innerHTML = h.rows.map(row => {
         const win = !!row.local_win;
-        return `<div class="history-row" data-game="${row.game_id}">` +
-          `<span class="${win ? 'win' : 'loss'}">${win ? 'WIN' : 'LOSS'}</span>` +
-          `<span>${esc(row.local_champion_name)}</span><span>${esc(row.local_role)}</span>` +
-          `<span>${row.kills}/${row.deaths}/${row.assists}</span>` +
-          `<span class="score">${Number(row.total_score).toFixed(1)}</span>` +
-          `<span>#${row.match_rank}</span><span>${historyWhen(row.game_creation_date)}</span></div>`;
+        const score = Number(row.total_score);
+        const rank = Number(row.match_rank);
+        const duration = Math.max(0, Number(row.duration) || 0);
+        const minutes = Math.floor(duration / 60);
+        const seconds = String(duration % 60).padStart(2, '0');
+        return `<article class="history-card ${win ? 'is-win' : 'is-loss'}" data-game="${row.game_id}">` +
+          `<div class="history-result"><strong>${win ? 'W' : 'L'}</strong><span>${win ? 'VICTORY' : 'DEFEAT'}</span></div>` +
+          `<div class="history-match">` +
+            `<div class="history-match-title"><strong>${esc(row.local_champion_name)}</strong>` +
+              `<span>${esc(row.local_role)} // ${queueLabel(row.queue_id)}</span></div>` +
+            `<div class="history-statline"><b>${row.kills}/${row.deaths}/${row.assists}</b><span>KDA</span>` +
+              `<b>${row.cs}</b><span>CS</span><b>${minutes}:${seconds}</b><span>${historyWhen(row.game_creation_date)}</span></div>` +
+            `<div class="history-score-track"><i style="width:${Math.max(0, Math.min(100, score))}%"></i></div>` +
+          `</div>` +
+          `<div class="history-score"><span>DAEMON</span><strong>${score.toFixed(1)}</strong><em>${scoreBand(score)}</em></div>` +
+          `<div class="history-rank ${rankClass(rank)}"><span>MATCH RANK</span><strong>#${rank}</strong><em>${rankLabel(rank)}</em></div>` +
+        `</article>`;
       }).join('');
     }
+    h.hasMore = h.rows.length < total;
+    const more = $('historyMore');
+    more.classList.toggle('disabled', !h.hasMore || h.loading);
+    more.textContent = h.loading
+      ? '[loading archive...]'
+      : h.hasMore
+        ? `[load ${Math.min(12, total - h.rows.length)} more]`
+        : `[archive complete // ${h.rows.length} matches]`;
   }
   function loadHistory(reset) {
     if (!window.API.ready()) { renderHistory(); return; }
-    if (reset) { state.history.offset = 0; state.history.rows = []; }
+    if (state.history.loading) return;
+    if (reset) {
+      state.history.offset = 0; state.history.rows = []; state.history.hasMore = true;
+    } else if (!state.history.hasMore) {
+      return;
+    }
+    state.history.loading = true;
+    renderHistory();
     const offset = state.history.offset;
     Promise.all([
       window.API.call('get_history_summary'),
-      window.API.call('get_match_history', offset, 25)
+      window.API.call('get_match_history', offset, 12)
     ]).then(([summary, rows]) => {
       state.history.summary = summary || state.history.summary;
       const incoming = rows || [];
-      state.history.rows = reset ? incoming : state.history.rows.concat(incoming);
+      const known = new Set(reset ? [] : state.history.rows.map(row => row.game_id));
+      const unique = incoming.filter(row => !known.has(row.game_id));
+      state.history.rows = reset ? unique : state.history.rows.concat(unique);
       state.history.offset = state.history.rows.length;
       state.history.loaded = true;
+      state.history.loading = false;
       state.history.error = '';
       renderHistory();
     }).catch(e => {
+      state.history.loading = false;
       state.history.error = String(e); renderHistory();
     });
   }
@@ -280,12 +348,15 @@
     if (!local) return;
     $('reportResult').textContent = local.win ? 'VICTORY' : 'DEFEAT';
     $('reportResult').className = 'report-result ' + (local.win ? 'win' : 'loss');
+    $('reportHero').className = `report-hero ${local.win ? 'is-win' : 'is-loss'} ${rankClass(local.match_rank)}`;
     $('reportTitle').textContent = `${local.champion_name} · ${local.role}`;
     const minutes = Math.floor(match.duration / 60);
     const seconds = String(match.duration % 60).padStart(2, '0');
     $('reportMeta').textContent = `${local.kills}/${local.deaths}/${local.assists} · ${local.cs} CS · ${minutes}:${seconds} · ${match.patch}`;
     $('reportScore').textContent = Number(local.total_score).toFixed(1);
-    $('reportRank').textContent = `#${local.match_rank} / 10`;
+    $('reportScoreBand').textContent = `${scoreBand(Number(local.total_score))} PERFORMANCE`;
+    $('reportRank').textContent = `#${local.match_rank}`;
+    $('reportRankLabel').textContent = `${rankLabel(local.match_rank)} // OF 10`;
     $('reportModel').textContent = local.model_version;
     const labels = {
       combat: 'combat', economy: 'economy', objectives: 'objectives',
@@ -298,13 +369,21 @@
     ).join('');
     $('reportObservations').innerHTML = (local.observations || [])
       .map(text => `<div>&gt; ${esc(text)}</div>`).join('');
-    $('reportPlayers').innerHTML = report.participants.map(player =>
-      `<div class="report-player${player.participant_id === match.local_participant_id ? ' local' : ''}">` +
-      `<span>#${player.match_rank}</span><span>${esc(player.summoner_name)}</span>` +
-      `<span>${esc(player.champion_name)}</span><span>${esc(player.role)}</span>` +
-      `<span>${player.kills}/${player.deaths}/${player.assists}</span>` +
-      `<span>${Number(player.total_score).toFixed(1)}</span></div>`
-    ).join('');
+    const localTeam = local.team_id;
+    let previousTeam = null;
+    $('reportPlayers').innerHTML = report.participants.map(player => {
+      const teamHeader = player.team_id !== previousTeam
+        ? `<div class="report-team">${player.team_id === localTeam ? 'YOUR TEAM' : 'ENEMY TEAM'}</div>`
+        : '';
+      previousTeam = player.team_id;
+      const rank = Number(player.match_rank);
+      return teamHeader +
+        `<div class="report-player ${rankClass(rank)}${player.participant_id === match.local_participant_id ? ' local' : ''}">` +
+        `<span class="player-rank">#${rank}<i>${rankLabel(rank)}</i></span><span>${esc(player.summoner_name)}</span>` +
+        `<span>${esc(player.champion_name)}</span><span>${esc(player.role)}</span>` +
+        `<span>${player.kills}/${player.deaths}/${player.assists}</span>` +
+        `<span class="player-score">${Number(player.total_score).toFixed(1)}</span></div>`;
+    }).join('');
   }
   function openReport(gameId) {
     if (!window.API.ready()) return;
@@ -337,6 +416,8 @@
       t.classList.toggle('active', t.dataset.screen === name || (name === 'report' && t.dataset.screen === 'history')));
     $('promptHint').textContent = PROMPTS[name];
     if (name === 'history' && !state.history.loaded) loadHistory(true);
+    const body = $('viewBody');
+    if (body && body.focus) body.focus({ preventScroll: true });
   }
 
   function applyTheme(name) {
@@ -474,8 +555,12 @@
       });
     });
     $('historyMore').addEventListener('click', () => loadHistory(false));
+    $('historyFeed').addEventListener('scroll', () => {
+      const feed = $('historyFeed');
+      if (feed.scrollHeight - feed.scrollTop - feed.clientHeight < 80) loadHistory(false);
+    });
     $('historyRows').addEventListener('click', e => {
-      const row = e.target.closest('.history-row');
+      const row = e.target.closest('.history-card');
       if (row) openReport(Number(row.dataset.game));
     });
     $('reportBack').addEventListener('click', () => setScreen('history'));

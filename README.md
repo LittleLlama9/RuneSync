@@ -62,8 +62,9 @@ history endpoint. RuneSync imports those once, then retains every supported game
 it sees afterward, so long-term "all time" statistics mean the initial backfill
 plus games captured after installation.
 
-Version 1 scores Summoner's Rift normal draft, ranked solo/duo, and ranked flex.
-Other queues and remakes are not scored.
+Version 1 scores standard Summoner's Rift PvP: draft, ranked solo/duo, ranked
+flex, legacy blind pick, Quickplay, and Swiftplay. ARAM, event modes, bots,
+custom games, and remakes are not scored.
 
 ## DAEMON Score
 

@@ -18,7 +18,7 @@
         <div class="topbar pywebview-drag-region">
           <div class="brand">
             <span class="brand-name">DAEMON</span>
-            <span class="brand-ver">v1.04</span>
+            <span class="brand-ver">v1.05</span>
           </div>
           <div class="menu">
             <span class="tab" data-screen="monitor">[1] MONITOR</span>
@@ -40,7 +40,7 @@
         </div>
 
         <!-- body -->
-        <div class="body">
+        <div class="body" id="viewBody" tabindex="-1">
 
           <!-- ===================== MONITOR ===================== -->
           <section class="view" data-view="monitor">
@@ -156,44 +156,65 @@
 
           <!-- ===================== HISTORY ===================== -->
           <section class="view" data-view="history" hidden>
-            <div class="page-head">
-              <span class="page-title">~/match.history</span>
-              <span>
+            <div class="page-head history-page-head">
+              <div>
+                <span class="page-title">~/match.history</span>
+                <span class="history-eyebrow">PERFORMANCE ARCHIVE // LOCAL ONLY</span>
+              </div>
+              <span class="history-controls">
                 <span class="history-state" id="historyState">local archive</span>
                 <span class="dbg-act" id="historyRefresh">[sync]</span>
               </span>
             </div>
             <div class="history-error" id="historyError" hidden></div>
-            <div class="history-summary">
-              <div class="panel hsum">
-                <span class="ptitle">OVERALL</span>
+            <div class="history-dashboard">
+              <div class="history-archive panel">
+                <span class="ptitle">ANALYZED ARCHIVE</span>
+                <div class="history-countline">
+                  <strong id="historyArchiveCount">0</strong>
+                  <span>MATCHES<br>ON DEVICE</span>
+                </div>
+                <div class="history-coverage">draft · ranked · quickplay · swiftplay</div>
+              </div>
+              <div class="history-metric panel">
+                <span class="ptitle">ALL-TIME WIN RATE</span>
                 <div class="hsum-wr" id="historyOverallWr">—</div>
                 <div class="hsum-meta" id="historyOverallMeta">no scored games</div>
               </div>
-              <div class="panel hsum">
-                <span class="ptitle">RECENT 20</span>
+              <div class="history-metric panel">
+                <span class="ptitle">RECENT FORM // 20</span>
                 <div class="hsum-wr" id="historyRecentWr">—</div>
                 <div class="hsum-meta" id="historyRecentMeta">no scored games</div>
               </div>
+              <div class="history-peak panel">
+                <span class="ptitle">PEAK PERFORMANCE</span>
+                <div class="history-best">
+                  <span>BEST FINISH</span>
+                  <strong id="historyBestRank">#—</strong>
+                </div>
+                <div class="history-average" id="historyAverageScore">avg score —</div>
+              </div>
+            </div>
+            <div class="history-splits">
               <div class="panel hbreak">
-                <span class="ptitle">BY CHAMPION</span>
+                <span class="ptitle">CHAMPION SIGNAL</span>
                 <div id="historyChampions"></div>
               </div>
               <div class="panel hbreak">
-                <span class="ptitle">BY ROLE</span>
+                <span class="ptitle">ROLE SIGNAL</span>
                 <div id="historyRoles"></div>
               </div>
             </div>
-            <div class="history-ledger">
-              <div class="history-head">
-                <span>RESULT</span><span>CHAMPION</span><span>ROLE</span>
-                <span>KDA</span><span>SCORE</span><span>RANK</span><span>WHEN</span>
-              </div>
+            <div class="history-feed-head">
+              <span>LATEST PERFORMANCE</span>
+              <span><i>click a match for full report</i> · <b id="historyLoaded">0 / 0 loaded</b></span>
+            </div>
+            <div class="history-feed" id="historyFeed">
               <div id="historyRows"></div>
             </div>
-            <div class="hints">
-              <span id="historyMore"><b>[more]</b> load older matches</span>
-              <span class="history-note">all-time = latest 100 backfill + games captured by RuneSync</span>
+            <div class="history-footer">
+              <span id="historyMore" class="history-more">[archive complete]</span>
+              <span class="history-note">latest 100 LCU backfill + every match DAEMON captures</span>
             </div>
           </section>
 
@@ -203,8 +224,13 @@
               <span class="page-title">~/postgame.report</span>
               <span class="ed-back" id="reportBack">‹ history</span>
             </div>
-            <div class="report-hero">
-              <div>
+            <div class="report-hero" id="reportHero">
+              <div class="report-rankbox">
+                <span>MATCH RANK</span>
+                <strong id="reportRank">#—</strong>
+                <em id="reportRankLabel">UNRANKED</em>
+              </div>
+              <div class="report-identity">
                 <div class="report-result" id="reportResult">—</div>
                 <div class="report-title" id="reportTitle">awaiting report</div>
                 <div class="report-meta" id="reportMeta"></div>
@@ -212,7 +238,7 @@
               <div class="report-scorebox">
                 <span>DAEMON SCORE</span>
                 <strong id="reportScore">—</strong>
-                <em id="reportRank">#— / 10</em>
+                <em id="reportScoreBand">PERFORMANCE INDEX</em>
               </div>
             </div>
             <div class="report-grid">
@@ -227,8 +253,8 @@
             </div>
             <div class="report-board">
               <div class="report-board-head">
-                <span>#</span><span>PLAYER</span><span>CHAMPION</span><span>ROLE</span>
-                <span>KDA</span><span>SCORE</span>
+                <span>RANK</span><span>PLAYER</span><span>CHAMPION</span><span>ROLE</span>
+                <span>KDA</span><span>DAEMON</span>
               </div>
               <div id="reportPlayers"></div>
             </div>

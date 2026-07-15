@@ -93,6 +93,13 @@ def test_normalize_match_builds_report_and_roles():
     assert {score["match_rank"] for score in report["scores"]} == set(range(1, 11))
 
 
+@pytest.mark.parametrize("queue_id", [400, 420, 430, 440, 480, 490])
+def test_standard_summoners_rift_queues_are_scored(queue_id):
+    report = normalize_match(_game(queue_id=queue_id), "puuid-1", CHAMPIONS)
+
+    assert report["match"]["queue_id"] == queue_id
+
+
 def test_captured_positions_fill_missing_timeline_role():
     game = _game()
     game["participants"][0]["timeline"] = {"lane": "NONE", "role": "SUPPORT"}

@@ -12,7 +12,7 @@ from lcu import LCUConnectionError
 from performance_score import SCORING_MODEL_VERSION, score_match
 
 
-SUPPORTED_QUEUE_IDS = {400, 420, 440}
+SUPPORTED_QUEUE_IDS = {400, 420, 430, 440, 480, 490}
 SUMMONERS_RIFT_MAP_ID = 11
 TEAM_ROLES = ("top", "jungle", "mid", "bot", "support")
 

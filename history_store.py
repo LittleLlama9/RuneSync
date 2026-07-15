@@ -258,6 +258,17 @@ class HistoryStore:
                 ORDER BY games DESC, name ASC
                 """
             ).fetchall()
+            performance = conn.execute(
+                """
+                SELECT ROUND(AVG(s.total_score), 1) AS average_score,
+                       MIN(s.match_rank) AS best_rank,
+                       ROUND(AVG(s.match_rank), 1) AS average_rank
+                FROM matches m
+                JOIN scores s
+                  ON s.game_id = m.game_id
+                 AND s.participant_id = m.local_participant_id
+                """
+            ).fetchone()
 
         def group_rows(rows):
             return [
@@ -275,6 +286,11 @@ class HistoryStore:
             "recent20": self._rate_row(recent),
             "champions": group_rows(champions),
             "roles": group_rows(roles),
+            "performance": {
+                "average_score": performance["average_score"],
+                "best_rank": performance["best_rank"],
+                "average_rank": performance["average_rank"],
+            },
         }
 
     @staticmethod

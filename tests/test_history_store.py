@@ -101,6 +101,11 @@ def test_summary_and_history_queries(tmp_path):
     assert summary["recent20"]["win_rate"] == 50.0
     assert summary["champions"][0]["name"] == "Sion"
     assert summary["roles"][0]["name"] == "mid"
+    assert summary["performance"] == {
+        "average_score": 100.0,
+        "best_rank": 1,
+        "average_rank": 1.0,
+    }
 
     rows = store.list_history()
     assert [row["game_id"] for row in rows] == [124, 123]
