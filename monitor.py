@@ -18,6 +18,8 @@ _LCU_POSITION_TO_ROLE = {
     "top": "top", "jungle": "jungle", "middle": "mid",
     "bottom": "bot", "utility": "support",
 }
+ACTIVE_GAME_PHASES = {"InProgress", "Reconnect"}
+TERMINAL_GAME_PHASES = {"WaitingForStats", "PreEndOfGame", "EndOfGame", "Lobby"}
 
 
 class ChampSelectMonitor:
@@ -151,12 +153,12 @@ class ChampSelectMonitor:
         phase = self.lcu.get_game_flow_phase()
 
         # ── InProgress transition detection ───────────────────────────────────
-        if phase == "InProgress" and not self._in_game:
+        if phase in ACTIVE_GAME_PHASES and not self._in_game:
             self._in_game = True
             self.log("Game started!", "success")
             if self._on_game_start:
                 self._on_game_start()
-        elif phase != "InProgress" and self._in_game:
+        elif phase in TERMINAL_GAME_PHASES and self._in_game:
             self._in_game = False
             self.log("Game ended.", "info")
             if self._on_game_end:

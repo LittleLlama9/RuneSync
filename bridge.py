@@ -16,7 +16,8 @@ import perks
 from lcu import LCUClient, LCUConnectionError
 from ugg_api import UGGClient
 from overrides import OverrideManager
-from monitor import ChampSelectMonitor
+from monitor import ACTIVE_GAME_PHASES, TERMINAL_GAME_PHASES, ChampSelectMonitor
+from match_history import MatchHistoryService
 from tray import is_autostart_enabled, set_autostart as _reg_set_autostart
 
 SUMMONER_SPELLS = {
@@ -73,12 +74,25 @@ class Api:
         self._connect_lock = threading.Lock()
         self._connecting = False
         self._monitor_lock = threading.Lock()   # makes _start's check-and-set atomic
+        self._pending_postgame_recovery = False
         self.tray = None
         self.poller = None
         self.log_queue = None   # set by app.py; drained to the debug console
         # snapshot of the live panels so a reload (get_state) rehydrates them
         self.snap = self._idle_snapshot()
         self.log_buf: list[dict] = []
+        self.history = None
+        self._history_error = ""
+        try:
+            self.history = MatchHistoryService(
+                self.lcu,
+                on_log=self._emit,
+                on_updated=self._on_history_updated,
+                on_postgame=self._on_postgame_ready,
+            )
+        except Exception as e:
+            self._history_error = f"Local history unavailable: {e}"
+            self._emit(self._history_error, "warn")
 
     # ── snapshot helpers ──────────────────────────────────────────────────────
     @staticmethod
@@ -154,7 +168,7 @@ class Api:
         st = {"status": self.status, "running": self.running,
               "theme": self.overrides.settings.get("phosphor", "amber"),
               "settings": self._settings(), "builds": self.get_builds(),
-              "log": self.log_buf[-80:]}
+              "log": self.log_buf[-80:], "historyError": self._history_error}
         st.update(self.snap)
         return st
 
@@ -314,6 +328,36 @@ class Api:
         ok = bool(_reg_set_autostart(bool(enabled)))
         return {"ok": ok, "enabled": is_autostart_enabled()}
 
+    def get_history_summary(self) -> dict:
+        if not self.history:
+            return {
+                "overall": {}, "recent20": {}, "champions": [], "roles": [],
+                "error": self._history_error,
+            }
+        return self.history.summary()
+
+    def get_match_history(self, offset: int = 0, limit: int = 25) -> list:
+        if not self.history:
+            return []
+        return self.history.list_history(offset, limit)
+
+    def get_match_report(self, game_id: int) -> dict:
+        if not self.history:
+            return {}
+        try:
+            report = self.history.report(int(game_id))
+        except (TypeError, ValueError):
+            report = None
+        return report or {}
+
+    def refresh_match_history(self) -> dict:
+        if not self.history:
+            return {"ok": False, "error": self._history_error}
+        if not self.lcu.connected:
+            return {"ok": False, "error": "League not connected."}
+        threading.Thread(target=self._sync_history, daemon=True).start()
+        return {"ok": True}
+
     def minimize(self) -> dict:
         w = self._win()
         if w:
@@ -372,6 +416,15 @@ class Api:
                     self._emit("✓ Connected to League Client", "success")
                     self._set_status("connected")
                     self._start()
+                    if self.history:
+                        threading.Thread(
+                            target=(
+                                self._recover_postgame_after_reconnect
+                                if self._pending_postgame_recovery
+                                else self._sync_history
+                            ),
+                            daemon=True,
+                        ).start()
                     return
                 except LCUConnectionError:
                     if attempt < attempts:
@@ -393,6 +446,9 @@ class Api:
             threading.Thread(target=self._try_connect, daemon=True).start()
 
     def on_league_close(self):
+        if self.snap["inGame"]:
+            self._pending_postgame_recovery = True
+            self._on_game(False, import_postgame=False)
         if self.running:
             self._stop()
         self.lcu.connected = False
@@ -437,7 +493,8 @@ class Api:
 
     def _on_league_closed(self):
         if self.snap["inGame"]:
-            self._on_game(False)
+            self._pending_postgame_recovery = True
+            self._on_game(False, import_postgame=False)
         if self.monitor:
             self.monitor._in_game = False
         self._stop()
@@ -526,6 +583,68 @@ class Api:
         self.snap["build"] = items
         self.pusher.push("build", {"src": src, "items": items})
 
-    def _on_game(self, in_game):
+    def _sync_history(self):
+        if not self.history:
+            return
+        self.pusher.push("history_sync", {"active": True})
+        try:
+            imported = self.history.sync_recent(100)
+            self._emit(
+                f"History sync complete: {imported} new scored game"
+                f"{'' if imported == 1 else 's'}.",
+                "success" if imported else "info",
+            )
+        except Exception as e:
+            self._emit(f"History sync failed: {e}", "warn")
+            self.pusher.push("history_error", {"message": str(e)})
+        finally:
+            self.pusher.push("history_sync", {"active": False})
+
+    def _ingest_postgame(self):
+        if not self.history:
+            return
+        self.pusher.push("history_sync", {"active": True})
+        try:
+            game_id = self.history.ingest_after_game()
+            if game_id is None:
+                self._emit("Post-game report skipped for this queue or remake.", "info")
+        except Exception as e:
+            self._emit(str(e), "warn")
+            self.pusher.push("history_error", {"message": str(e)})
+        finally:
+            self.pusher.push("history_sync", {"active": False})
+
+    def _on_history_updated(self):
+        self.pusher.push("history_updated")
+
+    def _recover_postgame_after_reconnect(self):
+        try:
+            phase = self.lcu.get_game_flow_phase()
+            if phase in TERMINAL_GAME_PHASES:
+                self._ingest_postgame()
+            elif phase in ACTIVE_GAME_PHASES:
+                self._emit("Game still active after reconnect; post-game recovery deferred.", "info")
+        finally:
+            self._pending_postgame_recovery = False
+        self._sync_history()
+
+    def _on_postgame_ready(self, game_id: int):
+        self.pusher.push("postgame_ready", {"game_id": game_id})
+        try:
+            window = self._win()
+            if window:
+                window.show()
+        except Exception:
+            pass
+
+    def _on_game(self, in_game, import_postgame=True):
         self.snap["inGame"] = in_game
         self.pusher.push("game", {"in_game": in_game})
+        if in_game:
+            if self.history:
+                try:
+                    self.history.capture_active_game()
+                except Exception as e:
+                    self._emit(f"Could not capture active game metadata: {e}", "warn")
+        elif import_postgame and self.history:
+            threading.Thread(target=self._ingest_postgame, daemon=True).start()

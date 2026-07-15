@@ -175,6 +175,8 @@ class DraftState:
         self.spell1_id = 4
         self.spell2_id = 12
         self.champion_map = _build_champion_map()
+        self.game_id = 9990001
+        self.reset_draft()
 
     def reset_draft(self, local_cell: int = 0, local_position: str = "top"):
         """Reset the draft session state for a new champion select."""
@@ -203,6 +205,93 @@ class DraftState:
             "myTeam": copy.deepcopy(self.my_team),
             "theirTeam": copy.deepcopy(self.their_team),
             "actions": copy.deepcopy(self.actions),
+        }
+
+    def gameflow_dict(self) -> dict:
+        position_map = {
+            "top": "TOP", "jungle": "JUNGLE", "middle": "MIDDLE",
+            "bottom": "BOTTOM", "utility": "UTILITY",
+        }
+
+        def convert(player):
+            cell = player["cellId"]
+            return {
+                "championId": player.get("championId", 0),
+                "puuid": "mock-puuid-0000" if cell == self.local_player_cell_id
+                         else f"mock-puuid-{cell:04d}",
+                "summonerId": cell + 1,
+                "selectedPosition": position_map.get(
+                    player.get("assignedPosition", ""), "",
+                ),
+            }
+
+        return {
+            "phase": self.phase,
+            "gameData": {
+                "gameId": self.game_id,
+                "teamOne": [convert(p) for p in self.my_team],
+                "teamTwo": [convert(p) for p in self.their_team],
+            },
+        }
+
+    def match_dict(self) -> dict:
+        defaults = [122, 64, 103, 51, 89, 86, 59, 3, 202, 40]
+        position_lane = {
+            "top": ("TOP", "SOLO"), "jungle": ("JUNGLE", "NONE"),
+            "middle": ("MIDDLE", "SOLO"), "bottom": ("BOTTOM", "CARRY"),
+            "utility": ("BOTTOM", "SUPPORT"),
+        }
+        participants = []
+        identities = []
+        for cell, player in enumerate(self.my_team + self.their_team):
+            participant_id = cell + 1
+            champion_id = player.get("championId") or defaults[cell]
+            lane, role = position_lane.get(
+                player.get("assignedPosition", ""), ("NONE", "NONE"),
+            )
+            team_id = 100 if cell < 5 else 200
+            participants.append({
+                "participantId": participant_id,
+                "championId": champion_id,
+                "teamId": team_id,
+                "timeline": {"lane": lane, "role": role},
+                "stats": {
+                    "win": team_id == 100,
+                    "kills": 4 + cell, "deaths": 3 + (cell % 3), "assists": 6,
+                    "goldEarned": 10000 + cell * 350,
+                    "totalMinionsKilled": 150 if role != "SUPPORT" else 25,
+                    "neutralMinionsKilled": 50 if lane == "JUNGLE" else 0,
+                    "champLevel": 16,
+                    "totalDamageDealtToChampions": 15000 + cell * 1800,
+                    "damageDealtToObjectives": 4000 + cell * 500,
+                    "damageDealtToTurrets": 1500 + cell * 250,
+                    "totalDamageTaken": 14000 + cell * 600,
+                    "damageSelfMitigated": 7000 + cell * 500,
+                    "totalHeal": 1000 + cell * 100,
+                    "visionScore": 18 + cell * 3,
+                    "wardsPlaced": 7 + cell, "wardsKilled": cell % 4,
+                    "item0": 1054, "item1": 3006, "item2": 3071,
+                },
+            })
+            identities.append({
+                "participantId": participant_id,
+                "player": {
+                    "puuid": "mock-puuid-0000"
+                             if player["cellId"] == self.local_player_cell_id
+                             else f"mock-puuid-{player['cellId']:04d}",
+                    "gameName": f"MockPlayer{participant_id}",
+                    "tagLine": "TEST",
+                },
+            })
+        return {
+            "gameId": self.game_id, "queueId": 420, "mapId": 11,
+            "gameMode": "CLASSIC", "gameDuration": 1800,
+            "gameCreation": 1784000000000,
+            "gameCreationDate": "2026-07-14T20:00:00Z",
+            "gameVersion": "16.13.1",
+            "participants": participants,
+            "participantIdentities": identities,
+            "teams": [],
         }
 
     def set_champion(self, cell_id: int, champ_id: int, completed: bool, in_progress: bool = None):
@@ -266,6 +355,10 @@ class MockLCUHandler(BaseHTTPRequestHandler):
             with s.lock:
                 self._send_json(s.phase)
 
+        elif path == "/lol-gameflow/v1/session":
+            with s.lock:
+                self._send_json(s.gameflow_dict())
+
         elif path == "/lol-champ-select/v1/session":
             with s.lock:
                 if s.phase != "ChampSelect":
@@ -282,6 +375,36 @@ class MockLCUHandler(BaseHTTPRequestHandler):
         elif path == "/lol-perks/v1/pages":
             with s.lock:
                 self._send_json(list(s.rune_pages))
+
+        elif path.startswith("/lol-match-history/v1/products/lol/") \
+                and path.endswith("/matches"):
+            with s.lock:
+                game = s.match_dict()
+            self._send_json({"games": {
+                "gameCount": 1, "gameIndexBegin": 0, "gameIndexEnd": 0,
+                "games": [game],
+            }})
+
+        elif path.startswith("/lol-match-history/v1/games/"):
+            try:
+                game_id = int(path.rsplit("/", 1)[1])
+            except ValueError:
+                self._send_empty(400)
+                return
+            with s.lock:
+                if game_id != s.game_id:
+                    self._send_empty(404)
+                    return
+                game = s.match_dict()
+            self._send_json(game)
+
+        elif path == "/lol-end-of-game/v1/eog-stats-block":
+            with s.lock:
+                if s.phase != "EndOfGame":
+                    self._send_empty(404)
+                    return
+                game = s.match_dict()
+            self._send_json(game)
 
         else:
             self._send_empty(404)

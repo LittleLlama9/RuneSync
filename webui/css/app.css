@@ -186,6 +186,61 @@ body {
 .legal { font-family:'Space Mono',monospace; font-size:9px; color:var(--pd); margin-top:38px;
   border-top:1px solid var(--pdd); padding-top:12px; line-height:1.7; opacity:.8; }
 
+/* ── history / post-game report ── */
+.history-state { font-family:'Space Mono',monospace; font-size:10px; color:var(--pd); }
+.history-error { margin-top:10px; border:1px solid var(--danger); color:var(--danger);
+  padding:6px 10px; font-family:'Space Mono',monospace; font-size:10px; }
+.history-summary { display:grid; grid-template-columns:1fr 1fr 1.25fr 1.25fr;
+  gap:12px; margin-top:18px; }
+.hsum { min-height:104px; }
+.hsum-wr { color:var(--pb); font-size:42px; line-height:.9; }
+.hsum-meta { color:var(--pd); font-size:14px; margin-top:8px; }
+.hbreak { min-height:104px; padding-top:14px; }
+.hbreak-row { display:flex; justify-content:space-between; gap:8px; font-size:15px; line-height:1.35; }
+.hbreak-row span:last-child { color:var(--pb); white-space:nowrap; }
+.hbreak-row i { color:var(--pd); font-style:normal; font-size:11px; }
+.h-empty { color:var(--pdd); font-size:15px; }
+.history-ledger { border:1px solid var(--pdd); margin-top:14px; }
+.history-head, .history-row { display:grid;
+  grid-template-columns:64px 1.2fr .7fr .8fr .65fr .55fr .75fr; gap:9px; align-items:center; }
+.history-head { padding:7px 11px; border-bottom:1px solid var(--pdd);
+  color:var(--pd); font-family:'Space Mono',monospace; font-size:9px; }
+.history-row { padding:8px 11px; font-size:17px; cursor:pointer; }
+.history-row:hover { background:rgba(255,176,0,.08); color:var(--pb); }
+.history-row .win, .report-result.win { color:var(--pb); }
+.history-row .loss, .report-result.loss { color:var(--danger); }
+.history-row .score { color:var(--pb); font-size:21px; }
+.history-empty { padding:18px; color:var(--pd); font-size:17px; }
+.history-note { cursor:default !important; margin-left:auto; font-size:13px; }
+
+.report-hero { display:flex; justify-content:space-between; align-items:center;
+  border-bottom:1px solid var(--pdd); padding:10px 4px 14px; }
+.report-result { font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.18em; }
+.report-title { color:var(--pb); font-size:38px; line-height:1; margin-top:4px; }
+.report-meta { color:var(--pd); font-size:17px; margin-top:5px; }
+.report-scorebox { text-align:right; min-width:180px; }
+.report-scorebox span { display:block; color:var(--pd); font-size:14px; }
+.report-scorebox strong { display:block; color:var(--pb); font-size:58px; line-height:.85; font-weight:normal; }
+.report-scorebox em { display:block; color:var(--p); font-style:normal; font-size:20px; }
+.report-grid { display:grid; grid-template-columns:1.05fr .95fr; gap:12px; margin-top:18px; }
+.component-list { display:flex; flex-direction:column; gap:7px; }
+.component-row { display:grid; grid-template-columns:112px 1fr 38px; gap:8px; align-items:center; font-size:15px; }
+.component-track { height:10px; border:1px solid var(--pdd); }
+.component-track i { display:block; height:100%; background:var(--p); }
+.component-row b { color:var(--pb); font-weight:normal; text-align:right; }
+.observation-list { color:var(--pb); font-size:15px; line-height:1.45; }
+.report-board { border:1px solid var(--pdd); margin-top:12px; }
+.report-board-head, .report-player { display:grid;
+  grid-template-columns:34px 1.25fr 1fr .65fr .75fr .55fr; gap:8px; align-items:center; }
+.report-board-head { padding:6px 10px; border-bottom:1px solid var(--pdd);
+  color:var(--pd); font-family:'Space Mono',monospace; font-size:9px; }
+.report-player { padding:5px 10px; font-size:15px; border-bottom:1px dotted var(--pdd); }
+.report-player:nth-child(5) { border-bottom:1px solid var(--p); }
+.report-player:last-child { border-bottom:0; }
+.report-player.local { background:var(--p); color:var(--bg); text-shadow:none; }
+.method-note { font-family:'Space Mono',monospace; color:var(--pd); font-size:9px;
+  margin-top:9px; line-height:1.45; }
+
 /* ── override editor ── */
 .ed-back { font-size:17px; color:var(--pd); cursor:pointer; }
 .ed-back:hover { color:var(--pb); }
