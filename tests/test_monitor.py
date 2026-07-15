@@ -175,3 +175,34 @@ def test_matchup_callback_still_fires_without_winrate_data():
     callback.assert_called_once_with(
         "Sion", "Samira", "mid", None, "Win rate unavailable", "info",
     )
+
+
+def test_reconnect_phase_does_not_end_active_game():
+    ended = MagicMock()
+    mon = ChampSelectMonitor(
+        lcu=MagicMock(), ugg=MagicMock(), overrides=MagicMock(),
+        on_log=lambda *a, **k: None, on_game_end=ended,
+    )
+    mon._in_game = True
+    mon.lcu.get_game_flow_phase.return_value = "Reconnect"
+
+    mon._tick()
+
+    assert mon._in_game is True
+    ended.assert_not_called()
+
+
+def test_terminal_phase_ends_active_game_once():
+    ended = MagicMock()
+    mon = ChampSelectMonitor(
+        lcu=MagicMock(), ugg=MagicMock(), overrides=MagicMock(),
+        on_log=lambda *a, **k: None, on_game_end=ended,
+    )
+    mon._in_game = True
+    mon.lcu.get_game_flow_phase.return_value = "EndOfGame"
+
+    mon._tick()
+    mon._tick()
+
+    assert mon._in_game is False
+    ended.assert_called_once()

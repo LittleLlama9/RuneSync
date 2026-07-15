@@ -18,12 +18,13 @@
         <div class="topbar pywebview-drag-region">
           <div class="brand">
             <span class="brand-name">DAEMON</span>
-            <span class="brand-ver">v1.03</span>
+            <span class="brand-ver">v1.04</span>
           </div>
           <div class="menu">
             <span class="tab" data-screen="monitor">[1] MONITOR</span>
             <span class="tab" data-screen="builds">[2] BUILDS</span>
             <span class="tab" data-screen="settings">[3] SETTINGS</span>
+            <span class="tab" data-screen="history">[4] HISTORY</span>
           </div>
           <div class="topright">
             <div class="status" id="status">
@@ -148,8 +149,92 @@
               </div>
             </div>
             <div class="legal">
-              data aggregated with attribution from lolalytics &amp; u.gg · not endorsed by riot games<br>
+              builds aggregated with attribution from lolalytics &amp; u.gg · post-game data stays local<br>
               league of legends © riot games, inc. · daemon is gpl-3.0
+            </div>
+          </section>
+
+          <!-- ===================== HISTORY ===================== -->
+          <section class="view" data-view="history" hidden>
+            <div class="page-head">
+              <span class="page-title">~/match.history</span>
+              <span>
+                <span class="history-state" id="historyState">local archive</span>
+                <span class="dbg-act" id="historyRefresh">[sync]</span>
+              </span>
+            </div>
+            <div class="history-error" id="historyError" hidden></div>
+            <div class="history-summary">
+              <div class="panel hsum">
+                <span class="ptitle">OVERALL</span>
+                <div class="hsum-wr" id="historyOverallWr">—</div>
+                <div class="hsum-meta" id="historyOverallMeta">no scored games</div>
+              </div>
+              <div class="panel hsum">
+                <span class="ptitle">RECENT 20</span>
+                <div class="hsum-wr" id="historyRecentWr">—</div>
+                <div class="hsum-meta" id="historyRecentMeta">no scored games</div>
+              </div>
+              <div class="panel hbreak">
+                <span class="ptitle">BY CHAMPION</span>
+                <div id="historyChampions"></div>
+              </div>
+              <div class="panel hbreak">
+                <span class="ptitle">BY ROLE</span>
+                <div id="historyRoles"></div>
+              </div>
+            </div>
+            <div class="history-ledger">
+              <div class="history-head">
+                <span>RESULT</span><span>CHAMPION</span><span>ROLE</span>
+                <span>KDA</span><span>SCORE</span><span>RANK</span><span>WHEN</span>
+              </div>
+              <div id="historyRows"></div>
+            </div>
+            <div class="hints">
+              <span id="historyMore"><b>[more]</b> load older matches</span>
+              <span class="history-note">all-time = latest 100 backfill + games captured by RuneSync</span>
+            </div>
+          </section>
+
+          <!-- ===================== POST-GAME REPORT ===================== -->
+          <section class="view" data-view="report" hidden>
+            <div class="page-head">
+              <span class="page-title">~/postgame.report</span>
+              <span class="ed-back" id="reportBack">‹ history</span>
+            </div>
+            <div class="report-hero">
+              <div>
+                <div class="report-result" id="reportResult">—</div>
+                <div class="report-title" id="reportTitle">awaiting report</div>
+                <div class="report-meta" id="reportMeta"></div>
+              </div>
+              <div class="report-scorebox">
+                <span>DAEMON SCORE</span>
+                <strong id="reportScore">—</strong>
+                <em id="reportRank">#— / 10</em>
+              </div>
+            </div>
+            <div class="report-grid">
+              <div class="panel">
+                <span class="ptitle">COMPONENTS</span>
+                <div class="component-list" id="reportComponents"></div>
+              </div>
+              <div class="panel">
+                <span class="ptitle">OBSERVATIONS</span>
+                <div class="observation-list" id="reportObservations"></div>
+              </div>
+            </div>
+            <div class="report-board">
+              <div class="report-board-head">
+                <span>#</span><span>PLAYER</span><span>CHAMPION</span><span>ROLE</span>
+                <span>KDA</span><span>SCORE</span>
+              </div>
+              <div id="reportPlayers"></div>
+            </div>
+            <div class="method-note">
+              DAEMON Score v<span id="reportModel">1</span> is a transparent,
+              role-aware performance summary. It is not MMR, ELO, or an LP prediction.
             </div>
           </section>
 

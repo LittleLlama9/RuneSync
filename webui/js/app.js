@@ -9,7 +9,8 @@
   const REGIONS = ['World', 'NA', 'EUW', 'EUNE', 'KR', 'BR', 'JP', 'OCE', 'LAS', 'LAN', 'TR', 'RU'];
   const PROMPTS = {
     monitor: 'watch --champ-select', builds: 'edit builds.ledger',
-    settings: 'vim daemon.conf', editor: 'vim override', builder: 'edit build',
+    settings: 'vim daemon.conf', history: 'query match.history',
+    report: 'cat postgame.report', editor: 'vim override', builder: 'edit build',
     debug: 'tail -f runesync.log'
   };
   // static game data (mirrors lcu.py; rarely changes)
@@ -67,6 +68,11 @@
       { champ: 'Ezreal', role: 'bottom', path: 'Precision × Inspiration', summoners: 'Flash / Teleport' }
     ],
     sel: 0,
+    history: {
+      loaded: false, syncing: false, error: '', offset: 0, rows: [],
+      summary: { overall: {}, recent20: {}, champions: [], roles: [] }
+    },
+    report: null,
     settings: { rank: 'Platinum+', region: 'World', auto_role: true, trigger: 'hover', phosphor: 'amber', autostart: false }
   };
 
@@ -202,6 +208,114 @@
     });
   }
 
+  function rateText(group) {
+    return group && group.win_rate != null ? `${group.win_rate.toFixed(1)}%` : '—';
+  }
+  function recordText(group) {
+    if (!group || !group.games) return 'no scored games';
+    return `${group.wins}W · ${group.games - group.wins}L · ${group.games} games`;
+  }
+  function renderBreakdown(rows) {
+    if (!rows || !rows.length) return '<div class="h-empty">no data</div>';
+    return rows.slice(0, 6).map(row =>
+      `<div class="hbreak-row"><span>${esc(row.name)}</span>` +
+      `<span>${row.win_rate.toFixed(1)}% <i>${row.games}g</i></span></div>`
+    ).join('');
+  }
+  function historyWhen(value) {
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  }
+  function renderHistory() {
+    const h = state.history;
+    $('historyState').textContent = h.syncing ? 'syncing league data…' : 'local archive';
+    $('historyError').hidden = !h.error;
+    $('historyError').textContent = h.error || '';
+    const summary = h.summary || {};
+    $('historyOverallWr').textContent = rateText(summary.overall);
+    $('historyOverallMeta').textContent = recordText(summary.overall);
+    $('historyRecentWr').textContent = rateText(summary.recent20);
+    $('historyRecentMeta').textContent = recordText(summary.recent20);
+    $('historyChampions').innerHTML = renderBreakdown(summary.champions);
+    $('historyRoles').innerHTML = renderBreakdown(summary.roles);
+    const rows = $('historyRows');
+    if (!h.rows.length) {
+      rows.innerHTML = `<div class="history-empty">${h.syncing ? 'syncing match history…' : 'no scored Summoner’s Rift games yet'}</div>`;
+    } else {
+      rows.innerHTML = h.rows.map(row => {
+        const win = !!row.local_win;
+        return `<div class="history-row" data-game="${row.game_id}">` +
+          `<span class="${win ? 'win' : 'loss'}">${win ? 'WIN' : 'LOSS'}</span>` +
+          `<span>${esc(row.local_champion_name)}</span><span>${esc(row.local_role)}</span>` +
+          `<span>${row.kills}/${row.deaths}/${row.assists}</span>` +
+          `<span class="score">${Number(row.total_score).toFixed(1)}</span>` +
+          `<span>#${row.match_rank}</span><span>${historyWhen(row.game_creation_date)}</span></div>`;
+      }).join('');
+    }
+  }
+  function loadHistory(reset) {
+    if (!window.API.ready()) { renderHistory(); return; }
+    if (reset) { state.history.offset = 0; state.history.rows = []; }
+    const offset = state.history.offset;
+    Promise.all([
+      window.API.call('get_history_summary'),
+      window.API.call('get_match_history', offset, 25)
+    ]).then(([summary, rows]) => {
+      state.history.summary = summary || state.history.summary;
+      const incoming = rows || [];
+      state.history.rows = reset ? incoming : state.history.rows.concat(incoming);
+      state.history.offset = state.history.rows.length;
+      state.history.loaded = true;
+      state.history.error = '';
+      renderHistory();
+    }).catch(e => {
+      state.history.error = String(e); renderHistory();
+    });
+  }
+  function renderReport() {
+    const report = state.report;
+    if (!report || !report.match || !report.participants) return;
+    const match = report.match;
+    const local = report.participants.find(p => p.participant_id === match.local_participant_id);
+    if (!local) return;
+    $('reportResult').textContent = local.win ? 'VICTORY' : 'DEFEAT';
+    $('reportResult').className = 'report-result ' + (local.win ? 'win' : 'loss');
+    $('reportTitle').textContent = `${local.champion_name} · ${local.role}`;
+    const minutes = Math.floor(match.duration / 60);
+    const seconds = String(match.duration % 60).padStart(2, '0');
+    $('reportMeta').textContent = `${local.kills}/${local.deaths}/${local.assists} · ${local.cs} CS · ${minutes}:${seconds} · ${match.patch}`;
+    $('reportScore').textContent = Number(local.total_score).toFixed(1);
+    $('reportRank').textContent = `#${local.match_rank} / 10`;
+    $('reportModel').textContent = local.model_version;
+    const labels = {
+      combat: 'combat', economy: 'economy', objectives: 'objectives',
+      vision: 'vision', teamplay: 'survival/teamplay'
+    };
+    $('reportComponents').innerHTML = Object.entries(local.components || {}).map(([key, value]) =>
+      `<div class="component-row"><span>${labels[key] || key}</span>` +
+      `<div class="component-track"><i style="width:${Math.max(0, Math.min(100, value))}%"></i></div>` +
+      `<b>${Number(value).toFixed(1)}</b></div>`
+    ).join('');
+    $('reportObservations').innerHTML = (local.observations || [])
+      .map(text => `<div>&gt; ${esc(text)}</div>`).join('');
+    $('reportPlayers').innerHTML = report.participants.map(player =>
+      `<div class="report-player${player.participant_id === match.local_participant_id ? ' local' : ''}">` +
+      `<span>#${player.match_rank}</span><span>${esc(player.summoner_name)}</span>` +
+      `<span>${esc(player.champion_name)}</span><span>${esc(player.role)}</span>` +
+      `<span>${player.kills}/${player.deaths}/${player.assists}</span>` +
+      `<span>${Number(player.total_score).toFixed(1)}</span></div>`
+    ).join('');
+  }
+  function openReport(gameId) {
+    if (!window.API.ready()) return;
+    window.API.call('get_match_report', gameId).then(report => {
+      if (!report || !report.match) return;
+      state.report = report;
+      setScreen('report');
+      renderReport();
+    });
+  }
+
   function renderOverlay() {
     $('overlay').hidden = !state.inGame;
     if (!state.inGame) return;
@@ -219,8 +333,10 @@
     if (!PROMPTS[name]) return;
     state.screen = name;
     document.querySelectorAll('[data-view]').forEach(v => { v.hidden = v.dataset.view !== name; });
-    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.screen === name));
+    document.querySelectorAll('.tab').forEach(t =>
+      t.classList.toggle('active', t.dataset.screen === name || (name === 'report' && t.dataset.screen === 'history')));
     $('promptHint').textContent = PROMPTS[name];
+    if (name === 'history' && !state.history.loaded) loadHistory(true);
   }
 
   function applyTheme(name) {
@@ -230,7 +346,8 @@
   }
 
   function renderAll() {
-    renderStatus(); renderMonitor(); renderBuilds(); renderSettings(); renderOverlay();
+    renderStatus(); renderMonitor(); renderBuilds(); renderSettings(); renderHistory(); renderOverlay();
+    if (state.report) renderReport();
   }
 
   // ── commands ────────────────────────────────────────────────────────────
@@ -283,10 +400,12 @@
     const k = (e.key || '').toLowerCase();
     if (k === 'escape' && state.screen === 'builder') { setScreen('editor'); return; }
     if (k === 'escape' && state.screen === 'editor') { setScreen('builds'); return; }
+    if (k === 'escape' && state.screen === 'report') { setScreen('history'); return; }
     if (e.ctrlKey || e.altKey || e.metaKey || typing(e)) return;
     if (k === '1') setScreen('monitor');
     else if (k === '2') setScreen('builds');
     else if (k === '3') setScreen('settings');
+    else if (k === '4') setScreen('history');
     else if (k === 's') cmd('toggle');
     else if (k === 'g') cmd('overlay');
     else if (k === 'q') cmd('tray');
@@ -344,6 +463,22 @@
     });
     $('moGo').addEventListener('click', submitMatchup);
     $('moInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') submitMatchup(); });
+    $('historyRefresh').addEventListener('click', () => {
+      state.history.syncing = true; renderHistory();
+      window.API.call('refresh_match_history').then(result => {
+        if (!result || !result.ok) {
+          state.history.syncing = false;
+          state.history.error = (result && result.error) || 'League not connected.';
+          renderHistory();
+        }
+      });
+    });
+    $('historyMore').addEventListener('click', () => loadHistory(false));
+    $('historyRows').addEventListener('click', e => {
+      const row = e.target.closest('.history-row');
+      if (row) openReport(Number(row.dataset.game));
+    });
+    $('reportBack').addEventListener('click', () => setScreen('history'));
     wireEditor();
     wireBuilder();
     wireDebug();
@@ -622,6 +757,11 @@
       case 'build': state.buildSrc = p.src; state.build = p.items || []; renderMonitor(); break;
       case 'import_ok': state.imported = true; renderMonitor(); break;
       case 'game': state.inGame = !!p.in_game; if (p.in_game) state.selecting = false; renderOverlay(); break;
+      case 'history_sync': state.history.syncing = !!p.active; renderHistory(); break;
+      case 'history_updated': state.history.loaded = false; loadHistory(true); break;
+      case 'history_error': state.history.error = p.message || 'history sync failed'; renderHistory(); break;
+      case 'postgame_ready':
+        state.history.loaded = false; loadHistory(true); openReport(p.game_id); break;
       case 'logrec': onLogrec(p); break;
       default: console.log('push?', event, p);
     }
@@ -643,6 +783,7 @@
     state.wrLabel = s.wrLabel || ''; state.wrTag = s.wrTag || 'info'; state.sample = s.sample || '';
     if (s.runes) state.runes = s.runes;
     state.buildSrc = s.buildSrc || 'idle'; state.build = s.build || []; state.inGame = !!s.inGame;
+    state.history.error = s.historyError || state.history.error;
     applyTheme(s.theme || state.settings.phosphor);
     renderAll();
   }

@@ -262,6 +262,68 @@ class LCUClient:
         except Exception:
             return None
 
+    def get_gameflow_session(self) -> Optional[dict]:
+        try:
+            data = self._get("/lol-gameflow/v1/session")
+            return data if isinstance(data, dict) else None
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                return None
+            raise LCUConnectionError(f"GET /lol-gameflow/v1/session failed {e.code}")
+        except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as e:
+            raise LCUConnectionError(f"League client not reachable: {e}")
+
+    def get_active_game_id(self) -> Optional[int]:
+        session = self.get_gameflow_session()
+        game_id = ((session or {}).get("gameData") or {}).get("gameId")
+        return game_id if isinstance(game_id, int) and game_id > 0 else None
+
+    def get_current_summoner_puuid(self) -> Optional[str]:
+        return self._puuid
+
+    def get_match_history_summaries(self, limit: int = 100) -> list[dict]:
+        """Return the newest local-player match summaries exposed by the LCU."""
+        if not self._puuid:
+            return []
+        safe_limit = max(1, min(int(limit), 100))
+        path = (
+            f"/lol-match-history/v1/products/lol/{self._puuid}/matches"
+            f"?begIndex=0&endIndex={safe_limit - 1}"
+        )
+        try:
+            data = self._get(path)
+        except urllib.error.HTTPError as e:
+            raise LCUConnectionError(f"GET match history failed {e.code}")
+        except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as e:
+            raise LCUConnectionError(f"League client not reachable: {e}")
+        games = ((data or {}).get("games") or {}).get("games") or []
+        return games[:safe_limit] if isinstance(games, list) else []
+
+    def get_match_details(self, game_id: int) -> dict:
+        if not isinstance(game_id, int) or game_id <= 0:
+            raise ValueError("game_id must be a positive integer")
+        try:
+            data = self._get(f"/lol-match-history/v1/games/{game_id}")
+        except urllib.error.HTTPError as e:
+            raise LCUConnectionError(f"GET match {game_id} failed {e.code}")
+        except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as e:
+            raise LCUConnectionError(f"League client not reachable: {e}")
+        if not isinstance(data, dict) or data.get("gameId") != game_id:
+            raise LCUConnectionError(f"Match {game_id} returned an invalid payload")
+        return data
+
+    def get_end_of_game_stats(self) -> Optional[dict]:
+        """Return the EOG stats block, or None while it is not available."""
+        try:
+            data = self._get("/lol-end-of-game/v1/eog-stats-block")
+            return data if isinstance(data, dict) else None
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                return None
+            raise LCUConnectionError(f"GET end-of-game stats failed {e.code}")
+        except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as e:
+            raise LCUConnectionError(f"League client not reachable: {e}")
+
     def get_game_flow_phase(self) -> str:
         try:
             return self._get("/lol-gameflow/v1/gameflow-phase")
