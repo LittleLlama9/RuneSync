@@ -70,7 +70,7 @@
     sel: 0,
     history: {
       loaded: false, loading: false, syncing: false, error: '', offset: 0,
-      rows: [], hasMore: true,
+      rows: [], hasMore: true, section: 'matches',
       summary: {
         overall: {}, recent20: {}, champions: [], roles: [], performance: {}
       }
@@ -274,9 +274,12 @@
     $('historyArchiveCount').textContent = total;
     $('historyBestRank').textContent = performance.best_rank ? `#${performance.best_rank}` : '#—';
     $('historyAverageScore').textContent = performance.average_score == null
-      ? 'avg score —'
-      : `avg score ${Number(performance.average_score).toFixed(1)} · avg rank #${Number(performance.average_rank).toFixed(1)}`;
-    $('historyLoaded').textContent = `${h.rows.length} / ${total} loaded`;
+      ? '—'
+      : Number(performance.average_score).toFixed(1);
+    $('historyAverageRank').textContent = performance.average_rank == null
+      ? '#—'
+      : `#${Number(performance.average_rank).toFixed(1)}`;
+    $('historyLoaded').textContent = `${h.rows.length} / ${total}`;
     $('historyFeed').setAttribute('aria-busy', String(h.loading || h.syncing));
     const rows = $('historyRows');
     if (!h.rows.length) {
@@ -296,10 +299,9 @@
           `<div class="history-result"><strong>${win ? 'W' : 'L'}</strong><span>${win ? 'VICTORY' : 'DEFEAT'}</span></div>` +
           `<div class="history-match">` +
             `<div class="history-match-title"><strong>${esc(row.local_champion_name)}</strong>` +
-              `<span>${esc(row.local_role)} // ${queueLabel(row.queue_id)}</span></div>` +
-            `<div class="history-statline"><b>${row.kills}/${row.deaths}/${row.assists}</b><span>KDA</span>` +
-              `<b>${row.cs}</b><span>CS</span><b>${minutes}:${seconds}</b><span>${historyWhen(row.game_creation_date)}</span></div>` +
-            `<div class="history-score-track"><i style="width:${Math.max(0, Math.min(100, score))}%"></i></div>` +
+              `<span>${esc(row.local_role)}</span></div>` +
+            `<div class="history-kda"><b>${row.kills}/${row.deaths}/${row.assists}</b><span>KDA</span></div>` +
+            `<div class="history-match-meta">${queueLabel(row.queue_id)} · ${minutes}:${seconds} · ${historyWhen(row.game_creation_date)}</div>` +
           `</div>` +
           `<div class="history-score"><span>DAEMON</span><strong>${score.toFixed(1)}</strong><em>${scoreBand(score)}</em></div>` +
           `<div class="history-rank ${rankClass(rank)}"><span>MATCH RANK</span><strong>#${rank}</strong><em>${rankLabel(rank)}</em></div>` +
@@ -427,7 +429,10 @@
       else t.removeAttribute('aria-current');
     });
     $('promptHint').textContent = PROMPTS[name];
-    if (name === 'history' && !state.history.loaded) loadHistory(true);
+    if (name === 'history') {
+      setHistorySection(state.history.section);
+      if (!state.history.loaded) loadHistory(true);
+    }
     const body = $('viewBody');
     if (body && body.focus) body.focus({ preventScroll: true });
   }
@@ -493,6 +498,33 @@
     if (e.key !== 'Enter' && e.key !== ' ') return;
     e.preventDefault();
     e.currentTarget.click();
+  }
+  function setHistorySection(section, focusTab) {
+    const allowed = ['matches', 'overview', 'champions', 'roles'];
+    const next = allowed.includes(section) ? section : 'matches';
+    state.history.section = next;
+    document.querySelectorAll('[data-history-section]').forEach(tab => {
+      const active = tab.dataset.historySection === next;
+      tab.classList.toggle('active', active);
+      tab.setAttribute('aria-selected', String(active));
+      tab.tabIndex = active ? 0 : -1;
+      if (active && focusTab) tab.focus();
+    });
+    document.querySelectorAll('[data-history-panel]').forEach(panel => {
+      panel.hidden = panel.dataset.historyPanel !== next;
+    });
+  }
+  function onHistoryTabKey(e) {
+    const tabs = Array.from(document.querySelectorAll('[data-history-section]'));
+    const current = tabs.indexOf(e.currentTarget);
+    let next = current;
+    if (e.key === 'ArrowRight') next = (current + 1) % tabs.length;
+    else if (e.key === 'ArrowLeft') next = (current - 1 + tabs.length) % tabs.length;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = tabs.length - 1;
+    else return;
+    e.preventDefault();
+    setHistorySection(tabs[next].dataset.historySection, true);
   }
   function onKey(e) {
     const k = (e.key || '').toLowerCase();
@@ -572,6 +604,10 @@
           renderHistory();
         }
       });
+    });
+    document.querySelectorAll('[data-history-section]').forEach(tab => {
+      tab.addEventListener('click', () => setHistorySection(tab.dataset.historySection));
+      tab.addEventListener('keydown', onHistoryTabKey);
     });
     $('historyMore').addEventListener('click', () => loadHistory(false));
     $('historyFeed').addEventListener('scroll', () => {

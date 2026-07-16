@@ -15,9 +15,19 @@ def test_history_and_report_views_are_wired():
     assert 'data-view="report"' in html
     assert 'id="historyFeed"' in html
     assert 'id="historyBestRank"' in html
-    assert 'class="history-overview"' in html
-    assert '<details class="history-breakdown">' in html
-    assert '<details class="history-breakdown" open>' not in html
+    assert 'role="tablist" aria-label="History sections"' in html
+    assert 'data-history-section="matches"' in html
+    assert 'data-history-section="overview"' in html
+    assert 'data-history-section="champions"' in html
+    assert 'data-history-section="roles"' in html
+    assert 'data-history-panel="matches"' in html
+    assert 'data-history-panel="overview"' in html
+    assert 'data-history-panel="champions"' in html
+    assert 'data-history-panel="roles"' in html
+    assert html.count('role="tabpanel" aria-labelledby="historyTab') == 4
+    assert html.count('role="tabpanel" aria-labelledby="historyTabOverview" tabindex="0"') == 1
+    assert html.count('role="tabpanel" aria-labelledby="historyTabChampions" tabindex="0"') == 1
+    assert html.count('role="tabpanel" aria-labelledby="historyTabRoles" tabindex="0"') == 1
     assert 'id="reportRankLabel"' in html
     assert "get_history_summary" in js
     assert "get_match_history" in js
@@ -46,6 +56,8 @@ def test_history_report_readability_and_keyboard_contract():
 
     assert 'role="button" tabindex="0" aria-label="${esc(cardLabel)}"' in js
     assert "activateButtonOnKey" in js
+    assert "setHistorySection" in js
+    assert "onHistoryTabKey" in js
     assert "$('historyRows').addEventListener('keydown'" in js
     assert "setAttribute('aria-current', 'page')" in js
     assert "setAttribute('aria-busy'" in js
@@ -58,10 +70,15 @@ def test_history_report_readability_and_keyboard_contract():
     assert min(sizes) >= 10
     assert "@media (prefers-reduced-motion: reduce)" in css
     assert "[role=\"button\"]:focus-visible" in css
-    assert "summary:focus-visible" in css
-    assert ".history-overview {" in css
-    assert ".history-breakdown > summary {" in css
+    assert ".history-tab:focus-visible" in css
+    assert ".history-tabs {" in css
+    assert ".history-recent {" in css
+    assert ".history-analytics-grid {" in css
+    assert "font:14px 'Space Mono',monospace" in css
+    assert ".history-analytics-grid small, .history-analytics-head small {\n  color:var(--pd); font-size:13px;" in css
     assert ".history-dashboard" not in css
+    assert ".history-breakdown {" not in css
+    assert ".history-breakdown > summary" not in css
 
     history_score = float(re.search(r"\.history-score strong \{[^}]*font-size:([0-9.]+)px", css).group(1))
     history_rank = float(re.search(r"\.history-rank strong \{[^}]*font-size:([0-9.]+)px", css).group(1))
@@ -69,5 +86,5 @@ def test_history_report_readability_and_keyboard_contract():
     report_rank = float(re.search(r"\.report-rankbox strong \{[^}]*font-size:([0-9.]+)px", css).group(1))
     assert history_rank > history_score
     assert report_rank > report_score
-    assert ".history-score-track { height:5px;" in css
-    assert "Math.max(0, Math.min(100, score))" in js
+    assert ".history-score-track" not in css
+    assert "row.cs" not in js.split("function renderHistory()", 1)[1].split("function loadHistory", 1)[0]

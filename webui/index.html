@@ -18,7 +18,7 @@
         <div class="topbar pywebview-drag-region">
           <div class="brand">
             <span class="brand-name">DAEMON</span>
-            <span class="brand-ver">v1.08</span>
+            <span class="brand-ver">v1.09</span>
           </div>
           <div class="menu" role="navigation" aria-label="Primary navigation">
             <span class="tab" data-screen="monitor" role="button" tabindex="0" aria-current="page">[1] MONITOR</span>
@@ -167,54 +167,65 @@
               </span>
             </div>
             <div class="history-error" id="historyError" role="alert" aria-live="assertive" hidden></div>
-            <div class="history-overview" role="region" aria-label="Performance overview">
-              <div class="history-overview-cell history-overview-archive">
-                <span>ARCHIVE</span>
-                <div><strong id="historyArchiveCount">0</strong><em>matches</em></div>
-                <small>local scored games</small>
+            <div class="history-tabs" role="tablist" aria-label="History sections">
+              <button type="button" id="historyTabMatches" class="history-tab active" data-history-section="matches"
+                role="tab" aria-selected="true" aria-controls="historyPanelMatches">MATCHES</button>
+              <button type="button" id="historyTabOverview" class="history-tab" data-history-section="overview"
+                role="tab" aria-selected="false" aria-controls="historyPanelOverview" tabindex="-1">OVERVIEW</button>
+              <button type="button" id="historyTabChampions" class="history-tab" data-history-section="champions"
+                role="tab" aria-selected="false" aria-controls="historyPanelChampions" tabindex="-1">CHAMPIONS</button>
+              <button type="button" id="historyTabRoles" class="history-tab" data-history-section="roles"
+                role="tab" aria-selected="false" aria-controls="historyPanelRoles" tabindex="-1">ROLES</button>
+            </div>
+            <div class="history-section" id="historyPanelMatches" data-history-panel="matches"
+              role="tabpanel" aria-labelledby="historyTabMatches">
+              <div class="history-recent" role="region" aria-label="Recent performance">
+                <div>
+                  <span>RECENT FORM // 20</span>
+                  <strong id="historyRecentMeta">no scored games</strong>
+                </div>
+                <div class="history-recent-rate">
+                  <strong id="historyRecentWr">—</strong>
+                  <span>WIN RATE</span>
+                </div>
               </div>
-              <div class="history-overview-cell">
-                <span>ALL TIME</span>
-                <strong id="historyOverallWr">—</strong>
-                <small id="historyOverallMeta">no scored games</small>
+              <div class="history-feed-head">
+                <span>RECENT MATCHES</span>
+                <b id="historyLoaded" aria-live="polite">0 / 0</b>
               </div>
-              <div class="history-overview-cell">
-                <span>LAST 20</span>
-                <strong id="historyRecentWr">—</strong>
-                <small id="historyRecentMeta">no scored games</small>
+              <div class="history-feed" id="historyFeed" aria-label="Match history" aria-busy="false">
+                <div id="historyRows"></div>
               </div>
-              <div class="history-overview-cell history-overview-peak">
-                <span>BEST FINISH</span>
-                <strong id="historyBestRank">#—</strong>
-                <small id="historyAverageScore">avg score —</small>
+              <div class="history-footer">
+                <span id="historyMore" class="history-more" role="button" tabindex="0" aria-label="Load more match history">[archive complete]</span>
               </div>
             </div>
-            <details class="history-breakdown">
-              <summary>
-                <span>CHAMPION + ROLE BREAKDOWN</span>
-                <em>secondary archive signals</em>
-              </summary>
-              <div class="history-breakdown-grid">
-                <section>
-                  <h3>CHAMPION SIGNAL</h3>
-                  <div id="historyChampions"></div>
-                </section>
-                <section>
-                  <h3>ROLE SIGNAL</h3>
-                  <div id="historyRoles"></div>
-                </section>
+            <div class="history-section history-analytics" id="historyPanelOverview" data-history-panel="overview"
+              role="tabpanel" aria-labelledby="historyTabOverview" tabindex="0" hidden>
+              <div class="history-analytics-grid" role="region" aria-label="Archive overview">
+                <div><span>ARCHIVE</span><strong id="historyArchiveCount">0</strong><small>local matches</small></div>
+                <div><span>ALL-TIME WIN RATE</span><strong id="historyOverallWr">—</strong><small id="historyOverallMeta">no scored games</small></div>
+                <div><span>AVERAGE DAEMON</span><strong id="historyAverageScore">—</strong><small>performance score</small></div>
+                <div><span>AVERAGE RANK</span><strong id="historyAverageRank">#—</strong><small>within each match</small></div>
+                <div><span>BEST FINISH</span><strong id="historyBestRank">#—</strong><small>peak match rank</small></div>
               </div>
-            </details>
-            <div class="history-feed-head">
-              <span>LATEST PERFORMANCE</span>
-              <span><i>open a match for full report</i> · <b id="historyLoaded" aria-live="polite">0 / 0 loaded</b></span>
+              <p class="history-data-note">latest 100 LCU backfill + every supported match DAEMON captures</p>
             </div>
-            <div class="history-feed" id="historyFeed" aria-label="Match history" aria-busy="false">
-              <div id="historyRows"></div>
+            <div class="history-section history-analytics" id="historyPanelChampions" data-history-panel="champions"
+              role="tabpanel" aria-labelledby="historyTabChampions" tabindex="0" hidden>
+              <div class="history-analytics-head">
+                <span>CHAMPION PERFORMANCE</span>
+                <small>win rate · games</small>
+              </div>
+              <div class="history-breakdown-list" id="historyChampions"></div>
             </div>
-            <div class="history-footer">
-              <span id="historyMore" class="history-more" role="button" tabindex="0" aria-label="Load more match history">[archive complete]</span>
-              <span class="history-note">latest 100 LCU backfill + every match DAEMON captures</span>
+            <div class="history-section history-analytics" id="historyPanelRoles" data-history-panel="roles"
+              role="tabpanel" aria-labelledby="historyTabRoles" tabindex="0" hidden>
+              <div class="history-analytics-head">
+                <span>ROLE PERFORMANCE</span>
+                <small>win rate · games</small>
+              </div>
+              <div class="history-breakdown-list" id="historyRoles"></div>
             </div>
           </section>
 
