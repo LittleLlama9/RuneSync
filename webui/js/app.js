@@ -5,6 +5,7 @@
   'use strict';
 
   const PHOSPHORS = ['amber', 'green', 'ice'];
+  const INTERFACES = [['Standard', 'standard'], ['DAEMON Classic', 'classic']];
   const RANKS = ['Iron+', 'Bronze+', 'Silver+', 'Gold+', 'Platinum+', 'Emerald+', 'Diamond+', 'Master+'];
   const REGIONS = ['World', 'NA', 'EUW', 'EUNE', 'KR', 'BR', 'JP', 'OCE', 'LAS', 'LAN', 'TR', 'RU'];
   const PROMPTS = {
@@ -76,7 +77,10 @@
       }
     },
     report: null,
-    settings: { rank: 'Platinum+', region: 'World', auto_role: true, trigger: 'hover', phosphor: 'amber', autostart: false }
+    settings: {
+      rank: 'Platinum+', region: 'World', auto_role: true, trigger: 'hover',
+      phosphor: 'amber', interface_style: 'standard', autostart: false
+    }
   };
 
   const $ = (id) => document.getElementById(id);
@@ -204,6 +208,7 @@
     $('setRank').textContent = s.rank + ' ▾';
     $('setRegion').textContent = s.region + ' ▾';
     $('setAutoRole').textContent = s.auto_role ? '[x]' : '[ ]';
+    $('setInterface').textContent = (s.interface_style === 'classic' ? 'DAEMON Classic' : 'Standard') + ' ▾';
     $('setPhosphor').textContent = s.phosphor + ' ▾';
     $('setAutostart').textContent = s.autostart ? '[x]' : '[ ]';
     document.querySelectorAll('[data-trig]').forEach(el => {
@@ -442,6 +447,12 @@
     state.settings.phosphor = name;
     renderSettings();
   }
+  function applyInterface(name) {
+    const interfaceStyle = name === 'classic' ? 'classic' : 'standard';
+    document.documentElement.setAttribute('data-interface', interfaceStyle);
+    state.settings.interface_style = interfaceStyle;
+    renderSettings();
+  }
 
   function renderAll() {
     renderStatus(); renderMonitor(); renderBuilds(); renderSettings(); renderHistory(); renderOverlay();
@@ -574,6 +585,11 @@
       openMenu($('setRank'), RANKS, state.settings.rank, v => { state.settings.rank = v; renderSettings(); }));
     $('setRegion').addEventListener('click', () =>
       openMenu($('setRegion'), REGIONS, state.settings.region, v => { state.settings.region = v; renderSettings(); }));
+    $('setInterface').addEventListener('click', () =>
+      openMenu($('setInterface'), INTERFACES, state.settings.interface_style, v => {
+        applyInterface(v);
+        window.API.call('set_interface', v);
+      }));
     $('setPhosphor').addEventListener('click', () =>
       openMenu($('setPhosphor'), PHOSPHORS, state.settings.phosphor, v => {
         applyTheme(v); window.API.call('set_theme', v);   // theme persists immediately
@@ -931,6 +947,7 @@
     if (s.runes) state.runes = s.runes;
     state.buildSrc = s.buildSrc || 'idle'; state.build = s.build || []; state.inGame = !!s.inGame;
     state.history.error = s.historyError || state.history.error;
+    applyInterface(state.settings.interface_style);
     applyTheme(s.theme || state.settings.phosphor);
     renderAll();
   }
@@ -965,6 +982,7 @@
 
   // ── boot ───────────────────────────────────────────────────────────────────
   function boot() {
+    applyInterface(state.settings.interface_style);
     applyTheme(state.settings.phosphor);
     wire();
     setScreen(state.screen);

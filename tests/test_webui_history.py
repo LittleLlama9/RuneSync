@@ -88,3 +88,22 @@ def test_history_report_readability_and_keyboard_contract():
     assert report_rank > report_score
     assert ".history-score-track" not in css
     assert "row.cs" not in js.split("function renderHistory()", 1)[1].split("function loadHistory", 1)[0]
+
+
+def test_standard_interface_mode_contract():
+    html = (ROOT / "webui" / "index.html").read_text(encoding="utf-8")
+    js = (ROOT / "webui" / "js" / "app.js").read_text(encoding="utf-8")
+    css = (ROOT / "webui" / "css" / "app.css").read_text(encoding="utf-8")
+
+    assert '<html data-phosphor="amber" data-interface="standard">' in html
+    assert 'id="setInterface" data-set="interface_style" role="button" tabindex="0"' in html
+    assert "const INTERFACES = [['Standard', 'standard'], ['DAEMON Classic', 'classic']]" in js
+    assert "function applyInterface(name)" in js
+    assert "window.API.call('set_interface', v)" in js
+    assert 'data-interface="standard"' in css
+    assert 'data-interface="classic"' not in css
+    assert 'font-family:"Segoe UI", Arial, sans-serif' in css
+    assert ".bezel-foot { display:none; }" in css
+    assert '.brand-name::after { content:"_"; color:var(--p); }' in css
+    assert "overflow-y:auto; padding:22px 24px" in css
+    assert "margin-top:12px; padding-top:8px; line-height:1.4" in css

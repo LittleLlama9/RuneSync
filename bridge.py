@@ -108,10 +108,14 @@ class Api:
 
     def _settings(self) -> dict:
         s = self.overrides.settings
+        interface_style = s.get("interface_style", "standard")
+        if interface_style not in {"standard", "classic"}:
+            interface_style = "standard"
         return {
             "rank": s.get("rank", "Platinum+"), "region": s.get("region", "World"),
             "auto_role": s.get("auto_role", True), "trigger": s.get("trigger", "hover"),
-            "phosphor": s.get("phosphor", "amber"), "autostart": is_autostart_enabled(),
+            "phosphor": s.get("phosphor", "amber"), "interface_style": interface_style,
+            "autostart": is_autostart_enabled(),
         }
 
     # ── lifecycle ─────────────────────────────────────────────────────────────
@@ -307,6 +311,14 @@ class Api:
         self.overrides.save_settings(s)
         return {"ok": True}
 
+    def set_interface(self, name: str) -> dict:
+        if name not in {"standard", "classic"}:
+            return {"ok": False, "error": "invalid interface style"}
+        s = dict(self.overrides.settings)
+        s["interface_style"] = name
+        self.overrides.save_settings(s)
+        return {"ok": True, "interface_style": name}
+
     def save_settings(self, data: dict) -> dict:
         # Start from the existing dict so unknown keys (server_url, phosphor) survive
         # — OverrideManager.save_settings replaces the whole dict. autostart is NOT
@@ -315,6 +327,11 @@ class Api:
         for k in ("rank", "region", "auto_role", "trigger", "phosphor"):
             if k in data:
                 s[k] = data[k]
+        interface_style = data.get("interface_style")
+        if interface_style in {"standard", "classic"}:
+            s["interface_style"] = interface_style
+        elif s.get("interface_style") not in {"standard", "classic"}:
+            s["interface_style"] = "standard"
         self.overrides.save_settings(s)
         # live-apply to a running monitor (plain attributes)
         if self.monitor:

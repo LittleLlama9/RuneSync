@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-phosphor="amber">
+<html data-phosphor="amber" data-interface="standard">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,7 +18,7 @@
         <div class="topbar pywebview-drag-region">
           <div class="brand">
             <span class="brand-name">DAEMON</span>
-            <span class="brand-ver">v1.09</span>
+            <span class="brand-ver">v1.10</span>
           </div>
           <div class="menu" role="navigation" aria-label="Primary navigation">
             <span class="tab" data-screen="monitor" role="button" tabindex="0" aria-current="page">[1] MONITOR</span>
@@ -128,23 +128,24 @@
             </div>
             <div class="conf">
               <div class="comment"># where the numbers come from</div>
-              <div class="crow"><span class="k">rank_filter</span><span>=</span><span class="v" id="setRank" data-set="rank">Platinum+ ▾</span></div>
-              <div class="crow"><span class="k">region</span><span>=</span><span class="v" id="setRegion" data-set="region">World ▾</span></div>
+              <div class="crow"><span class="k">rank_filter</span><span>=</span><span class="v" id="setRank" data-set="rank" role="button" tabindex="0">Platinum+ ▾</span></div>
+              <div class="crow"><span class="k">region</span><span>=</span><span class="v" id="setRegion" data-set="region" role="button" tabindex="0">World ▾</span></div>
 
               <div class="comment"># how it behaves</div>
-              <div class="crow"><span class="k">auto_detect_role</span><span>=</span><span class="vlit" id="setAutoRole" data-set="auto_role">[x]</span></div>
+              <div class="crow"><span class="k">auto_detect_role</span><span>=</span><span class="vlit" id="setAutoRole" data-set="auto_role" role="button" tabindex="0">[x]</span></div>
               <div class="crow"><span class="k">import_on</span><span>=</span>
-                <span class="radio" data-trig="hover">(•)&nbsp;hover</span><span class="radio" data-trig="lock">( )&nbsp;lock-in</span></div>
+                <span class="radio" data-trig="hover" role="button" tabindex="0">(•)&nbsp;hover</span><span class="radio" data-trig="lock" role="button" tabindex="0">( )&nbsp;lock-in</span></div>
 
               <div class="comment"># appearance</div>
-              <div class="crow"><span class="k">phosphor</span><span>=</span><span class="v" id="setPhosphor" data-set="phosphor">amber ▾</span></div>
+              <div class="crow"><span class="k">interface</span><span>=</span><span class="v" id="setInterface" data-set="interface_style" role="button" tabindex="0">Standard ▾</span></div>
+              <div class="crow"><span class="k">phosphor</span><span>=</span><span class="v" id="setPhosphor" data-set="phosphor" role="button" tabindex="0">amber ▾</span></div>
 
               <div class="comment"># system</div>
-              <div class="crow"><span class="k">start_with_windows</span><span>=</span><span class="vlit" id="setAutostart" data-set="autostart">[ ]</span>
+              <div class="crow"><span class="k">start_with_windows</span><span>=</span><span class="vlit" id="setAutostart" data-set="autostart" role="button" tabindex="0">[ ]</span>
                 <span class="note"># lives in tray, wakes when league opens</span></div>
 
               <div class="save-row">
-                <span class="save-btn" id="saveBtn">:w  write config</span>
+                <span class="save-btn" id="saveBtn" role="button" tabindex="0">:w  write config</span>
                 <span class="save-msg" id="saveMsg" hidden>"daemon.conf" written ✓</span>
               </div>
             </div>

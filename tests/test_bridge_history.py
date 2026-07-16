@@ -13,6 +13,40 @@ def _api():
     return api
 
 
+def test_interface_style_defaults_and_persists(monkeypatch):
+    api = _api()
+    api.overrides = MagicMock()
+    api.overrides.settings = {}
+    api.overrides.save_settings = MagicMock()
+    api.monitor = None
+    monkeypatch.setattr(bridge, "is_autostart_enabled", lambda: False)
+
+    assert api._settings()["interface_style"] == "standard"
+    assert api.set_interface("classic") == {
+        "ok": True, "interface_style": "classic",
+    }
+    api.overrides.save_settings.assert_called_once_with(
+        {"interface_style": "classic"},
+    )
+    assert api.set_interface("invalid") == {
+        "ok": False, "error": "invalid interface style",
+    }
+    api.overrides.settings = {"server_url": "https://example.invalid"}
+    api.overrides.save_settings.reset_mock()
+    assert api.save_settings({"interface_style": "classic"}) == {"ok": True}
+    api.overrides.save_settings.assert_called_once_with({
+        "server_url": "https://example.invalid",
+        "interface_style": "classic",
+    })
+    api.overrides.settings = {"interface_style": "retro"}
+    assert api._settings()["interface_style"] == "standard"
+    api.overrides.save_settings.reset_mock()
+    assert api.save_settings({"interface_style": "bogus"}) == {"ok": True}
+    api.overrides.save_settings.assert_called_once_with({
+        "interface_style": "standard",
+    })
+
+
 def test_history_api_delegates_to_service():
     api = _api()
     api.history.summary.return_value = {"overall": {"games": 2}}
