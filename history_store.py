@@ -341,7 +341,17 @@ class HistoryStore:
                   ON s.game_id = p.game_id
                  AND s.participant_id = p.participant_id
                 WHERE p.game_id = ?
-                ORDER BY p.team_id ASC, s.match_rank ASC
+                ORDER BY p.team_id ASC,
+                         CASE p.role
+                             WHEN 'top' THEN 1
+                             WHEN 'jungle' THEN 2
+                             WHEN 'mid' THEN 3
+                             WHEN 'bot' THEN 4
+                             WHEN 'bottom' THEN 4
+                             WHEN 'support' THEN 5
+                             ELSE 6
+                         END ASC,
+                         p.participant_id ASC
                 """,
                 (game_id,),
             ).fetchall()

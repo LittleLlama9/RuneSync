@@ -74,8 +74,12 @@ def test_store_round_trip_and_schema(tmp_path):
     report = store.get_report(123)
     assert report["match"]["local_champion_name"] == "Sion"
     assert len(report["participants"]) == 10
-    assert report["participants"][0]["match_rank"] == 1
-    assert report["participants"][0]["items"] == [1054, 6664]
+    local = next(
+        player for player in report["participants"]
+        if player["participant_id"] == report["match"]["local_participant_id"]
+    )
+    assert local["match_rank"] == 1
+    assert local["items"] == [1054, 6664]
 
 
 def test_save_report_is_idempotent(tmp_path):
@@ -89,6 +93,23 @@ def test_save_report_is_idempotent(tmp_path):
     local = next(p for p in saved["participants"] if p["participant_id"] == 1)
     assert local["kills"] == 99
     assert len(saved["participants"]) == 10
+
+
+def test_report_orders_each_team_like_league_scoreboard(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    report = _report()
+    shuffled_roles = ["support", "mid", "top", "bot", "jungle"]
+    for index, player in enumerate(report["participants"]):
+        player["role"] = shuffled_roles[index % 5]
+    store.save_report(report)
+
+    saved = store.get_report(123)
+    assert [player["role"] for player in saved["participants"][:5]] == [
+        "top", "jungle", "mid", "bot", "support",
+    ]
+    assert [player["role"] for player in saved["participants"][5:]] == [
+        "top", "jungle", "mid", "bot", "support",
+    ]
 
 
 def test_summary_and_history_queries(tmp_path):
