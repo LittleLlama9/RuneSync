@@ -1,8 +1,10 @@
 """Post-game match normalization, backfill, and ingestion orchestration."""
 
 import datetime
+import sqlite3
 import threading
 import time
+from dataclasses import asdict
 from itertools import permutations
 from typing import Callable, Optional
 
@@ -10,6 +12,7 @@ from champion_roles import get_role_weights
 from history_store import HistoryStore
 from lcu import LCUConnectionError
 from performance_score import SCORING_MODEL_VERSION, score_match
+from timeline_provider import LcuTimelineProvider, TimelineProviderError
 
 
 SUPPORTED_QUEUE_IDS = {400, 420, 430, 440, 480, 490}
@@ -209,6 +212,7 @@ class MatchHistoryService:
         self._active_game_id: Optional[int] = None
         self._active_positions: dict[str, str] = {}
         self._champion_names: dict[int, str] = {}
+        self._lcu_timeline_provider = LcuTimelineProvider(lcu)
 
     def _ensure_champions(self) -> dict[int, str]:
         if not self._champion_names:
@@ -239,9 +243,13 @@ class MatchHistoryService:
 
     def ingest_game(
             self, game_id: int, captured_positions: Optional[dict[str, str]] = None,
-            notify: bool = True) -> Optional[dict]:
+            notify: bool = True,
+            log_timeline_failure: bool = True) -> Optional[dict]:
         with self._ingest_lock:
             if self.store.has_game(game_id):
+                self._save_lcu_timeline(
+                    game_id, log_failure=log_timeline_failure,
+                )
                 return self.store.get_report(game_id)
             local_puuid = self.lcu.get_current_summoner_puuid()
             if not local_puuid:
@@ -255,14 +263,76 @@ class MatchHistoryService:
                 self.on_log(f"History skipped game {game_id}: {e}", "info")
                 return None
             self.store.save_report(report)
+            self._save_lcu_timeline(
+                game_id, game, log_failure=log_timeline_failure,
+            )
             if notify and self.on_updated:
                 self.on_updated()
             return report
+
+    def _save_lcu_timeline(
+            self, game_id: int, match_payload: Optional[dict] = None,
+            log_failure: bool = True) -> bool:
+        try:
+            if self.store.has_timeline_payload(game_id, "lcu_timeline"):
+                return True
+        except (sqlite3.Error, OSError) as exc:
+            if log_failure:
+                self.on_log(
+                    f"History could not inspect timeline {game_id}: {exc}",
+                    "warn",
+                )
+            return False
+        try:
+            payload = self._lcu_timeline_provider.fetch_match_timeline(
+                game_id, match_payload=match_payload,
+            )
+        except TimelineProviderError as exc:
+            try:
+                self.store.record_timeline_fetch_failure(
+                    game_id, "lcu_timeline", type(exc).__name__,
+                )
+            except (sqlite3.Error, OSError) as state_exc:
+                if log_failure:
+                    self.on_log(
+                        "History could not record timeline retry state "
+                        f"for {game_id}: {state_exc}",
+                        "warn",
+                    )
+            if log_failure:
+                self.on_log(
+                    f"History could not capture timeline {game_id}: {exc}",
+                    "warn",
+                )
+            return False
+        try:
+            self.store.save_timeline_payload(
+                game_id,
+                payload.source,
+                {
+                    "provenance": asdict(payload.provenance),
+                    "timeline": payload.timeline,
+                },
+                schema_version="lcu-v1",
+                completeness=payload.completeness,
+            )
+            self.store.clear_timeline_fetch_failure(game_id, payload.source)
+        except (sqlite3.Error, OSError) as exc:
+            if log_failure:
+                self.on_log(
+                    f"History could not persist timeline {game_id}: {exc}",
+                    "warn",
+                )
+            return False
+        return True
 
     def sync_recent(self, limit: int = 100) -> int:
         if not self._sync_lock.acquire(blocking=False):
             return 0
         imported = 0
+        timeline_failures = 0
+        timeline_attempted = set()
+        timeline_scan_failed = False
         try:
             known = self.store.known_game_ids()
             summaries = self.lcu.get_match_history_summaries(limit)
@@ -276,14 +346,52 @@ class MatchHistoryService:
                         or summary.get("mapId") != SUMMONERS_RIFT_MAP_ID:
                     continue
                 try:
-                    if self.ingest_game(game_id, notify=False):
+                    if self.ingest_game(
+                            game_id, notify=False,
+                            log_timeline_failure=False):
                         imported += 1
+                        timeline_attempted.add(game_id)
+                        if not self.store.has_timeline_payload(
+                                game_id, "lcu_timeline"):
+                            timeline_failures += 1
                 except (LCUConnectionError, RuntimeError, ValueError, OSError) as e:
                     self.on_log(f"History could not import game {game_id}: {e}", "warn")
+            try:
+                missing_timeline_ids = self.store.game_ids_missing_timeline(
+                    "lcu_timeline", limit,
+                )
+            except (sqlite3.Error, OSError):
+                missing_timeline_ids = []
+                timeline_scan_failed = True
+            for game_id in missing_timeline_ids:
+                if game_id in timeline_attempted:
+                    continue
+                try:
+                    saved = self._save_lcu_timeline(
+                        game_id, log_failure=False,
+                    )
+                except (sqlite3.Error, OSError, RuntimeError, ValueError):
+                    saved = False
+                if not saved:
+                    timeline_failures += 1
             self.store.set_meta("initial_backfill_complete", "1")
             self.store.set_meta(
                 "last_sync", datetime.datetime.now(datetime.timezone.utc).isoformat(),
             )
+            if timeline_failures:
+                self.on_log(
+                    "History could not capture "
+                    f"{timeline_failures} local timeline"
+                    f"{'s' if timeline_failures != 1 else ''}; "
+                    "aggregate evidence remains available.",
+                    "warn",
+                )
+            if timeline_scan_failed:
+                self.on_log(
+                    "History could not inspect missing local timelines; "
+                    "timeline backfill will retry later.",
+                    "warn",
+                )
             if imported and self.on_updated:
                 self.on_updated()
             return imported

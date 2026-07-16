@@ -66,6 +66,28 @@ def test_match_details_rejects_mismatched_payload(monkeypatch):
         client.get_match_details(123)
 
 
+def test_match_timeline_uses_numeric_game_id(monkeypatch):
+    client = LCUClient()
+    seen = []
+
+    def fake_get(path):
+        seen.append(path)
+        return {"frames": []}
+
+    monkeypatch.setattr(client, "_get", fake_get)
+
+    assert client.get_match_timeline(123) == {"frames": []}
+    assert seen == ["/lol-match-history/v1/game-timelines/123"]
+
+
+def test_match_timeline_rejects_invalid_payload(monkeypatch):
+    client = LCUClient()
+    monkeypatch.setattr(client, "_get", lambda path: {"notFrames": []})
+
+    with pytest.raises(Exception, match="invalid payload"):
+        client.get_match_timeline(123)
+
+
 def test_end_of_game_404_is_not_ready(monkeypatch):
     client = LCUClient()
 

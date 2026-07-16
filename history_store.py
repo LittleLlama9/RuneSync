@@ -219,6 +219,17 @@ class HistoryStore:
                     UNIQUE (game_id, source, content_hash)
                 );
 
+                CREATE TABLE IF NOT EXISTS timeline_fetch_attempts (
+                    game_id INTEGER NOT NULL REFERENCES matches(game_id)
+                        ON DELETE CASCADE,
+                    source TEXT NOT NULL,
+                    attempt_count INTEGER NOT NULL,
+                    last_attempted_at TEXT NOT NULL,
+                    next_retry_at TEXT NOT NULL,
+                    last_error_kind TEXT NOT NULL,
+                    PRIMARY KEY (game_id, source)
+                );
+
                 CREATE TABLE IF NOT EXISTS live_capture_sessions (
                     session_id TEXT PRIMARY KEY,
                     game_id INTEGER,
@@ -731,6 +742,90 @@ class HistoryStore:
             zlib.decompress(item.pop("payload_zlib")).decode("utf-8")
         )
         return item
+
+    def has_timeline_payload(self, game_id: int, source: str) -> bool:
+        with self._connect() as conn:
+            row = conn.execute(
+                """
+                SELECT 1 FROM timeline_payloads
+                WHERE game_id = ? AND source = ? LIMIT 1
+                """,
+                (game_id, source),
+            ).fetchone()
+        return row is not None
+
+    def game_ids_missing_timeline(
+            self, source: str, limit: int = 100,
+            now: Optional[datetime.datetime] = None) -> list[int]:
+        safe_limit = max(1, min(int(limit), 1000))
+        current = now or datetime.datetime.now(datetime.timezone.utc)
+        current_iso = current.astimezone(datetime.timezone.utc).isoformat()
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT m.game_id
+                FROM matches m
+                LEFT JOIN timeline_fetch_attempts a
+                  ON a.game_id = m.game_id AND a.source = ?
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM timeline_payloads t
+                    WHERE t.game_id = m.game_id AND t.source = ?
+                )
+                  AND (a.next_retry_at IS NULL OR a.next_retry_at <= ?)
+                ORDER BY COALESCE(a.attempt_count, 0) ASC,
+                         COALESCE(a.last_attempted_at, '') ASC,
+                         m.game_creation DESC
+                LIMIT ?
+                """,
+                (source, source, current_iso, safe_limit),
+            ).fetchall()
+        return [int(row["game_id"]) for row in rows]
+
+    def record_timeline_fetch_failure(
+            self, game_id: int, source: str, error_kind: str,
+            now: Optional[datetime.datetime] = None) -> int:
+        current = now or datetime.datetime.now(datetime.timezone.utc)
+        current = current.astimezone(datetime.timezone.utc)
+        with self._connect() as conn:
+            row = conn.execute(
+                """
+                SELECT attempt_count FROM timeline_fetch_attempts
+                WHERE game_id = ? AND source = ?
+                """,
+                (game_id, source),
+            ).fetchone()
+            attempt_count = int(row["attempt_count"]) + 1 if row else 1
+            delays = (300, 1800, 10800, 64800, 388800, 604800)
+            delay = delays[min(attempt_count - 1, len(delays) - 1)]
+            next_retry = current + datetime.timedelta(seconds=delay)
+            conn.execute(
+                """
+                INSERT INTO timeline_fetch_attempts (
+                    game_id, source, attempt_count, last_attempted_at,
+                    next_retry_at, last_error_kind
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(game_id, source) DO UPDATE SET
+                    attempt_count = excluded.attempt_count,
+                    last_attempted_at = excluded.last_attempted_at,
+                    next_retry_at = excluded.next_retry_at,
+                    last_error_kind = excluded.last_error_kind
+                """,
+                (
+                    game_id, source, attempt_count, current.isoformat(),
+                    next_retry.isoformat(), error_kind,
+                ),
+            )
+        return attempt_count
+
+    def clear_timeline_fetch_failure(self, game_id: int, source: str) -> None:
+        with self._connect() as conn:
+            conn.execute(
+                """
+                DELETE FROM timeline_fetch_attempts
+                WHERE game_id = ? AND source = ?
+                """,
+                (game_id, source),
+            )
 
     def save_feature_set(
             self, game_id: int, feature_version: str, evidence_source: str,

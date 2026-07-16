@@ -1,5 +1,6 @@
 import json
 import sqlite3
+import datetime
 from pathlib import Path
 
 import pytest
@@ -351,12 +352,55 @@ def test_timeline_payload_round_trip_is_compressed_and_deduplicated(tmp_path):
     saved = store.get_timeline_payload(123, "match_v5")
     assert saved["payload"] == payload
     assert saved["completeness"] == 1.0
+    assert store.game_ids_missing_timeline("match_v5") == []
+    assert store.game_ids_missing_timeline("lcu_timeline") == [123]
     with sqlite3.connect(store.path) as conn:
         compressed_size = conn.execute(
             "SELECT length(payload_zlib) FROM timeline_payloads WHERE id = ?",
             (first,),
         ).fetchone()[0]
     assert compressed_size < len(json.dumps(payload))
+
+
+def test_timeline_fetch_backoff_does_not_starve_older_games(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    for game_id in (121, 122, 123):
+        report = _report()
+        report["match"]["game_id"] = game_id
+        report["match"]["game_creation"] = game_id
+        for participant in report["participants"]:
+            participant["game_id"] = game_id
+        store.save_report(report)
+    now = datetime.datetime(2026, 7, 17, tzinfo=datetime.timezone.utc)
+
+    store.record_timeline_fetch_failure(
+        123, "lcu_timeline", "not_found", now=now,
+    )
+
+    assert store.game_ids_missing_timeline(
+        "lcu_timeline", limit=1, now=now,
+    ) == [122]
+    assert store.game_ids_missing_timeline(
+        "lcu_timeline", limit=3,
+        now=now + datetime.timedelta(days=8),
+    ) == [122, 121, 123]
+
+
+def test_successful_timeline_clears_fetch_backoff(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    store.save_report(_report())
+    now = datetime.datetime(2026, 7, 17, tzinfo=datetime.timezone.utc)
+    store.record_timeline_fetch_failure(
+        123, "lcu_timeline", "unavailable", now=now,
+    )
+
+    store.save_timeline_payload(123, "lcu_timeline", {"frames": []})
+    store.clear_timeline_fetch_failure(123, "lcu_timeline")
+
+    with sqlite3.connect(store.path) as conn:
+        assert conn.execute(
+            "SELECT COUNT(*) FROM timeline_fetch_attempts"
+        ).fetchone()[0] == 0
 
 
 def test_feature_sets_are_content_addressed(tmp_path):

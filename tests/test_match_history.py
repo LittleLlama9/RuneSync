@@ -1,4 +1,5 @@
 import json
+import sqlite3
 import threading
 import time
 from pathlib import Path
@@ -83,6 +84,27 @@ def _game(game_id=123, queue_id=420, duration=1800):
     }
 
 
+def _timeline(duration=1800):
+    participant_frames = {
+        str(participant_id): {"participantId": participant_id}
+        for participant_id in range(1, 11)
+    }
+    return {
+        "frames": [
+            {
+                "timestamp": timestamp,
+                "participantFrames": participant_frames,
+                "events": [],
+            }
+            for timestamp in range(0, duration * 1000 + 1, 60000)
+        ] + ([{
+            "timestamp": duration * 1000,
+            "participantFrames": participant_frames,
+            "events": [],
+        }] if duration % 60 else []),
+    }
+
+
 def test_normalize_match_builds_report_and_roles():
     report = normalize_match(_game(), "puuid-1", CHAMPIONS)
 
@@ -133,11 +155,129 @@ def test_service_sync_is_idempotent(tmp_path):
         {"gameId": 123, "queueId": 420, "mapId": 11},
     ]
     lcu.get_match_details.return_value = _game()
+    lcu.get_match_timeline.return_value = _timeline()
     service = MatchHistoryService(lcu, HistoryStore(tmp_path / "history.db"))
 
     assert service.sync_recent() == 1
     assert service.sync_recent() == 0
     assert len(service.list_history()) == 1
+    timeline = service.store.get_timeline_payload(123, "lcu_timeline")
+    assert timeline["completeness"] == 1.0
+    assert timeline["payload"]["provenance"]["source"] == "lcu_timeline"
+
+
+def test_sync_recent_summarizes_timeline_failures(tmp_path):
+    games = {game_id: _game(game_id) for game_id in (101, 102)}
+    lcu = MagicMock()
+    lcu.get_current_summoner_puuid.return_value = "puuid-1"
+    lcu.get_champion_name_map.return_value = CHAMPIONS
+    lcu.get_match_history_summaries.return_value = [
+        {"gameId": game_id, "queueId": 420, "mapId": 11}
+        for game_id in games
+    ]
+    lcu.get_match_details.side_effect = lambda game_id: games[game_id]
+    lcu.get_match_timeline.side_effect = LCUConnectionError("unavailable")
+    logs = []
+    service = MatchHistoryService(
+        lcu,
+        HistoryStore(tmp_path / "history.db"),
+        on_log=lambda message, tag: logs.append((message, tag)),
+    )
+
+    assert service.sync_recent() == 2
+    timeline_logs = [
+        message for message, tag in logs
+        if tag == "warn" and "timeline" in message
+    ]
+    assert timeline_logs == [
+        "History could not capture 2 local timelines; "
+        "aggregate evidence remains available."
+    ]
+
+
+def test_sync_recent_backfills_stored_games_missing_from_lcu_summaries(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    store.save_report(normalize_match(_game(), "puuid-1", CHAMPIONS))
+    lcu = MagicMock()
+    lcu.get_current_summoner_puuid.return_value = "puuid-1"
+    lcu.get_match_history_summaries.return_value = []
+    lcu.get_match_details.return_value = _game()
+    lcu.get_match_timeline.return_value = _timeline()
+    service = MatchHistoryService(lcu, store)
+
+    assert service.sync_recent() == 0
+    assert store.has_timeline_payload(123, "lcu_timeline")
+
+
+def test_sync_recent_isolates_timeline_persistence_failure(tmp_path, monkeypatch):
+    store = HistoryStore(tmp_path / "history.db")
+    for game_id in (122, 123):
+        report = normalize_match(_game(game_id), "puuid-1", CHAMPIONS)
+        store.save_report(report)
+    lcu = MagicMock()
+    lcu.get_current_summoner_puuid.return_value = "puuid-1"
+    lcu.get_match_history_summaries.return_value = []
+    lcu.get_match_details.side_effect = lambda game_id: _game(game_id)
+    lcu.get_match_timeline.return_value = _timeline()
+    logs = []
+    service = MatchHistoryService(
+        lcu, store, on_log=lambda message, tag: logs.append((message, tag)),
+    )
+    original_save = store.save_timeline_payload
+
+    def save_with_one_failure(game_id, *args, **kwargs):
+        if game_id == 123:
+            raise sqlite3.OperationalError("database is busy")
+        return original_save(game_id, *args, **kwargs)
+
+    monkeypatch.setattr(store, "save_timeline_payload", save_with_one_failure)
+
+    assert service.sync_recent() == 0
+    assert not store.has_timeline_payload(123, "lcu_timeline")
+    assert store.has_timeline_payload(122, "lcu_timeline")
+    assert store.get_meta("last_sync")
+    assert any(
+        tag == "warn" and "1 local timeline" in message
+        for message, tag in logs
+    )
+
+
+def test_sync_recent_isolates_missing_timeline_scan_failure(
+        tmp_path, monkeypatch):
+    store = HistoryStore(tmp_path / "history.db")
+    lcu = MagicMock()
+    lcu.get_current_summoner_puuid.return_value = "puuid-1"
+    lcu.get_champion_name_map.return_value = CHAMPIONS
+    lcu.get_match_history_summaries.return_value = [
+        {"gameId": 123, "queueId": 420, "mapId": 11},
+    ]
+    lcu.get_match_details.return_value = _game()
+    lcu.get_match_timeline.return_value = _timeline()
+    logs = []
+    notified = []
+    service = MatchHistoryService(
+        lcu,
+        store,
+        on_log=lambda message, tag: logs.append((message, tag)),
+        on_updated=lambda: notified.append(True),
+    )
+    monkeypatch.setattr(
+        store,
+        "game_ids_missing_timeline",
+        lambda *args, **kwargs: (
+            (_ for _ in ()).throw(sqlite3.OperationalError("database busy"))
+        ),
+    )
+
+    assert service.sync_recent() == 1
+    assert store.has_game(123)
+    assert store.get_meta("last_sync")
+    assert notified == [True]
+    assert (
+        "History could not inspect missing local timelines; "
+        "timeline backfill will retry later.",
+        "warn",
+    ) in logs
 
 
 def test_postgame_uses_captured_game_and_notifies(tmp_path):
@@ -154,6 +294,7 @@ def test_postgame_uses_captured_game_and_notifies(tmp_path):
         },
     }
     lcu.get_match_details.return_value = _game()
+    lcu.get_match_timeline.return_value = _timeline()
     notified = []
     service = MatchHistoryService(
         lcu, HistoryStore(tmp_path / "history.db"),
@@ -240,6 +381,9 @@ def test_sync_recent_repairs_gap_after_transient_failure(tmp_path):
         return games[game_id]
 
     lcu.get_match_details.side_effect = details
+    lcu.get_match_timeline.side_effect = lambda game_id: _timeline(
+        games[game_id]["gameDuration"]
+    )
     service = MatchHistoryService(lcu, HistoryStore(tmp_path / "history.db"))
 
     assert service.sync_recent() == 2
@@ -254,6 +398,9 @@ def test_failed_capture_cannot_reopen_previous_game(tmp_path):
     lcu.get_current_summoner_puuid.return_value = "puuid-1"
     lcu.get_champion_name_map.return_value = CHAMPIONS
     lcu.get_match_details.side_effect = lambda game_id: games[game_id]
+    lcu.get_match_timeline.side_effect = lambda game_id: _timeline(
+        games[game_id]["gameDuration"]
+    )
     opened = []
     service = MatchHistoryService(
         lcu, HistoryStore(tmp_path / "history.db"), on_postgame=opened.append,
@@ -286,6 +433,7 @@ def test_ingest_game_serializes_duplicate_concurrent_imports(tmp_path):
         return _game(game_id)
 
     lcu.get_match_details.side_effect = details
+    lcu.get_match_timeline.return_value = _timeline()
     service = MatchHistoryService(lcu, HistoryStore(tmp_path / "history.db"))
     results = []
 
@@ -316,6 +464,7 @@ def test_old_ingestion_cannot_clear_new_game_capture(tmp_path):
         return _game(game_id)
 
     lcu.get_match_details.side_effect = details
+    lcu.get_match_timeline.return_value = _timeline()
     service = MatchHistoryService(lcu, HistoryStore(tmp_path / "history.db"))
     service._active_game_id = 101
     worker = threading.Thread(

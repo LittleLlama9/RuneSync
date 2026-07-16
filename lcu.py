@@ -312,6 +312,25 @@ class LCUClient:
             raise LCUConnectionError(f"Match {game_id} returned an invalid payload")
         return data
 
+    def get_match_timeline(self, game_id: int) -> dict:
+        if not isinstance(game_id, int) or game_id <= 0:
+            raise ValueError("game_id must be a positive integer")
+        try:
+            data = self._get(
+                f"/lol-match-history/v1/game-timelines/{game_id}"
+            )
+        except urllib.error.HTTPError as e:
+            raise LCUConnectionError(
+                f"GET timeline {game_id} failed {e.code}"
+            )
+        except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as e:
+            raise LCUConnectionError(f"League client not reachable: {e}")
+        if not isinstance(data, dict) or not isinstance(data.get("frames"), list):
+            raise LCUConnectionError(
+                f"Timeline {game_id} returned an invalid payload"
+            )
+        return data
+
     def get_end_of_game_stats(self) -> Optional[dict]:
         """Return the EOG stats block, or None while it is not available."""
         try:
