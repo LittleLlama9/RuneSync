@@ -105,5 +105,31 @@ def test_standard_interface_mode_contract():
     assert 'font-family:"Segoe UI", Arial, sans-serif' in css
     assert ".bezel-foot { display:none; }" in css
     assert '.brand-name::after { content:"_"; color:var(--p); }' in css
-    assert "overflow-y:auto; padding:22px 24px" in css
-    assert "margin-top:12px; padding-top:8px; line-height:1.4" in css
+    assert "overflow-y:auto; padding:20px 22px" in css
+    assert 'role="switch" aria-checked="true"' in html
+    assert 'class="trigger-options" role="radiogroup"' in html
+    assert '<span class="standard-copy">Save changes</span>' in html
+    assert ":root[data-interface=\"standard\"] .classic-copy" in css
+    assert ":root[data-interface=\"standard\"] .settings-group" in css
+    assert ":root[data-interface=\"standard\"] .standard-toggle" in css
+    assert ":root[data-interface=\"standard\"] .trigger-options" in css
+    assert "menuitemradio" in js
+    assert "e.key === 'ArrowDown'" in js
+    assert "e.key === 'Escape'" in js
+    assert "SPELL_ICON_FILE" in js
+    assert "assets/spells/" in js
+    assert 'class="spell-icons"' in js
+    assert "championIconUrl" in js
+    assert 'class="history-champion-art"' in js
+    assert 'id="historyRecentForm"' in html
+    assert "Last 10 shown" in html
+    assert ":root[data-interface=\"standard\"] .history-form i.win" in css
+    assert ":root[data-interface=\"standard\"] .history-feed {" in css
+    assert ".history-match-meta i { margin:0 5px;" in css
+    assert '<span class="spell-names">${esc(b.summoners)}</span>` +' in js
+    assert '<span class="spell-default standard-copy">recommended</span>' in js
+    for spell_icon in (
+        "SummonerFlash.png", "SummonerTeleport.png", "SummonerDot.png",
+        "SummonerSmite.png", "SummonerExhaust.png",
+    ):
+        assert (ROOT / "webui" / "assets" / "spells" / spell_icon).is_file()

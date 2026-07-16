@@ -61,6 +61,22 @@ def test_history_api_delegates_to_service():
     api.history.report.assert_called_once_with(123)
 
 
+def test_builds_include_spell_ids_for_icon_rendering():
+    api = _api()
+    api.overrides = MagicMock()
+    api.overrides.all.return_value = {
+        "Azir": {
+            "role": "auto", "primary_tree": "Precision",
+            "secondary_tree": "Sorcery", "spell1": 4, "spell2": 12,
+        },
+    }
+
+    assert api.get_builds() == [{
+        "champ": "Azir", "role": "auto", "path": "Precision × Sorcery",
+        "summoners": "FLASH / TELEPORT", "spell1": 4, "spell2": 12,
+    }]
+
+
 def test_game_lifecycle_captures_and_imports(monkeypatch):
     api = _api()
 

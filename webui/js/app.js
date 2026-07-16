@@ -14,6 +14,12 @@
     report: 'cat postgame.report', editor: 'vim override', builder: 'edit build',
     debug: 'tail -f runesync.log'
   };
+  const STANDARD_PROMPTS = {
+    monitor: 'Monitoring champion select', builds: 'Manage custom builds',
+    settings: 'Application preferences', history: 'Local match archive',
+    report: 'Performance breakdown', editor: 'Edit custom build',
+    builder: 'Choose build items', debug: 'Diagnostics'
+  };
   // static game data (mirrors lcu.py; rarely changes)
   const ROLES = ['auto', 'top', 'jungle', 'mid', 'bot', 'support'];
   const TREES = ['Precision', 'Domination', 'Sorcery', 'Resolve', 'Inspiration'];
@@ -29,6 +35,26 @@
     ['Heal', 7], ['Ghost', 6], ['Teleport', 12], ['Cleanse', 1], ['Smite', 11], ['Clarity', 13]
   ];
   const SPELL_NAME = id => (SPELLS.find(s => s[1] === (id || 0)) || SPELLS[0])[0];
+  const SPELL_ICON_FILE = {
+    1: 'SummonerBoost.png', 3: 'SummonerExhaust.png', 4: 'SummonerFlash.png',
+    6: 'SummonerHaste.png', 7: 'SummonerHeal.png', 11: 'SummonerSmite.png',
+    12: 'SummonerTeleport.png', 13: 'SummonerMana.png', 14: 'SummonerDot.png',
+    21: 'SummonerBarrier.png'
+  };
+  const spellIconUrl = id => SPELL_ICON_FILE[id] ? `assets/spells/${SPELL_ICON_FILE[id]}` : '';
+  const championIconUrl = id => id
+    ? `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${Number(id)}.png`
+    : '';
+  const titleCase = value => {
+    const text = String(value || '');
+    return text ? text.charAt(0).toUpperCase() + text.slice(1) : '';
+  };
+  const standardInterface = () =>
+    document.documentElement.getAttribute('data-interface') === 'standard';
+  const plainMeta = value => {
+    const text = String(value || '').replace(/^\[\s*|\s*\]$/g, '');
+    return titleCase(text);
+  };
 
   // ── state (placeholder seed = the mock's sample data) ─────────────────────
   const state = {
@@ -96,23 +122,29 @@
   }
 
   function renderMonitor() {
+    const standard = standardInterface();
     const selecting = state.selecting && !state.champ;
     $('champName').textContent = state.champ || (selecting ? 'SELECTING…' : '—');
     $('champMeta').textContent = state.champ
-      ? (state.champMeta || '')
-      : (selecting ? '[ in champ select · pick a champion ]'
-                   : (state.champMeta || '[ awaiting champ select ]'));
+      ? (standard ? plainMeta(state.champMeta) : (state.champMeta || ''))
+      : (selecting
+          ? (standard ? 'Pick a champion to load your setup' : '[ in champ select · pick a champion ]')
+          : (standard ? 'Waiting for champion select' : (state.champMeta || '[ awaiting champ select ]')));
     $('champBadge').hidden = !state.imported;
 
-    $('matchupTitle').textContent = state.enemy
-      ? `MATCHUP // vs ${state.enemy}`
-      : (state.selecting ? 'MATCHUP // awaiting pick' : 'MATCHUP // idle');
+    $('matchupTitle').textContent = standard
+      ? (state.enemy ? `Matchup vs ${state.enemy}` : 'Matchup')
+      : (state.enemy
+          ? `MATCHUP // vs ${state.enemy}`
+          : (state.selecting ? 'MATCHUP // awaiting pick' : 'MATCHUP // idle'));
     const down = state.wr != null && state.wr < 50;
     $('wrNum').innerHTML = state.wr == null ? '—' : `${state.wr.toFixed(1)}<small>%</small>`;
     const dir = $('wrDir');
     dir.textContent = state.wr == null
-      ? (state.enemy ? (state.wrLabel || 'win rate unavailable')
-                     : (state.selecting ? 'awaiting pick' : 'awaiting matchup'))
+      ? (state.enemy ? (state.wrLabel || (standard ? 'Win rate unavailable' : 'win rate unavailable'))
+                     : (state.selecting
+                        ? (standard ? 'Waiting for your pick' : 'awaiting pick')
+                        : (standard ? 'Waiting for matchup' : 'awaiting matchup')))
       : `${down ? '▼' : '▲'} ${state.wrLabel || ''}`.trim();
     dir.classList.toggle('down', !!down);
     const fill = $('wrFill');
@@ -128,7 +160,9 @@
     $('rSecondaryMinor').textContent = r.secondaryMinor || '';
     $('rSummoners').textContent = r.summoners || '—';
 
-    $('buildTitle').textContent = `BUILD // ${state.buildSrc}`;
+    $('buildTitle').textContent = standard
+      ? (state.buildSrc === 'idle' ? 'Recommended build' : `Recommended build · ${state.buildSrc}`)
+      : `BUILD // ${state.buildSrc}`;
     $('buildList').innerHTML = renderBuildList(state.build);
 
     renderLog();
@@ -190,29 +224,57 @@
   }
 
   function renderBuilds() {
-    $('buildsCount').textContent = `${state.builds.length} champions · everyone else follows u.gg`;
+    const count = state.builds.length;
+    $('buildsCount').innerHTML =
+      `<span class="classic-copy">${count} champions · everyone else follows u.gg</span>` +
+      `<span class="standard-copy">${count} custom ${count === 1 ? 'build' : 'builds'}</span>`;
     const rows = $('ledgerRows');
     if (!state.builds.length) {
-      rows.innerHTML = `<div class="ledger-empty">no custom builds yet — press [a] to add one</div>`;
+      rows.innerHTML = `<div class="ledger-empty"><span class="classic-copy">no custom builds yet — press [a] to add one</span>` +
+        `<span class="standard-copy">No custom builds yet. Add one to override the recommended setup.</span></div>`;
       return;
     }
-    rows.innerHTML = state.builds.map((b, i) =>
+    rows.innerHTML = state.builds.map((b, i) => {
+      const spellIds = [Number(b.spell1) || 0, Number(b.spell2) || 0].filter(Boolean);
+      const spellNames = spellIds.map(SPELL_NAME);
+      const spellIcons = spellIds.map(id =>
+        `<img class="spell-icon" src="${spellIconUrl(id)}" alt="" title="${esc(SPELL_NAME(id))}">`
+      ).join('');
+      const spells = spellIds.length
+        ? `<span class="spell-icons" role="img" aria-label="${esc(spellNames.join(' and '))}">${spellIcons}</span>` +
+          `<span class="spell-names">${esc(b.summoners)}</span>`
+        : `<span class="spell-names">${esc(b.summoners)}</span>` +
+          `<span class="spell-default standard-copy">recommended</span>`;
+      return (
       `<div class="ledger-row${i === state.sel ? ' sel' : ''}" data-idx="${i}">` +
       `<span class="num">${String(i + 1).padStart(2, '0')}</span>` +
-      `<span>${esc(b.champ)}</span><span>${esc(b.role)}</span>` +
-      `<span class="sm">${esc(b.path)}</span><span class="sm">${esc(b.summoners)}</span></div>`).join('');
+      `<span class="ledger-champion">${esc(b.champ)}</span>` +
+      `<span><span class="classic-copy">${esc(b.role)}</span><span class="standard-copy">${esc(titleCase(b.role))}</span></span>` +
+      `<span class="sm">${esc(b.path)}</span><span class="sm ledger-spells">${spells}</span></div>`);
+    }).join('');
   }
 
   function renderSettings() {
     const s = state.settings;
     $('setRank').textContent = s.rank + ' ▾';
     $('setRegion').textContent = s.region + ' ▾';
-    $('setAutoRole').textContent = s.auto_role ? '[x]' : '[ ]';
     $('setInterface').textContent = (s.interface_style === 'classic' ? 'DAEMON Classic' : 'Standard') + ' ▾';
-    $('setPhosphor').textContent = s.phosphor + ' ▾';
-    $('setAutostart').textContent = s.autostart ? '[x]' : '[ ]';
+    $('setPhosphor').textContent = (standardInterface() ? titleCase(s.phosphor) : s.phosphor) + ' ▾';
+    [
+      [$('setAutoRole'), !!s.auto_role],
+      [$('setAutostart'), !!s.autostart]
+    ].forEach(([el, enabled]) => {
+      el.classList.toggle('on', enabled);
+      el.setAttribute('aria-checked', String(enabled));
+      const classic = el.querySelector('.classic-toggle');
+      if (classic) classic.textContent = enabled ? '[x]' : '[ ]';
+    });
     document.querySelectorAll('[data-trig]').forEach(el => {
-      el.textContent = (el.dataset.trig === s.trigger ? '(•)' : '( )') +
+      const selected = el.dataset.trig === s.trigger;
+      el.classList.toggle('selected', selected);
+      el.setAttribute('aria-checked', String(selected));
+      const classic = el.querySelector('.classic-radio');
+      if (classic) classic.textContent = (selected ? '(•)' : '( )') +
         ' ' + (el.dataset.trig === 'hover' ? 'hover' : 'lock-in');
     });
   }
@@ -284,7 +346,17 @@
     $('historyAverageRank').textContent = performance.average_rank == null
       ? '#—'
       : `#${Number(performance.average_rank).toFixed(1)}`;
-    $('historyLoaded').textContent = `${h.rows.length} / ${total}`;
+    $('historyLoaded').innerHTML =
+      `<span class="classic-copy">${h.rows.length} / ${total}</span>` +
+      `<span class="standard-copy">Showing ${h.rows.length} of ${total}</span>`;
+    const formRows = h.rows.slice(0, 10);
+    $('historyRecentForm').setAttribute(
+      'aria-label',
+      formRows.length ? formRows.map(row => row.local_win ? 'win' : 'loss').join(', ') : 'No recent matches'
+    );
+    $('historyRecentForm').innerHTML = formRows.map(row =>
+      `<i class="${row.local_win ? 'win' : 'loss'}" title="${row.local_win ? 'Victory' : 'Defeat'}"></i>`
+    ).join('');
     $('historyFeed').setAttribute('aria-busy', String(h.loading || h.syncing));
     const rows = $('historyRows');
     if (!h.rows.length) {
@@ -298,18 +370,29 @@
         const minutes = Math.floor(duration / 60);
         const seconds = String(duration % 60).padStart(2, '0');
         const result = win ? 'Victory' : 'Defeat';
+        const deaths = Number(row.deaths) || 0;
+        const kdaRatio = deaths
+          ? ((Number(row.kills) + Number(row.assists)) / deaths).toFixed(2)
+          : 'Perfect';
         const cardLabel = `${result}, ${row.local_champion_name}, ${row.local_role}, DAEMON score ${score.toFixed(1)}, match rank ${rank} of 10`;
         return `<article class="history-card ${win ? 'is-win' : 'is-loss'}" data-game="${row.game_id}" ` +
           `role="button" tabindex="0" aria-label="${esc(cardLabel)}">` +
-          `<div class="history-result"><strong>${win ? 'W' : 'L'}</strong><span>${win ? 'VICTORY' : 'DEFEAT'}</span></div>` +
+          `<div class="history-result"><strong class="classic-result-mark">${win ? 'W' : 'L'}</strong><span>${result}</span></div>` +
           `<div class="history-match">` +
-            `<div class="history-match-title"><strong>${esc(row.local_champion_name)}</strong>` +
-              `<span>${esc(row.local_role)}</span></div>` +
-            `<div class="history-kda"><b>${row.kills}/${row.deaths}/${row.assists}</b><span>KDA</span></div>` +
-            `<div class="history-match-meta">${queueLabel(row.queue_id)} · ${minutes}:${seconds} · ${historyWhen(row.game_creation_date)}</div>` +
+            `<div class="history-champion-art"><span>${esc(String(row.local_champion_name || '?').slice(0, 2))}</span>` +
+              `<img src="${championIconUrl(row.local_champion_id)}" alt="" loading="lazy" onerror="this.style.display='none'"></div>` +
+            `<div class="history-match-copy">` +
+              `<div class="history-match-title"><strong>${esc(row.local_champion_name)}</strong>` +
+                `<span><span class="classic-copy">${esc(row.local_role)}</span>` +
+                  `<span class="standard-copy">${esc(titleCase(row.local_role))}</span></span></div>` +
+              `<div class="history-kda"><b><span>${row.kills}</span>/<span class="deaths">${row.deaths}</span>/<span>${row.assists}</span></b>` +
+                `<span>KDA</span><em>${kdaRatio === 'Perfect' ? 'Perfect KDA' : `${kdaRatio} ratio`}</em></div>` +
+              `<div class="history-match-meta">${titleCase(queueLabel(row.queue_id).toLowerCase())}<i>·</i>${minutes}:${seconds}<i>·</i>${historyWhen(row.game_creation_date)}</div>` +
+            `</div>` +
           `</div>` +
-          `<div class="history-score"><span>DAEMON</span><strong>${score.toFixed(1)}</strong><em>${scoreBand(score)}</em></div>` +
-          `<div class="history-rank ${rankClass(rank)}"><span>MATCH RANK</span><strong>#${rank}</strong><em>${rankLabel(rank)}</em></div>` +
+          `<div class="history-score"><span><span class="classic-copy">DAEMON</span><span class="standard-copy">DAEMON score</span></span>` +
+            `<strong>${score.toFixed(1)}</strong><em>${scoreBand(score)}</em></div>` +
+          `<div class="history-rank ${rankClass(rank)}"><span>Match rank</span><strong>#${rank}</strong><em>${rankLabel(rank)}</em></div>` +
         `</article>`;
       }).join('');
     }
@@ -319,11 +402,12 @@
     more.classList.toggle('disabled', moreDisabled);
     more.setAttribute('aria-disabled', String(moreDisabled));
     more.tabIndex = moreDisabled ? -1 : 0;
-    more.textContent = h.loading
-      ? '[loading archive...]'
+    const remaining = Math.min(12, total - h.rows.length);
+    more.innerHTML = h.loading
+      ? '<span class="classic-copy">[loading archive...]</span><span class="standard-copy">Loading matches…</span>'
       : h.hasMore
-        ? `[load ${Math.min(12, total - h.rows.length)} more]`
-        : `[archive complete // ${h.rows.length} matches]`;
+        ? `<span class="classic-copy">[load ${remaining} more]</span><span class="standard-copy">Load ${remaining} more</span>`
+        : `<span class="classic-copy">[archive complete // ${h.rows.length} matches]</span><span class="standard-copy">All ${h.rows.length} matches loaded</span>`;
   }
   function loadHistory(reset) {
     if (!window.API.ready()) { renderHistory(); return; }
@@ -433,13 +517,16 @@
       if (active) t.setAttribute('aria-current', 'page');
       else t.removeAttribute('aria-current');
     });
-    $('promptHint').textContent = PROMPTS[name];
+    renderPrompt();
     if (name === 'history') {
       setHistorySection(state.history.section);
       if (!state.history.loaded) loadHistory(true);
     }
     const body = $('viewBody');
-    if (body && body.focus) body.focus({ preventScroll: true });
+    if (body) {
+      body.dataset.screen = name;
+      if (body.focus) body.focus({ preventScroll: true });
+    }
   }
 
   function applyTheme(name) {
@@ -451,7 +538,17 @@
     const interfaceStyle = name === 'classic' ? 'classic' : 'standard';
     document.documentElement.setAttribute('data-interface', interfaceStyle);
     state.settings.interface_style = interfaceStyle;
+    renderPrompt();
     renderSettings();
+    renderMonitor();
+    renderBuilds();
+    renderHistory();
+  }
+  function renderPrompt() {
+    const hint = $('promptHint');
+    if (!hint) return;
+    const standard = document.documentElement.getAttribute('data-interface') === 'standard';
+    hint.textContent = (standard ? STANDARD_PROMPTS : PROMPTS)[state.screen] || '';
   }
 
   function renderAll() {
@@ -568,7 +665,7 @@
       .forEach(el => el.addEventListener('mousedown', e => e.stopPropagation()));
     document.querySelectorAll('.tab').forEach(t =>
       t.addEventListener('click', () => setScreen(t.dataset.screen)));
-    document.querySelectorAll('[role="button"]').forEach(el =>
+    document.querySelectorAll('[role="button"], [role="switch"], [role="radio"]').forEach(el =>
       el.addEventListener('keydown', activateButtonOnKey));
     document.querySelectorAll('[data-cmd]').forEach(el =>
       el.addEventListener('click', () => cmd(el.dataset.cmd)));
@@ -722,20 +819,53 @@
   }
 
   // floating dropdown (editor + future settings menus)
-  let _menuEl = null;
-  function closeMenu() {
-    if (_menuEl) { _menuEl.remove(); _menuEl = null; document.removeEventListener('mousedown', _menuOutside, true); }
+  let _menuEl = null, _menuAnchor = null;
+  function closeMenu(restoreFocus) {
+    if (_menuEl) {
+      const anchor = _menuAnchor;
+      _menuEl.remove(); _menuEl = null;
+      if (anchor) anchor.setAttribute('aria-expanded', 'false');
+      _menuAnchor = null;
+      document.removeEventListener('mousedown', _menuOutside, true);
+      if (restoreFocus && anchor && anchor.focus) anchor.focus();
+    }
   }
   function _menuOutside(e) { if (_menuEl && !_menuEl.contains(e.target)) closeMenu(); }
   function openMenu(anchor, options, current, onPick) {
     closeMenu();
-    const m = document.createElement('div'); m.className = 'menu-pop';
+    const m = document.createElement('div'); m.className = 'menu-pop'; m.setAttribute('role', 'menu');
+    anchor.setAttribute('aria-expanded', 'true');
+    _menuAnchor = anchor;
+    const items = [];
+    const focusItem = index => {
+      const next = (index + items.length) % items.length;
+      items.forEach((item, i) => { item.tabIndex = i === next ? 0 : -1; });
+      items[next].focus();
+    };
     options.forEach(opt => {
       const label = Array.isArray(opt) ? opt[0] : opt;
       const value = Array.isArray(opt) ? opt[1] : opt;
       const it = document.createElement('div');
-      it.className = 'mi' + (value === current ? ' on' : ''); it.textContent = label;
-      it.addEventListener('click', () => { onPick(value); closeMenu(); });
+      const selected = value === current;
+      it.className = 'mi' + (selected ? ' on' : '');
+      it.setAttribute('role', 'menuitemradio');
+      it.setAttribute('aria-checked', String(selected));
+      const text = document.createElement('span'); text.textContent = label;
+      const check = document.createElement('span'); check.className = 'mi-check'; check.textContent = '✓';
+      it.append(text, check);
+      it.tabIndex = selected ? 0 : -1;
+      const pick = () => { onPick(value); closeMenu(true); };
+      it.addEventListener('click', pick);
+      it.addEventListener('keydown', e => {
+        const index = items.indexOf(it);
+        if (e.key === 'ArrowDown') { e.preventDefault(); focusItem(index + 1); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); focusItem(index - 1); }
+        else if (e.key === 'Home') { e.preventDefault(); focusItem(0); }
+        else if (e.key === 'End') { e.preventDefault(); focusItem(items.length - 1); }
+        else if (e.key === 'Escape') { e.preventDefault(); closeMenu(true); }
+        else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); }
+      });
+      items.push(it);
       m.appendChild(it);
     });
     document.body.appendChild(m);
@@ -743,6 +873,10 @@
     m.style.left = r.left + 'px'; m.style.top = (r.bottom + 2) + 'px';
     setTimeout(() => document.addEventListener('mousedown', _menuOutside, true), 0);
     _menuEl = m;
+    requestAnimationFrame(() => {
+      const selected = items.findIndex(item => item.classList.contains('on'));
+      focusItem(selected >= 0 ? selected : 0);
+    });
   }
 
   function wireEditor() {

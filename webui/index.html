@@ -18,13 +18,13 @@
         <div class="topbar pywebview-drag-region">
           <div class="brand">
             <span class="brand-name">DAEMON</span>
-            <span class="brand-ver">v1.10</span>
+            <span class="brand-ver">v1.11</span>
           </div>
           <div class="menu" role="navigation" aria-label="Primary navigation">
-            <span class="tab" data-screen="monitor" role="button" tabindex="0" aria-current="page">[1] MONITOR</span>
-            <span class="tab" data-screen="builds" role="button" tabindex="0">[2] BUILDS</span>
-            <span class="tab" data-screen="settings" role="button" tabindex="0">[3] SETTINGS</span>
-            <span class="tab" data-screen="history" role="button" tabindex="0">[4] HISTORY</span>
+            <span class="tab" data-screen="monitor" role="button" tabindex="0" aria-current="page"><span class="tab-key">[1]</span><span class="tab-name">Monitor</span></span>
+            <span class="tab" data-screen="builds" role="button" tabindex="0"><span class="tab-key">[2]</span><span class="tab-name">Builds</span></span>
+            <span class="tab" data-screen="settings" role="button" tabindex="0"><span class="tab-key">[3]</span><span class="tab-name">Settings</span></span>
+            <span class="tab" data-screen="history" role="button" tabindex="0"><span class="tab-key">[4]</span><span class="tab-name">History</span></span>
           </div>
           <div class="topright">
             <div class="status" id="status" role="button" tabindex="0">
@@ -47,7 +47,7 @@
             <div class="monitor-grid">
 
               <div class="panel">
-                <span class="ptitle">CHAMPION</span>
+                <span class="ptitle">Champion</span>
                 <div class="champ-name" id="champName">—</div>
                 <div class="champ-meta" id="champMeta">[ awaiting champ select ]</div>
                 <div class="champ-badge" id="champBadge" hidden>&gt;&gt; RUNES IMPORTED OK</div>
@@ -66,12 +66,12 @@
                 <div class="mo">
                   <label>vs:</label>
                   <input id="moInput" type="text" spellcheck="false" autocomplete="off">
-                  <span class="go" id="moGo">[look up]</span>
+                  <span class="go" id="moGo"><span class="classic-copy">[look up]</span><span class="standard-copy">Look up</span></span>
                 </div>
               </div>
 
               <div class="panel">
-                <span class="ptitle">RUNE PAGE</span>
+                <span class="ptitle">Rune page</span>
                 <div class="runes" id="runePage">
                   <div class="lrow"><span>keystone</span><span class="leader"></span><span class="val" id="rKeystone">—</span></div>
                   <div class="lrow"><span>primary</span><span class="leader"></span><span class="val dim" id="rPrimary">—</span></div>
@@ -88,10 +88,10 @@
               </div>
 
               <div class="panel span2">
-                <span class="ptitle">DISPATCH LOG</span>
+                <span class="ptitle"><span class="classic-copy">DISPATCH LOG</span><span class="standard-copy">Activity</span></span>
                 <span class="pactions">
-                  <span data-cmd="reimport">reimport</span>
-                  <span data-cmd="clear">clear</span>
+                  <span data-cmd="reimport">Reimport</span>
+                  <span data-cmd="clear">Clear</span>
                 </span>
                 <div class="log" id="logBox"></div>
               </div>
@@ -102,51 +102,95 @@
           <!-- ===================== BUILDS ===================== -->
           <section class="view" data-view="builds" hidden>
             <div class="page-head">
-              <span class="page-title">~/builds.ledger</span>
+              <span class="page-title"><span class="classic-copy">~/builds.ledger</span><span class="standard-copy">Custom builds</span></span>
               <span class="page-note" id="buildsCount"></span>
             </div>
-            <div class="page-sub">champions here import YOUR runes instead of the crowd's top build.</div>
+            <div class="page-sub"><span class="classic-copy">champions here import YOUR runes instead of the crowd's top build.</span><span class="standard-copy">Your saved builds override the recommended setup for these champions.</span></div>
             <div class="ledger">
               <div class="ledger-head">
-                <span>№</span><span>CHAMPION</span><span>ROLE</span><span>PATH</span><span>SUMMONERS</span>
+                <span>№</span><span>Champion</span><span>Role</span>
+                <span><span class="classic-copy">PATH</span><span class="standard-copy">Rune paths</span></span>
+                <span><span class="classic-copy">SUMMONERS</span><span class="standard-copy">Spells</span></span>
               </div>
               <div id="ledgerRows"></div>
             </div>
             <div class="hints">
-              <span data-cmd="add"><b>[a]</b> add</span>
-              <span data-cmd="edit"><b>[e]</b> edit</span>
-              <span data-cmd="delete"><b>[d]</b> delete</span>
-              <span><b>[↑↓]</b> select</span>
+              <span class="hint-action primary" data-cmd="add"><span class="classic-copy"><b>[a]</b> add</span><span class="standard-copy">Add build <kbd>A</kbd></span></span>
+              <span class="hint-action" data-cmd="edit"><span class="classic-copy"><b>[e]</b> edit</span><span class="standard-copy">Edit selected <kbd>E</kbd></span></span>
+              <span class="hint-action danger" data-cmd="delete"><span class="classic-copy"><b>[d]</b> delete</span><span class="standard-copy">Delete <kbd>D</kbd></span></span>
+              <span class="selection-hint"><span class="classic-copy"><b>[↑↓]</b> select</span><span class="standard-copy"><kbd>↑</kbd><kbd>↓</kbd> Select row</span></span>
             </div>
           </section>
 
           <!-- ===================== SETTINGS ===================== -->
           <section class="view" data-view="settings" hidden>
             <div class="page-head">
-              <span class="page-title">~/daemon.conf</span>
-              <span class="page-note" style="font-family:'Space Mono',monospace;font-size:10px">%APPDATA%\RuneSync\overrides.json</span>
+              <span class="page-title"><span class="classic-copy">~/daemon.conf</span><span class="standard-copy">Settings</span></span>
+              <span class="page-note"><span class="classic-copy">%APPDATA%\RuneSync\overrides.json</span><span class="standard-copy">Configure champion-select behavior and appearance.</span></span>
             </div>
             <div class="conf">
-              <div class="comment"># where the numbers come from</div>
-              <div class="crow"><span class="k">rank_filter</span><span>=</span><span class="v" id="setRank" data-set="rank" role="button" tabindex="0">Platinum+ ▾</span></div>
-              <div class="crow"><span class="k">region</span><span>=</span><span class="v" id="setRegion" data-set="region" role="button" tabindex="0">World ▾</span></div>
+              <div class="settings-group">
+                <div class="comment"><span class="classic-copy"># where the numbers come from</span><span class="standard-copy">Data preferences</span></div>
+                <div class="crow">
+                  <span class="k"><span class="classic-copy">rank_filter</span><span class="standard-setting"><strong>Minimum data rank</strong><small>Filter recommended builds by player rank.</small></span></span>
+                  <span class="setting-eq">=</span>
+                  <span class="v" id="setRank" data-set="rank" role="button" tabindex="0">Platinum+ ▾</span>
+                </div>
+                <div class="crow">
+                  <span class="k"><span class="classic-copy">region</span><span class="standard-setting"><strong>Region</strong><small>Prefer build data from this server.</small></span></span>
+                  <span class="setting-eq">=</span>
+                  <span class="v" id="setRegion" data-set="region" role="button" tabindex="0">World ▾</span>
+                </div>
+              </div>
 
-              <div class="comment"># how it behaves</div>
-              <div class="crow"><span class="k">auto_detect_role</span><span>=</span><span class="vlit" id="setAutoRole" data-set="auto_role" role="button" tabindex="0">[x]</span></div>
-              <div class="crow"><span class="k">import_on</span><span>=</span>
-                <span class="radio" data-trig="hover" role="button" tabindex="0">(•)&nbsp;hover</span><span class="radio" data-trig="lock" role="button" tabindex="0">( )&nbsp;lock-in</span></div>
+              <div class="settings-group">
+                <div class="comment"><span class="classic-copy"># how it behaves</span><span class="standard-copy">Champion select</span></div>
+                <div class="crow">
+                  <span class="k"><span class="classic-copy">auto_detect_role</span><span class="standard-setting"><strong>Detect my role automatically</strong><small>Use League's assigned position when available.</small></span></span>
+                  <span class="setting-eq">=</span>
+                  <span class="vlit setting-switch" id="setAutoRole" data-set="auto_role" role="switch" aria-checked="true" tabindex="0" aria-label="Detect my role automatically">
+                    <span class="classic-toggle">[x]</span><span class="standard-toggle" aria-hidden="true"><i></i></span>
+                  </span>
+                </div>
+                <div class="crow trigger-row">
+                  <span class="k"><span class="classic-copy">import_on</span><span class="standard-setting"><strong>Import timing</strong><small>Choose when RuneSync updates your setup.</small></span></span>
+                  <span class="setting-eq">=</span>
+                  <span class="trigger-options" role="radiogroup" aria-label="Import timing">
+                    <span class="radio" data-trig="hover" role="radio" aria-checked="false" tabindex="0"><span class="classic-radio">( ) hover</span><span class="standard-radio">On hover</span></span>
+                    <span class="radio" data-trig="lock" role="radio" aria-checked="true" tabindex="0"><span class="classic-radio">(•) lock-in</span><span class="standard-radio">On lock-in</span></span>
+                  </span>
+                </div>
+              </div>
 
-              <div class="comment"># appearance</div>
-              <div class="crow"><span class="k">interface</span><span>=</span><span class="v" id="setInterface" data-set="interface_style" role="button" tabindex="0">Standard ▾</span></div>
-              <div class="crow"><span class="k">phosphor</span><span>=</span><span class="v" id="setPhosphor" data-set="phosphor" role="button" tabindex="0">amber ▾</span></div>
+              <div class="settings-group">
+                <div class="comment"><span class="classic-copy"># appearance</span><span class="standard-copy">Appearance</span></div>
+                <div class="crow">
+                  <span class="k"><span class="classic-copy">interface</span><span class="standard-setting"><strong>Interface style</strong><small>Switch between Standard and DAEMON Classic.</small></span></span>
+                  <span class="setting-eq">=</span>
+                  <span class="v" id="setInterface" data-set="interface_style" role="button" tabindex="0">Standard ▾</span>
+                </div>
+                <div class="crow">
+                  <span class="k"><span class="classic-copy">phosphor</span><span class="standard-setting"><strong>Accent color</strong><small>Used for selections, status, and emphasis.</small></span></span>
+                  <span class="setting-eq">=</span>
+                  <span class="v" id="setPhosphor" data-set="phosphor" role="button" tabindex="0">amber ▾</span>
+                </div>
+              </div>
 
-              <div class="comment"># system</div>
-              <div class="crow"><span class="k">start_with_windows</span><span>=</span><span class="vlit" id="setAutostart" data-set="autostart" role="button" tabindex="0">[ ]</span>
-                <span class="note"># lives in tray, wakes when league opens</span></div>
+              <div class="settings-group">
+                <div class="comment"><span class="classic-copy"># system</span><span class="standard-copy">Startup</span></div>
+                <div class="crow">
+                  <span class="k"><span class="classic-copy">start_with_windows</span><span class="standard-setting"><strong>Start with Windows</strong><small>Stay in the tray and wake when League opens.</small></span></span>
+                  <span class="setting-eq">=</span>
+                  <span class="vlit setting-switch" id="setAutostart" data-set="autostart" role="switch" aria-checked="false" tabindex="0" aria-label="Start RuneSync with Windows">
+                    <span class="classic-toggle">[ ]</span><span class="standard-toggle" aria-hidden="true"><i></i></span>
+                  </span>
+                  <span class="note"># lives in tray, wakes when league opens</span>
+                </div>
+              </div>
 
               <div class="save-row">
-                <span class="save-btn" id="saveBtn" role="button" tabindex="0">:w  write config</span>
-                <span class="save-msg" id="saveMsg" hidden>"daemon.conf" written ✓</span>
+                <span class="save-btn" id="saveBtn" role="button" tabindex="0"><span class="classic-copy">:w&nbsp; write config</span><span class="standard-copy">Save changes</span></span>
+                <span class="save-msg" id="saveMsg" hidden><span class="classic-copy">"daemon.conf" written ✓</span><span class="standard-copy">Settings saved</span></span>
               </div>
             </div>
             <div class="legal">
@@ -159,39 +203,43 @@
           <section class="view" data-view="history" hidden>
             <div class="page-head history-page-head">
               <div>
-                <span class="page-title">~/match.history</span>
-                <span class="history-eyebrow">PERFORMANCE ARCHIVE // LOCAL ONLY</span>
+                <span class="page-title"><span class="classic-copy">~/match.history</span><span class="standard-copy">Match history</span></span>
+                <span class="history-eyebrow"><span class="classic-copy">PERFORMANCE ARCHIVE // LOCAL ONLY</span><span class="standard-copy">Recent Summoner's Rift performance, stored locally</span></span>
               </div>
               <span class="history-controls">
                 <span class="history-state" id="historyState" role="status" aria-live="polite" aria-atomic="true">local archive</span>
-                <span class="dbg-act" id="historyRefresh" role="button" tabindex="0" aria-label="Sync match history">[sync]</span>
+                <span class="dbg-act" id="historyRefresh" role="button" tabindex="0" aria-label="Sync match history"><span class="classic-copy">[sync]</span><span class="standard-copy">↻&nbsp; Sync</span></span>
               </span>
             </div>
             <div class="history-error" id="historyError" role="alert" aria-live="assertive" hidden></div>
             <div class="history-tabs" role="tablist" aria-label="History sections">
               <button type="button" id="historyTabMatches" class="history-tab active" data-history-section="matches"
-                role="tab" aria-selected="true" aria-controls="historyPanelMatches">MATCHES</button>
+                role="tab" aria-selected="true" aria-controls="historyPanelMatches">Matches</button>
               <button type="button" id="historyTabOverview" class="history-tab" data-history-section="overview"
-                role="tab" aria-selected="false" aria-controls="historyPanelOverview" tabindex="-1">OVERVIEW</button>
+                role="tab" aria-selected="false" aria-controls="historyPanelOverview" tabindex="-1">Overview</button>
               <button type="button" id="historyTabChampions" class="history-tab" data-history-section="champions"
-                role="tab" aria-selected="false" aria-controls="historyPanelChampions" tabindex="-1">CHAMPIONS</button>
+                role="tab" aria-selected="false" aria-controls="historyPanelChampions" tabindex="-1">Champions</button>
               <button type="button" id="historyTabRoles" class="history-tab" data-history-section="roles"
-                role="tab" aria-selected="false" aria-controls="historyPanelRoles" tabindex="-1">ROLES</button>
+                role="tab" aria-selected="false" aria-controls="historyPanelRoles" tabindex="-1">Roles</button>
             </div>
             <div class="history-section" id="historyPanelMatches" data-history-panel="matches"
               role="tabpanel" aria-labelledby="historyTabMatches">
               <div class="history-recent" role="region" aria-label="Recent performance">
-                <div>
-                  <span>RECENT FORM // 20</span>
+                <div class="history-recent-copy">
+                  <span><span class="classic-copy">RECENT FORM // 20</span><span class="standard-copy">Recent 20 games</span></span>
                   <strong id="historyRecentMeta">no scored games</strong>
+                </div>
+                <div class="history-form-wrap">
+                  <span>Last 10 shown</span>
+                  <div class="history-form" id="historyRecentForm" aria-label="Recent match results"></div>
                 </div>
                 <div class="history-recent-rate">
                   <strong id="historyRecentWr">—</strong>
-                  <span>WIN RATE</span>
+                  <span>Win rate</span>
                 </div>
               </div>
               <div class="history-feed-head">
-                <span>RECENT MATCHES</span>
+                <span>Recent matches</span>
                 <b id="historyLoaded" aria-live="polite">0 / 0</b>
               </div>
               <div class="history-feed" id="historyFeed" aria-label="Match history" aria-busy="false">
@@ -204,18 +252,18 @@
             <div class="history-section history-analytics" id="historyPanelOverview" data-history-panel="overview"
               role="tabpanel" aria-labelledby="historyTabOverview" tabindex="0" hidden>
               <div class="history-analytics-grid" role="region" aria-label="Archive overview">
-                <div><span>ARCHIVE</span><strong id="historyArchiveCount">0</strong><small>local matches</small></div>
-                <div><span>ALL-TIME WIN RATE</span><strong id="historyOverallWr">—</strong><small id="historyOverallMeta">no scored games</small></div>
-                <div><span>AVERAGE DAEMON</span><strong id="historyAverageScore">—</strong><small>performance score</small></div>
-                <div><span>AVERAGE RANK</span><strong id="historyAverageRank">#—</strong><small>within each match</small></div>
-                <div><span>BEST FINISH</span><strong id="historyBestRank">#—</strong><small>peak match rank</small></div>
+                <div><span>Archive</span><strong id="historyArchiveCount">0</strong><small>local matches</small></div>
+                <div><span>All-time win rate</span><strong id="historyOverallWr">—</strong><small id="historyOverallMeta">no scored games</small></div>
+                <div><span>Average DAEMON</span><strong id="historyAverageScore">—</strong><small>performance score</small></div>
+                <div><span>Average rank</span><strong id="historyAverageRank">#—</strong><small>within each match</small></div>
+                <div><span>Best finish</span><strong id="historyBestRank">#—</strong><small>peak match rank</small></div>
               </div>
               <p class="history-data-note">latest 100 LCU backfill + every supported match DAEMON captures</p>
             </div>
             <div class="history-section history-analytics" id="historyPanelChampions" data-history-panel="champions"
               role="tabpanel" aria-labelledby="historyTabChampions" tabindex="0" hidden>
               <div class="history-analytics-head">
-                <span>CHAMPION PERFORMANCE</span>
+                <span>Champion performance</span>
                 <small>win rate · games</small>
               </div>
               <div class="history-breakdown-list" id="historyChampions"></div>
@@ -223,7 +271,7 @@
             <div class="history-section history-analytics" id="historyPanelRoles" data-history-panel="roles"
               role="tabpanel" aria-labelledby="historyTabRoles" tabindex="0" hidden>
               <div class="history-analytics-head">
-                <span>ROLE PERFORMANCE</span>
+                <span>Role performance</span>
                 <small>win rate · games</small>
               </div>
               <div class="history-breakdown-list" id="historyRoles"></div>
@@ -233,7 +281,7 @@
           <!-- ===================== POST-GAME REPORT ===================== -->
           <section class="view" data-view="report" hidden>
             <div class="page-head">
-              <span class="page-title">~/postgame.report</span>
+              <span class="page-title"><span class="classic-copy">~/postgame.report</span><span class="standard-copy">Match report</span></span>
               <span class="ed-back" id="reportBack" role="button" tabindex="0" aria-label="Return to match history">‹ history</span>
             </div>
             <div class="report-hero" id="reportHero" role="region" aria-label="Match performance summary">

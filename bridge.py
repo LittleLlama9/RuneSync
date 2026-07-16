@@ -179,10 +179,13 @@ class Api:
     def get_builds(self) -> list:
         out = []
         for champ, d in self.overrides.all().items():
+            spell1 = d.get("spell1", 0)
+            spell2 = d.get("spell2", 0)
             out.append({
                 "champ": champ, "role": d.get("role", "auto"),
                 "path": f"{d.get('primary_tree', '—')} × {d.get('secondary_tree', '—')}",
-                "summoners": _spell_label(d.get("spell1", 0), d.get("spell2", 0)),
+                "summoners": _spell_label(spell1, spell2),
+                "spell1": spell1, "spell2": spell2,
             })
         return out
 
