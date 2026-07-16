@@ -15,6 +15,9 @@ def test_history_and_report_views_are_wired():
     assert 'data-view="report"' in html
     assert 'id="historyFeed"' in html
     assert 'id="historyBestRank"' in html
+    assert 'class="history-overview"' in html
+    assert '<details class="history-breakdown">' in html
+    assert '<details class="history-breakdown" open>' not in html
     assert 'id="reportRankLabel"' in html
     assert "get_history_summary" in js
     assert "get_match_history" in js
@@ -55,7 +58,10 @@ def test_history_report_readability_and_keyboard_contract():
     assert min(sizes) >= 10
     assert "@media (prefers-reduced-motion: reduce)" in css
     assert "[role=\"button\"]:focus-visible" in css
-    assert ".history-dashboard .panel { min-height:112px; padding:16px; overflow:visible; }" in css
+    assert "summary:focus-visible" in css
+    assert ".history-overview {" in css
+    assert ".history-breakdown > summary {" in css
+    assert ".history-dashboard" not in css
 
     history_score = float(re.search(r"\.history-score strong \{[^}]*font-size:([0-9.]+)px", css).group(1))
     history_rank = float(re.search(r"\.history-rank strong \{[^}]*font-size:([0-9.]+)px", css).group(1))
