@@ -18,23 +18,23 @@
         <div class="topbar pywebview-drag-region">
           <div class="brand">
             <span class="brand-name">DAEMON</span>
-            <span class="brand-ver">v1.06</span>
+            <span class="brand-ver">v1.07</span>
           </div>
-          <div class="menu">
-            <span class="tab" data-screen="monitor">[1] MONITOR</span>
-            <span class="tab" data-screen="builds">[2] BUILDS</span>
-            <span class="tab" data-screen="settings">[3] SETTINGS</span>
-            <span class="tab" data-screen="history">[4] HISTORY</span>
+          <div class="menu" role="navigation" aria-label="Primary navigation">
+            <span class="tab" data-screen="monitor" role="button" tabindex="0" aria-current="page">[1] MONITOR</span>
+            <span class="tab" data-screen="builds" role="button" tabindex="0">[2] BUILDS</span>
+            <span class="tab" data-screen="settings" role="button" tabindex="0">[3] SETTINGS</span>
+            <span class="tab" data-screen="history" role="button" tabindex="0">[4] HISTORY</span>
           </div>
           <div class="topright">
-            <div class="status" id="status">
-              <span id="statusLabel">LEAGUE: WAITING</span>
+            <div class="status" id="status" role="button" tabindex="0">
+              <span id="statusLabel" aria-live="polite" aria-atomic="true">LEAGUE: WAITING</span>
               <span class="dot"></span>
             </div>
             <div class="wctl">
-              <span class="wbtn" id="wMin" title="Minimize">&minus;</span>
-              <span class="wbtn" id="wMax" title="Toggle fullscreen">&#9633;</span>
-              <span class="wbtn close" id="wClose" title="Hide to tray">&times;</span>
+              <span class="wbtn" id="wMin" title="Minimize" role="button" tabindex="0" aria-label="Minimize">&minus;</span>
+              <span class="wbtn" id="wMax" title="Toggle fullscreen" role="button" tabindex="0" aria-label="Toggle fullscreen">&#9633;</span>
+              <span class="wbtn close" id="wClose" title="Hide to tray" role="button" tabindex="0" aria-label="Hide to tray">&times;</span>
             </div>
           </div>
         </div>
@@ -162,11 +162,11 @@
                 <span class="history-eyebrow">PERFORMANCE ARCHIVE // LOCAL ONLY</span>
               </div>
               <span class="history-controls">
-                <span class="history-state" id="historyState">local archive</span>
-                <span class="dbg-act" id="historyRefresh">[sync]</span>
+                <span class="history-state" id="historyState" role="status" aria-live="polite" aria-atomic="true">local archive</span>
+                <span class="dbg-act" id="historyRefresh" role="button" tabindex="0" aria-label="Sync match history">[sync]</span>
               </span>
             </div>
-            <div class="history-error" id="historyError" hidden></div>
+            <div class="history-error" id="historyError" role="alert" aria-live="assertive" hidden></div>
             <div class="history-dashboard">
               <div class="history-archive panel">
                 <span class="ptitle">ANALYZED ARCHIVE</span>
@@ -207,13 +207,13 @@
             </div>
             <div class="history-feed-head">
               <span>LATEST PERFORMANCE</span>
-              <span><i>click a match for full report</i> · <b id="historyLoaded">0 / 0 loaded</b></span>
+              <span><i>open a match for full report</i> · <b id="historyLoaded" aria-live="polite">0 / 0 loaded</b></span>
             </div>
-            <div class="history-feed" id="historyFeed">
+            <div class="history-feed" id="historyFeed" aria-label="Match history" aria-busy="false">
               <div id="historyRows"></div>
             </div>
             <div class="history-footer">
-              <span id="historyMore" class="history-more">[archive complete]</span>
+              <span id="historyMore" class="history-more" role="button" tabindex="0" aria-label="Load more match history">[archive complete]</span>
               <span class="history-note">latest 100 LCU backfill + every match DAEMON captures</span>
             </div>
           </section>
@@ -222,9 +222,9 @@
           <section class="view" data-view="report" hidden>
             <div class="page-head">
               <span class="page-title">~/postgame.report</span>
-              <span class="ed-back" id="reportBack">‹ history</span>
+              <span class="ed-back" id="reportBack" role="button" tabindex="0" aria-label="Return to match history">‹ history</span>
             </div>
-            <div class="report-hero" id="reportHero">
+            <div class="report-hero" id="reportHero" role="region" aria-label="Match performance summary">
               <div class="report-rankbox">
                 <span>MATCH RANK</span>
                 <strong id="reportRank">#—</strong>

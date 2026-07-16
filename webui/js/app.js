@@ -88,6 +88,7 @@
     const el = $('status');
     el.classList.toggle('waiting', state.status === 'waiting');
     $('statusLabel').textContent = 'LEAGUE: ' + state.status.toUpperCase();
+    el.setAttribute('aria-label', `Toggle monitoring. League ${state.status}`);
   }
 
   function renderMonitor() {
@@ -276,6 +277,7 @@
       ? 'avg score —'
       : `avg score ${Number(performance.average_score).toFixed(1)} · avg rank #${Number(performance.average_rank).toFixed(1)}`;
     $('historyLoaded').textContent = `${h.rows.length} / ${total} loaded`;
+    $('historyFeed').setAttribute('aria-busy', String(h.loading || h.syncing));
     const rows = $('historyRows');
     if (!h.rows.length) {
       rows.innerHTML = `<div class="history-empty">${h.syncing ? 'syncing match history…' : 'no scored Summoner’s Rift games yet'}</div>`;
@@ -287,7 +289,10 @@
         const duration = Math.max(0, Number(row.duration) || 0);
         const minutes = Math.floor(duration / 60);
         const seconds = String(duration % 60).padStart(2, '0');
-        return `<article class="history-card ${win ? 'is-win' : 'is-loss'}" data-game="${row.game_id}">` +
+        const result = win ? 'Victory' : 'Defeat';
+        const cardLabel = `${result}, ${row.local_champion_name}, ${row.local_role}, DAEMON score ${score.toFixed(1)}, match rank ${rank} of 10`;
+        return `<article class="history-card ${win ? 'is-win' : 'is-loss'}" data-game="${row.game_id}" ` +
+          `role="button" tabindex="0" aria-label="${esc(cardLabel)}">` +
           `<div class="history-result"><strong>${win ? 'W' : 'L'}</strong><span>${win ? 'VICTORY' : 'DEFEAT'}</span></div>` +
           `<div class="history-match">` +
             `<div class="history-match-title"><strong>${esc(row.local_champion_name)}</strong>` +
@@ -303,7 +308,10 @@
     }
     h.hasMore = h.rows.length < total;
     const more = $('historyMore');
-    more.classList.toggle('disabled', !h.hasMore || h.loading);
+    const moreDisabled = !h.hasMore || h.loading;
+    more.classList.toggle('disabled', moreDisabled);
+    more.setAttribute('aria-disabled', String(moreDisabled));
+    more.tabIndex = moreDisabled ? -1 : 0;
     more.textContent = h.loading
       ? '[loading archive...]'
       : h.hasMore
@@ -412,8 +420,12 @@
     if (!PROMPTS[name]) return;
     state.screen = name;
     document.querySelectorAll('[data-view]').forEach(v => { v.hidden = v.dataset.view !== name; });
-    document.querySelectorAll('.tab').forEach(t =>
-      t.classList.toggle('active', t.dataset.screen === name || (name === 'report' && t.dataset.screen === 'history')));
+    document.querySelectorAll('.tab').forEach(t => {
+      const active = t.dataset.screen === name || (name === 'report' && t.dataset.screen === 'history');
+      t.classList.toggle('active', active);
+      if (active) t.setAttribute('aria-current', 'page');
+      else t.removeAttribute('aria-current');
+    });
     $('promptHint').textContent = PROMPTS[name];
     if (name === 'history' && !state.history.loaded) loadHistory(true);
     const body = $('viewBody');
@@ -477,6 +489,11 @@
     const t = e.target;
     return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
   }
+  function activateButtonOnKey(e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    e.currentTarget.click();
+  }
   function onKey(e) {
     const k = (e.key || '').toLowerCase();
     if (k === 'escape' && state.screen === 'builder') { setScreen('editor'); return; }
@@ -508,6 +525,8 @@
       .forEach(el => el.addEventListener('mousedown', e => e.stopPropagation()));
     document.querySelectorAll('.tab').forEach(t =>
       t.addEventListener('click', () => setScreen(t.dataset.screen)));
+    document.querySelectorAll('[role="button"]').forEach(el =>
+      el.addEventListener('keydown', activateButtonOnKey));
     document.querySelectorAll('[data-cmd]').forEach(el =>
       el.addEventListener('click', () => cmd(el.dataset.cmd)));
     $('status').addEventListener('click', toggleMonitoring);
@@ -562,6 +581,13 @@
     $('historyRows').addEventListener('click', e => {
       const row = e.target.closest('.history-card');
       if (row) openReport(Number(row.dataset.game));
+    });
+    $('historyRows').addEventListener('keydown', e => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = e.target.closest('.history-card');
+      if (!row) return;
+      e.preventDefault();
+      openReport(Number(row.dataset.game));
     });
     $('reportBack').addEventListener('click', () => setScreen('history'));
     wireEditor();

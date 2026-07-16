@@ -69,6 +69,10 @@ body {
 .dot { width:10px; height:10px; border-radius:50%; background:var(--pb);
   box-shadow:0 0 8px var(--pb); animation:rs-pulse 1.6s infinite; }
 .status.waiting .dot { background:var(--danger); box-shadow:0 0 8px var(--danger); }
+[role="button"]:focus-visible, .history-card:focus-visible {
+  outline:2px solid var(--pb); outline-offset:2px;
+  box-shadow:0 0 0 1px var(--bg), 0 0 14px var(--glow);
+}
 
 /* ── body / screens ── */
 .body {
@@ -192,30 +196,30 @@ body {
 
 /* ── history / post-game report ── */
 .history-page-head > div { display:flex; align-items:baseline; gap:12px; }
-.history-eyebrow { font-family:'Space Mono',monospace; font-size:10px; color:var(--pd);
+.history-eyebrow { font-family:'Space Mono',monospace; font-size:11px; color:var(--pd);
   letter-spacing:.1em; }
 .history-controls { display:flex; align-items:center; gap:4px; }
 .history-state { font-family:'Space Mono',monospace; font-size:11px; color:var(--pd); }
 .history-error { margin-top:10px; border:1px solid var(--danger); color:var(--danger);
-  padding:6px 10px; font-family:'Space Mono',monospace; font-size:10px; }
+  padding:6px 10px; font-family:'Space Mono',monospace; font-size:11px; }
 .history-dashboard {
   display:grid; grid-template-columns:1.15fr 1fr 1fr 1.05fr; gap:12px; margin-top:18px;
 }
-.history-dashboard .panel { min-height:112px; padding:16px; overflow:hidden; }
+.history-dashboard .panel { min-height:112px; padding:16px; overflow:visible; }
 .history-archive {
   background:linear-gradient(135deg,rgba(255,176,0,.10),transparent 65%);
 }
 .history-countline { display:flex; align-items:flex-end; gap:10px; }
 .history-countline strong { color:var(--pb); font-size:56px; line-height:.75; font-weight:normal; }
 .history-countline span { color:var(--pd); font-family:'Space Mono',monospace;
-  font-size:8px; line-height:1.5; letter-spacing:.08em; }
-.history-coverage { margin-top:13px; color:var(--pdd); font-family:'Space Mono',monospace;
-  font-size:8px; white-space:nowrap; }
+  font-size:10px; line-height:1.35; letter-spacing:.06em; }
+.history-coverage { margin-top:11px; color:var(--pd); font-family:'Space Mono',monospace;
+  font-size:10px; white-space:nowrap; }
 .hsum-wr { color:var(--pb); font-size:46px; line-height:.8; }
 .hsum-meta { color:var(--pd); font-size:14px; margin-top:10px; }
 .history-peak { background:linear-gradient(225deg,rgba(255,216,122,.08),transparent 60%); }
 .history-best { display:flex; align-items:flex-end; justify-content:space-between; }
-.history-best span { color:var(--pd); font-family:'Space Mono',monospace; font-size:8px; }
+.history-best span { color:var(--pd); font-family:'Space Mono',monospace; font-size:10px; }
 .history-best strong { color:var(--pb); font-size:50px; font-weight:normal; line-height:.75; }
 .history-average { margin-top:15px; border-top:1px dotted var(--pdd); padding-top:7px;
   color:var(--pd); font-size:13px; }
@@ -248,28 +252,28 @@ body {
 .history-result { display:flex; flex-direction:column; align-items:center; justify-content:center;
   border-right:1px solid var(--pdd); }
 .history-result strong { color:var(--pb); font-size:43px; line-height:.75; font-weight:normal; }
-.history-result span { color:var(--pd); font-family:'Space Mono',monospace; font-size:9px;
+.history-result span { color:var(--pd); font-family:'Space Mono',monospace; font-size:10px;
   letter-spacing:.08em; margin-top:8px; }
 .history-card.is-loss .history-result strong { color:var(--danger); }
 .history-match { min-width:0; padding:11px 16px 9px; }
 .history-match-title { display:flex; align-items:baseline; gap:9px; }
 .history-match-title strong { color:var(--pb); font-size:27px; font-weight:normal; }
-.history-match-title span { color:var(--pd); font-family:'Space Mono',monospace; font-size:11px; }
+.history-match-title span { color:var(--pd); font-family:'Space Mono',monospace; font-size:12px; }
 .history-statline { display:flex; align-items:baseline; gap:5px; margin-top:4px;
   color:var(--pd); font-size:14px; }
 .history-statline b { color:var(--p); font-size:19px; font-weight:normal; margin-left:10px; }
 .history-statline b:first-child { margin-left:0; }
-.history-statline span { font-family:'Space Mono',monospace; font-size:9px; }
+.history-statline span { font-family:'Space Mono',monospace; font-size:10px; }
 .history-score-track { height:5px; border:1px solid var(--pdd); margin-top:8px; }
 .history-score-track i { display:block; height:100%; background:var(--p);
   box-shadow:0 0 7px var(--glow); }
 .history-score, .history-rank { display:flex; flex-direction:column; align-items:center;
   justify-content:center; border-left:1px solid var(--pdd); }
 .history-score span, .history-rank span { color:var(--pd); font-family:'Space Mono',monospace;
-  font-size:9px; letter-spacing:.08em; }
+  font-size:10px; letter-spacing:.06em; }
 .history-score strong { color:var(--pb); font-size:34px; line-height:.9; font-weight:normal; }
 .history-score em, .history-rank em { color:var(--pd); font-family:'Space Mono',monospace;
-  font-size:9px; font-style:normal; margin-top:5px; }
+  font-size:10px; font-style:normal; margin-top:5px; }
 .history-rank strong { color:var(--p); font-size:46px; line-height:.8; font-weight:normal; }
 .history-rank.rank-first { background:var(--p); text-shadow:none; }
 .history-rank.rank-first span, .history-rank.rank-first strong,
@@ -291,17 +295,17 @@ body {
 .report-rankbox { display:flex; flex-direction:column; align-items:center; justify-content:center;
   border-right:1px solid var(--pdd); }
 .report-rankbox span, .report-scorebox span { color:var(--pd); font-family:'Space Mono',monospace;
-  font-size:8px; letter-spacing:.12em; }
+  font-size:10px; letter-spacing:.1em; }
 .report-rankbox strong { color:var(--p); font-size:68px; line-height:.72; font-weight:normal; }
 .report-rankbox em { color:var(--pd); font-family:'Space Mono',monospace;
-  font-size:8px; font-style:normal; margin-top:10px; }
+  font-size:10px; font-style:normal; margin-top:9px; }
 .report-hero.rank-first .report-rankbox { background:var(--p); text-shadow:none; }
 .report-hero.rank-first .report-rankbox span,
 .report-hero.rank-first .report-rankbox strong,
 .report-hero.rank-first .report-rankbox em { color:var(--bg); }
 .report-hero.rank-podium .report-rankbox { background:rgba(255,176,0,.10); }
 .report-identity { display:flex; flex-direction:column; justify-content:center; padding:14px 20px; }
-.report-result { font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.18em; }
+.report-result { font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.16em; }
 .report-result.win { color:var(--pb); }
 .report-result.loss { color:var(--danger); }
 .report-title { color:var(--pb); font-size:38px; line-height:1; margin-top:4px; }
@@ -310,7 +314,7 @@ body {
   border-left:1px solid var(--pdd); }
 .report-scorebox strong { display:block; color:var(--pb); font-size:58px; line-height:.85; font-weight:normal; }
 .report-scorebox em { display:block; color:var(--p); font-family:'Space Mono',monospace;
-  font-style:normal; font-size:8px; margin-top:8px; }
+  font-style:normal; font-size:10px; margin-top:8px; }
 .report-grid { display:grid; grid-template-columns:1.05fr .95fr; gap:12px; margin-top:18px; }
 .component-list { display:flex; flex-direction:column; gap:7px; }
 .component-row { display:grid; grid-template-columns:112px 1fr 38px; gap:8px; align-items:center; font-size:15px; }
@@ -322,23 +326,29 @@ body {
 .report-board-head, .report-player { display:grid;
   grid-template-columns:64px 1.25fr 1fr .65fr .75fr .55fr; gap:8px; align-items:center; }
 .report-board-head { padding:6px 10px; border-bottom:1px solid var(--pdd);
-  color:var(--pd); font-family:'Space Mono',monospace; font-size:9px; }
+  color:var(--pd); font-family:'Space Mono',monospace; font-size:10px; }
 .report-team { padding:3px 10px; color:var(--pd); background:rgba(255,176,0,.04);
   border-bottom:1px solid var(--pdd); font-family:'Space Mono',monospace;
-  font-size:8px; letter-spacing:.12em; }
+  font-size:10px; letter-spacing:.1em; }
 .report-player { padding:5px 10px; min-height:34px; font-size:15px; border-bottom:1px dotted var(--pdd); }
 .report-player:last-child { border-bottom:0; }
 .report-player.local { background:var(--p); color:var(--bg); text-shadow:none; }
 .player-rank { color:var(--p); font-size:20px; line-height:.8; }
 .player-rank i { display:block; color:var(--pd); font-family:'Space Mono',monospace;
-  font-size:9px; font-style:normal; margin-top:5px; }
+  font-size:10px; font-style:normal; margin-top:5px; }
 .report-player.rank-first:not(.local) { background:rgba(255,176,0,.10); }
 .report-player.rank-lower .player-rank { color:var(--pd); }
 .report-player.local .player-rank, .report-player.local .player-rank i,
 .report-player.local .player-score { color:var(--bg); }
 .player-score { color:var(--pb); font-size:19px; }
-.method-note { font-family:'Space Mono',monospace; color:var(--pd); font-size:9px;
+.method-note { font-family:'Space Mono',monospace; color:var(--pd); font-size:10px;
   margin-top:9px; line-height:1.45; }
+
+@media (prefers-reduced-motion: reduce) {
+  .content, .dot, .ov-live .dot { animation:none !important; }
+  .history-card { transition:none; }
+  .history-card:hover { transform:none; }
+}
 
 /* ── override editor ── */
 .ed-back { font-size:17px; color:var(--pd); cursor:pointer; }
