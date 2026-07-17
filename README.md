@@ -49,6 +49,17 @@ Rune recommendations and matchup win rates are aggregated with attribution from:
 Match history and post-game statistics come from the locally running League
 Client API. They are not uploaded anywhere and never leave your machine.
 
+## Riot API credentials (private research feature)
+
+A separate, disabled-by-default Match-V5 timeline research feature can use a
+Riot API key. If configured, that key is encrypted at rest with Windows
+DPAPI under `%APPDATA%\RuneSync\riot_api_key.bin`, is never written to the
+repo, git history, packaged build resources, or any log/bridge payload, and
+is never exposed by RuneSync's own status reporting. See
+[`docs/RIOT_API_KEY_POLICY.md`](docs/RIOT_API_KEY_POLICY.md) for the full
+policy, including Riot's personal-vs-production key rules and how to read a
+`403` response.
+
 ## Post-game history and privacy
 
 RuneSync stores normalized match history in:

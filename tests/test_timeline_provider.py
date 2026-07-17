@@ -1,16 +1,20 @@
 import pytest
 
 from lcu import LCUConnectionError
-from riot_api import RiotApiNotFoundError
+from riot_api import RiotApiAuthError, RiotApiNotFoundError
 from timeline_provider import (
     LcuTimelineProvider,
     MatchTimelinePayload,
     PRIVATE_MATCH_V5_ENV,
     RiotMatchV5Provider,
+    TimelineProviderDisabledError,
     TimelineProviderUpstreamError,
     TimelineProviderValidationError,
     is_private_match_v5_enabled,
 )
+
+
+_ENABLED_ENV = {PRIVATE_MATCH_V5_ENV: "1"}
 
 
 class FakeClient:
@@ -168,7 +172,7 @@ def _timeline_payload(match_id="NA1_123456", participants=None):
 
 def test_provider_returns_complete_match_timeline_payload():
     client = FakeClient(_match_payload(), _timeline_payload())
-    provider = RiotMatchV5Provider(client)
+    provider = RiotMatchV5Provider(client, env=_ENABLED_ENV)
 
     payload = provider.fetch_match_timeline("na1_123456")
 
@@ -183,7 +187,7 @@ def test_provider_returns_complete_match_timeline_payload():
 
 def test_provider_rejects_mismatched_metadata_match_id():
     client = FakeClient(_match_payload(match_id="NA1_999999"), _timeline_payload())
-    provider = RiotMatchV5Provider(client)
+    provider = RiotMatchV5Provider(client, env=_ENABLED_ENV)
 
     with pytest.raises(TimelineProviderValidationError):
         provider.fetch_match_timeline("NA1_123456")
@@ -194,7 +198,7 @@ def test_provider_rejects_participant_mismatch():
         _match_payload(participants=["p1", "p2"]),
         _timeline_payload(participants=["p1", "other"]),
     )
-    provider = RiotMatchV5Provider(client)
+    provider = RiotMatchV5Provider(client, env=_ENABLED_ENV)
 
     with pytest.raises(TimelineProviderValidationError):
         provider.fetch_match_timeline("NA1_123456")
@@ -202,7 +206,7 @@ def test_provider_rejects_participant_mismatch():
 
 def test_provider_wraps_riot_api_errors():
     client = FakeClient(RiotApiNotFoundError("missing"), _timeline_payload())
-    provider = RiotMatchV5Provider(client)
+    provider = RiotMatchV5Provider(client, env=_ENABLED_ENV)
 
     with pytest.raises(TimelineProviderUpstreamError) as exc:
         provider.fetch_match_timeline("NA1_123456")
@@ -214,3 +218,85 @@ def test_feature_gate_requires_explicit_opt_in():
     assert is_private_match_v5_enabled({PRIVATE_MATCH_V5_ENV: "0"}) is False
     assert is_private_match_v5_enabled({PRIVATE_MATCH_V5_ENV: "true"}) is True
     assert is_private_match_v5_enabled({PRIVATE_MATCH_V5_ENV: "YES"}) is True
+
+
+def test_provider_refuses_to_run_when_feature_disabled():
+    client = FakeClient(_match_payload(), _timeline_payload())
+    provider = RiotMatchV5Provider(client, env={})
+
+    with pytest.raises(TimelineProviderDisabledError):
+        provider.fetch_match_timeline("NA1_123456")
+    # The gate must block before any network call is attempted.
+    assert client.calls == []
+
+
+def test_provider_refuses_to_run_with_explicit_opt_out():
+    client = FakeClient(_match_payload(), _timeline_payload())
+    provider = RiotMatchV5Provider(client, env={PRIVATE_MATCH_V5_ENV: "0"})
+
+    with pytest.raises(TimelineProviderDisabledError):
+        provider.fetch_match_timeline("NA1_123456")
+    assert client.calls == []
+
+
+class _RecordingStatusRecorder:
+    def __init__(self):
+        self.events = []
+
+    def record_success(self):
+        self.events.append("success")
+
+    def record_error(self, exc):
+        self.events.append(("error", type(exc)))
+
+    def record_disabled(self):
+        self.events.append("disabled")
+
+
+def test_provider_reports_disabled_status_without_calling_client():
+    client = FakeClient(_match_payload(), _timeline_payload())
+    recorder = _RecordingStatusRecorder()
+    provider = RiotMatchV5Provider(client, env={}, status_recorder=recorder)
+
+    with pytest.raises(TimelineProviderDisabledError):
+        provider.fetch_match_timeline("NA1_123456")
+
+    assert recorder.events == ["disabled"]
+    assert client.calls == []
+
+
+def test_provider_reports_success_status():
+    client = FakeClient(_match_payload(), _timeline_payload())
+    recorder = _RecordingStatusRecorder()
+    provider = RiotMatchV5Provider(client, env=_ENABLED_ENV, status_recorder=recorder)
+
+    provider.fetch_match_timeline("NA1_123456")
+
+    assert recorder.events == ["success"]
+
+
+def test_provider_reports_sanitized_error_status_on_auth_rejection():
+    token = "super-secret-token"
+    client = FakeClient(RiotApiAuthError(token), _timeline_payload())
+    recorder = _RecordingStatusRecorder()
+    provider = RiotMatchV5Provider(client, env=_ENABLED_ENV, status_recorder=recorder)
+
+    with pytest.raises(TimelineProviderUpstreamError):
+        provider.fetch_match_timeline("NA1_123456")
+
+    assert recorder.events == [("error", RiotApiAuthError)]
+
+
+def test_provider_reports_success_even_when_payload_validation_later_fails():
+    # Both HTTP requests succeeding means auth/connectivity are confirmed,
+    # even if the returned payload then fails RuneSync's own consistency
+    # checks (e.g. a mismatched match ID). Provider availability and
+    # payload validity are separate concerns.
+    client = FakeClient(_match_payload(match_id="NA1_999999"), _timeline_payload())
+    recorder = _RecordingStatusRecorder()
+    provider = RiotMatchV5Provider(client, env=_ENABLED_ENV, status_recorder=recorder)
+
+    with pytest.raises(TimelineProviderValidationError):
+        provider.fetch_match_timeline("NA1_123456")
+
+    assert recorder.events == ["success"]

@@ -26,6 +26,31 @@ class TimelineProviderValidationError(TimelineProviderError):
     """Raised when fetched match data is inconsistent."""
 
 
+class TimelineProviderDisabledError(TimelineProviderError):
+    """Raised when the private/research Riot Match-V5 feature is not enabled.
+
+    Match-V5 is a private, opt-in research integration (see
+    docs/RIOT_API_KEY_POLICY.md). This is enforced here, not just declared by
+    ``is_private_match_v5_enabled`` -- callers cannot fetch from Riot Match-V5
+    without explicitly opting in via ``RUNESYNC_ENABLE_PRIVATE_RIOT_MATCH_V5``.
+    """
+
+
+class ProviderStatusRecorder(Protocol):
+    """Sanitized status sink a Match-V5 provider can report transitions to.
+
+    Implementations must never store token material or raw exception text --
+    see ``riot_provider_status.RiotProviderStatusTracker`` for the reference
+    implementation.
+    """
+
+    def record_success(self) -> None: ...
+
+    def record_error(self, exc: BaseException) -> None: ...
+
+    def record_disabled(self) -> None: ...
+
+
 @dataclass(frozen=True)
 class TimelineProvenance:
     source: str
@@ -89,21 +114,54 @@ class LcuTimelineProvider:
 
 
 class RiotMatchV5Provider:
-    """Timeline provider backed by Riot Match-V5."""
+    """Timeline provider backed by Riot Match-V5.
 
-    def __init__(self, client: RiotApiClient):
+    This is a private/research integration: ``fetch_match_timeline`` refuses
+    to run unless ``is_private_match_v5_enabled`` returns ``True`` for the
+    configured environment, so the opt-in gate is enforced here rather than
+    left for callers to remember to check.
+    """
+
+    def __init__(
+        self,
+        client: RiotApiClient,
+        env: Optional[Mapping[str, str]] = None,
+        status_recorder: Optional[ProviderStatusRecorder] = None,
+    ):
         self._client = client
+        self._env = env
+        self._status_recorder = status_recorder
 
     def fetch_match_timeline(self, match_id: str) -> MatchTimelinePayload:
+        if not is_private_match_v5_enabled(self._env):
+            if self._status_recorder is not None:
+                self._status_recorder.record_disabled()
+            raise TimelineProviderDisabledError(
+                "Riot Match-V5 is a private research feature and is not "
+                "enabled. Set RUNESYNC_ENABLE_PRIVATE_RIOT_MATCH_V5=1 to "
+                "opt in."
+            )
+
         normalized_match_id = _normalize_match_id(match_id)
         platform_id, _ = parse_match_v5_id(normalized_match_id)
         try:
             match_payload = self._client.get_match(normalized_match_id)
             timeline_payload = self._client.get_timeline(normalized_match_id)
         except RiotApiError as exc:
+            if self._status_recorder is not None:
+                self._status_recorder.record_error(exc)
             raise TimelineProviderUpstreamError(
                 f"Failed to fetch Riot Match-V5 payloads for {normalized_match_id}."
             ) from exc
+
+        # Both HTTP requests succeeded: authentication and connectivity are
+        # confirmed working regardless of what payload validation below
+        # decides. Provider availability and payload validity are separate
+        # concerns, so record success here rather than after validation --
+        # a validation failure (mismatched match ID, participants, etc.)
+        # must not be misreported as an auth/connectivity problem.
+        if self._status_recorder is not None:
+            self._status_recorder.record_success()
 
         _validate_payload_match_id(match_payload, normalized_match_id, "match")
         _validate_payload_match_id(timeline_payload, normalized_match_id, "timeline")
