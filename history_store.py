@@ -414,6 +414,41 @@ class HistoryStore:
             ).fetchall()
         return {row["puuid"] for row in rows if row["puuid"]}
 
+    def get_match(self, game_id: int) -> Optional[dict]:
+        """Return the bare `matches` row, or None if unknown.
+
+        Unlike `get_report`, this never requires an active score run --
+        Score v2 feature extraction (score_features.py) runs before any
+        score exists.
+        """
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT * FROM matches WHERE game_id = ?", (game_id,),
+            ).fetchone()
+        return dict(row) if row else None
+
+    def get_participants(self, game_id: int) -> list[dict]:
+        """Return raw participant rows for a game, no score join required.
+
+        Unlike `get_report`, this is available as soon as `save_report` has
+        ingested a match -- Score v2 feature extraction runs before any
+        score exists.
+        """
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT * FROM participants
+                WHERE game_id = ? ORDER BY participant_id
+                """,
+                (game_id,),
+            ).fetchall()
+        participants = []
+        for row in rows:
+            item = dict(row)
+            item["items"] = json.loads(item.pop("items_json"))
+            participants.append(item)
+        return participants
+
     def get_meta(self, key: str) -> Optional[str]:
         with self._connect() as conn:
             row = conn.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
