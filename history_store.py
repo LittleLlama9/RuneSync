@@ -1588,12 +1588,28 @@ class HistoryStore:
         return out
 
     def get_report(self, game_id: int) -> Optional[dict]:
+        return self.get_score_run_report(game_id)
+
+    def get_score_run_report(
+            self, game_id: int, run_id: Optional[int] = None) -> Optional[dict]:
+        """Return a report for one immutable run without changing activation.
+
+        When ``run_id`` is omitted this is the active report used by the UI.
+        Offline shadow tooling supplies an explicit historical run so it can
+        compare v1 and v2 without moving ``matches.active_score_run_id``.
+        """
         with self._connect() as conn:
             match = conn.execute(
                 "SELECT * FROM matches WHERE game_id = ?", (game_id,),
             ).fetchone()
             if not match:
                 return None
+            resolved_run_id = (
+                int(run_id) if run_id is not None
+                else match["active_score_run_id"]
+            )
+            if resolved_run_id is None:
+                return {"match": dict(match), "participants": []}
             players = conn.execute(
                 """
                 SELECT p.*, sr.model_version, sr.feature_version,
@@ -1608,7 +1624,9 @@ class HistoryStore:
                        r.coaching_eligible
                 FROM participants p
                 JOIN matches m ON m.game_id = p.game_id
-                JOIN score_runs sr ON sr.id = m.active_score_run_id
+                JOIN score_runs sr
+                  ON sr.id = ?
+                 AND sr.game_id = m.game_id
                 JOIN score_results r
                   ON r.run_id = sr.id
                  AND r.participant_id = p.participant_id
@@ -1625,7 +1643,7 @@ class HistoryStore:
                          END ASC,
                          p.participant_id ASC
                 """,
-                (game_id,),
+                (resolved_run_id, game_id),
             ).fetchall()
 
         participants = []

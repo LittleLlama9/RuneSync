@@ -340,6 +340,22 @@ def test_score_v2_provenance_confidence_and_abstention_round_trip(tmp_path):
     assert history[0]["coaching"]["challenges"][0]["target_successes"] == 3
 
 
+def test_explicit_score_run_report_does_not_change_active_run(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    report = _report()
+    store.save_report(report)
+    v1_run = store.list_score_runs(123)[0]["id"]
+    v2_run = store.save_score_run(
+        123, report["scores"], 2, "features-v2", "aggregate",
+        model_artifact_hash="artifact", input_hash="input",
+    )
+
+    saved = store.get_score_run_report(123, v1_run)
+
+    assert saved["participants"][0]["model_version"] == 1
+    assert store.get_match(123)["active_score_run_id"] == v2_run
+
+
 def test_score_run_activation_never_downgrades_evidence_tier(tmp_path):
     store = HistoryStore(tmp_path / "history.db")
     report = _report()
