@@ -72,6 +72,45 @@ so a shipped build cannot accidentally start making Match-V5 calls with a
 personal-use key, which Riot's policy does not allow for a distributed
 product without going through its production key application process.
 
+## History integration: an opt-in upgrade path, never a dependency
+
+When enabled, `MatchHistoryService` (`match_history.py`) treats Match-V5 as
+a best-effort upgrade layered strictly *after* LCU-derived history for a
+game is already durable, both on fresh ingest (`ingest_game`) and during
+backfill (`sync_recent`):
+
+- **Platform routing is never guessed.** `platform_id_from_lcu_match`
+  (`timeline_provider.py`) reads the authoritative `platformId` the local
+  LCU match payload already carries (falling back to a participant
+  identity's `currentPlatformId`/`platformId` if the top-level field is
+  ever absent) and fails explicitly if neither is present or routable --
+  it never assumes a default region.
+- **Every failure mode is fully contained.** A disabled gate, missing/
+  corrupt/rejected key, rate limit, upstream error, or a malformed/
+  mismatched payload (wrong game ID, wrong participant count, empty/short
+  frames, or Match-V5 participants that don't match what was already
+  stored from LCU ingestion for that game) is caught locally and reduced
+  to a bool plus sanitized status/backoff state. None of these can ever
+  delay, block, or break the existing LCU-backed report or timeline.
+- **Already-stored Match-V5 timelines are never refetched** (checked via
+  `HistoryStore.has_timeline_payload`), and a failed attempt gets the same
+  bounded, per-game backoff schedule as LCU timeline fetches (reusing
+  `timeline_fetch_attempts`/`HistoryStore.timeline_fetch_due`), so a
+  rejected key or a single bad match cannot retry-storm Riot or starve
+  other matches of their own retry schedule. A rate-limit response during
+  a backfill pass (`sync_recent`) stops that pass early rather than
+  hammering the next game; each skipped game still keeps its own backoff
+  schedule for a later pass.
+- **Storage is immutable and content-addressed**, exactly like the
+  existing LCU timeline path: Match-V5 payloads are saved via the same
+  compressed, hash-deduplicated `timeline_payloads` table under the
+  `match_v5` source, so re-saving an identical payload never creates a
+  duplicate row.
+
+See `tests/test_match_history.py` (gate disabled, missing/corrupt/rejected
+key, routing, caching, backoff, fallback, malformed/mismatched payloads,
+immutable storage) for the behavior this section describes.
+
 ## Provider status API
 
 `riot_provider_status.py` exposes a small, closed set of sanitized states

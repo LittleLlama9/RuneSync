@@ -400,6 +400,20 @@ class HistoryStore:
             rows = conn.execute("SELECT game_id FROM matches").fetchall()
         return {int(row["game_id"]) for row in rows}
 
+    def participant_puuids(self, game_id: int) -> set[str]:
+        """Stored participant PUUIDs for a game, ignoring blank identities.
+
+        Used to cross-validate an upgrade timeline source (e.g. Match-V5)
+        against the identity RuneSync already stored for this game_id from
+        LCU ingestion, independent of how that upgrade source resolved
+        platform/region routing.
+        """
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT puuid FROM participants WHERE game_id = ?", (game_id,),
+            ).fetchall()
+        return {row["puuid"] for row in rows if row["puuid"]}
+
     def get_meta(self, key: str) -> Optional[str]:
         with self._connect() as conn:
             row = conn.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
@@ -784,6 +798,43 @@ class HistoryStore:
                 (source, source, current_iso, safe_limit),
             ).fetchall()
         return [int(row["game_id"]) for row in rows]
+
+    def timeline_fetch_due(
+            self, game_id: int, source: str,
+            now: Optional[datetime.datetime] = None) -> bool:
+        """Whether a timeline fetch for (game_id, source) should run now.
+
+        True when no payload is stored yet for this (game_id, source) and
+        either no prior attempt was recorded or its backoff window (see
+        ``record_timeline_fetch_failure``) has elapsed. This gates a single
+        opportunistic, per-match fetch (e.g. an inline Match-V5 upgrade
+        attempt right after LCU ingestion) the same way
+        ``game_ids_missing_timeline`` gates a bulk backfill scan, so a
+        failing match backs off fairly without needing a full table scan
+        and without starving other matches of their own retry schedule.
+        """
+        current = now or datetime.datetime.now(datetime.timezone.utc)
+        current_iso = current.astimezone(datetime.timezone.utc).isoformat()
+        with self._connect() as conn:
+            has_payload = conn.execute(
+                """
+                SELECT 1 FROM timeline_payloads
+                WHERE game_id = ? AND source = ? LIMIT 1
+                """,
+                (game_id, source),
+            ).fetchone()
+            if has_payload:
+                return False
+            attempt = conn.execute(
+                """
+                SELECT next_retry_at FROM timeline_fetch_attempts
+                WHERE game_id = ? AND source = ?
+                """,
+                (game_id, source),
+            ).fetchone()
+        if attempt is None:
+            return True
+        return attempt["next_retry_at"] <= current_iso
 
     def record_timeline_fetch_failure(
             self, game_id: int, source: str, error_kind: str,

@@ -229,6 +229,16 @@ def test_save_report_is_idempotent(tmp_path):
     assert len(store.list_score_runs(123)) == 2
 
 
+def test_participant_puuids_returns_stored_identities(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    store.save_report(_report())
+
+    puuids = store.participant_puuids(123)
+
+    assert puuids == {f"puuid-{i}" for i in range(1, 11)}
+    assert store.participant_puuids(999) == set()
+
+
 def test_score_runs_are_immutable_and_can_switch_active_version(tmp_path):
     store = HistoryStore(tmp_path / "history.db")
     report = _report()
@@ -384,6 +394,32 @@ def test_timeline_fetch_backoff_does_not_starve_older_games(tmp_path):
         "lcu_timeline", limit=3,
         now=now + datetime.timedelta(days=8),
     ) == [122, 121, 123]
+
+
+def test_timeline_fetch_due_respects_cache_and_backoff(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    store.save_report(_report())
+    now = datetime.datetime(2026, 7, 17, tzinfo=datetime.timezone.utc)
+
+    assert store.timeline_fetch_due(123, "match_v5", now=now) is True
+
+    store.record_timeline_fetch_failure(123, "match_v5", "auth_rejected", now=now)
+    assert store.timeline_fetch_due(123, "match_v5", now=now) is False
+    assert store.timeline_fetch_due(
+        123, "match_v5", now=now + datetime.timedelta(minutes=1),
+    ) is False
+    assert store.timeline_fetch_due(
+        123, "match_v5", now=now + datetime.timedelta(minutes=6),
+    ) is True
+
+
+def test_timeline_fetch_due_is_false_once_payload_is_cached(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    store.save_report(_report())
+
+    store.save_timeline_payload(123, "match_v5", {"info": {"frames": []}})
+
+    assert store.timeline_fetch_due(123, "match_v5") is False
 
 
 def test_successful_timeline_clears_fetch_backoff(tmp_path):

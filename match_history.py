@@ -12,12 +12,24 @@ from champion_roles import get_role_weights
 from history_store import HistoryStore
 from lcu import LCUConnectionError
 from performance_score import SCORING_MODEL_VERSION, score_match
-from timeline_provider import LcuTimelineProvider, TimelineProviderError
+from riot_api import RiotApiClient, RiotApiError, build_match_v5_id
+from riot_provider_status import ProviderStatus, get_default_status_tracker
+from secret_store import SecretStoreError, SecretStoreStatus
+from timeline_provider import (
+    LcuTimelineProvider,
+    RiotMatchV5Provider,
+    TimelineProviderDisabledError,
+    TimelineProviderError,
+    TimelineProviderValidationError,
+    is_private_match_v5_enabled,
+    platform_id_from_lcu_match,
+)
 
 
 SUPPORTED_QUEUE_IDS = {400, 420, 430, 440, 480, 490}
 SUMMONERS_RIFT_MAP_ID = 11
 TEAM_ROLES = ("top", "jungle", "mid", "bot", "support")
+MATCH_V5_SOURCE = "match_v5"
 
 
 class UnsupportedMatch(ValueError):
@@ -200,7 +212,12 @@ class MatchHistoryService:
             self, lcu, store: Optional[HistoryStore] = None,
             on_log: Optional[Callable[[str, str], None]] = None,
             on_updated: Optional[Callable[[], None]] = None,
-            on_postgame: Optional[Callable[[int], None]] = None):
+            on_postgame: Optional[Callable[[int], None]] = None,
+            riot_status_tracker=None,
+            riot_client_factory: Optional[Callable[[Callable[[], str]], object]] = None,
+            match_v5_scheduler: Optional[
+                Callable[[Callable[[], None]], None]
+            ] = None):
         self.lcu = lcu
         self.store = store or HistoryStore()
         self.on_log = on_log or (lambda message, tag="info": None)
@@ -213,6 +230,24 @@ class MatchHistoryService:
         self._active_positions: dict[str, str] = {}
         self._champion_names: dict[int, str] = {}
         self._lcu_timeline_provider = LcuTimelineProvider(lcu)
+        # Builds the Riot Match-V5 HTTP client from a key supplier. Tests
+        # inject a fake in place of RiotApiClient so Match-V5 integration
+        # behavior (routing, caching, backoff, validation) can be exercised
+        # without any real network access.
+        self._riot_client_factory = riot_client_factory or (
+            lambda key_supplier: RiotApiClient(key_supplier=key_supplier)
+        )
+        # Match-V5 is a private, opt-in upgrade path (see
+        # docs/RIOT_API_KEY_POLICY.md): defaults to the process-wide
+        # sanitized status tracker so a request's outcome is reflected in
+        # later status checks, but tests can inject their own tracker
+        # (backed by a throwaway secret store) without touching the real
+        # DPAPI-protected key on disk.
+        self._riot_status_tracker = riot_status_tracker or get_default_status_tracker()
+        self._match_v5_fetch_lock = threading.Lock()
+        self._match_v5_scheduler = match_v5_scheduler or (
+            lambda task: threading.Thread(target=task, daemon=True).start()
+        )
 
     def _ensure_champions(self) -> dict[int, str]:
         if not self._champion_names:
@@ -253,31 +288,55 @@ class MatchHistoryService:
     def ingest_game(
             self, game_id: int, captured_positions: Optional[dict[str, str]] = None,
             notify: bool = True,
-            log_timeline_failure: bool = True) -> Optional[dict]:
+            log_timeline_failure: bool = True,
+            attempt_match_v5: bool = True) -> Optional[dict]:
+        match_v5_game = None
         with self._ingest_lock:
             if self.store.has_game(game_id):
                 self._save_lcu_timeline(
                     game_id, log_failure=log_timeline_failure,
                 )
-                return self.store.get_report(game_id)
-            local_puuid = self.lcu.get_current_summoner_puuid()
-            if not local_puuid:
-                raise RuntimeError("Current summoner PUUID is unavailable")
-            game = self.lcu.get_match_details(game_id)
-            try:
-                report = normalize_match(
-                    game, local_puuid, self._ensure_champions(), captured_positions,
+                report = self.store.get_report(game_id)
+            else:
+                local_puuid = self.lcu.get_current_summoner_puuid()
+                if not local_puuid:
+                    raise RuntimeError("Current summoner PUUID is unavailable")
+                game = self.lcu.get_match_details(game_id)
+                try:
+                    report = normalize_match(
+                        game, local_puuid, self._ensure_champions(),
+                        captured_positions,
+                    )
+                except UnsupportedMatch as e:
+                    self.on_log(f"History skipped game {game_id}: {e}", "info")
+                    return None
+                self.store.save_report(report)
+                self._save_lcu_timeline(
+                    game_id, game, log_failure=log_timeline_failure,
                 )
-            except UnsupportedMatch as e:
-                self.on_log(f"History skipped game {game_id}: {e}", "info")
-                return None
-            self.store.save_report(report)
-            self._save_lcu_timeline(
-                game_id, game, log_failure=log_timeline_failure,
-            )
+                match_v5_game = game
             if notify and self.on_updated:
                 self.on_updated()
-            return report
+        # Match-V5 is a private, additive upgrade. Schedule it only after the
+        # LCU report/timeline are durable and the global ingestion lock is
+        # released, so remote latency can never block another game's local
+        # postgame report.
+        if attempt_match_v5:
+            self._schedule_match_v5_upgrade(
+                game_id, match_v5_game, log_timeline_failure,
+            )
+        return report
+
+    def _schedule_match_v5_upgrade(
+            self, game_id: int, game_payload: Optional[dict],
+            log_failure: bool) -> None:
+        if not is_private_match_v5_enabled():
+            return
+        self._match_v5_scheduler(
+            lambda: self._save_match_v5_timeline(
+                game_id, game_payload, log_failure=log_failure,
+            )
+        )
 
     def _save_lcu_timeline(
             self, game_id: int, match_payload: Optional[dict] = None,
@@ -335,6 +394,147 @@ class MatchHistoryService:
             return False
         return True
 
+    def _save_match_v5_timeline(
+            self, game_id: int, game_payload: Optional[dict] = None,
+            log_failure: bool = True) -> bool:
+        with self._match_v5_fetch_lock:
+            return self._save_match_v5_timeline_unlocked(
+                game_id, game_payload, log_failure,
+            )
+
+    def _record_match_v5_failure(
+            self, game_id: int, error_kind: str,
+            log_failure: bool) -> None:
+        try:
+            self.store.record_timeline_fetch_failure(
+                game_id, MATCH_V5_SOURCE, error_kind,
+            )
+        except (sqlite3.Error, OSError) as state_exc:
+            if log_failure:
+                self.on_log(
+                    "History could not record Match-V5 retry state "
+                    f"for {game_id}: {state_exc}",
+                    "warn",
+                )
+
+    def _save_match_v5_timeline_unlocked(
+            self, game_id: int, game_payload: Optional[dict] = None,
+            log_failure: bool = True) -> bool:
+        """Best-effort, opt-in Match-V5 timeline upgrade.
+
+        Always runs strictly after LCU-backed history for this game is
+        already durable, and every failure mode here (feature disabled, no
+        usable key, auth rejected, rate limited, upstream error, payload
+        validation, cross-source mismatch) is caught locally and reduced to
+        a bool plus sanitized status/backoff state -- never raised, so it
+        can never delay or break LCU-derived history.
+        """
+        if not is_private_match_v5_enabled():
+            return False
+
+        tracker = self._riot_status_tracker
+        secret_store = tracker.store
+        if secret_store is None:
+            return False
+        # Check key availability before touching cache/backoff state or
+        # the network: a missing/corrupt key is a global configuration
+        # issue, not a per-match failure, so it must not create backoff
+        # rows for every match in the library.
+        try:
+            if secret_store.status() is not SecretStoreStatus.AVAILABLE:
+                return False
+        except OSError:
+            return False
+
+        try:
+            if self.store.has_timeline_payload(game_id, MATCH_V5_SOURCE):
+                return True
+            if not self.store.timeline_fetch_due(game_id, MATCH_V5_SOURCE):
+                return False
+        except (sqlite3.Error, OSError) as exc:
+            if log_failure:
+                self.on_log(
+                    "History could not inspect Match-V5 timeline state "
+                    f"for {game_id}: {exc}",
+                    "warn",
+                )
+            return False
+
+        try:
+            platform_id = platform_id_from_lcu_match(
+                game_payload if game_payload is not None
+                else self.lcu.get_match_details(game_id)
+            )
+            match_id = build_match_v5_id(platform_id, game_id)
+            client = self._riot_client_factory(secret_store.get_key)
+            provider = RiotMatchV5Provider(client, status_recorder=tracker)
+            payload = provider.fetch_match_timeline(match_id)
+            stored_puuids = self.store.participant_puuids(game_id)
+            fetched_puuids = {
+                participant.get("puuid")
+                for participant in (payload.match.get("info") or {}).get(
+                    "participants", []
+                )
+                if isinstance(participant, dict) and participant.get("puuid")
+            }
+            if stored_puuids and stored_puuids != fetched_puuids:
+                raise TimelineProviderValidationError(
+                    f"Riot Match-V5 participants for {match_id} did not "
+                    "match the locally stored match; refusing to store a "
+                    "cross-source mismatch."
+                )
+        except (sqlite3.Error, OSError) as exc:
+            self._record_match_v5_failure(
+                game_id, type(exc).__name__, log_failure,
+            )
+            if log_failure:
+                self.on_log(
+                    "History could not validate Match-V5 participant "
+                    f"identities for {game_id}: {exc}",
+                    "warn",
+                )
+            return False
+        except TimelineProviderDisabledError:
+            return False
+        except (ValueError, LCUConnectionError, TimelineProviderError,
+                RiotApiError, SecretStoreError) as exc:
+            error_kind = type(exc).__name__
+            self._record_match_v5_failure(
+                game_id, error_kind, log_failure,
+            )
+            if log_failure:
+                self.on_log(
+                    f"History could not upgrade timeline {game_id} via "
+                    f"Match-V5 (status: {tracker.status().value}).",
+                    "info",
+                )
+            return False
+
+        try:
+            self.store.save_timeline_payload(
+                game_id,
+                payload.source,
+                {
+                    "provenance": asdict(payload.provenance),
+                    "match": payload.match,
+                    "timeline": payload.timeline,
+                },
+                schema_version="match-v5-v1",
+                completeness=payload.completeness,
+            )
+            self.store.clear_timeline_fetch_failure(game_id, payload.source)
+        except (sqlite3.Error, OSError) as exc:
+            self._record_match_v5_failure(
+                game_id, type(exc).__name__, log_failure,
+            )
+            if log_failure:
+                self.on_log(
+                    f"History could not persist Match-V5 timeline {game_id}: {exc}",
+                    "warn",
+                )
+            return False
+        return True
+
     def sync_recent(self, limit: int = 100) -> int:
         if not self._sync_lock.acquire(blocking=False):
             return 0
@@ -342,6 +542,8 @@ class MatchHistoryService:
         timeline_failures = 0
         timeline_attempted = set()
         timeline_scan_failed = False
+        match_v5_failures = 0
+        match_v5_scan_failed = False
         try:
             known = self.store.known_game_ids()
             summaries = self.lcu.get_match_history_summaries(limit)
@@ -357,7 +559,8 @@ class MatchHistoryService:
                 try:
                     if self.ingest_game(
                             game_id, notify=False,
-                            log_timeline_failure=False):
+                            log_timeline_failure=False,
+                            attempt_match_v5=False):
                         imported += 1
                         timeline_attempted.add(game_id)
                         if not self.store.has_timeline_payload(
@@ -383,6 +586,9 @@ class MatchHistoryService:
                     saved = False
                 if not saved:
                     timeline_failures += 1
+            match_v5_failures, match_v5_scan_failed = (
+                self._backfill_match_v5_timelines(limit)
+            )
             self.store.set_meta("initial_backfill_complete", "1")
             self.store.set_meta(
                 "last_sync", datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -401,11 +607,72 @@ class MatchHistoryService:
                     "timeline backfill will retry later.",
                     "warn",
                 )
+            if match_v5_failures:
+                self.on_log(
+                    "History could not upgrade "
+                    f"{match_v5_failures} timeline"
+                    f"{'s' if match_v5_failures != 1 else ''} via Match-V5; "
+                    "LCU-derived evidence remains available.",
+                    "info",
+                )
+            if match_v5_scan_failed:
+                self.on_log(
+                    "History could not inspect missing Match-V5 timelines; "
+                    "upgrade backfill will retry later.",
+                    "info",
+                )
             if imported and self.on_updated:
                 self.on_updated()
             return imported
         finally:
             self._sync_lock.release()
+
+    def _backfill_match_v5_timelines(self, limit: int) -> tuple[int, bool]:
+        """Opportunistically upgrade already-known games missing a Match-V5
+        timeline. Purely additive to LCU-derived history: returns
+        (failure_count, scan_failed) and never raises, so a disabled
+        feature, missing key, or upstream outage cannot affect the rest of
+        sync_recent.
+        """
+        if not is_private_match_v5_enabled():
+            return 0, False
+        tracker = self._riot_status_tracker
+        secret_store = tracker.store
+        if secret_store is None:
+            return 0, False
+        try:
+            if secret_store.status() is not SecretStoreStatus.AVAILABLE:
+                return 0, False
+        except OSError:
+            return 0, False
+
+        failures = 0
+        try:
+            missing_ids = self.store.game_ids_missing_timeline(
+                MATCH_V5_SOURCE, limit,
+            )
+        except (sqlite3.Error, OSError):
+            return 0, True
+        for game_id in missing_ids:
+            try:
+                saved = self._save_match_v5_timeline(game_id, log_failure=False)
+            except (sqlite3.Error, OSError, RuntimeError, ValueError):
+                saved = False
+            if not saved:
+                failures += 1
+                # A rate-limit response applies to the whole key, not just
+                # this match: stop this pass rather than immediately
+                # hammering the next game and risking a retry storm. Each
+                # skipped game keeps its own backoff schedule via
+                # timeline_fetch_attempts, so this does not starve them --
+                # they are simply retried on a later sync_recent pass.
+                if tracker.status() in {
+                        ProviderStatus.AUTH_REJECTED,
+                        ProviderStatus.RATE_LIMITED,
+                        ProviderStatus.UPSTREAM_UNAVAILABLE,
+                }:
+                    break
+        return failures, False
 
     def ingest_after_game(self, retries: int = 30, delay: float = 2.0) -> Optional[int]:
         with self._state_lock:

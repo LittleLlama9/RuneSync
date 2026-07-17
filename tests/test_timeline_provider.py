@@ -11,6 +11,7 @@ from timeline_provider import (
     TimelineProviderUpstreamError,
     TimelineProviderValidationError,
     is_private_match_v5_enabled,
+    platform_id_from_lcu_match,
 )
 
 
@@ -149,24 +150,51 @@ def test_lcu_provider_wraps_lcu_errors():
     assert isinstance(exc.value.__cause__, LCUConnectionError)
 
 
-def _match_payload(match_id="NA1_123456", participants=None):
-    participants = participants or ["p1", "p2"]
+def _match_v5_puuids():
+    return [f"p{i}" for i in range(1, 11)]
+
+
+def _match_v5_frames(duration=120):
+    participant_frames = {
+        str(participant_id): {"participantId": participant_id}
+        for participant_id in range(1, 11)
+    }
+    return [
+        {
+            "timestamp": timestamp,
+            "participantFrames": participant_frames,
+            "events": [],
+        }
+        for timestamp in (0, 60000, duration * 1000)
+    ]
+
+
+def _match_payload(
+        match_id="NA1_123456", game_id=123456, duration=120, puuids=None,
+        participant_count=10):
+    puuids = puuids if puuids is not None else _match_v5_puuids()
+    participants = [
+        {"participantId": index, "puuid": puuid}
+        for index, puuid in enumerate(puuids, start=1)
+    ][:participant_count]
     return {
-        "metadata": {"matchId": match_id, "participants": participants},
+        "metadata": {"matchId": match_id, "participants": puuids},
         "info": {
-            "participants": [
-                {"puuid": participant}
-                for participant in participants
-            ]
+            "gameId": game_id,
+            "gameDuration": duration,
+            "participants": participants,
         },
     }
 
 
-def _timeline_payload(match_id="NA1_123456", participants=None):
-    participants = participants or ["p1", "p2"]
+def _timeline_payload(
+        match_id="NA1_123456", puuids=None, duration=120, frames=None):
+    puuids = puuids if puuids is not None else _match_v5_puuids()
     return {
-        "metadata": {"matchId": match_id, "participants": participants},
-        "info": {"frames": []},
+        "metadata": {"matchId": match_id, "participants": puuids},
+        "info": {
+            "frames": frames if frames is not None else _match_v5_frames(duration),
+        },
     }
 
 
@@ -182,6 +210,7 @@ def test_provider_returns_complete_match_timeline_payload():
     assert payload.provenance.match_id == "NA1_123456"
     assert payload.provenance.platform_id == "NA1"
     assert payload.provenance.regional_route == "AMERICAS"
+    assert payload.completeness == 1.0
     assert client.calls == [("match", "NA1_123456"), ("timeline", "NA1_123456")]
 
 
@@ -194,14 +223,60 @@ def test_provider_rejects_mismatched_metadata_match_id():
 
 
 def test_provider_rejects_participant_mismatch():
+    mismatched = _match_v5_puuids()[:-1] + ["other"]
+    client = FakeClient(_match_payload(), _timeline_payload(puuids=mismatched))
+    provider = RiotMatchV5Provider(client, env=_ENABLED_ENV)
+
+    with pytest.raises(TimelineProviderValidationError):
+        provider.fetch_match_timeline("NA1_123456")
+
+
+def test_provider_rejects_wrong_game_id():
+    client = FakeClient(_match_payload(game_id=999999), _timeline_payload())
+    provider = RiotMatchV5Provider(client, env=_ENABLED_ENV)
+
+    with pytest.raises(TimelineProviderValidationError):
+        provider.fetch_match_timeline("NA1_123456")
+
+
+def test_provider_rejects_incomplete_participant_count():
+    puuids = _match_v5_puuids()[:-1]
     client = FakeClient(
-        _match_payload(participants=["p1", "p2"]),
-        _timeline_payload(participants=["p1", "other"]),
+        _match_payload(puuids=puuids, participant_count=9),
+        _timeline_payload(puuids=puuids),
     )
     provider = RiotMatchV5Provider(client, env=_ENABLED_ENV)
 
     with pytest.raises(TimelineProviderValidationError):
         provider.fetch_match_timeline("NA1_123456")
+
+
+def test_provider_rejects_invalid_duration():
+    match_payload = _match_payload(duration=0)
+    client = FakeClient(match_payload, _timeline_payload())
+    provider = RiotMatchV5Provider(client, env=_ENABLED_ENV)
+
+    with pytest.raises(TimelineProviderValidationError):
+        provider.fetch_match_timeline("NA1_123456")
+
+
+def test_provider_rejects_success_shaped_empty_frames():
+    client = FakeClient(_match_payload(), _timeline_payload(frames=[]))
+    provider = RiotMatchV5Provider(client, env=_ENABLED_ENV)
+
+    with pytest.raises(TimelineProviderValidationError):
+        provider.fetch_match_timeline("NA1_123456")
+
+
+def test_provider_marks_missing_frames_as_partial():
+    frames = _match_v5_frames()
+    frames.pop(1)
+    client = FakeClient(_match_payload(), _timeline_payload(frames=frames))
+    provider = RiotMatchV5Provider(client, env=_ENABLED_ENV)
+
+    payload = provider.fetch_match_timeline("NA1_123456")
+
+    assert 0 < payload.completeness < 1
 
 
 def test_provider_wraps_riot_api_errors():
@@ -300,3 +375,30 @@ def test_provider_reports_success_even_when_payload_validation_later_fails():
         provider.fetch_match_timeline("NA1_123456")
 
     assert recorder.events == ["success"]
+
+
+def test_platform_id_from_lcu_match_reads_top_level_field():
+    assert platform_id_from_lcu_match({"platformId": "na1"}) == "NA1"
+
+
+def test_platform_id_from_lcu_match_falls_back_to_participant_identity():
+    game = {
+        "participantIdentities": [
+            {"player": {"currentPlatformId": "euw1"}},
+        ],
+    }
+    assert platform_id_from_lcu_match(game) == "EUW1"
+
+
+def test_platform_id_from_lcu_match_never_guesses_when_absent():
+    with pytest.raises(TimelineProviderValidationError):
+        platform_id_from_lcu_match({"gameId": 123456})
+    with pytest.raises(TimelineProviderValidationError):
+        platform_id_from_lcu_match({})
+    with pytest.raises(TimelineProviderValidationError):
+        platform_id_from_lcu_match(None)
+
+
+def test_platform_id_from_lcu_match_rejects_unrouted_platform():
+    with pytest.raises(TimelineProviderValidationError):
+        platform_id_from_lcu_match({"platformId": "not-a-real-platform"})

@@ -143,7 +143,7 @@ class RiotMatchV5Provider:
             )
 
         normalized_match_id = _normalize_match_id(match_id)
-        platform_id, _ = parse_match_v5_id(normalized_match_id)
+        platform_id, expected_game_id = parse_match_v5_id(normalized_match_id)
         try:
             match_payload = self._client.get_match(normalized_match_id)
             timeline_payload = self._client.get_timeline(normalized_match_id)
@@ -166,6 +166,15 @@ class RiotMatchV5Provider:
         _validate_payload_match_id(match_payload, normalized_match_id, "match")
         _validate_payload_match_id(timeline_payload, normalized_match_id, "timeline")
         _validate_participants(match_payload, timeline_payload)
+        participant_ids = _validate_match_v5_identity(
+            match_payload, expected_game_id,
+        )
+
+        duration = (match_payload.get("info") or {}).get("gameDuration")
+        frames = (timeline_payload.get("info") or {}).get("frames")
+        completeness = _validate_timeline_frames(
+            frames, participant_ids, duration, label="Riot",
+        )
 
         route = regional_route_for_platform(platform_id)
         provenance = TimelineProvenance(
@@ -179,6 +188,7 @@ class RiotMatchV5Provider:
             provenance=provenance,
             match=match_payload,
             timeline=timeline_payload,
+            completeness=completeness,
         )
 
 
@@ -239,14 +249,24 @@ def _validate_lcu_payloads(
         timeline_payload.get("frames")
         if isinstance(timeline_payload, dict) else None
     )
+    return _validate_timeline_frames(frames, participant_ids, duration, label="Local")
+
+
+def _validate_timeline_frames(
+        frames, participant_ids: set[int], duration, label: str = "Riot") -> float:
+    """Validate a timeline's frame list and return a completeness score.
+
+    Shared by both the LCU and Match-V5 providers: both timeline schemas
+    describe a list of per-minute frames with ``timestamp``,
+    ``participantFrames`` (keyed by participant ID), and ``events``. A
+    success-shaped but empty/short payload (no frames, non-increasing
+    timestamps, frames missing participant coverage) is rejected here
+    rather than silently accepted as a complete timeline.
+    """
     if not isinstance(duration, (int, float)) or duration <= 0:
-        raise TimelineProviderValidationError(
-            "Local match duration was invalid."
-        )
+        raise TimelineProviderValidationError(f"{label} match duration was invalid.")
     if not isinstance(frames, list) or not frames:
-        raise TimelineProviderValidationError(
-            "Local timeline did not contain frames."
-        )
+        raise TimelineProviderValidationError(f"{label} timeline did not contain frames.")
 
     timestamps = []
     participant_slots = 0
@@ -254,34 +274,34 @@ def _validate_lcu_payloads(
     for frame in frames:
         if not isinstance(frame, dict):
             raise TimelineProviderValidationError(
-                "Local timeline contained an invalid frame."
+                f"{label} timeline contained an invalid frame."
             )
         timestamp = frame.get("timestamp")
         participant_frames = frame.get("participantFrames")
         events = frame.get("events")
         if not isinstance(timestamp, (int, float)) or timestamp < 0:
             raise TimelineProviderValidationError(
-                "Local timeline contained an invalid timestamp."
+                f"{label} timeline contained an invalid timestamp."
             )
         if not isinstance(participant_frames, dict):
             raise TimelineProviderValidationError(
-                "Local timeline frame was missing participant data."
+                f"{label} timeline frame was missing participant data."
             )
         if not isinstance(events, list):
             raise TimelineProviderValidationError(
-                "Local timeline frame was missing its event list."
+                f"{label} timeline frame was missing its event list."
             )
         actual_keys = {str(key) for key in participant_frames}
         if not actual_keys.issubset(expected_keys):
             raise TimelineProviderValidationError(
-                "Local timeline contained an unknown participant."
+                f"{label} timeline contained an unknown participant."
             )
         participant_slots += len(actual_keys)
         timestamps.append(float(timestamp))
 
     if timestamps != sorted(timestamps) or len(timestamps) != len(set(timestamps)):
         raise TimelineProviderValidationError(
-            "Local timeline frame timestamps were not strictly increasing."
+            f"{label} timeline frame timestamps were not strictly increasing."
         )
 
     expected_frames = math.ceil(float(duration) / 60.0) + 1
@@ -295,6 +315,47 @@ def _validate_lcu_payloads(
     )
 
 
+def platform_id_from_lcu_match(game: dict) -> str:
+    """Extract the authoritative Riot platform ID from a local match payload.
+
+    This never guesses at a platform/region: the LCU's own match JSON
+    mirrors the Match-v4 schema and carries a top-level ``platformId``
+    (e.g. ``"NA1"``), with each participant identity's ``player`` object
+    carrying the same value (as ``currentPlatformId``/``platformId``) as a
+    fallback if the top-level field is ever absent. If neither is present,
+    or the value isn't a platform Riot's regional routing recognizes, this
+    fails explicitly instead of assuming a default region.
+    """
+    if not isinstance(game, dict):
+        raise TimelineProviderValidationError(
+            "Local match payload is unavailable; cannot determine the "
+            "Riot platform ID."
+        )
+    candidate = game.get("platformId")
+    if not isinstance(candidate, str) or not candidate.strip():
+        candidate = None
+        for identity in game.get("participantIdentities") or []:
+            player = (identity or {}).get("player") or {}
+            fallback = player.get("currentPlatformId") or player.get("platformId")
+            if isinstance(fallback, str) and fallback.strip():
+                candidate = fallback
+                break
+    if not isinstance(candidate, str) or not candidate.strip():
+        raise TimelineProviderValidationError(
+            "Local match payload did not include a Riot platform ID; "
+            "refusing to guess a region for Match-V5 routing."
+        )
+    normalized = candidate.strip().upper()
+    try:
+        regional_route_for_platform(normalized)
+    except ValueError as exc:
+        raise TimelineProviderValidationError(
+            f"Local match platform ID {normalized!r} is not a platform "
+            "Riot Match-V5 routes."
+        ) from exc
+    return normalized
+
+
 def _validate_payload_match_id(payload: dict, expected_match_id: str, label: str) -> None:
     metadata = payload.get("metadata")
     if not isinstance(metadata, dict):
@@ -304,6 +365,51 @@ def _validate_payload_match_id(payload: dict, expected_match_id: str, label: str
         raise TimelineProviderValidationError(
             f"Riot {label} payload did not match {expected_match_id}."
         )
+
+
+def _validate_match_v5_identity(match_payload: dict, expected_game_id: int) -> set[int]:
+    """Validate the Match-V5 game ID and participant set, returning IDs 1-10.
+
+    A success-shaped but empty/short payload (wrong game, missing or
+    partial participants) must not be accepted as a complete match, so this
+    checks the numeric ``info.gameId`` against the ID encoded in the
+    requested Match-V5 ID and requires exactly ten distinct participant
+    slots before any timeline frame validation runs.
+    """
+    info = match_payload.get("info")
+    if not isinstance(info, dict):
+        raise TimelineProviderValidationError("Riot match payload is missing info.")
+    if info.get("gameId") != expected_game_id:
+        raise TimelineProviderValidationError(
+            f"Riot match payload game ID did not match {expected_game_id}."
+        )
+    participants = info.get("participants")
+    if not isinstance(participants, list) or len(participants) != 10:
+        raise TimelineProviderValidationError(
+            "Riot match payload did not contain ten participants."
+        )
+    participant_ids = set()
+    for participant in participants:
+        if not isinstance(participant, dict):
+            raise TimelineProviderValidationError(
+                "Riot match payload contained an invalid participant."
+            )
+        participant_id = participant.get("participantId")
+        puuid = participant.get("puuid")
+        if not isinstance(participant_id, int) or participant_id <= 0:
+            raise TimelineProviderValidationError(
+                "Riot match participant IDs were invalid."
+            )
+        if not isinstance(puuid, str) or not puuid.strip():
+            raise TimelineProviderValidationError(
+                "Riot match payload contained an empty participant."
+            )
+        participant_ids.add(participant_id)
+    if len(participant_ids) != 10:
+        raise TimelineProviderValidationError(
+            "Riot match participant IDs were invalid."
+        )
+    return participant_ids
 
 
 def _validate_participants(match_payload: dict, timeline_payload: dict) -> None:
