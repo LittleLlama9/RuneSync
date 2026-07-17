@@ -302,6 +302,16 @@ def test_score_v2_provenance_confidence_and_abstention_round_trip(tmp_path):
             "abstain_reasons": (
                 ["short_game"] if score["participant_id"] == 1 else []
             ),
+            "coaching": (
+                {
+                    "eligible": True,
+                    "primary_focus": "Reduce untraded deaths",
+                    "challenges": [{"target_successes": 3, "window_games": 5}],
+                    "recurring_patterns": [],
+                    "withheld_reasons": [],
+                }
+                if score["participant_id"] == 1 else {}
+            ),
         }
         for score in report["scores"]
     ]
@@ -322,10 +332,12 @@ def test_score_v2_provenance_confidence_and_abstention_round_trip(tmp_path):
     assert local["participant_confidence"] == 0.7
     assert local["abstain"] is True
     assert local["abstain_reasons"] == ["short_game"]
+    assert local["coaching"]["primary_focus"] == "Reduce untraded deaths"
     history = store.list_history()
     assert history[0]["participant_confidence"] == 0.7
     assert history[0]["abstain"] is True
     assert history[0]["abstain_reasons"] == ["short_game"]
+    assert history[0]["coaching"]["challenges"][0]["target_successes"] == 3
 
 
 def test_score_run_activation_never_downgrades_evidence_tier(tmp_path):
@@ -600,6 +612,100 @@ def test_get_feature_set_reads_back_newest_matching_row(tmp_path):
     assert len(all_sets) == 2
     assert {row["evidence_source"] for row in all_sets} == {"aggregate", "match_v5"}
     assert store.list_feature_sets(999) == []
+
+
+def test_recent_local_feature_blocks_are_same_role_past_only_and_nonabstained(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    for game_id in (121, 122, 123, 124):
+        report = _report(game_id)
+        if game_id == 122:
+            report["match"]["local_role"] = "top"
+            report["participants"][0]["role"] = "top"
+        store.save_report(report)
+
+    def features(value, abstain=False, completeness=1.0):
+        return {
+            "feature_version": "features-v2",
+            "evidence_source": "lcu_timeline",
+            "abstain": abstain,
+            "chosen_source_completeness": completeness,
+            "participants": {
+                "1": {
+                    "fight_influence": {"untraded_deaths": value},
+                    "baseline": {"role": "mid"},
+                },
+            },
+        }
+
+    store.save_feature_set(121, "features-v2", "lcu_timeline", features(1))
+    store.save_feature_set(122, "features-v2", "lcu_timeline", features(2))
+    store.save_feature_set(
+        123, "features-v2", "lcu_timeline", features(3, completeness=0.4),
+    )
+    store.save_feature_set(124, "features-v2", "lcu_timeline", features(4))
+
+    blocks = store.list_recent_local_feature_blocks(
+        124, "features-v2", "lcu_timeline",
+        min_completeness=0.7,
+    )
+
+    assert [
+        block["fight_influence"]["untraded_deaths"] for block in blocks
+    ] == [1]
+
+
+def test_recent_local_feature_blocks_page_past_ineligible_games(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    for game_id in range(100, 126):
+        store.save_report(_report(game_id))
+        completeness = 1.0 if game_id < 104 or game_id == 125 else 0.4
+        store.save_feature_set(
+            game_id, "features-v2", "lcu_timeline",
+            {
+                "chosen_source_completeness": completeness,
+                "participants": {
+                    "1": {
+                        "fight_influence": {"untraded_deaths": game_id},
+                    },
+                },
+            },
+        )
+
+    blocks = store.list_recent_local_feature_blocks(
+        125, "features-v2", "lcu_timeline",
+        limit=3, min_completeness=0.7,
+    )
+
+    assert [
+        block["fight_influence"]["untraded_deaths"] for block in blocks
+    ] == [103, 102, 101]
+
+
+def test_recent_local_feature_blocks_exclude_creation_time_ties(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    for game_id in (40, 45, 50, 60):
+        report = _report(game_id)
+        report["match"]["game_creation"] = 900 if game_id == 40 else 1000
+        store.save_report(report)
+        store.save_feature_set(
+            game_id, "features-v2", "lcu_timeline",
+            {
+                "chosen_source_completeness": 1.0,
+                "participants": {
+                    "1": {
+                        "fight_influence": {"untraded_deaths": game_id},
+                    },
+                },
+            },
+        )
+
+    blocks = store.list_recent_local_feature_blocks(
+        50, "features-v2", "lcu_timeline",
+    )
+
+    assert [
+        block["fight_influence"]["untraded_deaths"] for block in blocks
+    ] == [40]
 
 
 def test_report_orders_each_team_like_league_scoreboard(tmp_path):

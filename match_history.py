@@ -27,6 +27,7 @@ from score_features import (
     detect_capabilities,
     extract_game_features,
 )
+from score_v2.coaching import MIN_TIMELINE_COMPLETENESS
 from timeline_provider import (
     LcuTimelineProvider,
     RiotMatchV5Provider,
@@ -396,8 +397,17 @@ class MatchHistoryService:
                 raise ScoreRoutingError(
                     f"Score v2 feature set was not persisted for game {game_id}"
                 )
+            match = self.store.get_match(game_id)
+            if match is None:
+                raise ScoreRoutingError(f"Match {game_id} disappeared before scoring")
+            recent_local_features = self.store.list_recent_local_feature_blocks(
+                game_id, FEATURE_VERSION, source,
+                min_completeness=MIN_TIMELINE_COMPLETENESS,
+            )
             routed = self._score_router.score_feature_set(
                 features, stored["evidence"],
+                local_participant_id=match["local_participant_id"],
+                recent_local_features=recent_local_features,
             )
             run_id = self.store.save_score_run(
                 game_id, list(routed.scores),

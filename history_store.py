@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Optional
 
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 
 SCORE_EVIDENCE_PRIORITY = {
     "aggregate_legacy": -1,
@@ -163,6 +163,8 @@ class HistoryStore:
                     ON matches(local_champion_name);
                 CREATE INDEX IF NOT EXISTS idx_matches_role
                     ON matches(local_role);
+                CREATE INDEX IF NOT EXISTS idx_matches_role_creation
+                    ON matches(local_role, game_creation DESC, game_id DESC);
                 """
             )
             match_columns = {
@@ -212,6 +214,7 @@ class HistoryStore:
                     rank_confidence REAL,
                     abstain INTEGER NOT NULL DEFAULT 0,
                     abstain_reasons_json TEXT NOT NULL DEFAULT '[]',
+                    coaching_json TEXT NOT NULL DEFAULT '{}',
                     coaching_eligible INTEGER NOT NULL,
                     PRIMARY KEY (run_id, participant_id),
                     FOREIGN KEY (game_id, participant_id)
@@ -297,6 +300,11 @@ class HistoryStore:
                     ON timeline_payloads(game_id, source, created_at DESC);
                 CREATE INDEX IF NOT EXISTS idx_feature_sets_game
                     ON feature_sets(game_id, feature_version, evidence_source);
+                CREATE INDEX IF NOT EXISTS idx_feature_sets_lookup
+                    ON feature_sets(
+                        game_id, feature_version, evidence_source,
+                        created_at DESC, id DESC
+                    );
 
                 CREATE TRIGGER IF NOT EXISTS prevent_active_score_run_delete
                 BEFORE DELETE ON score_runs
@@ -338,6 +346,11 @@ class HistoryStore:
                 conn.execute(
                     "ALTER TABLE score_results ADD COLUMN "
                     "abstain_reasons_json TEXT NOT NULL DEFAULT '[]'"
+                )
+            if "coaching_json" not in score_result_columns:
+                conn.execute(
+                    "ALTER TABLE score_results ADD COLUMN "
+                    "coaching_json TEXT NOT NULL DEFAULT '{}'"
                 )
             self._migrate_legacy_scores(conn)
             conn.execute(
@@ -702,8 +715,8 @@ class HistoryStore:
                     components_json, observations_json, evidence_json,
                     score_low, score_high, participant_confidence,
                     rank_confidence, abstain, abstain_reasons_json,
-                    coaching_eligible
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    coaching_json, coaching_eligible
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     run_id, game_id, score["participant_id"],
@@ -716,6 +729,7 @@ class HistoryStore:
                     score.get("rank_confidence"),
                     int(bool(score.get("abstain", False))),
                     self._json(score.get("abstain_reasons", [])),
+                    self._json(score.get("coaching", {})),
                     int(bool(score.get("coaching_eligible", False))),
                 ),
             )
@@ -1368,6 +1382,92 @@ class HistoryStore:
             results.append(item)
         return results
 
+    def list_recent_local_feature_blocks(
+            self, game_id: int, feature_version: str,
+            evidence_source: str, limit: int = 5,
+            min_completeness: float = 0.0) -> list[dict]:
+        """Return prior same-role local feature blocks for recurrence checks.
+
+        Only games created before `game_id` are eligible, preventing a
+        historical backfill from reading future matches. At most one newest
+        feature set per game is returned, and abstained games are excluded.
+        """
+        current = self.get_match(game_id)
+        if current is None:
+            raise ValueError(f"Unknown game ID {game_id}")
+        safe_limit = max(1, min(int(limit), 20))
+        batch_size = max(20, safe_limit * 2)
+        blocks = []
+        cursor_creation = int(current["game_creation"])
+        cursor_game_id = 2 ** 63 - 1
+        with self._connect() as conn:
+            while len(blocks) < safe_limit:
+                rows = conn.execute(
+                    """
+                    WITH candidate_matches AS (
+                        SELECT game_id, local_participant_id, game_creation
+                        FROM matches
+                        WHERE game_id != ?
+                          AND local_role = ?
+                          AND game_creation < ?
+                          AND (
+                              game_creation < ?
+                              OR (game_creation = ? AND game_id < ?)
+                          )
+                        ORDER BY game_creation DESC, game_id DESC
+                        LIMIT ?
+                    )
+                    SELECT
+                        m.game_id,
+                        m.local_participant_id,
+                        m.game_creation,
+                        fs.features_json
+                    FROM candidate_matches m
+                    LEFT JOIN feature_sets fs ON fs.id = (
+                        SELECT candidate.id
+                        FROM feature_sets candidate
+                        WHERE candidate.game_id = m.game_id
+                          AND candidate.feature_version = ?
+                          AND candidate.evidence_source = ?
+                        ORDER BY candidate.created_at DESC, candidate.id DESC
+                        LIMIT 1
+                    )
+                    ORDER BY m.game_creation DESC, m.game_id DESC
+                    """,
+                    (
+                        int(game_id), current["local_role"],
+                        int(current["game_creation"]),
+                        cursor_creation, cursor_creation, cursor_game_id,
+                        batch_size, feature_version, evidence_source,
+                    ),
+                ).fetchall()
+                if not rows:
+                    break
+                for row in rows:
+                    if row["features_json"] is None:
+                        continue
+                    features = json.loads(row["features_json"])
+                    if features.get("abstain"):
+                        continue
+                    completeness = float(
+                        features.get("chosen_source_completeness") or 0.0
+                    )
+                    if completeness < float(min_completeness):
+                        continue
+                    block = (features.get("participants") or {}).get(
+                        str(row["local_participant_id"]),
+                    )
+                    if isinstance(block, dict):
+                        blocks.append(block)
+                    if len(blocks) >= safe_limit:
+                        break
+                last_row = rows[-1]
+                cursor_creation = int(last_row["game_creation"])
+                cursor_game_id = int(last_row["game_id"])
+                if len(rows) < batch_size:
+                    break
+        return blocks
+
     def get_summary(self) -> dict:
         with self._connect() as conn:
             totals = conn.execute(
@@ -1454,6 +1554,7 @@ class HistoryStore:
                        r.total_score, r.match_rank, r.score_low, r.score_high,
                        r.participant_confidence, r.rank_confidence,
                        r.abstain, r.abstain_reasons_json,
+                       r.coaching_json, r.coaching_eligible,
                        sr.evidence_source, sr.feature_version,
                        sr.calibration_version, sr.model_artifact_hash,
                        sr.artifact_model_version, sr.model_family,
@@ -1481,6 +1582,8 @@ class HistoryStore:
             item["abstain_reasons"] = json.loads(
                 item.pop("abstain_reasons_json"),
             )
+            item["coaching"] = json.loads(item.pop("coaching_json"))
+            item["coaching_eligible"] = bool(item["coaching_eligible"])
             out.append(item)
         return out
 
@@ -1501,6 +1604,7 @@ class HistoryStore:
                        r.components_json, r.observations_json, r.evidence_json,
                        r.score_low, r.score_high, r.participant_confidence,
                        r.rank_confidence, r.abstain, r.abstain_reasons_json,
+                       r.coaching_json,
                        r.coaching_eligible
                 FROM participants p
                 JOIN matches m ON m.game_id = p.game_id
@@ -1536,6 +1640,7 @@ class HistoryStore:
             item["abstain_reasons"] = json.loads(
                 item.pop("abstain_reasons_json"),
             )
+            item["coaching"] = json.loads(item.pop("coaching_json"))
             item["coaching_eligible"] = bool(item["coaching_eligible"])
             participants.append(item)
         return {"match": dict(match), "participants": participants}

@@ -140,6 +140,7 @@ def test_router_builds_persistable_scores_with_confidence_and_provenance():
             {"kind": "fight", "participant_id": 1, "t_ms": 1000},
             {"kind": "fight", "participant_id": 2, "t_ms": 2000},
         ),
+        local_participant_id=1,
     )
 
     assert routed.model_version == SCORE_V2_MODEL_VERSION
@@ -158,6 +159,13 @@ def test_router_builds_persistable_scores_with_confidence_and_provenance():
     assert {row["kind"] for row in participant_one["evidence"]} == {
         "capability_snapshot", "fight",
     }
+    assert participant_one["coaching_eligible"] is False
+    assert participant_one["coaching"]["primary_focus"] is None
+    assert any(
+        "Aggregate evidence" in reason
+        for reason in participant_one["coaching"]["withheld_reasons"]
+    )
+    assert participant_one["observations"][0] == "Post-game totals: 10/0/5."
     assert routed.confidence["production_ready"] is False
 
 

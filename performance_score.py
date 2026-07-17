@@ -3,7 +3,7 @@
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Mapping, Optional
+from typing import Iterable, Mapping, Optional, Sequence
 
 from score_features import AGGREGATE, SOURCE_PRIORITY
 from score_v2.artifact import (
@@ -11,6 +11,7 @@ from score_v2.artifact import (
     ArtifactIntegrityError,
     ArtifactValidationError,
 )
+from score_v2.coaching import CoachingResult, build_coaching, build_observations
 from score_v2.leakage import OutcomeLeakageError
 from score_v2.runtime import (
     ArtifactUnavailableError,
@@ -126,12 +127,20 @@ class ScoreRouter:
 
     def score_feature_set(
             self, game_features: Mapping,
-            evidence: Iterable[Mapping] = ()) -> RoutedScoreRun:
+            evidence: Iterable[Mapping] = (), *,
+            local_participant_id: Optional[int] = None,
+            recent_local_features: Sequence[Mapping] = ()) -> RoutedScoreRun:
         source = game_features.get("evidence_source")
         artifact = self._artifacts.get(source)
         if artifact is None:
             raise ScoreRoutingError(
                 f"No Score v2 artifact registered for evidence tier {source!r}"
+            )
+        feature_version = game_features.get("feature_version")
+        if feature_version != artifact.feature_version:
+            raise ScoreRoutingError(
+                f"Feature set version {feature_version!r} does not match artifact "
+                f"feature version {artifact.feature_version!r}"
             )
         try:
             ranked = score_game(self._artifacts, game_features)
@@ -143,12 +152,38 @@ class ScoreRouter:
                 f"Score v2 could not score {source!r} evidence: {exc}"
             ) from exc
         evidence_rows = tuple(dict(row) for row in evidence)
-        scores = tuple(
-            self._storage_score(
-                ranked[participant_id], evidence_rows,
+        participants = game_features.get("participants") or {}
+        scores = []
+        for participant_id in sorted(ranked):
+            block = participants.get(str(participant_id)) or {}
+            if participant_id == local_participant_id:
+                coaching = build_coaching(
+                    block, participant_id, evidence_rows,
+                    artifact.evidence_source,
+                    ranked[participant_id].result.confidence,
+                    float(game_features.get("chosen_source_completeness") or 0.0),
+                    ranked[participant_id].result.abstain,
+                    ranked[participant_id].result.abstain_reasons,
+                    recent_local_features,
+                )
+            else:
+                coaching = CoachingResult(
+                    observations=build_observations(
+                        block, participant_id, evidence_rows,
+                        artifact.evidence_source,
+                    ),
+                    eligible=False,
+                    primary_focus=None,
+                    challenges=(),
+                    recurring_patterns=(),
+                    withheld_reasons=("Coaching is generated only for the local player.",),
+                )
+            scores.append(
+                self._storage_score(
+                    ranked[participant_id], evidence_rows, coaching,
+                )
             )
-            for participant_id in sorted(ranked)
-        )
+        scores = tuple(scores)
         abstained = [
             score["participant_id"] for score in scores if score["abstain"]
         ]
@@ -179,7 +214,8 @@ class ScoreRouter:
     @staticmethod
     def _storage_score(
             ranked: RankedScoreResult,
-            evidence: tuple[Mapping, ...]) -> dict:
+            evidence: tuple[Mapping, ...],
+            coaching: CoachingResult) -> dict:
         result = ranked.result
         participant_evidence = [
             dict(row) for row in evidence
@@ -191,7 +227,7 @@ class ScoreRouter:
             "total_score": result.score,
             "match_rank": ranked.rank,
             "components": {},
-            "observations": [],
+            "observations": list(coaching.observations),
             "evidence": participant_evidence,
             "score_low": result.score_interval[0],
             "score_high": result.score_interval[1],
@@ -199,7 +235,8 @@ class ScoreRouter:
             "rank_confidence": ranked.rank_confidence,
             "abstain": result.abstain,
             "abstain_reasons": list(result.abstain_reasons),
-            "coaching_eligible": False,
+            "coaching_eligible": coaching.eligible,
+            "coaching": coaching.to_dict(),
         }
 
 
