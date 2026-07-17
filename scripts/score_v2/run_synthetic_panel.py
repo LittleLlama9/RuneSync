@@ -38,8 +38,13 @@ def _parse_judgment_spec(spec: str) -> tuple[str, str, Path]:
 
 def _export(args) -> int:
     store = HistoryStore(args.history_db)
+    game_ids = None
+    if args.game_ids_file:
+        raw = Path(args.game_ids_file).read_text(encoding="utf-8")
+        game_ids = [int(line) for line in raw.split() if line.strip()]
     result = export_panel_inputs(
         store, args.output_dir, evidence_source=args.evidence_source,
+        game_ids=game_ids,
     )
     print(json.dumps(result, sort_keys=True))
     return 0
@@ -92,6 +97,11 @@ def main() -> int:
     export_parser.add_argument("--output-dir", type=Path, required=True)
     export_parser.add_argument(
         "--evidence-source", default="lcu_timeline",
+    )
+    export_parser.add_argument(
+        "--game-ids-file", type=Path, default=None,
+        help="Optional whitespace-separated game IDs to restrict the export "
+             "(e.g. a stratified sample of a large corpus)",
     )
     export_parser.set_defaults(handler=_export)
 

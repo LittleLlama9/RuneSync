@@ -536,18 +536,37 @@ def validate_panel_bundle(
 
 def export_panel_inputs(
         store, output_dir: Path, *, evidence_source: str = "lcu_timeline",
+        game_ids: Optional[Iterable[int]] = None,
 ) -> dict:
-    """Export every newest exact-tier feature set into two shuffled rounds."""
+    """Export every newest exact-tier feature set into two shuffled rounds.
+
+    ``game_ids``, when given, restricts the export to that explicit set of
+    games (used to grade a stratified sample of a large corpus rather than
+    every game). A requested game with no matching ``evidence_source`` feature
+    set raises rather than being silently dropped, so a sampling plan can never
+    quietly shrink.
+    """
     output_dir = Path(output_dir)
+    requested = None if game_ids is None else {int(gid) for gid in game_ids}
     newest_by_game = {}
     for stored in store.list_feature_sets():
         if stored.get("evidence_source") != evidence_source:
             continue
-        newest_by_game.setdefault(int(stored["game_id"]), stored)
+        game_id = int(stored["game_id"])
+        if requested is not None and game_id not in requested:
+            continue
+        newest_by_game.setdefault(game_id, stored)
     if not newest_by_game:
         raise PanelValidationError(
             f"no {evidence_source!r} feature sets are available"
         )
+    if requested is not None:
+        missing = sorted(requested - set(newest_by_game))
+        if missing:
+            raise PanelValidationError(
+                f"{len(missing)} requested games have no {evidence_source!r} "
+                f"feature set (first few: {missing[:5]})"
+            )
 
     round_rows = {round_id: [] for round_id in PANEL_ROUNDS}
     private_maps = {}
