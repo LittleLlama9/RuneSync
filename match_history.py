@@ -362,15 +362,14 @@ class MatchHistoryService:
 
     def refresh_score_v2(
             self, game_id: int, *, log_failure: bool = True) -> Optional[int]:
-        """Append and conditionally activate the best available Score v2 run.
+        """Persist best evidence, then optionally append a Score v2 run.
 
-        With no registered production artifact this is a no-op, preserving v1.
-        When artifacts are present, the strongest evidence tier that has an
-        exact matching artifact is extracted and scored. Weaker reruns remain
+        Canonical features are retained even when no artifact is installed so
+        shadow/backfill analysis stays current while v1 remains active. When
+        artifacts are present, the strongest evidence tier with an exact
+        matching artifact is also extracted and scored. Weaker reruns remain
         immutable but cannot replace a stronger active tier.
         """
-        if not self._score_router.enabled:
-            return None
         try:
             capabilities = detect_capabilities(self.store, game_id)
             available_sources = [
@@ -380,15 +379,59 @@ class MatchHistoryService:
                     else getattr(capabilities, source)
                 )
             ]
+            strongest_source = capabilities.best_source()
+            strongest_error = None
+            if strongest_source is not None:
+                try:
+                    extract_game_features(
+                        self.store, game_id, FEATURE_VERSION,
+                        evidence_source=strongest_source,
+                    )
+                except (
+                        OSError, sqlite3.Error, ScoreRoutingError,
+                        TypeError, ValueError) as exc:
+                    strongest_error = exc
+            if not self._score_router.enabled:
+                if strongest_error is not None and log_failure:
+                    self.on_log(
+                        f"History could not persist {strongest_source} "
+                        f"Score v2 evidence for game {game_id}: "
+                        f"{strongest_error}",
+                        "warn",
+                    )
+                return None
             source = self._score_router.select_source(
                 available_sources, capabilities.quality_dict(),
             )
             if source is None:
+                if strongest_error is not None and log_failure:
+                    self.on_log(
+                        f"History could not persist {strongest_source} "
+                        f"Score v2 evidence for game {game_id}: "
+                        f"{strongest_error}",
+                        "warn",
+                    )
                 return None
-            features = extract_game_features(
-                self.store, game_id, FEATURE_VERSION,
-                evidence_source=source,
-            )
+            if source == strongest_source and strongest_error is not None:
+                if log_failure:
+                    self.on_log(
+                        f"History could not prepare routed {source} Score v2 "
+                        f"evidence for game {game_id}: {strongest_error}",
+                        "warn",
+                    )
+                return None
+            if strongest_error is not None and log_failure:
+                self.on_log(
+                    f"History could not persist stronger {strongest_source} "
+                    f"Score v2 evidence for game {game_id}; continuing with "
+                    f"registered {source} evidence: {strongest_error}",
+                    "warn",
+                )
+            if source != strongest_source:
+                extract_game_features(
+                    self.store, game_id, FEATURE_VERSION,
+                    evidence_source=source,
+                )
             stored = self.store.get_feature_set(
                 game_id, feature_version=FEATURE_VERSION,
                 evidence_source=source,
@@ -397,6 +440,7 @@ class MatchHistoryService:
                 raise ScoreRoutingError(
                     f"Score v2 feature set was not persisted for game {game_id}"
                 )
+            features = stored["features"]
             match = self.store.get_match(game_id)
             if match is None:
                 raise ScoreRoutingError(f"Match {game_id} disappeared before scoring")
@@ -429,7 +473,8 @@ class MatchHistoryService:
                 TypeError, ValueError) as exc:
             if log_failure:
                 self.on_log(
-                    f"History could not append Score v2 for game {game_id}: {exc}",
+                    f"History could not prepare Score v2 evidence or score "
+                    f"for game {game_id}: {exc}",
                     "warn",
                 )
             return None

@@ -8,6 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+import match_history
 from history_store import HistoryStore
 from lcu import LCUConnectionError
 from match_history import (
@@ -22,6 +23,7 @@ from riot_provider_status import ProviderStatus, RiotProviderStatusTracker
 from secret_store import RiotSecretStore, SecretStoreCorruptError
 from score_v2.artifact import FeatureCoefficient, RoleCalibration, build_artifact
 from score_v2.feature_spec import feature_contract_for_tier
+from score_features import FEATURE_VERSION
 from timeline_provider import PRIVATE_MATCH_V5_ENV
 
 
@@ -218,6 +220,11 @@ def test_service_sync_is_idempotent(tmp_path):
     timeline = service.store.get_timeline_payload(123, "lcu_timeline")
     assert timeline["completeness"] == 1.0
     assert timeline["payload"]["provenance"]["source"] == "lcu_timeline"
+    features = service.store.get_feature_set(
+        123, evidence_source="lcu_timeline",
+    )
+    assert features["features"]["evidence_source"] == "lcu_timeline"
+    assert len(service.store.list_score_runs(123)) == 1
 
 
 def test_ingest_routes_v2_through_best_tier_with_a_registered_artifact(tmp_path):
@@ -246,6 +253,107 @@ def test_ingest_routes_v2_through_best_tier_with_a_registered_artifact(tmp_path)
     report = store.get_report(123)
     assert all(row["model_version"] == 2 for row in report["participants"])
     assert all(row["participant_confidence"] is not None for row in report["participants"])
+
+
+def test_refresh_reextracts_same_tier_content_without_artifact(tmp_path, monkeypatch):
+    lcu = MagicMock()
+    store = HistoryStore(tmp_path / "history.db")
+    store.save_report(normalize_match(_game(), "puuid-1", CHAMPIONS))
+    store.save_timeline_payload(
+        123, "lcu_timeline",
+        {"provenance": {"source": "lcu_timeline"}, "timeline": _timeline()},
+        completeness=1.0,
+    )
+    service = MatchHistoryService(lcu, store)
+    service.refresh_score_v2(123)
+    original = match_history.extract_game_features
+    extractor = MagicMock(side_effect=original)
+    monkeypatch.setattr(match_history, "extract_game_features", extractor)
+
+    assert service.refresh_score_v2(123) is None
+
+    extractor.assert_called_once_with(
+        store, 123, FEATURE_VERSION, evidence_source="lcu_timeline",
+    )
+    assert len(store.list_feature_sets(123)) == 1
+    assert len(store.list_score_runs(123)) == 1
+
+
+def test_stronger_feature_failure_does_not_block_healthy_routed_tier(
+        tmp_path, monkeypatch):
+    lcu = MagicMock()
+    store = HistoryStore(tmp_path / "history.db")
+    store.save_report(normalize_match(_game(), "puuid-1", CHAMPIONS))
+    store.save_timeline_payload(
+        123, "lcu_timeline",
+        {"provenance": {"source": "lcu_timeline"}, "timeline": _timeline()},
+        completeness=1.0,
+    )
+    logs = []
+    service = MatchHistoryService(
+        lcu, store,
+        on_log=lambda message, tag: logs.append((message, tag)),
+        score_v2_artifacts={"aggregate": _score_v2_artifact("aggregate")},
+        allow_development_score_v2=True,
+    )
+    original = match_history.extract_game_features
+
+    def extract(store_arg, game_id, feature_version, evidence_source=None):
+        if evidence_source == "lcu_timeline":
+            raise ValueError("simulated malformed local timeline")
+        return original(
+            store_arg, game_id, feature_version,
+            evidence_source=evidence_source,
+        )
+
+    monkeypatch.setattr(match_history, "extract_game_features", extract)
+
+    run_id = service.refresh_score_v2(123)
+
+    assert run_id is not None
+    active = next(
+        run for run in store.list_score_runs(123) if run["is_active"]
+    )
+    assert active["id"] == run_id
+    assert active["evidence_source"] == "aggregate"
+    assert logs == [(
+        "History could not persist stronger lcu_timeline Score v2 evidence "
+        "for game 123; continuing with registered aggregate evidence: "
+        "simulated malformed local timeline",
+        "warn",
+    )]
+
+
+def test_unroutable_artifact_does_not_hide_evidence_retention_failure(
+        tmp_path, monkeypatch):
+    lcu = MagicMock()
+    store = HistoryStore(tmp_path / "history.db")
+    store.save_report(normalize_match(_game(), "puuid-1", CHAMPIONS))
+    store.save_timeline_payload(
+        123, "lcu_timeline",
+        {"provenance": {"source": "lcu_timeline"}, "timeline": _timeline()},
+        completeness=1.0,
+    )
+    logs = []
+    service = MatchHistoryService(
+        lcu, store,
+        on_log=lambda message, tag: logs.append((message, tag)),
+        score_v2_artifacts={"match_v5": _score_v2_artifact("match_v5")},
+        allow_development_score_v2=True,
+    )
+    monkeypatch.setattr(
+        match_history, "extract_game_features",
+        MagicMock(side_effect=ValueError("simulated malformed local timeline")),
+    )
+
+    assert service.refresh_score_v2(123) is None
+
+    assert len(store.list_score_runs(123)) == 1
+    assert logs == [(
+        "History could not persist lcu_timeline Score v2 evidence for game "
+        "123: simulated malformed local timeline",
+        "warn",
+    )]
 
 
 def test_stronger_timeline_evidence_appends_and_activates_an_upgrade(tmp_path):
