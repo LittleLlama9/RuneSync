@@ -2,6 +2,7 @@ import json
 import sqlite3
 import threading
 import time
+import datetime
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -19,6 +20,8 @@ from riot_api import (
 )
 from riot_provider_status import ProviderStatus, RiotProviderStatusTracker
 from secret_store import RiotSecretStore, SecretStoreCorruptError
+from score_v2.artifact import FeatureCoefficient, RoleCalibration, build_artifact
+from score_v2.feature_spec import feature_contract_for_tier
 from timeline_provider import PRIVATE_MATCH_V5_ENV
 
 
@@ -27,6 +30,50 @@ CHAMPIONS = {
     157: "Yasuo", 48: "Trundle", 800: "Mel", 161: "Vel'Koz", 145: "Kai'Sa",
 }
 FIXTURES = Path(__file__).parent / "fixtures"
+
+
+def _score_v2_artifact(source="aggregate"):
+    return build_artifact(
+        model_version="2.0.0-test",
+        feature_version="2.0.0-evidence",
+        calibration_version="2.0.0-test",
+        evidence_source=source,
+        intercept=0.0,
+        coefficients=tuple(
+            FeatureCoefficient(
+                spec=spec,
+                coefficient=0.5 if spec.direction > 0 else -0.5,
+                robust_center=0.0,
+                robust_scale=1.0,
+            )
+            for spec in feature_contract_for_tier(source)
+        ),
+        role_calibration={
+            role: RoleCalibration(
+                offset=0.0, sample_count=20, shrinkage_weight=0.8,
+            )
+            for role in ("top", "jungle", "mid", "bot", "support", "unknown")
+        },
+        score_calibration={
+            "midpoint": 50.0, "scale": 5.0,
+            "clip_min": 0.0, "clip_max": 100.0,
+        },
+        confidence_params={
+            "missing_feature_penalty": 0.5,
+            "evidence_quality_weight": 0.5,
+            "interval_min_half_width": 3.0,
+            "interval_max_half_width": 40.0,
+        },
+        abstention_params={
+            "short_game_seconds": 600.0,
+            "min_present_feature_fraction": 0.3,
+            "min_confidence_to_report": 0.15,
+        },
+        training_metadata={"status": "test"},
+        production_ready=False,
+        release_notes="routing integration test",
+        now=datetime.datetime(2026, 7, 18, tzinfo=datetime.timezone.utc),
+    )
 
 
 def _game(game_id=123, queue_id=420, duration=1800, platform_id="NA1"):
@@ -171,6 +218,69 @@ def test_service_sync_is_idempotent(tmp_path):
     timeline = service.store.get_timeline_payload(123, "lcu_timeline")
     assert timeline["completeness"] == 1.0
     assert timeline["payload"]["provenance"]["source"] == "lcu_timeline"
+
+
+def test_ingest_routes_v2_through_best_tier_with_a_registered_artifact(tmp_path):
+    lcu = MagicMock()
+    lcu.get_current_summoner_puuid.return_value = "puuid-1"
+    lcu.get_champion_name_map.return_value = CHAMPIONS
+    lcu.get_match_details.return_value = _game()
+    lcu.get_match_timeline.return_value = _timeline()
+    store = HistoryStore(tmp_path / "history.db")
+    artifact = _score_v2_artifact()
+    service = MatchHistoryService(
+        lcu, store,
+        score_v2_artifacts={"aggregate": artifact},
+        allow_development_score_v2=True,
+    )
+
+    service.ingest_game(123, attempt_match_v5=False)
+
+    runs = store.list_score_runs(123)
+    assert len(runs) == 2
+    active = next(run for run in runs if run["is_active"])
+    assert active["model_version"] == 2
+    assert active["evidence_source"] == "aggregate"
+    assert active["artifact_model_version"] == artifact.model_version
+    assert active["model_family"] == artifact.model_family
+    report = store.get_report(123)
+    assert all(row["model_version"] == 2 for row in report["participants"])
+    assert all(row["participant_confidence"] is not None for row in report["participants"])
+
+
+def test_stronger_timeline_evidence_appends_and_activates_an_upgrade(tmp_path):
+    lcu = MagicMock()
+    store = HistoryStore(tmp_path / "history.db")
+    store.save_report(normalize_match(_game(), "puuid-1", CHAMPIONS))
+    aggregate_artifact = _score_v2_artifact("aggregate")
+    lcu_artifact = _score_v2_artifact("lcu_timeline")
+    service = MatchHistoryService(
+        lcu, store,
+        score_v2_artifacts={
+            "aggregate": aggregate_artifact,
+            "lcu_timeline": lcu_artifact,
+        },
+        allow_development_score_v2=True,
+    )
+
+    aggregate_run = service.refresh_score_v2(123)
+    store.save_timeline_payload(
+        123, "lcu_timeline",
+        {"provenance": {"source": "lcu_timeline"}, "timeline": _timeline()},
+        completeness=1.0,
+    )
+    lcu_run = service.refresh_score_v2(123)
+
+    assert aggregate_run != lcu_run
+    runs = store.list_score_runs(123)
+    assert len(runs) == 3
+    assert next(run for run in runs if run["id"] == aggregate_run)["is_active"] is False
+    active = next(run for run in runs if run["id"] == lcu_run)
+    assert active["is_active"] is True
+    assert active["evidence_source"] == "lcu_timeline"
+    assert store.get_report(123)["participants"][0]["model_artifact_hash"] == (
+        lcu_artifact.content_hash
+    )
 
 
 def test_sync_recent_summarizes_timeline_failures(tmp_path):

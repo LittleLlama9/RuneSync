@@ -12,7 +12,15 @@ from pathlib import Path
 from typing import Optional
 
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
+
+SCORE_EVIDENCE_PRIORITY = {
+    "aggregate_legacy": -1,
+    "aggregate": 0,
+    "live_client": 1,
+    "lcu_timeline": 2,
+    "match_v5": 3,
+}
 
 
 def default_history_path() -> Path:
@@ -175,6 +183,8 @@ class HistoryStore:
                     evidence_source TEXT NOT NULL,
                     calibration_version TEXT NOT NULL,
                     model_artifact_hash TEXT NOT NULL,
+                    artifact_model_version TEXT NOT NULL DEFAULT '',
+                    model_family TEXT NOT NULL DEFAULT 'legacy',
                     input_hash TEXT NOT NULL,
                     confidence_json TEXT NOT NULL,
                     status TEXT NOT NULL,
@@ -198,7 +208,10 @@ class HistoryStore:
                     evidence_json TEXT NOT NULL,
                     score_low REAL,
                     score_high REAL,
+                    participant_confidence REAL,
                     rank_confidence REAL,
+                    abstain INTEGER NOT NULL DEFAULT 0,
+                    abstain_reasons_json TEXT NOT NULL DEFAULT '[]',
                     coaching_eligible INTEGER NOT NULL,
                     PRIMARY KEY (run_id, participant_id),
                     FOREIGN KEY (game_id, participant_id)
@@ -296,6 +309,36 @@ class HistoryStore:
                 END;
                 """
             )
+            score_run_columns = {
+                row["name"] for row in conn.execute("PRAGMA table_info(score_runs)")
+            }
+            if "artifact_model_version" not in score_run_columns:
+                conn.execute(
+                    "ALTER TABLE score_runs ADD COLUMN "
+                    "artifact_model_version TEXT NOT NULL DEFAULT ''"
+                )
+            if "model_family" not in score_run_columns:
+                conn.execute(
+                    "ALTER TABLE score_runs ADD COLUMN "
+                    "model_family TEXT NOT NULL DEFAULT 'legacy'"
+                )
+            score_result_columns = {
+                row["name"] for row in conn.execute("PRAGMA table_info(score_results)")
+            }
+            if "participant_confidence" not in score_result_columns:
+                conn.execute(
+                    "ALTER TABLE score_results ADD COLUMN participant_confidence REAL"
+                )
+            if "abstain" not in score_result_columns:
+                conn.execute(
+                    "ALTER TABLE score_results ADD COLUMN "
+                    "abstain INTEGER NOT NULL DEFAULT 0"
+                )
+            if "abstain_reasons_json" not in score_result_columns:
+                conn.execute(
+                    "ALTER TABLE score_results ADD COLUMN "
+                    "abstain_reasons_json TEXT NOT NULL DEFAULT '[]'"
+                )
             self._migrate_legacy_scores(conn)
             conn.execute(
                 "INSERT OR REPLACE INTO meta(key, value) VALUES('schema_version', ?)",
@@ -614,21 +657,24 @@ class HistoryStore:
             self, conn: sqlite3.Connection, game_id: int, scores: list[dict],
             model_version: int, feature_version: str, evidence_source: str,
             calibration_version: str, model_artifact_hash: str, input_hash: str,
-            confidence: dict, activate: bool) -> int:
+            confidence: dict, activate: bool,
+            artifact_model_version: str = "", model_family: str = "legacy") -> int:
         self._validate_score_participants(conn, game_id, scores)
         created_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
         cursor = conn.execute(
             """
             INSERT OR IGNORE INTO score_runs (
                 game_id, model_version, feature_version, evidence_source,
-                calibration_version, model_artifact_hash, input_hash,
+                calibration_version, model_artifact_hash,
+                artifact_model_version, model_family, input_hash,
                 confidence_json, status, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'complete', ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'complete', ?)
             """,
             (
-                game_id, int(model_version), feature_version, evidence_source,
-                calibration_version, model_artifact_hash, input_hash,
-                self._json(confidence), created_at,
+            game_id, int(model_version), feature_version, evidence_source,
+            calibration_version, model_artifact_hash,
+            artifact_model_version, model_family, input_hash,
+            self._json(confidence), created_at,
             ),
         )
         run_id = cursor.lastrowid
@@ -654,9 +700,10 @@ class HistoryStore:
                 INSERT OR IGNORE INTO score_results (
                     run_id, game_id, participant_id, total_score, match_rank,
                     components_json, observations_json, evidence_json,
-                    score_low, score_high, rank_confidence,
+                    score_low, score_high, participant_confidence,
+                    rank_confidence, abstain, abstain_reasons_json,
                     coaching_eligible
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     run_id, game_id, score["participant_id"],
@@ -665,7 +712,10 @@ class HistoryStore:
                     self._json(score.get("observations", [])),
                     self._json(score.get("evidence", [])),
                     score.get("score_low"), score.get("score_high"),
+                    score.get("participant_confidence"),
                     score.get("rank_confidence"),
+                    int(bool(score.get("abstain", False))),
+                    self._json(score.get("abstain_reasons", [])),
                     int(bool(score.get("coaching_eligible", False))),
                 ),
             )
@@ -708,7 +758,8 @@ class HistoryStore:
             feature_version: str, evidence_source: str,
             calibration_version: str = "", model_artifact_hash: str = "",
             input_hash: str = "", confidence: Optional[dict] = None,
-            activate: bool = True) -> int:
+            activate: bool = True, artifact_model_version: str = "",
+            model_family: str = "legacy") -> int:
         if not scores:
             raise ValueError("A score run requires participant results")
         resolved_hash = input_hash or self._hash(scores)
@@ -717,7 +768,70 @@ class HistoryStore:
                 conn, game_id, scores, model_version, feature_version,
                 evidence_source, calibration_version, model_artifact_hash,
                 resolved_hash, confidence or {}, activate,
+                artifact_model_version, model_family,
             )
+
+    def activate_score_run_if_preferred(self, run_id: int) -> bool:
+        """Activate `run_id` only when it does not downgrade evidence quality.
+
+        A v2 run always supersedes legacy v1. Stronger evidence tiers supersede
+        weaker tiers, and a new run from the same tier may replace an older
+        model/calibration. Lower-evidence rescoring remains immutable but does
+        not become the active UI result.
+        """
+        with self._connect() as conn:
+            # Take the SQLite write lock before reading the active pointer.
+            # Match-V5 and reconciled Live Client refreshes can race on
+            # independent threads; a deferred transaction would let both
+            # decide against the same stale active run and make the last write
+            # win even when it carries weaker evidence.
+            conn.execute("BEGIN IMMEDIATE")
+            candidate = conn.execute(
+                "SELECT * FROM score_runs WHERE id = ?", (int(run_id),),
+            ).fetchone()
+            if not candidate:
+                raise ValueError(f"Unknown score run ID {run_id}")
+            match = conn.execute(
+                "SELECT active_score_run_id FROM matches WHERE game_id = ?",
+                (candidate["game_id"],),
+            ).fetchone()
+            current_id = match["active_score_run_id"] if match else None
+            if current_id == run_id:
+                return True
+            current = (
+                conn.execute(
+                    "SELECT * FROM score_runs WHERE id = ?", (current_id,),
+                ).fetchone()
+                if current_id else None
+            )
+            candidate_priority = SCORE_EVIDENCE_PRIORITY.get(
+                candidate["evidence_source"], -2,
+            )
+            current_priority = (
+                SCORE_EVIDENCE_PRIORITY.get(current["evidence_source"], -2)
+                if current else -3
+            )
+            preferred = (
+                current is None
+                or candidate_priority > current_priority
+                or (
+                    candidate_priority == current_priority
+                    and int(candidate["model_version"]) >= int(current["model_version"])
+                )
+            )
+            if preferred:
+                conn.execute(
+                    """
+                    UPDATE matches
+                    SET active_score_run_id = ?, score_model_version = ?
+                    WHERE game_id = ?
+                    """,
+                    (
+                        int(run_id), int(candidate["model_version"]),
+                        int(candidate["game_id"]),
+                    ),
+                )
+            return preferred
 
     def list_score_runs(self, game_id: int) -> list[dict]:
         with self._connect() as conn:
@@ -1337,7 +1451,12 @@ class HistoryStore:
             rows = conn.execute(
                 """
                 SELECT m.*, p.kills, p.deaths, p.assists, p.cs, p.gold_earned,
-                       r.total_score, r.match_rank, sr.evidence_source,
+                       r.total_score, r.match_rank, r.score_low, r.score_high,
+                       r.participant_confidence, r.rank_confidence,
+                       r.abstain, r.abstain_reasons_json,
+                       sr.evidence_source, sr.feature_version,
+                       sr.calibration_version, sr.model_artifact_hash,
+                       sr.artifact_model_version, sr.model_family,
                        sr.model_version AS active_model_version,
                        sr.confidence_json
                 FROM matches m
@@ -1358,6 +1477,10 @@ class HistoryStore:
         for row in rows:
             item = dict(row)
             item["score_confidence"] = json.loads(item.pop("confidence_json"))
+            item["abstain"] = bool(item["abstain"])
+            item["abstain_reasons"] = json.loads(
+                item.pop("abstain_reasons_json"),
+            )
             out.append(item)
         return out
 
@@ -1373,9 +1496,11 @@ class HistoryStore:
                 SELECT p.*, sr.model_version, sr.feature_version,
                        sr.evidence_source, sr.calibration_version,
                        sr.model_artifact_hash, sr.input_hash,
+                       sr.artifact_model_version, sr.model_family,
                        sr.confidence_json, r.total_score, r.match_rank,
                        r.components_json, r.observations_json, r.evidence_json,
-                       r.score_low, r.score_high, r.rank_confidence,
+                       r.score_low, r.score_high, r.participant_confidence,
+                       r.rank_confidence, r.abstain, r.abstain_reasons_json,
                        r.coaching_eligible
                 FROM participants p
                 JOIN matches m ON m.game_id = p.game_id
@@ -1407,6 +1532,10 @@ class HistoryStore:
             item["observations"] = json.loads(item.pop("observations_json"))
             item["evidence"] = json.loads(item.pop("evidence_json"))
             item["score_confidence"] = json.loads(item.pop("confidence_json"))
+            item["abstain"] = bool(item["abstain"])
+            item["abstain_reasons"] = json.loads(
+                item.pop("abstain_reasons_json"),
+            )
             item["coaching_eligible"] = bool(item["coaching_eligible"])
             participants.append(item)
         return {"match": dict(match), "participants": participants}

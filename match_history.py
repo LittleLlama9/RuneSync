@@ -11,10 +11,22 @@ from typing import Callable, Optional
 from champion_roles import get_role_weights
 from history_store import HistoryStore
 from lcu import LCUConnectionError
-from performance_score import SCORING_MODEL_VERSION, score_match
+from performance_score import (
+    SCORING_MODEL_VERSION,
+    ScoreRouter,
+    ScoreRoutingError,
+    score_match,
+)
 from riot_api import RiotApiClient, RiotApiError, build_match_v5_id
 from riot_provider_status import ProviderStatus, get_default_status_tracker
 from secret_store import SecretStoreError, SecretStoreStatus
+from score_features import (
+    AGGREGATE,
+    FEATURE_VERSION,
+    SOURCE_PRIORITY,
+    detect_capabilities,
+    extract_game_features,
+)
 from timeline_provider import (
     LcuTimelineProvider,
     RiotMatchV5Provider,
@@ -217,7 +229,9 @@ class MatchHistoryService:
             riot_client_factory: Optional[Callable[[Callable[[], str]], object]] = None,
             match_v5_scheduler: Optional[
                 Callable[[Callable[[], None]], None]
-            ] = None):
+            ] = None,
+            score_v2_artifacts: Optional[dict] = None,
+            allow_development_score_v2: bool = False):
         self.lcu = lcu
         self.store = store or HistoryStore()
         self.on_log = on_log or (lambda message, tag="info": None)
@@ -247,6 +261,10 @@ class MatchHistoryService:
         self._match_v5_fetch_lock = threading.Lock()
         self._match_v5_scheduler = match_v5_scheduler or (
             lambda task: threading.Thread(target=task, daemon=True).start()
+        )
+        self._score_router = ScoreRouter(
+            score_v2_artifacts,
+            allow_development_artifacts=allow_development_score_v2,
         )
 
     def _ensure_champions(self) -> dict[int, str]:
@@ -315,6 +333,9 @@ class MatchHistoryService:
                     game_id, game, log_failure=log_timeline_failure,
                 )
                 match_v5_game = game
+            self.refresh_score_v2(
+                game_id, log_failure=log_timeline_failure,
+            )
             if notify and self.on_updated:
                 self.on_updated()
         # Match-V5 is a private, additive upgrade. Schedule it only after the
@@ -337,6 +358,71 @@ class MatchHistoryService:
                 game_id, game_payload, log_failure=log_failure,
             )
         )
+
+    def refresh_score_v2(
+            self, game_id: int, *, log_failure: bool = True) -> Optional[int]:
+        """Append and conditionally activate the best available Score v2 run.
+
+        With no registered production artifact this is a no-op, preserving v1.
+        When artifacts are present, the strongest evidence tier that has an
+        exact matching artifact is extracted and scored. Weaker reruns remain
+        immutable but cannot replace a stronger active tier.
+        """
+        if not self._score_router.enabled:
+            return None
+        try:
+            capabilities = detect_capabilities(self.store, game_id)
+            available_sources = [
+                source for source in SOURCE_PRIORITY
+                if (
+                    capabilities.aggregate if source == AGGREGATE
+                    else getattr(capabilities, source)
+                )
+            ]
+            source = self._score_router.select_source(
+                available_sources, capabilities.quality_dict(),
+            )
+            if source is None:
+                return None
+            features = extract_game_features(
+                self.store, game_id, FEATURE_VERSION,
+                evidence_source=source,
+            )
+            stored = self.store.get_feature_set(
+                game_id, feature_version=FEATURE_VERSION,
+                evidence_source=source,
+            )
+            if stored is None:
+                raise ScoreRoutingError(
+                    f"Score v2 feature set was not persisted for game {game_id}"
+                )
+            routed = self._score_router.score_feature_set(
+                features, stored["evidence"],
+            )
+            run_id = self.store.save_score_run(
+                game_id, list(routed.scores),
+                model_version=routed.model_version,
+                feature_version=routed.feature_version,
+                evidence_source=routed.evidence_source,
+                calibration_version=routed.calibration_version,
+                model_artifact_hash=routed.model_artifact_hash,
+                artifact_model_version=routed.artifact_model_version,
+                model_family=routed.model_family,
+                input_hash=stored["input_hash"],
+                confidence=dict(routed.confidence),
+                activate=False,
+            )
+            self.store.activate_score_run_if_preferred(run_id)
+            return run_id
+        except (
+                OSError, sqlite3.Error, ScoreRoutingError,
+                TypeError, ValueError) as exc:
+            if log_failure:
+                self.on_log(
+                    f"History could not append Score v2 for game {game_id}: {exc}",
+                    "warn",
+                )
+            return None
 
     def _save_lcu_timeline(
             self, game_id: int, match_payload: Optional[dict] = None,
@@ -392,6 +478,7 @@ class MatchHistoryService:
                     "warn",
                 )
             return False
+        self.refresh_score_v2(game_id, log_failure=log_failure)
         return True
 
     def _save_match_v5_timeline(
@@ -533,6 +620,7 @@ class MatchHistoryService:
                     "warn",
                 )
             return False
+        self.refresh_score_v2(game_id, log_failure=log_failure)
         return True
 
     def sync_recent(self, limit: int = 100) -> int:

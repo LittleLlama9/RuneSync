@@ -1186,7 +1186,8 @@ def compute_feature_set(
 
 
 def extract_game_features(
-        store, game_id: int, feature_version: str = FEATURE_VERSION) -> dict:
+        store, game_id: int, feature_version: str = FEATURE_VERSION,
+        evidence_source: Optional[str] = None) -> dict:
     """Detect the best evidence tier for `game_id`, extract, and persist.
 
     This is the only HistoryStore integration point in this module --
@@ -1198,7 +1199,20 @@ def extract_game_features(
         raise ValueError(f"Unknown game ID {game_id}")
     participants = store.get_participants(game_id)
     capabilities = detect_capabilities(store, game_id)
-    source = capabilities.best_source()
+    if evidence_source is None:
+        source = capabilities.best_source()
+    else:
+        if evidence_source not in SOURCE_PRIORITY:
+            raise ValueError(f"Unknown evidence source {evidence_source!r}")
+        available = (
+            capabilities.aggregate if evidence_source == AGGREGATE
+            else getattr(capabilities, evidence_source)
+        )
+        if not available:
+            raise ValueError(
+                f"Evidence source {evidence_source!r} is unavailable for game {game_id}"
+            )
+        source = evidence_source
 
     timeline = None
     live_events = None

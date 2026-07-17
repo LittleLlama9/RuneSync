@@ -1,6 +1,9 @@
 import json
 import sqlite3
 import datetime
+import threading
+import time
+from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
@@ -283,6 +286,129 @@ def test_score_runs_are_immutable_and_can_switch_active_version(tmp_path):
     assert local["rank_confidence"] == 0.8
     assert local["coaching_eligible"] is True
     assert local["evidence"] == [{"kind": "fight", "time": 900}]
+
+
+def test_score_v2_provenance_confidence_and_abstention_round_trip(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    report = _report()
+    store.save_report(report)
+    scores = [
+        {
+            **score,
+            "model_version": 2,
+            "participant_confidence": 0.7,
+            "rank_confidence": 0.6,
+            "abstain": score["participant_id"] == 1,
+            "abstain_reasons": (
+                ["short_game"] if score["participant_id"] == 1 else []
+            ),
+        }
+        for score in report["scores"]
+    ]
+
+    store.save_score_run(
+        123, scores, 2, "2.0.0-evidence", "aggregate",
+        calibration_version="2.0.0-test",
+        model_artifact_hash="artifact-hash",
+        artifact_model_version="2.0.0-test",
+        model_family="linear",
+        confidence={"production_ready": False},
+    )
+
+    saved = store.get_report(123)
+    local = next(row for row in saved["participants"] if row["participant_id"] == 1)
+    assert local["artifact_model_version"] == "2.0.0-test"
+    assert local["model_family"] == "linear"
+    assert local["participant_confidence"] == 0.7
+    assert local["abstain"] is True
+    assert local["abstain_reasons"] == ["short_game"]
+    history = store.list_history()
+    assert history[0]["participant_confidence"] == 0.7
+    assert history[0]["abstain"] is True
+    assert history[0]["abstain_reasons"] == ["short_game"]
+
+
+def test_score_run_activation_never_downgrades_evidence_tier(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    report = _report()
+    store.save_report(report)
+    lcu_run = store.save_score_run(
+        123, report["scores"], 2, "features-v2", "lcu_timeline",
+        model_artifact_hash="lcu-artifact", input_hash="lcu-input",
+        activate=False,
+    )
+    assert store.activate_score_run_if_preferred(lcu_run) is True
+
+    aggregate_run = store.save_score_run(
+        123, report["scores"], 2, "features-v2", "aggregate",
+        model_artifact_hash="aggregate-artifact", input_hash="aggregate-input",
+        activate=False,
+    )
+    assert store.activate_score_run_if_preferred(aggregate_run) is False
+    runs = store.list_score_runs(123)
+    assert next(run for run in runs if run["id"] == lcu_run)["is_active"] is True
+    assert next(run for run in runs if run["id"] == aggregate_run)["is_active"] is False
+
+
+def test_concurrent_activation_cannot_demote_stronger_evidence(tmp_path):
+    class DelayedSelectConnection:
+        def __init__(self, conn):
+            self._conn = conn
+
+        def execute(self, sql, parameters=()):
+            result = self._conn.execute(sql, parameters)
+            if "SELECT active_score_run_id FROM matches" in sql:
+                delay = 0.02 if threading.current_thread().name == "strong" else 0.08
+                time.sleep(delay)
+            return result
+
+        def __getattr__(self, name):
+            return getattr(self._conn, name)
+
+    class DelayedSelectStore(HistoryStore):
+        @contextmanager
+        def _connect(self):
+            with super()._connect() as conn:
+                yield DelayedSelectConnection(conn)
+
+    store = DelayedSelectStore(tmp_path / "history.db")
+    report = _report()
+    store.save_report(report)
+    strong_run = store.save_score_run(
+        123, report["scores"], 2, "features-v2", "match_v5",
+        model_artifact_hash="match-v5-artifact", input_hash="match-v5-input",
+        activate=False,
+    )
+    weak_run = store.save_score_run(
+        123, report["scores"], 2, "features-v2", "live_client",
+        model_artifact_hash="live-artifact", input_hash="live-input",
+        activate=False,
+    )
+
+    errors = []
+
+    def activate(run_id):
+        try:
+            store.activate_score_run_if_preferred(run_id)
+        except Exception as exc:
+            errors.append(exc)
+
+    strong = threading.Thread(
+        name="strong", target=activate, args=(strong_run,),
+    )
+    weak = threading.Thread(
+        name="weak", target=activate, args=(weak_run,),
+    )
+    strong.start()
+    time.sleep(0.01)
+    weak.start()
+    strong.join()
+    weak.join()
+
+    assert errors == []
+    runs = store.list_score_runs(123)
+    assert next(run for run in runs if run["id"] == strong_run)["is_active"] is True
+    assert next(run for run in runs if run["id"] == weak_run)["is_active"] is False
 
 
 def test_duplicate_score_run_reuses_same_immutable_record(tmp_path):

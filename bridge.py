@@ -17,8 +17,10 @@ from lcu import LCUClient, LCUConnectionError
 from ugg_api import UGGClient
 from overrides import OverrideManager
 from monitor import ACTIVE_GAME_PHASES, TERMINAL_GAME_PHASES, ChampSelectMonitor
+from history_store import default_history_path
 from match_history import MatchHistoryService
 from live_client import LiveCaptureManager
+from performance_score import ScoreRoutingError, load_score_v2_artifacts
 from tray import is_autostart_enabled, set_autostart as _reg_set_autostart
 
 SUMMONER_SPELLS = {
@@ -84,12 +86,20 @@ class Api:
         self.log_buf: list[dict] = []
         self.history = None
         self._history_error = ""
+        score_v2_artifacts = {}
+        try:
+            score_v2_artifacts = load_score_v2_artifacts(
+                default_history_path().parent / "score-v2-artifacts",
+            )
+        except ScoreRoutingError as e:
+            self._emit(f"Score v2 artifacts unavailable: {e}", "warn")
         try:
             self.history = MatchHistoryService(
                 self.lcu,
                 on_log=self._emit,
                 on_updated=self._on_history_updated,
                 on_postgame=self._on_postgame_ready,
+                score_v2_artifacts=score_v2_artifacts,
             )
         except Exception as e:
             self._history_error = f"Local history unavailable: {e}"
@@ -643,6 +653,7 @@ class Api:
             elif self.live_capture and live_capture_session_id:
                 try:
                     self.live_capture.reconcile(game_id, live_capture_session_id)
+                    self.history.refresh_score_v2(game_id)
                 except Exception as e:
                     self._emit(f"Live client capture reconciliation failed: {e}", "warn")
         except Exception as e:

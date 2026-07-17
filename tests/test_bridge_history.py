@@ -156,6 +156,7 @@ def test_ingest_postgame_reconciles_live_capture_with_resolved_game_id():
     api._ingest_postgame(live_capture_session_id="session-abc")
 
     api.live_capture.reconcile.assert_called_once_with(555, "session-abc")
+    api.history.refresh_score_v2.assert_called_once_with(555)
 
 
 def test_ingest_postgame_skips_reconcile_when_game_id_unresolved():

@@ -979,6 +979,26 @@ def test_extract_game_features_end_to_end_with_lcu_timeline(tmp_path):
     assert rows["n"] == 1
 
 
+def test_extract_game_features_can_explicitly_use_a_weaker_available_tier(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    participants = _ksante_participants()
+    _store_report(store, KSANTE_GAME_ID, participants, KSANTE_DURATION, local_participant_id=8)
+    store.save_timeline_payload(
+        KSANTE_GAME_ID, sf.LCU_TIMELINE,
+        {"provenance": {"source": "lcu_historical"}, "timeline": _ksante_timeline()},
+    )
+
+    features = sf.extract_game_features(
+        store, KSANTE_GAME_ID, evidence_source=sf.AGGREGATE,
+    )
+
+    assert features["evidence_source"] == sf.AGGREGATE
+    assert features["participants"]["8"]["fight_influence"] is None
+    assert store.get_feature_set(
+        KSANTE_GAME_ID, evidence_source=sf.AGGREGATE,
+    ) is not None
+
+
 def test_extract_game_features_falls_back_to_aggregate_when_no_timeline(tmp_path):
     store = HistoryStore(tmp_path / "history.db")
     participants = _sion_participants()

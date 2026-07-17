@@ -1,9 +1,27 @@
-"""Transparent, role-aware post-game performance scoring for RuneSync."""
+"""DAEMON Score routing plus the retained v1 heuristic scorer."""
 
 from collections import defaultdict
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Iterable, Mapping, Optional
+
+from score_features import AGGREGATE, SOURCE_PRIORITY
+from score_v2.artifact import (
+    Artifact,
+    ArtifactIntegrityError,
+    ArtifactValidationError,
+)
+from score_v2.leakage import OutcomeLeakageError
+from score_v2.runtime import (
+    ArtifactUnavailableError,
+    EvidenceTierMismatchError,
+    RankedScoreResult,
+    score_game,
+)
 
 
 SCORING_MODEL_VERSION = 1
+SCORE_V2_MODEL_VERSION = 2
 
 COMPONENT_WEIGHTS = {
     "lane": {
@@ -23,6 +41,204 @@ COMPONENT_WEIGHTS = {
         "vision": 0.15, "teamplay": 0.15,
     },
 }
+
+
+class ScoreRoutingError(Exception):
+    """Raised when a configured Score v2 route is unsafe or inconsistent."""
+
+
+@dataclass(frozen=True)
+class RoutedScoreRun:
+    """One complete Score v2 result ready for immutable persistence."""
+
+    model_version: int
+    artifact_model_version: str
+    feature_version: str
+    evidence_source: str
+    calibration_version: str
+    model_artifact_hash: str
+    model_family: str
+    scores: tuple[dict, ...]
+    confidence: Mapping
+
+
+class ScoreRouter:
+    """Route feature sets through exact-tier Score v2 artifacts.
+
+    An empty router is the normal installed state until production artifacts
+    pass the replacement gates. It never substitutes an artifact from another
+    evidence tier and never reads match outcome fields; v1 remains available
+    through `score_match` independently.
+    """
+
+    def __init__(
+            self, artifacts: Optional[Mapping[str, Artifact]] = None, *,
+            allow_development_artifacts: bool = False):
+        self._artifacts: dict[str, Artifact] = {}
+        for source, artifact in (artifacts or {}).items():
+            artifact.verify_content_hash()
+            artifact.validate()
+            if source != artifact.evidence_source:
+                raise ScoreRoutingError(
+                    f"Score v2 artifact registered for {source!r} declares "
+                    f"{artifact.evidence_source!r}"
+                )
+            if source not in SOURCE_PRIORITY:
+                raise ScoreRoutingError(f"Unknown Score v2 evidence source {source!r}")
+            if not artifact.production_ready and not allow_development_artifacts:
+                raise ScoreRoutingError(
+                    f"Score v2 artifact for {source!r} is not production-ready"
+                )
+            self._artifacts[source] = artifact
+
+    @property
+    def enabled(self) -> bool:
+        return bool(self._artifacts)
+
+    @property
+    def registered_sources(self) -> tuple[str, ...]:
+        return tuple(
+            source for source in SOURCE_PRIORITY if source in self._artifacts
+        )
+
+    def select_source(
+            self, available_sources: Iterable[str],
+            source_quality: Optional[Mapping[str, float]] = None) -> Optional[str]:
+        available = set(available_sources)
+        candidates = [
+            source for source in SOURCE_PRIORITY
+            if source in available and source in self._artifacts
+        ]
+        if not candidates:
+            return None
+        quality = source_quality or {}
+        priority = {
+            source: -index for index, source in enumerate(SOURCE_PRIORITY)
+        }
+        return max(
+            candidates,
+            key=lambda source: (
+                -1.0 if source == AGGREGATE
+                else float(quality.get(source, 1.0)),
+                priority[source],
+            ),
+        )
+
+    def score_feature_set(
+            self, game_features: Mapping,
+            evidence: Iterable[Mapping] = ()) -> RoutedScoreRun:
+        source = game_features.get("evidence_source")
+        artifact = self._artifacts.get(source)
+        if artifact is None:
+            raise ScoreRoutingError(
+                f"No Score v2 artifact registered for evidence tier {source!r}"
+            )
+        try:
+            ranked = score_game(self._artifacts, game_features)
+        except (
+                ArtifactIntegrityError, ArtifactValidationError,
+                ArtifactUnavailableError, EvidenceTierMismatchError,
+                OutcomeLeakageError, KeyError, TypeError, ValueError) as exc:
+            raise ScoreRoutingError(
+                f"Score v2 could not score {source!r} evidence: {exc}"
+            ) from exc
+        evidence_rows = tuple(dict(row) for row in evidence)
+        scores = tuple(
+            self._storage_score(
+                ranked[participant_id], evidence_rows,
+            )
+            for participant_id in sorted(ranked)
+        )
+        abstained = [
+            score["participant_id"] for score in scores if score["abstain"]
+        ]
+        return RoutedScoreRun(
+            model_version=SCORE_V2_MODEL_VERSION,
+            artifact_model_version=artifact.model_version,
+            feature_version=artifact.feature_version,
+            evidence_source=artifact.evidence_source,
+            calibration_version=artifact.calibration_version,
+            model_artifact_hash=artifact.content_hash,
+            model_family=artifact.model_family,
+            scores=scores,
+            confidence={
+                "score_version": SCORE_V2_MODEL_VERSION,
+                "artifact_model_version": artifact.model_version,
+                "model_family": artifact.model_family,
+                "evidence_source": artifact.evidence_source,
+                "feature_version": artifact.feature_version,
+                "calibration_version": artifact.calibration_version,
+                "production_ready": artifact.production_ready,
+                "chosen_source_completeness": game_features.get(
+                    "chosen_source_completeness",
+                ),
+                "abstained_participant_ids": abstained,
+            },
+        )
+
+    @staticmethod
+    def _storage_score(
+            ranked: RankedScoreResult,
+            evidence: tuple[Mapping, ...]) -> dict:
+        result = ranked.result
+        participant_evidence = [
+            dict(row) for row in evidence
+            if row.get("participant_id") in (None, result.participant_id)
+        ]
+        return {
+            "participant_id": result.participant_id,
+            "model_version": SCORE_V2_MODEL_VERSION,
+            "total_score": result.score,
+            "match_rank": ranked.rank,
+            "components": {},
+            "observations": [],
+            "evidence": participant_evidence,
+            "score_low": result.score_interval[0],
+            "score_high": result.score_interval[1],
+            "participant_confidence": result.confidence,
+            "rank_confidence": ranked.rank_confidence,
+            "abstain": result.abstain,
+            "abstain_reasons": list(result.abstain_reasons),
+            "coaching_eligible": False,
+        }
+
+
+def load_score_v2_artifacts(
+        directory, *, require_production_ready: bool = True) -> dict[str, Artifact]:
+    """Load exact-tier artifacts from `<directory>/<source>.json`.
+
+    A missing directory or missing tier file is normal. A present but invalid
+    artifact raises rather than silently leaving a route partially configured.
+    """
+    root = Path(directory)
+    if not root.exists():
+        return {}
+    if not root.is_dir():
+        raise ScoreRoutingError(f"Score v2 artifact path is not a directory: {root}")
+    artifacts = {}
+    for source in SOURCE_PRIORITY:
+        path = root / f"{source}.json"
+        if not path.exists():
+            continue
+        try:
+            artifact = Artifact.load(path)
+        except (
+                OSError, KeyError, TypeError, ValueError,
+                ArtifactIntegrityError, ArtifactValidationError) as exc:
+            raise ScoreRoutingError(
+                f"Could not load Score v2 artifact {path.name}: {exc}"
+            ) from exc
+        if artifact.evidence_source != source:
+            raise ScoreRoutingError(
+                f"Artifact {path.name} declares evidence tier "
+                f"{artifact.evidence_source!r}"
+            )
+        if require_production_ready and not artifact.production_ready:
+            raise ScoreRoutingError(
+                f"Artifact {path.name} is not production-ready"
+            )
+        artifacts[source] = artifact
+    return artifacts
 
 
 def _safe_div(numerator, denominator) -> float:
