@@ -1,12 +1,14 @@
 # DAEMON Score v2 routing
 
-**Status: integrated, inactive by default.** RuneSync ships no production
-Score v2 artifact yet. The retained v1 scorer remains the active fallback until
-an independently approved artifact is installed.
+**Status: integrated, opt-in beta, inactive by default.** RuneSync ships no
+trained Score v2 artifact yet. The retained v1 scorer remains the active
+fallback until the user enables the beta and a valid exact-tier artifact is
+installed.
 
 ## Artifact loading
 
-At startup RuneSync checks:
+When **DAEMON Score v2 beta** is enabled in Settings, RuneSync checks at
+startup:
 
 ```text
 %APPDATA%\RuneSync\score-v2-artifacts\
@@ -18,10 +20,13 @@ for exact-tier files named `match_v5.json`, `lcu_timeline.json`,
 - pass content-hash and schema validation;
 - declare the same evidence tier as its filename;
 - use that tier's canonical feature contract; and
-- set `production_ready=true`.
+- contain a fitted signal rather than an `insufficient_data` neutral prior.
 
-Any present invalid or development-only artifact is rejected and logged. A
-missing directory or missing tier file is normal and leaves v1 active.
+The beta may load a development artifact without `production_ready=true`, but
+that does not promote or publish it. Any invalid or neutral artifact is
+rejected and logged. A missing directory or missing tier file is normal and
+leaves v1 active. Disabling the setting prevents artifacts from loading; a
+restart applies changes to the runtime router.
 
 ## Route selection
 

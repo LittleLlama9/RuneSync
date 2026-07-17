@@ -24,6 +24,8 @@ def test_interface_style_defaults_and_persists(monkeypatch):
     monkeypatch.setattr(bridge, "is_autostart_enabled", lambda: False)
 
     assert api._settings()["interface_style"] == "standard"
+    assert api._settings()["score_v2_beta"] is False
+    assert api._settings()["score_v2_beta_sources"] == []
     assert api.set_interface("classic") == {
         "ok": True, "interface_style": "classic",
     }
@@ -45,6 +47,34 @@ def test_interface_style_defaults_and_persists(monkeypatch):
     api.overrides.save_settings.reset_mock()
     assert api.save_settings({"interface_style": "bogus"}) == {"ok": True}
     api.overrides.save_settings.assert_called_once_with({
+        "interface_style": "standard",
+    })
+
+
+def test_score_v2_beta_setting_is_explicit_and_persists(monkeypatch):
+    api = _api()
+    api.overrides = MagicMock()
+    api.overrides.settings = {}
+    api.overrides.save_settings = MagicMock()
+    api.monitor = None
+
+    assert bridge._load_configured_score_v2_artifacts(
+        api.overrides.settings, "ignored",
+    ) == {}
+
+    loader = MagicMock(return_value={"lcu_timeline": object()})
+    monkeypatch.setattr(bridge, "load_score_v2_artifacts", loader)
+    loaded = bridge._load_configured_score_v2_artifacts(
+        {"score_v2_beta": True}, "artifacts",
+    )
+    assert tuple(loaded) == ("lcu_timeline",)
+    loader.assert_called_once_with(
+        "artifacts", require_production_ready=False,
+    )
+
+    assert api.save_settings({"score_v2_beta": True}) == {"ok": True}
+    api.overrides.save_settings.assert_called_once_with({
+        "score_v2_beta": True,
         "interface_style": "standard",
     })
 

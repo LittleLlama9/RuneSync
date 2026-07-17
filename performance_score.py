@@ -270,6 +270,10 @@ def load_score_v2_artifacts(
                 f"Artifact {path.name} declares evidence tier "
                 f"{artifact.evidence_source!r}"
             )
+        if artifact.training_metadata.get("status") == "insufficient_data":
+            raise ScoreRoutingError(
+                f"Artifact {path.name} is a neutral insufficient-data model"
+            )
         if require_production_ready and not artifact.production_ready:
             raise ScoreRoutingError(
                 f"Artifact {path.name} is not production-ready"

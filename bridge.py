@@ -31,6 +31,15 @@ _SPELL_ID_TO_NAME = {v: k for k, v in SUMMONER_SPELLS.items()}
 _LOG_CLS = {"success": "ok", "warn": "warn", "error": "error", "champ": "champ", "info": ""}
 
 
+def _load_configured_score_v2_artifacts(settings, directory):
+    if settings.get("score_v2_beta") is not True:
+        return {}
+    return load_score_v2_artifacts(
+        directory,
+        require_production_ready=False,
+    )
+
+
 def _spell_label(s1, s2) -> str:
     if not s1 and not s2:
         return "u.gg default"
@@ -86,13 +95,19 @@ class Api:
         self.log_buf: list[dict] = []
         self.history = None
         self._history_error = ""
+        self._score_v2_beta_sources: tuple[str, ...] = ()
+        self._score_v2_beta_error = ""
+        score_v2_beta = self.overrides.settings.get("score_v2_beta") is True
         score_v2_artifacts = {}
         try:
-            score_v2_artifacts = load_score_v2_artifacts(
+            score_v2_artifacts = _load_configured_score_v2_artifacts(
+                self.overrides.settings,
                 default_history_path().parent / "score-v2-artifacts",
             )
         except ScoreRoutingError as e:
+            self._score_v2_beta_error = str(e)
             self._emit(f"Score v2 artifacts unavailable: {e}", "warn")
+        self._score_v2_beta_sources = tuple(score_v2_artifacts)
         try:
             self.history = MatchHistoryService(
                 self.lcu,
@@ -100,6 +115,7 @@ class Api:
                 on_updated=self._on_history_updated,
                 on_postgame=self._on_postgame_ready,
                 score_v2_artifacts=score_v2_artifacts,
+                allow_development_score_v2=score_v2_beta,
             )
         except Exception as e:
             self._history_error = f"Local history unavailable: {e}"
@@ -133,6 +149,11 @@ class Api:
             "rank": s.get("rank", "Platinum+"), "region": s.get("region", "World"),
             "auto_role": s.get("auto_role", True), "trigger": s.get("trigger", "hover"),
             "phosphor": s.get("phosphor", "amber"), "interface_style": interface_style,
+            "score_v2_beta": s.get("score_v2_beta") is True,
+            "score_v2_beta_sources": list(
+                getattr(self, "_score_v2_beta_sources", ()),
+            ),
+            "score_v2_beta_error": getattr(self, "_score_v2_beta_error", ""),
             "autostart": is_autostart_enabled(),
         }
 
@@ -348,6 +369,8 @@ class Api:
         for k in ("rank", "region", "auto_role", "trigger", "phosphor"):
             if k in data:
                 s[k] = data[k]
+        if "score_v2_beta" in data:
+            s["score_v2_beta"] = data["score_v2_beta"] is True
         interface_style = data.get("interface_style")
         if interface_style in {"standard", "classic"}:
             s["interface_style"] = interface_style

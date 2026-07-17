@@ -1,3 +1,4 @@
+import dataclasses
 import datetime
 
 import pytest
@@ -192,3 +193,18 @@ def test_artifact_directory_loader_is_fail_closed(tmp_path):
         tmp_path, require_production_ready=False,
     )
     assert loaded["aggregate"].content_hash == artifact.content_hash
+
+
+def test_artifact_directory_loader_rejects_neutral_beta_model(tmp_path):
+    artifact = _artifact()
+    artifact = dataclasses.replace(
+        artifact,
+        training_metadata={"status": "insufficient_data"},
+        content_hash="",
+    ).with_content_hash()
+    artifact.save(tmp_path / "aggregate.json")
+
+    with pytest.raises(ScoreRoutingError, match="neutral insufficient-data"):
+        load_score_v2_artifacts(
+            tmp_path, require_production_ready=False,
+        )

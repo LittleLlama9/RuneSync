@@ -105,7 +105,8 @@
     report: null,
     settings: {
       rank: 'Platinum+', region: 'World', auto_role: true, trigger: 'hover',
-      phosphor: 'amber', interface_style: 'standard', autostart: false
+      phosphor: 'amber', interface_style: 'standard', score_v2_beta: false,
+      score_v2_beta_sources: [], score_v2_beta_error: '', autostart: false
     }
   };
 
@@ -262,6 +263,7 @@
     $('setPhosphor').textContent = (standardInterface() ? titleCase(s.phosphor) : s.phosphor) + ' ▾';
     [
       [$('setAutoRole'), !!s.auto_role],
+      [$('setScoreV2Beta'), !!s.score_v2_beta],
       [$('setAutostart'), !!s.autostart]
     ].forEach(([el, enabled]) => {
       el.classList.toggle('on', enabled);
@@ -269,6 +271,18 @@
       const classic = el.querySelector('.classic-toggle');
       if (classic) classic.textContent = enabled ? '[x]' : '[ ]';
     });
+    const betaSources = Array.isArray(s.score_v2_beta_sources)
+      ? s.score_v2_beta_sources : [];
+    const betaStatus = $('scoreV2BetaStatus');
+    if (s.score_v2_beta_error) {
+      betaStatus.textContent = '# model rejected; v1 fallback active';
+    } else if (betaSources.length) {
+      betaStatus.textContent = '# loaded: ' + betaSources.join(', ').replaceAll('_', ' ');
+    } else if (s.score_v2_beta) {
+      betaStatus.textContent = '# no beta model loaded; v1 fallback active';
+    } else {
+      betaStatus.textContent = '# off by default; restart after enabling';
+    }
     document.querySelectorAll('[data-trig]').forEach(el => {
       const selected = el.dataset.trig === s.trigger;
       el.classList.toggle('selected', selected);
@@ -830,6 +844,10 @@
         applyTheme(v); window.API.call('set_theme', v);   // theme persists immediately
       }));
     $('setAutoRole').addEventListener('click', () => { state.settings.auto_role = !state.settings.auto_role; renderSettings(); });
+    $('setScoreV2Beta').addEventListener('click', () => {
+      state.settings.score_v2_beta = !state.settings.score_v2_beta;
+      renderSettings();
+    });
     $('setAutostart').addEventListener('click', () => {
       const next = !state.settings.autostart;
       if (window.API.ready()) {
