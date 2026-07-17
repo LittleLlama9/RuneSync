@@ -11,6 +11,7 @@ from riot_api import (
     RiotApiRateLimitError,
     RiotApiTransientError,
     RiotApiTransportError,
+    USER_AGENT,
     build_match_v5_id,
     regional_route_for_platform,
 )
@@ -89,6 +90,7 @@ def test_get_match_sends_riot_header_and_returns_payload():
         "https://americas.api.riotgames.com/lol/match/v5/matches/NA1_123456"
     )
     assert captured["headers"]["X-riot-token"] == "test-token"
+    assert captured["headers"]["User-agent"] == USER_AGENT
     assert captured["timeout"] == 7.5
 
 
