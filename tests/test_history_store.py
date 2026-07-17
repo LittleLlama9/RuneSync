@@ -456,6 +456,26 @@ def test_feature_sets_are_content_addressed(tmp_path):
     assert first == second
 
 
+def test_get_feature_set_reads_back_newest_matching_row(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    store.save_report(_report())
+    older = {"participants": {"1": {"combat_influence": 1.0}}}
+    newer = {"participants": {"1": {"combat_influence": 2.0}}}
+
+    store.save_feature_set(123, "features-v1", "aggregate", older)
+    store.save_feature_set(123, "features-v1", "match_v5", newer)
+
+    assert store.get_feature_set(123, evidence_source="aggregate")["features"] == older
+    assert store.get_feature_set(123, evidence_source="match_v5")["features"] == newer
+    assert store.get_feature_set(999) is None
+    assert store.get_feature_set(123, evidence_source="live_client") is None
+
+    all_sets = store.list_feature_sets(123)
+    assert len(all_sets) == 2
+    assert {row["evidence_source"] for row in all_sets} == {"aggregate", "match_v5"}
+    assert store.list_feature_sets(999) == []
+
+
 def test_report_orders_each_team_like_league_scoreboard(tmp_path):
     store = HistoryStore(tmp_path / "history.db")
     report = _report()

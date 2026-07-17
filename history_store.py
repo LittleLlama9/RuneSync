@@ -1194,6 +1194,66 @@ class HistoryStore:
             ).fetchone()
         return int(row["id"])
 
+    def get_feature_set(
+            self, game_id: int, feature_version: Optional[str] = None,
+            evidence_source: Optional[str] = None) -> Optional[dict]:
+        """Read back the newest saved feature set for `game_id`.
+
+        Narrow read accessor for `save_feature_set` -- Score v2
+        training/evaluation tooling needs to load persisted feature sets
+        without duplicating the `feature_sets` schema here. Returns the
+        most recent matching row (by `created_at`/`id`), or None if no
+        feature set has been saved for this game (and, if supplied,
+        `feature_version`/`evidence_source`).
+        """
+        where = "WHERE game_id = ?"
+        params: list = [game_id]
+        if feature_version:
+            where += " AND feature_version = ?"
+            params.append(feature_version)
+        if evidence_source:
+            where += " AND evidence_source = ?"
+            params.append(evidence_source)
+        with self._connect() as conn:
+            row = conn.execute(
+                f"""
+                SELECT * FROM feature_sets
+                {where}
+                ORDER BY created_at DESC, id DESC LIMIT 1
+                """,
+                params,
+            ).fetchone()
+        if not row:
+            return None
+        item = dict(row)
+        item["features"] = json.loads(item.pop("features_json"))
+        item["evidence"] = json.loads(item.pop("evidence_json"))
+        return item
+
+    def list_feature_sets(self, game_id: Optional[int] = None) -> list[dict]:
+        """List saved feature sets, newest first, optionally filtered by game."""
+        where = ""
+        params: list = []
+        if game_id is not None:
+            where = "WHERE game_id = ?"
+            params.append(game_id)
+        with self._connect() as conn:
+            rows = conn.execute(
+                f"""
+                SELECT * FROM feature_sets
+                {where}
+                ORDER BY created_at DESC, id DESC
+                """,
+                params,
+            ).fetchall()
+        results = []
+        for row in rows:
+            item = dict(row)
+            item["features"] = json.loads(item.pop("features_json"))
+            item["evidence"] = json.loads(item.pop("evidence_json"))
+            results.append(item)
+        return results
+
     def get_summary(self) -> dict:
         with self._connect() as conn:
             totals = conn.execute(
