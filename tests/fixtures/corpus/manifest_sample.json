@@ -1,0 +1,254 @@
+[
+  {
+    "capability_flags": {
+      "has_all_player_parity": true,
+      "has_bounty_detail": false,
+      "has_building_events": false,
+      "has_champion_events": false,
+      "has_item_events": false,
+      "has_local_player_detail": true,
+      "has_minute_frames": false,
+      "has_position_timeline": false,
+      "has_subminute_resolution": false,
+      "has_victim_damage_detail": false,
+      "has_ward_events": false
+    },
+    "completeness": 1.0,
+    "consent_status": "personal_local_client_data",
+    "content_hash": "82200a978ae55244d5abc45ca925df65dce5bbe67b8b6d3a270ac27a6f963e75",
+    "created_at": "2024-01-01T00:00:00+00:00",
+    "entry_id": "1001:aggregate",
+    "game_id": 1001,
+    "game_metadata": {
+      "duration_seconds": 1800,
+      "game_creation_date": "2024-01-01T00:00:00Z",
+      "map_id": 11,
+      "patch": "14.1",
+      "queue_id": 420,
+      "rank_tier": null,
+      "rank_unknown_reason": "not_captured_by_history_store_schema",
+      "region": null,
+      "region_unknown_reason": "not_captured_by_history_store_schema"
+    },
+    "leakage": {
+      "champion": "Ahri",
+      "match_group_key": "1001",
+      "patch": "14.1",
+      "player_group_keys": [
+        "p_109b4df5a3775bd1e294ee60",
+        "p_3c745fc1361d96debd79fe7a",
+        "p_58e85cb30a3b3c33083c44e4",
+        "p_5c3f6db4bba64201f0a9370a",
+        "p_63ca9bd86edd519a4482fd40",
+        "p_8206f05e1c8dc16e0d1f89da",
+        "p_9f7fec9d40a35a6077ea8435",
+        "p_ab16f23ebc070a0327019e3c",
+        "p_d13234818200dc630aa71e77",
+        "p_eda260f8b1ce04bdfc7fe11a"
+      ],
+      "rank_tier": null,
+      "region": null,
+      "role": "MID"
+    },
+    "manifest_schema_version": 1,
+    "privacy_classification": "local_hashed_real",
+    "provenance": {
+      "capture_method": "lcu_aggregate_fallback",
+      "captured_at": "2024-01-01T00:00:00+00:00",
+      "collection_tool": "runesync-corpus-tooling",
+      "collection_tool_version": "1",
+      "notes": [],
+      "source_schema_version": "1"
+    },
+    "source": "aggregate"
+  },
+  {
+    "capability_flags": {
+      "has_all_player_parity": true,
+      "has_bounty_detail": false,
+      "has_building_events": true,
+      "has_champion_events": true,
+      "has_item_events": false,
+      "has_local_player_detail": true,
+      "has_minute_frames": true,
+      "has_position_timeline": true,
+      "has_subminute_resolution": false,
+      "has_victim_damage_detail": false,
+      "has_ward_events": false
+    },
+    "completeness": 0.85,
+    "consent_status": "personal_local_client_data",
+    "content_hash": "d143c9b04bc85136de301341e9920a89f4693ebf63b3261585347d9cccbe7f1b",
+    "created_at": "2024-01-01T00:00:00+00:00",
+    "entry_id": "1002:lcu_timeline",
+    "game_id": 1002,
+    "game_metadata": {
+      "duration_seconds": 1800,
+      "game_creation_date": "2024-01-01T00:00:00Z",
+      "map_id": 11,
+      "patch": "14.2",
+      "queue_id": 420,
+      "rank_tier": null,
+      "rank_unknown_reason": "not_captured_by_history_store_schema",
+      "region": null,
+      "region_unknown_reason": "not_captured_by_history_store_schema"
+    },
+    "leakage": {
+      "champion": "Zed",
+      "match_group_key": "1002",
+      "patch": "14.2",
+      "player_group_keys": [
+        "p_26a270a990666f9e07a5822e",
+        "p_36b2ec64ed6fa7112ea0ac2a",
+        "p_4b78247248675e69dacf7998",
+        "p_644673fe934f9e358fb1eb37",
+        "p_6da37efe4e560191bbfc4e5c",
+        "p_8c38c53cf4de4f737dec0eb0",
+        "p_8e92d817cee1fb65b5b06f17",
+        "p_c1962cc6cb7dfd770a9c380f",
+        "p_d5e58f9fe8ec2b97a8054205",
+        "p_f4f7b0542ff002282a9f3260"
+      ],
+      "rank_tier": null,
+      "region": null,
+      "role": "MID"
+    },
+    "manifest_schema_version": 1,
+    "privacy_classification": "local_hashed_real",
+    "provenance": {
+      "capture_method": "lcu_local_client",
+      "captured_at": "2024-01-01T00:00:00+00:00",
+      "collection_tool": "runesync-corpus-tooling",
+      "collection_tool_version": "1",
+      "notes": [],
+      "source_schema_version": "1"
+    },
+    "source": "lcu_timeline"
+  },
+  {
+    "capability_flags": {
+      "has_all_player_parity": false,
+      "has_bounty_detail": false,
+      "has_building_events": false,
+      "has_champion_events": false,
+      "has_item_events": false,
+      "has_local_player_detail": true,
+      "has_minute_frames": false,
+      "has_position_timeline": false,
+      "has_subminute_resolution": true,
+      "has_victim_damage_detail": false,
+      "has_ward_events": false
+    },
+    "completeness": 0.6,
+    "consent_status": "personal_local_client_data",
+    "content_hash": "7815e8cd809b328d08dbdb61bbd579e5dd3dcaa94c751f209a579632a2c4faf7",
+    "created_at": "2024-01-01T00:00:00+00:00",
+    "entry_id": "1003:live_client",
+    "game_id": 1003,
+    "game_metadata": {
+      "duration_seconds": 1800,
+      "game_creation_date": "2024-01-01T00:00:00Z",
+      "map_id": 11,
+      "patch": "14.1",
+      "queue_id": 420,
+      "rank_tier": null,
+      "rank_unknown_reason": "not_captured_by_history_store_schema",
+      "region": null,
+      "region_unknown_reason": "not_captured_by_history_store_schema"
+    },
+    "leakage": {
+      "champion": "Garen",
+      "match_group_key": "1003",
+      "patch": "14.1",
+      "player_group_keys": [
+        "p_1593b4d5bb5c22624dc338f9",
+        "p_55c2801d628d936a5f757b57",
+        "p_5c3f6db4bba64201f0a9370a",
+        "p_6d781f48c4e7a932d19e8b2f",
+        "p_93d2dbc28dfc282532c5fb23",
+        "p_affe041f6c86fdd6f12dd434",
+        "p_b4b428f49669ad0f919286dc",
+        "p_d59dc0b87cdd79613d0a24fc",
+        "p_e81bef98d2c85aab1b38a8be",
+        "p_f319c3ce3f9a1316f7283670"
+      ],
+      "rank_tier": null,
+      "region": null,
+      "role": "TOP"
+    },
+    "manifest_schema_version": 1,
+    "privacy_classification": "local_hashed_real",
+    "provenance": {
+      "capture_method": "live_client_local_capture",
+      "captured_at": "2024-01-01T00:00:00+00:00",
+      "collection_tool": "runesync-corpus-tooling",
+      "collection_tool_version": "1",
+      "notes": [],
+      "source_schema_version": "1"
+    },
+    "source": "live_client"
+  },
+  {
+    "capability_flags": {
+      "has_all_player_parity": true,
+      "has_bounty_detail": true,
+      "has_building_events": true,
+      "has_champion_events": true,
+      "has_item_events": true,
+      "has_local_player_detail": true,
+      "has_minute_frames": true,
+      "has_position_timeline": true,
+      "has_subminute_resolution": false,
+      "has_victim_damage_detail": true,
+      "has_ward_events": true
+    },
+    "completeness": 1.0,
+    "consent_status": "match_v5_personal_key_research_only",
+    "content_hash": "ecc90105ad53584909db0b93e40766b3cd45354aba82c4f8209b769cf8c4e3e7",
+    "created_at": "2024-01-01T00:00:00+00:00",
+    "entry_id": "1004:match_v5",
+    "game_id": 1004,
+    "game_metadata": {
+      "duration_seconds": 1800,
+      "game_creation_date": "2024-01-01T00:00:00Z",
+      "map_id": 11,
+      "patch": "14.3",
+      "queue_id": 420,
+      "rank_tier": null,
+      "rank_unknown_reason": "not_captured_by_history_store_schema",
+      "region": null,
+      "region_unknown_reason": "not_captured_by_history_store_schema"
+    },
+    "leakage": {
+      "champion": "Lux",
+      "match_group_key": "1004",
+      "patch": "14.3",
+      "player_group_keys": [
+        "p_460176462c4d5c0efa5fbc94",
+        "p_47d5fe2240a3357a7370dbe7",
+        "p_4e1989168f56fa715c107c0f",
+        "p_5ad09fd416c83aa597e98a6c",
+        "p_72f0c8d6ab5d358829f53fc6",
+        "p_9f9eb94d95def3aec7b44d2d",
+        "p_c07446f9d6cd326ed41e595f",
+        "p_c64cbc96930cd03a6a76c270",
+        "p_eef422839636b91ecc4e6f37",
+        "p_f78df214bd1de98d85b79d5d"
+      ],
+      "rank_tier": null,
+      "region": null,
+      "role": "SUPPORT"
+    },
+    "manifest_schema_version": 1,
+    "privacy_classification": "local_hashed_synthetic",
+    "provenance": {
+      "capture_method": "match_v5_personal_key",
+      "captured_at": "2024-01-01T00:00:00+00:00",
+      "collection_tool": "runesync-corpus-tooling",
+      "collection_tool_version": "1",
+      "notes": [],
+      "source_schema_version": "1"
+    },
+    "source": "match_v5"
+  }
+]
