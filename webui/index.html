@@ -301,16 +301,39 @@
                 <em id="reportScoreBand">PERFORMANCE INDEX</em>
               </div>
             </div>
+            <div class="report-trust" role="region" aria-label="Score evidence and confidence">
+              <div>
+                <span>EVIDENCE</span>
+                <strong id="reportEvidenceSource">Legacy aggregate</strong>
+                <small id="reportEvidenceDetail">DAEMON v1 input</small>
+              </div>
+              <div>
+                <span>SCORE CONFIDENCE</span>
+                <strong id="reportConfidence">Not calibrated</strong>
+                <small id="reportConfidenceDetail">legacy estimate</small>
+              </div>
+              <div>
+                <span>SCORE RANGE</span>
+                <strong id="reportInterval">—</strong>
+                <small>calibrated interval</small>
+              </div>
+              <div>
+                <span>RANK CONFIDENCE</span>
+                <strong id="reportRankConfidence">Not calibrated</strong>
+                <small id="reportRankDetail">within this match</small>
+              </div>
+            </div>
             <div class="report-grid">
-              <div class="panel">
-                <span class="ptitle">COMPONENTS</span>
+              <div class="panel report-components-panel">
+                <span class="ptitle">SCORE BREAKDOWN</span>
                 <div class="component-list" id="reportComponents"></div>
               </div>
               <div class="panel">
-                <span class="ptitle">OBSERVATIONS</span>
+                <span class="ptitle">MATCH EVIDENCE</span>
                 <div class="observation-list" id="reportObservations"></div>
               </div>
             </div>
+            <div class="panel report-coaching" id="reportCoaching" aria-live="polite"></div>
             <div class="report-board">
               <div class="report-board-head">
                 <span>RANK</span><span>PLAYER</span><span>CHAMPION</span><span>ROLE</span>
@@ -321,6 +344,7 @@
             <div class="method-note">
               DAEMON Score v<span id="reportModel">1</span> is a transparent,
               role-aware performance summary. It is not MMR, ELO, or an LP prediction.
+              <span id="reportMethodDetail"></span>
             </div>
           </section>
 

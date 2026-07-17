@@ -29,6 +29,11 @@ def test_history_and_report_views_are_wired():
     assert html.count('role="tabpanel" aria-labelledby="historyTabChampions" tabindex="0"') == 1
     assert html.count('role="tabpanel" aria-labelledby="historyTabRoles" tabindex="0"') == 1
     assert 'id="reportRankLabel"' in html
+    assert 'id="reportEvidenceSource"' in html
+    assert 'id="reportConfidence"' in html
+    assert 'id="reportInterval"' in html
+    assert 'id="reportRankConfidence"' in html
+    assert 'id="reportCoaching"' in html
     assert "get_history_summary" in js
     assert "get_match_history" in js
     assert "get_match_report" in js
@@ -39,6 +44,8 @@ def test_history_and_report_views_are_wired():
     assert "overflow-y:scroll" in css
     assert ".history-card" in css
     assert ".report-rankbox" in css
+    assert ".report-trust" in css
+    assert ".report-coaching" in css
 
 
 def test_history_report_readability_and_keyboard_contract():
@@ -120,6 +127,12 @@ def test_standard_interface_mode_contract():
     assert "assets/spells/" in js
     assert 'class="spell-icons"' in js
     assert "championIconUrl" in js
+    assert "EVIDENCE_SOURCES" in js
+    assert "function renderCoaching" in js
+    assert "CLOSE RANKING" in js
+    assert "Score v2 replaces legacy category bars" in js
+    assert "COACHING WITHHELD" in js
+    assert "3 OF 5 CHALLENGE" in js
     assert 'class="history-champion-art"' in js
     assert 'id="historyRecentForm"' in html
     assert "Last 10 shown" in html

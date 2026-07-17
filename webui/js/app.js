@@ -314,6 +314,63 @@
     if (score >= 35) return 'C-TIER';
     return 'D-TIER';
   }
+  const EVIDENCE_SOURCES = {
+    match_v5: { label: 'Full timeline', detail: 'Riot Match-V5 timeline', cls: 'full' },
+    lcu_timeline: { label: 'Local timeline', detail: 'Post-game League client timeline', cls: 'local' },
+    live_client: { label: 'Live capture', detail: 'Reconciled local in-game capture', cls: 'live' },
+    aggregate: { label: 'Aggregate estimate', detail: 'Post-game totals only', cls: 'aggregate' },
+    aggregate_legacy: { label: 'Legacy aggregate', detail: 'DAEMON v1 post-game totals', cls: 'legacy' }
+  };
+  function evidenceSource(source) {
+    return EVIDENCE_SOURCES[source] || {
+      label: source ? plainMeta(String(source).replaceAll('_', ' ')) : 'Unknown evidence',
+      detail: source || 'source unavailable',
+      cls: 'unknown'
+    };
+  }
+  function percentText(value) {
+    if (value == null || value === '') return 'Not calibrated';
+    const number = Number(value);
+    return Number.isFinite(number) ? `${Math.round(number * 100)}%` : 'Not calibrated';
+  }
+  function confidenceText(value) {
+    if (value == null || value === '') return 'Legacy scoring';
+    const number = Number(value);
+    if (!Number.isFinite(number)) return 'Legacy scoring';
+    if (number >= 0.8) return 'High confidence';
+    if (number >= 0.65) return 'Moderate confidence';
+    return 'Limited confidence';
+  }
+  function intervalText(row) {
+    if (row.score_low == null || row.score_high == null) return 'Not calibrated';
+    const low = Number(row.score_low);
+    const high = Number(row.score_high);
+    return Number.isFinite(low) && Number.isFinite(high)
+      ? `${low.toFixed(1)} - ${high.toFixed(1)}`
+      : 'Not calibrated';
+  }
+  function readableReason(reason) {
+    return titleCase(String(reason || 'insufficient evidence').replaceAll('_', ' '));
+  }
+  function abstainText(row) {
+    const reasons = row.abstain_reasons || [];
+    const detail = reasons.length
+      ? reasons.map(readableReason).join(', ')
+      : 'Insufficient evidence';
+    return `Score withheld: ${detail}`;
+  }
+  function rankOrderLabel(row) {
+    if (row.rank_confidence == null || row.rank_confidence === '') {
+      return rankLabel(Number(row.match_rank));
+    }
+    const confidence = Number(row.rank_confidence);
+    if (!Number.isFinite(confidence)) return rankLabel(Number(row.match_rank));
+    return confidence < 0.7 ? 'CLOSE RANKING' : rankLabel(Number(row.match_rank));
+  }
+  function shortHash(value) {
+    const text = String(value || '');
+    return text ? text.slice(0, 10) : '';
+  }
   function queueLabel(queueId) {
     return ({
       400: 'DRAFT', 420: 'RANKED SOLO', 430: 'BLIND',
@@ -374,7 +431,12 @@
         const kdaRatio = deaths
           ? ((Number(row.kills) + Number(row.assists)) / deaths).toFixed(2)
           : 'Perfect';
-        const cardLabel = `${result}, ${row.local_champion_name}, ${row.local_role}, DAEMON score ${score.toFixed(1)}, match rank ${rank} of 10`;
+        const source = evidenceSource(row.evidence_source);
+        const scoreState = row.abstain
+          ? abstainText(row)
+          : confidenceText(row.participant_confidence);
+        const range = intervalText(row);
+        const cardLabel = `${result}, ${row.local_champion_name}, ${row.local_role}, ${source.label}, DAEMON score ${score.toFixed(1)}, ${range} range, match rank ${rank} of 10, ${scoreState}`;
         return `<article class="history-card ${win ? 'is-win' : 'is-loss'}" data-game="${row.game_id}" ` +
           `role="button" tabindex="0" aria-label="${esc(cardLabel)}">` +
           `<div class="history-result"><strong class="classic-result-mark">${win ? 'W' : 'L'}</strong><span>${result}</span></div>` +
@@ -388,11 +450,14 @@
               `<div class="history-kda"><b><span>${row.kills}</span>/<span class="deaths">${row.deaths}</span>/<span>${row.assists}</span></b>` +
                 `<span>KDA</span><em>${kdaRatio === 'Perfect' ? 'Perfect KDA' : `${kdaRatio} ratio`}</em></div>` +
               `<div class="history-match-meta">${titleCase(queueLabel(row.queue_id).toLowerCase())}<i>·</i>${minutes}:${seconds}<i>·</i>${historyWhen(row.game_creation_date)}</div>` +
+              `<div class="history-evidence"><span class="evidence-badge ${source.cls}">${esc(source.label)}</span>` +
+                `<span class="${row.abstain ? 'withheld' : ''}">${esc(scoreState)}</span></div>` +
             `</div>` +
           `</div>` +
           `<div class="history-score"><span><span class="classic-copy">DAEMON</span><span class="standard-copy">DAEMON score</span></span>` +
-            `<strong>${score.toFixed(1)}</strong><em>${scoreBand(score)}</em></div>` +
-          `<div class="history-rank ${rankClass(rank)}"><span>Match rank</span><strong>#${rank}</strong><em>${rankLabel(rank)}</em></div>` +
+            `<strong>${score.toFixed(1)}</strong><em>${row.abstain ? 'WITHHELD' : scoreBand(score)}</em>` +
+            `<small>${esc(range)}</small></div>` +
+          `<div class="history-rank ${rankClass(rank)}"><span>Match rank</span><strong>#${rank}</strong><em>${rankOrderLabel(row)}</em></div>` +
         `</article>`;
       }).join('');
     }
@@ -447,27 +512,69 @@
     if (!local) return;
     $('reportResult').textContent = local.win ? 'VICTORY' : 'DEFEAT';
     $('reportResult').className = 'report-result ' + (local.win ? 'win' : 'loss');
-    $('reportHero').className = `report-hero ${local.win ? 'is-win' : 'is-loss'} ${rankClass(local.match_rank)}`;
+    $('reportHero').className = `report-hero ${local.win ? 'is-win' : 'is-loss'} ${rankClass(local.match_rank)}${local.abstain ? ' is-abstained' : ''}`;
     $('reportTitle').textContent = `${local.champion_name} · ${local.role}`;
     const minutes = Math.floor(match.duration / 60);
     const seconds = String(match.duration % 60).padStart(2, '0');
     $('reportMeta').textContent = `${local.kills}/${local.deaths}/${local.assists} · ${local.cs} CS · ${minutes}:${seconds} · ${match.patch}`;
     $('reportScore').textContent = Number(local.total_score).toFixed(1);
-    $('reportScoreBand').textContent = `${scoreBand(Number(local.total_score))} PERFORMANCE`;
+    $('reportScoreBand').textContent = local.abstain
+      ? 'SCORE WITHHELD'
+      : `${scoreBand(Number(local.total_score))} PERFORMANCE`;
     $('reportRank').textContent = `#${local.match_rank}`;
-    $('reportRankLabel').textContent = `${rankLabel(local.match_rank)} // OF 10`;
+    $('reportRankLabel').textContent = `${rankOrderLabel(local)} // OF 10`;
     $('reportModel').textContent = local.model_version;
+    const source = evidenceSource(local.evidence_source);
+    $('reportEvidenceSource').textContent = source.label;
+    const completeness = local.score_confidence
+      && local.score_confidence.chosen_source_completeness;
+    $('reportEvidenceDetail').textContent = completeness == null
+      ? source.detail
+      : `${source.detail} · ${percentText(completeness)} complete`;
+    $('reportConfidence').textContent = confidenceText(local.participant_confidence);
+    $('reportConfidenceDetail').textContent = local.abstain
+      ? abstainText(local)
+      : local.participant_confidence == null
+        ? 'legacy estimate; no calibrated confidence'
+        : `${percentText(local.participant_confidence)} participant confidence`;
+    $('reportInterval').textContent = intervalText(local);
+    $('reportRankConfidence').textContent = percentText(local.rank_confidence);
+    $('reportRankDetail').textContent = local.rank_confidence == null
+      ? 'legacy rank order; no confidence estimate'
+      : Number(local.rank_confidence) < 0.7
+        ? 'close ordering; treat nearby ranks as tied'
+        : 'estimated ordering stability';
+    const artifact = local.artifact_model_version || '';
+    const artifactHash = shortHash(local.model_artifact_hash);
+    const provenance = artifact
+      ? `${local.model_family || 'model'} · artifact ${artifact}${artifactHash ? ` · ${artifactHash}` : ''}`
+      : 'legacy role-weighted model';
+    const calibration = local.calibration_version
+      ? ` Calibration: ${local.calibration_version}.`
+      : '';
+    $('reportMethodDetail').textContent =
+      ` Evidence: ${source.detail}. Provenance: ${provenance}.${calibration}`;
     const labels = {
       combat: 'combat', economy: 'economy', objectives: 'objectives',
       vision: 'vision', teamplay: 'survival/teamplay'
     };
-    $('reportComponents').innerHTML = Object.entries(local.components || {}).map(([key, value]) =>
-      `<div class="component-row"><span>${labels[key] || key}</span>` +
-      `<div class="component-track"><i style="width:${Math.max(0, Math.min(100, value))}%"></i></div>` +
-      `<b>${Number(value).toFixed(1)}</b></div>`
-    ).join('');
-    $('reportObservations').innerHTML = (local.observations || [])
-      .map(text => `<div>&gt; ${esc(text)}</div>`).join('');
+    const components = Object.entries(local.components || {});
+    $('reportComponents').innerHTML = components.length
+      ? components.map(([key, value]) => {
+        const amount = Number(value);
+        const safeAmount = Number.isFinite(amount) ? amount : 0;
+        return `<div class="component-row"><span>${esc(labels[key] || readableReason(key))}</span>` +
+          `<div class="component-track"><i style="width:${Math.max(0, Math.min(100, safeAmount))}%"></i></div>` +
+          `<b>${safeAmount.toFixed(1)}</b></div>`;
+      }).join('')
+      : '<div class="component-empty">Score v2 replaces legacy category bars with source-specific evidence, confidence, and calibrated intervals.</div>';
+    const observations = local.observations || [];
+    $('reportObservations').innerHTML = observations.length
+      ? observations.map(text =>
+        `<div><i aria-hidden="true"></i><span>${esc(text)}</span></div>`
+      ).join('')
+      : '<div class="observation-empty">No participant-level observations were retained for this score run.</div>';
+    $('reportCoaching').innerHTML = renderCoaching(local.coaching || {}, local);
     const localTeam = local.team_id;
     let previousTeam = null;
     $('reportPlayers').innerHTML = report.participants.map(player => {
@@ -476,13 +583,44 @@
         : '';
       previousTeam = player.team_id;
       const rank = Number(player.match_rank);
+      const playerInterval = intervalText(player);
+      const playerScoreState = player.abstain
+        ? abstainText(player)
+        : `${confidenceText(player.participant_confidence)}; range ${playerInterval}`;
       return teamHeader +
-        `<div class="report-player ${rankClass(rank)}${player.participant_id === match.local_participant_id ? ' local' : ''}">` +
-        `<span class="player-rank">#${rank}<i>${rankLabel(rank)}</i></span><span>${esc(player.summoner_name)}</span>` +
+        `<div class="report-player ${rankClass(rank)}${player.participant_id === match.local_participant_id ? ' local' : ''}${player.abstain ? ' is-abstained' : ''}">` +
+        `<span class="player-rank">#${rank}<i>${rankOrderLabel(player)}</i></span><span>${esc(player.summoner_name)}</span>` +
         `<span>${esc(player.champion_name)}</span><span>${esc(player.role)}</span>` +
         `<span>${player.kills}/${player.deaths}/${player.assists}</span>` +
-        `<span class="player-score">${Number(player.total_score).toFixed(1)}</span></div>`;
+        `<span class="player-score" title="${esc(playerScoreState)}">${Number(player.total_score).toFixed(1)}</span></div>`;
     }).join('');
+  }
+  function renderCoaching(coaching, local) {
+    if (coaching.eligible && coaching.primary_focus) {
+      const challenge = (coaching.challenges || [])[0] || {};
+      const pattern = (coaching.recurring_patterns || []).find(
+        row => row.title === coaching.primary_focus
+      ) || (coaching.recurring_patterns || [])[0] || {};
+      return `<div class="coaching-head"><span class="coaching-state eligible">PRIMARY FOCUS</span>` +
+        `<span>${Number(pattern.occurrences || 0)} of ${Number(pattern.games_considered || 0)} comparable games</span></div>` +
+        `<h3>${esc(coaching.primary_focus)}</h3>` +
+        `${pattern.current_evidence ? `<p>${esc(pattern.current_evidence)}</p>` : ''}` +
+        `<div class="coaching-challenge"><span>3 OF 5 CHALLENGE</span>` +
+          `<strong>${esc(challenge.target || 'Challenge target unavailable.')}</strong>` +
+          `<small>${esc(challenge.measurement || '')}</small></div>` +
+        `<div class="coaching-guardrail"><b>Guardrail</b><span>${esc(challenge.anti_gaming_guardrail || '')}</span></div>`;
+    }
+    let reasons = coaching.withheld_reasons || [];
+    if (!reasons.length && Number(local.model_version) < 2) {
+      reasons = ['Evidence-backed coaching begins with DAEMON Score v2.'];
+    }
+    if (!reasons.length) {
+      reasons = ['No recurring controllable pattern met the coaching threshold.'];
+    }
+    return `<div class="coaching-head"><span class="coaching-state withheld">COACHING WITHHELD</span>` +
+      '<span>Evidence gate</span></div>' +
+      '<h3>No focus assigned from this match</h3>' +
+      `<ul>${reasons.map(reason => `<li>${esc(reason)}</li>`).join('')}</ul>`;
   }
   function openReport(gameId) {
     if (!window.API.ready()) return;

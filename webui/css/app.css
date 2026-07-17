@@ -277,8 +277,8 @@ body {
   scrollbar-gutter:stable; overscroll-behavior:contain;
 }
 .history-card {
-  position:relative; display:grid; grid-template-columns:66px minmax(0,1fr) 104px 118px;
-  min-height:86px; border:1px solid var(--pdd); margin-bottom:7px; cursor:pointer;
+  position:relative; display:grid; grid-template-columns:66px minmax(0,1fr) 112px 124px;
+  min-height:98px; border:1px solid var(--pdd); margin-bottom:7px; cursor:pointer;
   background:linear-gradient(90deg,rgba(255,176,0,.035),transparent 58%);
   transition:background .12s,border-color .12s,transform .12s;
 }
@@ -305,6 +305,13 @@ body {
 .history-kda em { display:none; }
 .history-match-meta { margin-top:4px; text-transform:uppercase; }
 .history-match-meta i { margin:0 5px; font-style:normal; }
+.history-evidence { display:flex; align-items:center; gap:7px; margin-top:6px;
+  color:var(--pd); font:10px 'Space Mono',monospace; }
+.evidence-badge { display:inline-flex; align-items:center; min-height:20px; padding:0 6px;
+  border:1px solid var(--pdd); color:var(--pb); font:10px 'Space Mono',monospace;
+  letter-spacing:.04em; text-transform:uppercase; white-space:nowrap; }
+.evidence-badge.full, .evidence-badge.local { border-color:var(--p); color:var(--p); }
+.history-evidence .withheld { color:var(--danger); }
 .history-score, .history-rank { display:flex; flex-direction:column; align-items:center;
   justify-content:center; border-left:1px solid var(--pdd); }
 .history-score span, .history-rank span { color:var(--pd); font-family:'Space Mono',monospace;
@@ -312,6 +319,7 @@ body {
 .history-score strong { color:var(--pb); font-size:32px; line-height:.9; font-weight:normal; }
 .history-score em, .history-rank em { color:var(--pd); font-family:'Space Mono',monospace;
   font-size:10px; font-style:normal; margin-top:5px; }
+.history-score small { color:var(--pd); font:10px 'Space Mono',monospace; margin-top:4px; }
 .history-rank strong { color:var(--p); font-size:43px; line-height:.8; font-weight:normal; }
 .history-rank.rank-first { background:var(--p); text-shadow:none; }
 .history-rank.rank-first span, .history-rank.rank-first strong,
@@ -352,13 +360,45 @@ body {
 .report-scorebox strong { display:block; color:var(--pb); font-size:58px; line-height:.85; font-weight:normal; }
 .report-scorebox em { display:block; color:var(--p); font-family:'Space Mono',monospace;
   font-style:normal; font-size:10px; margin-top:8px; }
+.report-trust { display:grid; grid-template-columns:repeat(4,minmax(0,1fr));
+  border:1px solid var(--pdd); border-top:0; }
+.report-trust > div { min-height:76px; padding:11px 13px; display:flex; flex-direction:column;
+  justify-content:center; border-right:1px solid var(--pdd); }
+.report-trust > div:last-child { border-right:0; }
+.report-trust span { color:var(--pd); font:10px 'Space Mono',monospace; letter-spacing:.08em; }
+.report-trust strong { color:var(--pb); font-size:17px; font-weight:normal; margin-top:5px; }
+.report-trust small { color:var(--pd); font-size:11px; margin-top:3px; }
 .report-grid { display:grid; grid-template-columns:1.05fr .95fr; gap:12px; margin-top:18px; }
 .component-list { display:flex; flex-direction:column; gap:7px; }
 .component-row { display:grid; grid-template-columns:112px 1fr 38px; gap:8px; align-items:center; font-size:15px; }
 .component-track { height:10px; border:1px solid var(--pdd); }
 .component-track i { display:block; height:100%; background:var(--p); }
 .component-row b { color:var(--pb); font-weight:normal; text-align:right; }
-.observation-list { color:var(--pb); font-size:15px; line-height:1.45; }
+.component-empty, .observation-empty { color:var(--pd); font-size:14px; line-height:1.5; }
+.observation-list { display:flex; flex-direction:column; gap:8px; color:var(--pb);
+  font-size:14px; line-height:1.45; }
+.observation-list > div:not(.observation-empty) { display:grid; grid-template-columns:7px 1fr; gap:9px; }
+.observation-list i { width:5px; height:5px; margin-top:7px; background:var(--p);
+  box-shadow:0 0 7px var(--glow); }
+.report-coaching { margin-top:12px; }
+.coaching-head { display:flex; align-items:center; justify-content:space-between; gap:12px;
+  color:var(--pd); font:10px 'Space Mono',monospace; letter-spacing:.06em; }
+.coaching-state { display:inline-flex; align-items:center; min-height:22px; padding:0 7px;
+  border:1px solid var(--pdd); }
+.coaching-state.eligible { border-color:var(--p); color:var(--p); }
+.coaching-state.withheld { color:var(--pd); }
+.report-coaching h3 { margin:10px 0 0; color:var(--pb); font-size:22px; font-weight:normal; }
+.report-coaching p, .report-coaching li { color:var(--pd); font-size:14px; line-height:1.45; }
+.report-coaching ul { margin:8px 0 0; padding-left:19px; }
+.coaching-challenge { display:grid; grid-template-columns:112px 1fr; gap:5px 12px;
+  margin-top:12px; padding:11px 12px; border:1px solid var(--pdd); }
+.coaching-challenge span { grid-row:1 / span 2; color:var(--p);
+  font:10px 'Space Mono',monospace; letter-spacing:.06em; }
+.coaching-challenge strong { color:var(--pb); font-size:14px; font-weight:normal; }
+.coaching-challenge small { color:var(--pd); font-size:12px; }
+.coaching-guardrail { display:grid; grid-template-columns:78px 1fr; gap:10px; margin-top:9px;
+  color:var(--pd); font-size:12px; line-height:1.4; }
+.coaching-guardrail b { color:var(--pb); font-weight:normal; }
 .report-board { border:1px solid var(--pdd); margin-top:12px; }
 .report-board-head, .report-player { display:grid;
   grid-template-columns:64px 1.25fr 1fr .65fr .75fr .55fr; gap:8px; align-items:center; }
@@ -378,6 +418,7 @@ body {
 .report-player.local .player-rank, .report-player.local .player-rank i,
 .report-player.local .player-score { color:var(--bg); }
 .player-score { color:var(--pb); font-size:19px; }
+.report-player.is-abstained .player-score { color:var(--danger); }
 .method-note { font-family:'Space Mono',monospace; color:var(--pd); font-size:10px;
   margin-top:9px; line-height:1.45; }
 
@@ -908,7 +949,7 @@ body {
   padding:7px 0; color:var(--std-text); font-size:15px;
 }
 :root[data-interface="standard"] .history-card {
-  grid-template-columns:88px minmax(0,1fr) 110px 118px; min-height:94px;
+  grid-template-columns:88px minmax(0,1fr) 118px 126px; min-height:108px;
   margin:0; border:0; border-bottom:1px solid var(--std-line-soft);
   background:transparent; transition:background .12s;
 }
@@ -972,6 +1013,21 @@ body {
   width:3px; height:3px; margin:0; flex-shrink:0; overflow:hidden; border-radius:50%;
   background:#526074; color:transparent; font-size:0;
 }
+:root[data-interface="standard"] .history-evidence {
+  gap:8px; margin-top:6px; color:var(--std-muted); font:12px "Segoe UI",sans-serif;
+}
+:root[data-interface="standard"] .evidence-badge {
+  min-height:22px; padding:0 7px; border-color:#3a485c; border-radius:4px;
+  color:#c7d0dc; background:#111925; font:600 11px "Segoe UI",sans-serif;
+  letter-spacing:0; text-transform:none;
+}
+:root[data-interface="standard"] .evidence-badge.full {
+  color:#c5e9d3; border-color:#3f7155; background:rgba(76,170,111,.10);
+}
+:root[data-interface="standard"] .evidence-badge.local {
+  color:#c0ddf2; border-color:#3c6785; background:rgba(89,166,217,.10);
+}
+:root[data-interface="standard"] .history-evidence .withheld { color:#ffc1bd; }
 :root[data-interface="standard"] .history-score,
 :root[data-interface="standard"] .history-rank {
   border-left:1px solid var(--std-line); border-color:var(--std-line);
@@ -992,6 +1048,9 @@ body {
 :root[data-interface="standard"] .history-score em,
 :root[data-interface="standard"] .history-rank em {
   color:var(--std-muted); font:600 10px "Segoe UI",sans-serif; letter-spacing:.03em;
+}
+:root[data-interface="standard"] .history-score small {
+  color:var(--std-muted); font:11px "Segoe UI",sans-serif;
 }
 :root[data-interface="standard"] .history-rank.rank-first {
   background:linear-gradient(180deg,rgba(239,183,75,.18),rgba(239,183,75,.08));
@@ -1019,6 +1078,53 @@ body {
 :root[data-interface="standard"] .report-scorebox { border-color:var(--std-line); }
 :root[data-interface="standard"] .report-title,
 :root[data-interface="standard"] .report-scorebox strong { color:var(--std-text); }
+:root[data-interface="standard"] .report-trust {
+  border-color:var(--std-line); background:#0f1620; border-radius:0 0 7px 7px; overflow:hidden;
+}
+:root[data-interface="standard"] .report-trust > div { border-color:var(--std-line); }
+:root[data-interface="standard"] .report-trust span {
+  color:var(--std-muted); font:600 10px "Segoe UI",sans-serif; letter-spacing:.06em;
+}
+:root[data-interface="standard"] .report-trust strong {
+  color:var(--std-text); font-size:15px; font-weight:700;
+}
+:root[data-interface="standard"] .report-trust small {
+  color:var(--std-muted); font:11px "Segoe UI",sans-serif;
+}
+:root[data-interface="standard"] .component-empty,
+:root[data-interface="standard"] .observation-empty { color:var(--std-muted); }
+:root[data-interface="standard"] .observation-list { color:var(--std-text); }
+:root[data-interface="standard"] .observation-list i {
+  background:var(--p); box-shadow:none; border-radius:50%;
+}
+:root[data-interface="standard"] .report-coaching {
+  border:1px solid var(--std-line); border-radius:7px; background:var(--std-surface);
+}
+:root[data-interface="standard"] .coaching-head {
+  color:var(--std-muted); font:600 11px "Segoe UI",sans-serif; letter-spacing:0;
+}
+:root[data-interface="standard"] .coaching-state {
+  border-color:#3a485c; border-radius:4px; background:#111925;
+}
+:root[data-interface="standard"] .coaching-state.eligible {
+  border-color:#6b5a32; color:#f2cc7e; background:rgba(239,183,75,.08);
+}
+:root[data-interface="standard"] .report-coaching h3 {
+  color:var(--std-text); font-size:20px; font-weight:700;
+}
+:root[data-interface="standard"] .report-coaching p,
+:root[data-interface="standard"] .report-coaching li { color:var(--std-muted); }
+:root[data-interface="standard"] .coaching-challenge {
+  border-color:var(--std-line); border-radius:5px; background:#0f1620;
+}
+:root[data-interface="standard"] .coaching-challenge strong {
+  color:var(--std-text); font-weight:600;
+}
+:root[data-interface="standard"] .coaching-challenge small,
+:root[data-interface="standard"] .coaching-guardrail { color:var(--std-muted); }
+:root[data-interface="standard"] .coaching-guardrail b {
+  color:var(--std-text); font-weight:600;
+}
 :root[data-interface="standard"] .report-board { border-color:var(--std-line); background:var(--std-surface); }
 :root[data-interface="standard"] .report-board-head,
 :root[data-interface="standard"] .report-team,
