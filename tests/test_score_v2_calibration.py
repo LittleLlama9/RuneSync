@@ -5,6 +5,12 @@ Sections:
      closer to raw mean; unknown roles bucket separately).
   2. Score calibration scale fitting and its small-sample fallback.
   3. Default confidence/abstention parameter shape.
+  4. Generic score_fn calibration (`fit_role_calibration_for_score_fn`/
+     `fit_score_calibration_for_score_fn`): the linear-specific wrappers
+     produce IDENTICAL results (behavior-preserving refactor), and the
+     generic functions work with an arbitrary, non-linear `score_fn` too
+     -- this is what lets GAM/boosting/tree candidates be calibrated the
+     same way the linear baseline already is.
 """
 
 from score_v2.artifact import RoleCalibration
@@ -14,7 +20,9 @@ from score_v2.training.calibration import (
     default_abstention_params,
     default_confidence_params,
     fit_role_calibration,
+    fit_role_calibration_for_score_fn,
     fit_score_calibration,
+    fit_score_calibration_for_score_fn,
     neutral_role_calibration,
     neutral_score_calibration,
     raw_linear_score,
@@ -187,3 +195,67 @@ def test_neutral_score_calibration_uses_fixed_default_scale():
     assert calibration["midpoint"] == 50.0
     assert calibration["clip_min"] == 0.0
     assert calibration["clip_max"] == 100.0
+
+
+# ── generic score_fn calibration (shared by every non-linear family) ──────
+
+def test_generic_role_calibration_matches_linear_specific_wrapper():
+    records = tuple(_record(game_id, kills=9, deaths=0, role="top") for game_id in range(1, 4))
+    dataset = TrainingDataset(schema_version=1, feature_records=records, pair_labels=())
+    fitted = fit_pairwise_baseline(dataset)
+    fitted.coefficients["raw_kills"] = 2.0
+
+    linear_specific = fit_role_calibration(dataset, fitted, shrinkage_k=5.0)
+    generic = fit_role_calibration_for_score_fn(
+        dataset, lambda record: raw_linear_score(record, fitted), shrinkage_k=5.0,
+    )
+    assert linear_specific == generic
+
+
+def test_generic_score_calibration_matches_linear_specific_wrapper():
+    records = tuple(_record(game_id, kills=game_id, deaths=0) for game_id in range(1, 6))
+    dataset = TrainingDataset(schema_version=1, feature_records=records, pair_labels=())
+    fitted = fit_pairwise_baseline(dataset)
+    fitted.coefficients["raw_kills"] = 1.0
+    role_calibration = fit_role_calibration(dataset, fitted)
+
+    linear_specific = fit_score_calibration(dataset, fitted, role_calibration)
+    generic = fit_score_calibration_for_score_fn(
+        dataset, lambda record: raw_linear_score(record, fitted), role_calibration,
+    )
+    assert linear_specific == generic
+
+
+def test_generic_role_calibration_works_with_an_arbitrary_score_fn():
+    # A non-linear "score_fn" that has nothing to do with FittedBaseline --
+    # demonstrates the generic function is genuinely family-agnostic.
+    records = tuple(_record(game_id, kills=9, deaths=0, role="top") for game_id in range(1, 8))
+    dataset = TrainingDataset(schema_version=1, feature_records=records, pair_labels=())
+
+    def constant_five(record):
+        return 5.0
+
+    calibration = fit_role_calibration_for_score_fn(dataset, constant_five, shrinkage_k=2.0)
+    top = calibration["top"]
+    assert top.sample_count == 7
+    expected_weight = 7 / (7 + 2.0)
+    assert abs(top.shrinkage_weight - expected_weight) < 1e-9
+    assert abs(top.offset - 5.0 * expected_weight) < 1e-9
+
+
+def test_generic_score_calibration_excludes_abstained_by_default():
+    normal_records = tuple(_record(gid, kills=gid, deaths=0) for gid in range(1, 6))
+    abstained = _record(99, kills=999, deaths=0, abstain=True)
+    dataset = TrainingDataset(
+        schema_version=1, feature_records=normal_records + (abstained,), pair_labels=(),
+    )
+    role_calibration = {}
+
+    def score_fn(record):
+        return float(record.features["raw"]["kills"])
+
+    excluded = fit_score_calibration_for_score_fn(dataset, score_fn, role_calibration)
+    included = fit_score_calibration_for_score_fn(
+        dataset, score_fn, role_calibration, include_abstained=True,
+    )
+    assert excluded["scale"] != included["scale"]

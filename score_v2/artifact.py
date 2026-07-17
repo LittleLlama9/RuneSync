@@ -34,10 +34,25 @@ from score_v2.feature_spec import (
     FeatureSpec,
     TIER_FEATURE_CONTRACTS,
 )
+from score_v2.model_shapes import (
+    FeatureShapeFit,
+    Stump,
+    TreeNode,
+    verify_tree_monotonicity,
+)
 
 ARTIFACT_SCHEMA_VERSION = 1
 
 ROLE_NAMES = ("top", "jungle", "mid", "bot", "support", "unknown")
+
+MODEL_FAMILY_LINEAR = "linear"
+MODEL_FAMILY_GAM = "gam"
+MODEL_FAMILY_BOOSTED_STUMPS = "boosted_stumps"
+MODEL_FAMILY_MONOTONIC_TREE = "monotonic_tree"
+MODEL_FAMILIES = (
+    MODEL_FAMILY_LINEAR, MODEL_FAMILY_GAM, MODEL_FAMILY_BOOSTED_STUMPS,
+    MODEL_FAMILY_MONOTONIC_TREE,
+)
 
 REQUIRED_SCORE_CALIBRATION_KEYS = ("midpoint", "scale", "clip_min", "clip_max")
 REQUIRED_CONFIDENCE_PARAM_KEYS = (
@@ -86,6 +101,31 @@ def _require_strict_bool(name: str, value) -> bool:
     if not isinstance(value, bool):
         raise ArtifactValidationError(f"{name} must be a strict boolean, got {value!r}")
     return value
+
+
+def _require_canonical_spec_match(
+        feature_name: str, spec: FeatureSpec,
+        canonical_by_name: Mapping[str, FeatureSpec], evidence_source: str) -> None:
+    """A non-linear model family's shape may legitimately use only a
+    SUBSET of a tier's canonical feature contract (unlike the linear
+    family, which must cover it exactly) -- but every feature it DOES use
+    must be an exact, untampered match against that tier's canonical
+    `FeatureSpec` (no arbitrary raw path, no smuggled-in direction/
+    transform/capability/group edit), even if the artifact's
+    `content_hash` was recomputed to match a hand-edited payload.
+    """
+    canonical_spec = canonical_by_name.get(feature_name)
+    if canonical_spec is None:
+        raise ArtifactValidationError(
+            f"{feature_name}: not part of tier {evidence_source!r}'s canonical "
+            "feature contract"
+        )
+    if spec != canonical_spec:
+        raise ArtifactValidationError(
+            f"{feature_name}: spec does not exactly match the canonical contract "
+            f"for tier {evidence_source!r} (path/direction/transform/capability/"
+            "group must match exactly)"
+        )
 
 
 @dataclass(frozen=True)
@@ -190,6 +230,10 @@ class Artifact:
     production_ready: bool
     release_notes: str
     created_at: str
+    model_family: str = MODEL_FAMILY_LINEAR
+    gam_shapes: Optional[tuple[FeatureShapeFit, ...]] = None
+    boosted_stumps: Optional[tuple[Stump, ...]] = None
+    monotonic_tree: Optional[TreeNode] = None
     content_hash: str = ""
 
     # ── (de)serialization ───────────────────────────────────────────────
@@ -202,8 +246,20 @@ class Artifact:
             "calibration_version": self.calibration_version,
             "evidence_source": self.evidence_source,
             "fallback": dict(self.fallback),
+            "model_family": self.model_family,
             "intercept": self.intercept,
             "coefficients": [c.to_dict() for c in self.coefficients],
+            "gam_shapes": (
+                [shape.to_dict() for shape in self.gam_shapes]
+                if self.gam_shapes is not None else None
+            ),
+            "boosted_stumps": (
+                [stump.to_dict() for stump in self.boosted_stumps]
+                if self.boosted_stumps is not None else None
+            ),
+            "monotonic_tree": (
+                self.monotonic_tree.to_dict() if self.monotonic_tree is not None else None
+            ),
             "role_calibration": {
                 role: cal.to_dict() for role, cal in self.role_calibration.items()
             },
@@ -256,6 +312,19 @@ class Artifact:
             production_ready=data["production_ready"],
             release_notes=data.get("release_notes", ""),
             created_at=data["created_at"],
+            model_family=data.get("model_family", MODEL_FAMILY_LINEAR),
+            gam_shapes=(
+                tuple(FeatureShapeFit.from_dict(s) for s in data["gam_shapes"])
+                if data.get("gam_shapes") is not None else None
+            ),
+            boosted_stumps=(
+                tuple(Stump.from_dict(s) for s in data["boosted_stumps"])
+                if data.get("boosted_stumps") is not None else None
+            ),
+            monotonic_tree=(
+                TreeNode.from_dict(data["monotonic_tree"])
+                if data.get("monotonic_tree") is not None else None
+            ),
             content_hash=data.get("content_hash", ""),
         )
 
@@ -293,21 +362,14 @@ class Artifact:
 
         _require_finite("intercept", self.intercept)
 
-        if not self.coefficients:
-            raise ArtifactValidationError(
-                "an artifact must have at least one coefficient"
-            )
-        names = [c.spec.name for c in self.coefficients]
-        if len(names) != len(set(names)):
-            raise ArtifactValidationError("Duplicate feature names in coefficients")
-        for coefficient in self.coefficients:
-            coefficient.validate()
+        if self.model_family not in MODEL_FAMILIES:
+            raise ArtifactValidationError(f"Unknown model_family {self.model_family!r}")
 
-        # Coefficient specs must EXACTLY match the canonical, tier-specific
-        # feature contract -- no arbitrary raw paths, no extra/missing
-        # features, no tampered direction/transform/capability, even if
-        # the artifact's content_hash was recomputed to match (a
-        # "rehashed" tamper). See score_v2.feature_spec.TIER_FEATURE_CONTRACTS.
+        # Canonical, tier-specific feature contract -- every family checks
+        # its own features against this; no arbitrary raw paths, no
+        # tampered direction/transform/capability, even if the artifact's
+        # content_hash was recomputed to match (a "rehashed" tamper). See
+        # score_v2.feature_spec.TIER_FEATURE_CONTRACTS.
         canonical_specs = TIER_FEATURE_CONTRACTS.get(self.evidence_source)
         if canonical_specs is None:
             raise ArtifactValidationError(
@@ -315,23 +377,26 @@ class Artifact:
                 f"{self.evidence_source!r}"
             )
         canonical_by_name = {spec.name: spec for spec in canonical_specs}
-        coefficient_names = set(names)
-        if coefficient_names != set(canonical_by_name):
-            missing_features = sorted(set(canonical_by_name) - coefficient_names)
-            extra_features = sorted(coefficient_names - set(canonical_by_name))
-            raise ArtifactValidationError(
-                f"coefficients for tier {self.evidence_source!r} do not match its "
-                f"canonical feature contract (missing={missing_features}, "
-                f"extra={extra_features})"
-            )
-        for coefficient in self.coefficients:
-            canonical_spec = canonical_by_name[coefficient.spec.name]
-            if coefficient.spec != canonical_spec:
+
+        if self.model_family == MODEL_FAMILY_LINEAR:
+            self._validate_linear_coefficients(canonical_by_name)
+        else:
+            if self.coefficients:
                 raise ArtifactValidationError(
-                    f"{coefficient.spec.name}: spec does not exactly match the "
-                    f"canonical contract for tier {self.evidence_source!r} (path/"
-                    "direction/transform/capability/group must match exactly)"
+                    f"a {self.model_family!r} artifact must not carry linear "
+                    "coefficients (they are unused and would be dead weight)"
                 )
+            if self.intercept != 0.0:
+                raise ArtifactValidationError(
+                    f"a {self.model_family!r} artifact's intercept must be 0.0 "
+                    "-- there is no separate linear term for a non-linear shape"
+                )
+            if self.model_family == MODEL_FAMILY_GAM:
+                self._validate_gam_shapes(canonical_by_name)
+            elif self.model_family == MODEL_FAMILY_BOOSTED_STUMPS:
+                self._validate_boosted_stumps(canonical_by_name)
+            elif self.model_family == MODEL_FAMILY_MONOTONIC_TREE:
+                self._validate_monotonic_tree(canonical_by_name)
 
         for role, calibration in self.role_calibration.items():
             if role not in ROLE_NAMES:
@@ -448,6 +513,157 @@ class Artifact:
                 "in release_notes"
             )
 
+    def _validate_linear_coefficients(
+            self, canonical_by_name: Mapping[str, FeatureSpec]) -> None:
+        """The linear family must cover its tier's canonical feature
+        contract EXACTLY (every canonical feature present, no extras) --
+        unlike the non-linear families below, which may legitimately use
+        only a subset.
+        """
+        if not self.coefficients:
+            raise ArtifactValidationError(
+                "a linear artifact must have at least one coefficient"
+            )
+        names = [c.spec.name for c in self.coefficients]
+        if len(names) != len(set(names)):
+            raise ArtifactValidationError("Duplicate feature names in coefficients")
+        for coefficient in self.coefficients:
+            coefficient.validate()
+
+        coefficient_names = set(names)
+        if coefficient_names != set(canonical_by_name):
+            missing_features = sorted(set(canonical_by_name) - coefficient_names)
+            extra_features = sorted(coefficient_names - set(canonical_by_name))
+            raise ArtifactValidationError(
+                f"coefficients for tier {self.evidence_source!r} do not match its "
+                f"canonical feature contract (missing={missing_features}, "
+                f"extra={extra_features})"
+            )
+        for coefficient in self.coefficients:
+            _require_canonical_spec_match(
+                coefficient.spec.name, coefficient.spec, canonical_by_name,
+                self.evidence_source,
+            )
+
+    def _validate_gam_shapes(self, canonical_by_name: Mapping[str, FeatureSpec]) -> None:
+        if not self.gam_shapes:
+            raise ArtifactValidationError(
+                "a gam artifact must have at least one feature shape"
+            )
+        names = [shape.spec.name for shape in self.gam_shapes]
+        if len(names) != len(set(names)):
+            raise ArtifactValidationError("Duplicate feature names in gam_shapes")
+        for shape in self.gam_shapes:
+            _require_canonical_spec_match(
+                shape.spec.name, shape.spec, canonical_by_name, self.evidence_source,
+            )
+            _require_finite(f"{shape.spec.name}.robust_center", shape.robust_center)
+            scale = _require_finite(f"{shape.spec.name}.robust_scale", shape.robust_scale)
+            if scale <= 0:
+                raise ArtifactValidationError(
+                    f"{shape.spec.name}: robust_scale must be > 0, got {scale}"
+                )
+            if not shape.knot_x or len(shape.knot_x) != len(shape.knot_y):
+                raise ArtifactValidationError(
+                    f"{shape.spec.name}: knot_x/knot_y must be non-empty and of "
+                    "equal length"
+                )
+            for index, x in enumerate(shape.knot_x):
+                _require_finite(f"{shape.spec.name}.knot_x[{index}]", x)
+            for index, y in enumerate(shape.knot_y):
+                _require_finite(f"{shape.spec.name}.knot_y[{index}]", y)
+            for index in range(len(shape.knot_x) - 1):
+                if not (shape.knot_x[index] < shape.knot_x[index + 1]):
+                    raise ArtifactValidationError(
+                        f"{shape.spec.name}: knot_x must be strictly increasing"
+                    )
+            if shape.spec.direction == DIRECTION_POSITIVE:
+                for index in range(len(shape.knot_y) - 1):
+                    if shape.knot_y[index] > shape.knot_y[index + 1] + 1e-9:
+                        raise ArtifactValidationError(
+                            f"{shape.spec.name}: knot_y must be non-decreasing "
+                            "for a positive-direction feature"
+                        )
+            elif shape.spec.direction == DIRECTION_NEGATIVE:
+                for index in range(len(shape.knot_y) - 1):
+                    if shape.knot_y[index] < shape.knot_y[index + 1] - 1e-9:
+                        raise ArtifactValidationError(
+                            f"{shape.spec.name}: knot_y must be non-increasing "
+                            "for a negative-direction feature"
+                        )
+
+    def _validate_boosted_stumps(
+            self, canonical_by_name: Mapping[str, FeatureSpec]) -> None:
+        if not self.boosted_stumps:
+            raise ArtifactValidationError(
+                "a boosted_stumps artifact must have at least one stump"
+            )
+        for stump in self.boosted_stumps:
+            _require_canonical_spec_match(
+                stump.spec.name, stump.spec, canonical_by_name, self.evidence_source,
+            )
+            _require_finite(f"{stump.spec.name}.robust_center", stump.robust_center)
+            scale = _require_finite(f"{stump.spec.name}.robust_scale", stump.robust_scale)
+            if scale <= 0:
+                raise ArtifactValidationError(
+                    f"{stump.spec.name}: robust_scale must be > 0, got {scale}"
+                )
+            _require_finite(f"{stump.spec.name}.threshold", stump.threshold)
+            low = _require_finite(f"{stump.spec.name}.low_value", stump.low_value)
+            high = _require_finite(f"{stump.spec.name}.high_value", stump.high_value)
+            if stump.spec.direction == DIRECTION_POSITIVE and low > high + 1e-9:
+                raise ArtifactValidationError(
+                    f"{stump.spec.name}: low_value must be <= high_value for a "
+                    "positive-direction feature"
+                )
+            if stump.spec.direction == DIRECTION_NEGATIVE and low < high - 1e-9:
+                raise ArtifactValidationError(
+                    f"{stump.spec.name}: low_value must be >= high_value for a "
+                    "negative-direction feature"
+                )
+
+    def _validate_monotonic_tree(
+            self, canonical_by_name: Mapping[str, FeatureSpec]) -> None:
+        if self.monotonic_tree is None:
+            raise ArtifactValidationError(
+                "a monotonic_tree artifact must have a tree"
+            )
+        self._validate_tree_node(self.monotonic_tree, canonical_by_name)
+        # Independent, bottom-up structural re-verification of the
+        # monotonicity invariant -- does not trust whatever training code
+        # produced this tree; catches a hand-edited/tampered-then-rehashed
+        # tree whose individual nodes look well-formed in isolation but
+        # whose child intervals actually cross.
+        if not verify_tree_monotonicity(self.monotonic_tree):
+            raise ArtifactValidationError(
+                "monotonic_tree failed independent structural monotonicity "
+                "re-verification"
+            )
+
+    def _validate_tree_node(
+            self, node: TreeNode, canonical_by_name: Mapping[str, FeatureSpec]) -> None:
+        if node.is_leaf:
+            _require_finite("monotonic_tree leaf value", node.value)
+            return
+        _require_canonical_spec_match(
+            node.spec.name, node.spec, canonical_by_name, self.evidence_source,
+        )
+        _require_finite(f"monotonic_tree.{node.spec.name}.robust_center", node.robust_center)
+        scale = _require_finite(
+            f"monotonic_tree.{node.spec.name}.robust_scale", node.robust_scale,
+        )
+        if scale <= 0:
+            raise ArtifactValidationError(
+                f"monotonic_tree.{node.spec.name}: robust_scale must be > 0, got {scale}"
+            )
+        _require_finite(f"monotonic_tree.{node.spec.name}.threshold", node.threshold)
+        if node.low is None or node.high is None:
+            raise ArtifactValidationError(
+                "an internal monotonic_tree node must have both low and high children"
+            )
+        self._validate_tree_node(node.low, canonical_by_name)
+        self._validate_tree_node(node.high, canonical_by_name)
+
     # ── hashing / persistence ────────────────────────────────────────────
 
     def with_content_hash(self) -> "Artifact":
@@ -493,6 +709,10 @@ def build_artifact(
         evaluation_metadata: Optional[Mapping] = None,
         production_ready: bool = False, release_notes: str = "",
         fallback: Optional[Mapping] = None,
+        model_family: str = MODEL_FAMILY_LINEAR,
+        gam_shapes: Optional[Sequence[FeatureShapeFit]] = None,
+        boosted_stumps: Optional[Sequence[Stump]] = None,
+        monotonic_tree: Optional[TreeNode] = None,
         now: Optional[datetime.datetime] = None) -> Artifact:
     """Construct and validate one immutable `Artifact`.
 
@@ -500,6 +720,13 @@ def build_artifact(
     mark an artifact production-ready except an explicit, documented
     caller (there is none yet -- see `docs/SCORE_V2_MODEL_CARD_TEMPLATE.md`
     "Release gates").
+
+    `model_family` defaults to the linear baseline (`coefficients`
+    required, `gam_shapes`/`boosted_stumps`/`monotonic_tree` all `None`).
+    For a non-linear family, pass `coefficients=()`, `intercept=0.0`, and
+    exactly one of `gam_shapes`/`boosted_stumps`/`monotonic_tree` -- see
+    `score_v2.training.compare` for how each candidate family is built and
+    `Artifact.validate` for the exact per-family contract enforced.
     """
     timestamp = (now or datetime.datetime.now(datetime.timezone.utc)).isoformat()
     artifact = Artifact(
@@ -520,6 +747,10 @@ def build_artifact(
         production_ready=production_ready,
         release_notes=release_notes,
         created_at=timestamp,
+        model_family=model_family,
+        gam_shapes=(tuple(gam_shapes) if gam_shapes is not None else None),
+        boosted_stumps=(tuple(boosted_stumps) if boosted_stumps is not None else None),
+        monotonic_tree=monotonic_tree,
     )
     artifact.validate()
     return artifact.with_content_hash()

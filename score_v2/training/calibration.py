@@ -25,7 +25,7 @@ the resulting `Artifact` for how to tell a real fit from a fallback.
 from __future__ import annotations
 
 import statistics
-from typing import Mapping
+from typing import Callable, Mapping
 
 from score_v2.artifact import RoleCalibration
 from score_v2.feature_spec import extract_feature_vector
@@ -40,6 +40,8 @@ CLIP_MIN = 0.0
 CLIP_MAX = 100.0
 _MAD_TO_STD = 1.4826
 _MAD_EPSILON = 1e-6
+
+ScoreFn = Callable[[FeatureRecord], float]
 
 
 def raw_linear_score(record: FeatureRecord, fitted: FittedBaseline) -> float:
@@ -59,23 +61,30 @@ def raw_linear_score(record: FeatureRecord, fitted: FittedBaseline) -> float:
     return total
 
 
-def fit_role_calibration(
-        dataset: TrainingDataset, fitted: FittedBaseline,
+def fit_role_calibration_for_score_fn(
+        dataset: TrainingDataset, score_fn: ScoreFn,
         *, shrinkage_k: float = DEFAULT_ROLE_SHRINKAGE_K,
         include_abstained: bool = False) -> dict[str, RoleCalibration]:
-    """Fit per-role offsets from `dataset`'s raw linear scores.
+    """Fit per-role offsets from `dataset`'s raw model scores, for ANY
+    model family. `score_fn(record)` computes one record's raw
+    (pre-role-offset) score -- the linear family passes
+    `lambda record: raw_linear_score(record, fitted)`
+    (see `fit_role_calibration` below); the non-linear families
+    (`score_v2.training.gam`/`boosting`/`tree`) pass a closure over their
+    own fitted shape's `model_shapes.evaluate_*` function instead. This
+    keeps role/score calibration IDENTICAL in method across every family
+    -- only how the raw score itself is computed differs.
 
     `include_abstained=False` (the default) excludes any `FeatureRecord`
     with `abstain=True` from the per-role mean -- a short-game/low-evidence
-    record's feature values should not pull a role's calibration offset,
-    matching `score_v2.training.baseline.fit_pairwise_baseline`'s default.
+    record's feature values should not pull a role's calibration offset.
     """
     scores_by_role: dict[str, list[float]] = {role: [] for role in ROLE_NAMES}
     for record in dataset.feature_records:
         if record.abstain and not include_abstained:
             continue
         role = record.role if record.role in ROLE_NAMES else "unknown"
-        scores_by_role[role].append(raw_linear_score(record, fitted))
+        scores_by_role[role].append(score_fn(record))
 
     calibration: dict[str, RoleCalibration] = {}
     for role, scores in scores_by_role.items():
@@ -94,15 +103,17 @@ def fit_role_calibration(
     return calibration
 
 
-def fit_score_calibration(
-        dataset: TrainingDataset, fitted: FittedBaseline,
+def fit_score_calibration_for_score_fn(
+        dataset: TrainingDataset, score_fn: ScoreFn,
         role_calibration: Mapping[str, RoleCalibration],
         *, default_scale: float = DEFAULT_SCORE_SCALE,
         include_abstained: bool = False) -> dict:
-    """Fit the score-mapping `scale` from `dataset`'s adjusted linear scores.
+    """Fit the score-mapping `scale` from `dataset`'s adjusted raw model
+    scores, for ANY model family -- see `fit_role_calibration_for_score_fn`
+    for what `score_fn` is.
 
     `include_abstained=False` (the default) excludes abstained records
-    from the spread measurement, matching `fit_role_calibration`.
+    from the spread measurement, matching `fit_role_calibration_for_score_fn`.
     """
     adjusted_scores = []
     for record in dataset.feature_records:
@@ -110,7 +121,7 @@ def fit_score_calibration(
             continue
         role = record.role if record.role in ROLE_NAMES else "unknown"
         offset = role_calibration[role].offset if role in role_calibration else 0.0
-        adjusted_scores.append(raw_linear_score(record, fitted) - offset)
+        adjusted_scores.append(score_fn(record) - offset)
 
     scale = default_scale
     if len(adjusted_scores) >= 2:
@@ -123,6 +134,45 @@ def fit_score_calibration(
     return {
         "midpoint": MIDPOINT, "scale": scale, "clip_min": CLIP_MIN, "clip_max": CLIP_MAX,
     }
+
+
+def fit_role_calibration(
+        dataset: TrainingDataset, fitted: FittedBaseline,
+        *, shrinkage_k: float = DEFAULT_ROLE_SHRINKAGE_K,
+        include_abstained: bool = False) -> dict[str, RoleCalibration]:
+    """Fit per-role offsets from `dataset`'s raw linear scores.
+
+    `include_abstained=False` (the default) excludes any `FeatureRecord`
+    with `abstain=True` from the per-role mean -- a short-game/low-evidence
+    record's feature values should not pull a role's calibration offset,
+    matching `score_v2.training.baseline.fit_pairwise_baseline`'s default.
+
+    A thin, behavior-preserving wrapper around
+    `fit_role_calibration_for_score_fn` specialized to the linear family.
+    """
+    return fit_role_calibration_for_score_fn(
+        dataset, lambda record: raw_linear_score(record, fitted),
+        shrinkage_k=shrinkage_k, include_abstained=include_abstained,
+    )
+
+
+def fit_score_calibration(
+        dataset: TrainingDataset, fitted: FittedBaseline,
+        role_calibration: Mapping[str, RoleCalibration],
+        *, default_scale: float = DEFAULT_SCORE_SCALE,
+        include_abstained: bool = False) -> dict:
+    """Fit the score-mapping `scale` from `dataset`'s adjusted linear scores.
+
+    `include_abstained=False` (the default) excludes abstained records
+    from the spread measurement, matching `fit_role_calibration`.
+
+    A thin, behavior-preserving wrapper around
+    `fit_score_calibration_for_score_fn` specialized to the linear family.
+    """
+    return fit_score_calibration_for_score_fn(
+        dataset, lambda record: raw_linear_score(record, fitted), role_calibration,
+        default_scale=default_scale, include_abstained=include_abstained,
+    )
 
 
 def neutral_role_calibration(

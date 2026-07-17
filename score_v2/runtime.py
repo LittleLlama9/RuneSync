@@ -31,8 +31,20 @@ import math
 from dataclasses import dataclass
 from typing import Mapping, Optional
 
-from score_v2.artifact import Artifact
-from score_v2.feature_spec import extract_feature_vector, resolve_role
+from score_v2.artifact import (
+    Artifact,
+    MODEL_FAMILY_BOOSTED_STUMPS,
+    MODEL_FAMILY_GAM,
+    MODEL_FAMILY_LINEAR,
+    MODEL_FAMILY_MONOTONIC_TREE,
+)
+from score_v2.feature_spec import FeatureSpec, extract_feature_vector, resolve_role
+from score_v2.model_shapes import (
+    collect_tree_specs,
+    evaluate_boosted_stumps,
+    evaluate_gam_shapes,
+    evaluate_tree,
+)
 
 
 class ArtifactUnavailableError(Exception):
@@ -67,6 +79,58 @@ def select_artifact(artifacts: Mapping[str, Artifact], evidence_source: str) -> 
             "a mismatched artifact"
         )
     return artifact
+
+
+def _artifact_feature_specs(artifact: Artifact) -> tuple[FeatureSpec, ...]:
+    """Every feature this artifact's model actually reads, regardless of
+    family. The linear family always covers its tier's full canonical
+    contract (enforced by `Artifact.validate`); the non-linear families
+    may legitimately use only a SUBSET of it -- so `present_feature_count`/
+    `missing_features` below are computed against exactly the features
+    THIS model depends on, never the full tier contract for a model that
+    does not use every feature in it.
+    """
+    if artifact.model_family == MODEL_FAMILY_LINEAR:
+        return tuple(coefficient.spec for coefficient in artifact.coefficients)
+    if artifact.model_family == MODEL_FAMILY_GAM:
+        return tuple(shape.spec for shape in artifact.gam_shapes)
+    if artifact.model_family == MODEL_FAMILY_BOOSTED_STUMPS:
+        specs_by_name = {}
+        for stump in artifact.boosted_stumps:
+            specs_by_name.setdefault(stump.spec.name, stump.spec)
+        return tuple(specs_by_name.values())
+    if artifact.model_family == MODEL_FAMILY_MONOTONIC_TREE:
+        return tuple(collect_tree_specs(artifact.monotonic_tree).values())
+    raise ValueError(f"Unknown model_family {artifact.model_family!r}")
+
+
+def _artifact_raw_score(artifact: Artifact, values: Mapping) -> float:
+    """The pre-role-offset raw model score, dispatched by
+    `artifact.model_family`. `values` is one participant's already
+    extracted/transformed feature vector
+    (`score_v2.feature_spec.extract_feature_vector` output) -- identical
+    input shape regardless of family. A missing feature contributes
+    exactly `0.0` for every family (see each family's own module
+    docstring for why).
+    """
+    if artifact.model_family == MODEL_FAMILY_LINEAR:
+        total = artifact.intercept
+        for coefficient in artifact.coefficients:
+            value = values[coefficient.spec.name]
+            if not value.present:
+                continue
+            normalized = (
+                (value.transformed - coefficient.robust_center) / coefficient.robust_scale
+            )
+            total += coefficient.coefficient * normalized
+        return total
+    if artifact.model_family == MODEL_FAMILY_GAM:
+        return evaluate_gam_shapes(artifact.gam_shapes, values)
+    if artifact.model_family == MODEL_FAMILY_BOOSTED_STUMPS:
+        return evaluate_boosted_stumps(artifact.boosted_stumps, values)
+    if artifact.model_family == MODEL_FAMILY_MONOTONIC_TREE:
+        return evaluate_tree(artifact.monotonic_tree, values)
+    raise ValueError(f"Unknown model_family {artifact.model_family!r}")
 
 
 @dataclass(frozen=True)
@@ -129,26 +193,20 @@ def score_participant(
     if block is None:
         raise ValueError(f"No feature block for participant_id={participant_id!r}")
 
-    specs = [coefficient.spec for coefficient in artifact.coefficients]
+    specs = list(_artifact_feature_specs(artifact))
     values = extract_feature_vector(block, specs=specs)
     role = resolve_role(block)
 
-    total = len(artifact.coefficients)
+    total = len(specs)
     missing_names = [name for name, value in values.items() if not value.present]
     present_count = total - len(missing_names)
     present_fraction = (present_count / total) if total else 0.0
 
-    linear = artifact.intercept
-    for coefficient in artifact.coefficients:
-        value = values[coefficient.spec.name]
-        if not value.present:
-            # Missing features contribute nothing (a neutral 0 in
-            # normalized space) -- the resulting confidence penalty below
-            # is how "missing evidence" is honestly represented, rather
-            # than silently imputing a guessed value that looks confident.
-            continue
-        normalized = (value.transformed - coefficient.robust_center) / coefficient.robust_scale
-        linear += coefficient.coefficient * normalized
+    # Missing features contribute nothing (a neutral 0 in normalized
+    # space, for every model family) -- the resulting confidence penalty
+    # below is how "missing evidence" is honestly represented, rather
+    # than silently imputing a guessed value that looks confident.
+    linear = _artifact_raw_score(artifact, values)
 
     role_calibration = (
         artifact.role_calibration.get(role)

@@ -14,6 +14,9 @@ Sections:
      real (non-null) metrics.
   3. Malformed/tampered artifact rejection at the `evaluate_model.py` CLI
      boundary.
+  4. `compare_models.py`: honest no-selection at today's real corpus
+     scale, `--export-selected-dir` writes nothing when nothing was
+     selected, and the report is deterministic across repeated runs.
 """
 
 import json
@@ -260,3 +263,82 @@ def test_evaluate_model_rejects_malformed_json_artifact(corpus_environment, tmp_
     assert result.returncode == 0
     report = json.loads(result.stdout)
     assert "error" in report["aggregate"]
+
+
+# ── 4. compare_models.py CLI ─────────────────────────────────────────────────
+
+def test_compare_models_with_zero_labels_is_honest(corpus_environment):
+    # Mirrors today's real corpus scale (a handful of games, zero
+    # pairwise labels since Match-V5 authorization is still blocked) --
+    # every tier must honestly report no selection, never a fabricated
+    # winner.
+    tmp_path = corpus_environment["tmp_path"]
+    dataset_path = tmp_path / "dataset.jsonl"
+    result = _run(
+        "build_training_dataset.py",
+        "--history-db", str(corpus_environment["db_path"]),
+        "--manifest", str(corpus_environment["manifest_path"]),
+        "--split-seed", "test-seed", "--output", str(dataset_path),
+    )
+    assert result.returncode == 0, result.stderr
+
+    report_path = tmp_path / "compare_report.json"
+    result = _run(
+        "compare_models.py", "--dataset", str(dataset_path),
+        "--model-version", "0.0.1-dev", "--calibration-version", "0.0.1-dev",
+        "--report-out", str(report_path),
+    )
+    assert result.returncode == 0, result.stderr
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert "aggregate" in report
+    aggregate = report["aggregate"]
+    assert aggregate["selected_model"] is None
+    assert all(candidate["eligible"] is False for candidate in aggregate["candidates"])
+    assert "never fabricates a winner" in result.stderr or aggregate["selected_model"] is None
+
+
+def test_compare_models_export_selected_dir_writes_nothing_when_no_selection(corpus_environment):
+    tmp_path = corpus_environment["tmp_path"]
+    dataset_path = tmp_path / "dataset.jsonl"
+    result = _run(
+        "build_training_dataset.py",
+        "--history-db", str(corpus_environment["db_path"]),
+        "--manifest", str(corpus_environment["manifest_path"]),
+        "--split-seed", "test-seed", "--output", str(dataset_path),
+    )
+    assert result.returncode == 0, result.stderr
+
+    export_dir = tmp_path / "export"
+    result = _run(
+        "compare_models.py", "--dataset", str(dataset_path),
+        "--model-version", "0.0.1-dev", "--calibration-version", "0.0.1-dev",
+        "--export-selected-dir", str(export_dir),
+    )
+    assert result.returncode == 0, result.stderr
+    # export_dir is created (mkdir) but must contain no artifact files --
+    # nothing was selected, so nothing is exported.
+    if export_dir.exists():
+        assert list(export_dir.glob("*.json")) == []
+
+
+def test_compare_models_report_is_deterministic_across_runs(corpus_environment):
+    tmp_path = corpus_environment["tmp_path"]
+    dataset_path = tmp_path / "dataset.jsonl"
+    result = _run(
+        "build_training_dataset.py",
+        "--history-db", str(corpus_environment["db_path"]),
+        "--manifest", str(corpus_environment["manifest_path"]),
+        "--split-seed", "test-seed", "--output", str(dataset_path),
+    )
+    assert result.returncode == 0, result.stderr
+
+    result_a = _run(
+        "compare_models.py", "--dataset", str(dataset_path),
+        "--model-version", "0.0.1-dev", "--calibration-version", "0.0.1-dev",
+    )
+    result_b = _run(
+        "compare_models.py", "--dataset", str(dataset_path),
+        "--model-version", "0.0.1-dev", "--calibration-version", "0.0.1-dev",
+    )
+    assert result_a.returncode == 0 and result_b.returncode == 0
+    assert json.loads(result_a.stdout) == json.loads(result_b.stdout)

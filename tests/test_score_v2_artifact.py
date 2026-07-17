@@ -13,6 +13,12 @@ Sections:
      coefficients, score/confidence/abstention range+order checks, exact
      tier-contract matching (rejects arbitrary/extra/tampered specs),
      and rejection of a "rehashed" (tampered-then-rehashed) artifact.
+  8. Non-linear model families (GAM/boosted_stumps/monotonic_tree):
+     subset-of-canonical-contract validation, empty/missing-shape
+     rejection, non-linear-family-must-not-carry-coefficients/intercept,
+     monotonic-order re-verification (knot_y, stump low/high, and the
+     tree's independent structural `verify_tree_monotonicity`), tampered/
+     rehashed rejection, and save/load round trip.
 """
 
 import dataclasses
@@ -28,10 +34,15 @@ from score_v2.artifact import (
     ArtifactIntegrityError,
     ArtifactValidationError,
     FeatureCoefficient,
+    MODEL_FAMILY_BOOSTED_STUMPS,
+    MODEL_FAMILY_GAM,
+    MODEL_FAMILY_LINEAR,
+    MODEL_FAMILY_MONOTONIC_TREE,
     RoleCalibration,
     build_artifact,
 )
 from score_v2.feature_spec import FEATURE_ALLOWLIST, feature_contract_for_tier
+from score_v2.model_shapes import FeatureShapeFit, Stump, TreeNode
 
 FIXED_NOW = datetime.datetime(2026, 7, 17, tzinfo=datetime.timezone.utc)
 
@@ -442,3 +453,222 @@ def test_coefficients_reject_tampered_spec_with_matching_name():
     coeffs = [tampered_coefficient] + list(coeffs[1:])
     with pytest.raises(ArtifactValidationError):
         _build(evidence_source="match_v5", coefficients=coeffs)
+
+
+# ── 8. non-linear model families (GAM / boosted_stumps / monotonic_tree) ───
+
+def _gam_shapes(evidence_source="aggregate"):
+    return tuple(
+        FeatureShapeFit(
+            spec=spec, robust_center=0.0, robust_scale=1.0,
+            knot_x=(-1.0, 0.0, 1.0),
+            knot_y=(
+                (-1.0, 0.0, 1.0) if spec.direction > 0
+                else (1.0, 0.0, -1.0) if spec.direction < 0 else (0.0, 0.0, 0.0)
+            ),
+        )
+        for spec in feature_contract_for_tier(evidence_source)
+    )
+
+
+def _stumps(evidence_source="aggregate"):
+    return tuple(
+        Stump(
+            spec=spec, robust_center=0.0, robust_scale=1.0, threshold=0.0,
+            low_value=(-1.0 if spec.direction >= 0 else 1.0),
+            high_value=(1.0 if spec.direction >= 0 else -1.0),
+        )
+        for spec in feature_contract_for_tier(evidence_source)
+    )
+
+
+def _tree(evidence_source="aggregate"):
+    spec = feature_contract_for_tier(evidence_source)[0]
+    low_value, high_value = (-1.0, 1.0) if spec.direction >= 0 else (1.0, -1.0)
+    return TreeNode(
+        is_leaf=False, spec=spec, robust_center=0.0, robust_scale=1.0, threshold=0.0,
+        low=TreeNode(is_leaf=True, value=low_value),
+        high=TreeNode(is_leaf=True, value=high_value),
+    )
+
+
+def _build_nonlinear(model_family, **overrides):
+    kwargs = dict(evidence_source="aggregate", coefficients=(), intercept=0.0)
+    kwargs.update(overrides)
+    return _build(model_family=model_family, **kwargs)
+
+
+def test_gam_artifact_builds_and_validates():
+    artifact = _build_nonlinear(MODEL_FAMILY_GAM, gam_shapes=_gam_shapes())
+    artifact.validate()
+    assert artifact.model_family == MODEL_FAMILY_GAM
+    assert artifact.coefficients == ()
+
+
+def test_boosted_stumps_artifact_builds_and_validates():
+    artifact = _build_nonlinear(MODEL_FAMILY_BOOSTED_STUMPS, boosted_stumps=_stumps())
+    artifact.validate()
+    assert artifact.model_family == MODEL_FAMILY_BOOSTED_STUMPS
+
+
+def test_monotonic_tree_artifact_builds_and_validates():
+    artifact = _build_nonlinear(MODEL_FAMILY_MONOTONIC_TREE, monotonic_tree=_tree())
+    artifact.validate()
+    assert artifact.model_family == MODEL_FAMILY_MONOTONIC_TREE
+
+
+def test_gam_may_use_a_subset_of_the_tier_contract():
+    # aggregate's own contract has 3 features -- a GAM using only one of
+    # them is legitimately valid (unlike the linear family, which must
+    # cover the full contract exactly).
+    spec = feature_contract_for_tier("aggregate")[0]
+    one_shape = (
+        FeatureShapeFit(
+            spec=spec, robust_center=0.0, robust_scale=1.0,
+            knot_x=(-1.0, 1.0), knot_y=((-1.0, 1.0) if spec.direction >= 0 else (1.0, -1.0)),
+        ),
+    )
+    artifact = _build_nonlinear(MODEL_FAMILY_GAM, gam_shapes=one_shape)
+    artifact.validate()
+
+
+def test_nonlinear_family_rejects_nonempty_linear_coefficients():
+    with pytest.raises(ArtifactValidationError):
+        _build_nonlinear(
+            MODEL_FAMILY_GAM, gam_shapes=_gam_shapes(),
+            coefficients=_coefficients("aggregate"),
+        )
+
+
+def test_nonlinear_family_rejects_nonzero_intercept():
+    with pytest.raises(ArtifactValidationError):
+        _build_nonlinear(MODEL_FAMILY_GAM, gam_shapes=_gam_shapes(), intercept=1.0)
+
+
+def test_gam_rejects_empty_shapes():
+    with pytest.raises(ArtifactValidationError):
+        _build_nonlinear(MODEL_FAMILY_GAM, gam_shapes=())
+
+
+def test_boosted_stumps_rejects_empty_stumps():
+    with pytest.raises(ArtifactValidationError):
+        _build_nonlinear(MODEL_FAMILY_BOOSTED_STUMPS, boosted_stumps=())
+
+
+def test_monotonic_tree_rejects_missing_tree():
+    with pytest.raises(ArtifactValidationError):
+        _build_nonlinear(MODEL_FAMILY_MONOTONIC_TREE, monotonic_tree=None)
+
+
+def test_gam_rejects_feature_not_in_canonical_contract():
+    match_v5_only_spec = next(
+        spec for spec in feature_contract_for_tier("match_v5")
+        if spec.name not in {s.name for s in feature_contract_for_tier("aggregate")}
+    )
+    bad_shape = FeatureShapeFit(
+        spec=match_v5_only_spec, robust_center=0.0, robust_scale=1.0,
+        knot_x=(-1.0, 1.0), knot_y=(-1.0, 1.0),
+    )
+    with pytest.raises(ArtifactValidationError):
+        _build_nonlinear(MODEL_FAMILY_GAM, evidence_source="aggregate", gam_shapes=(bad_shape,))
+
+
+def test_gam_rejects_tampered_spec_with_matching_name():
+    shapes = list(_gam_shapes())
+    # Same name and path, but a tampered `group` field -- exact spec
+    # equality must still catch any field mismatch, not just path.
+    tampered_spec = dataclasses.replace(shapes[0].spec, group="tampered_group")
+    shapes[0] = dataclasses.replace(shapes[0], spec=tampered_spec)
+    with pytest.raises(ArtifactValidationError):
+        _build_nonlinear(MODEL_FAMILY_GAM, gam_shapes=tuple(shapes))
+
+
+def test_gam_rejects_non_monotonic_knot_y_for_positive_feature():
+    spec = next(s for s in feature_contract_for_tier("aggregate") if s.direction > 0)
+    bad_shape = FeatureShapeFit(
+        spec=spec, robust_center=0.0, robust_scale=1.0,
+        knot_x=(-1.0, 0.0, 1.0), knot_y=(1.0, 0.0, -1.0),  # decreasing, should be increasing
+    )
+    with pytest.raises(ArtifactValidationError):
+        _build_nonlinear(MODEL_FAMILY_GAM, gam_shapes=(bad_shape,))
+
+
+def test_gam_rejects_non_strictly_increasing_knot_x():
+    spec = feature_contract_for_tier("aggregate")[0]
+    bad_shape = FeatureShapeFit(
+        spec=spec, robust_center=0.0, robust_scale=1.0,
+        knot_x=(0.0, 0.0), knot_y=(-1.0, 1.0),
+    )
+    with pytest.raises(ArtifactValidationError):
+        _build_nonlinear(MODEL_FAMILY_GAM, gam_shapes=(bad_shape,))
+
+
+def test_boosted_stumps_rejects_non_monotonic_low_high_for_positive_feature():
+    spec = next(s for s in feature_contract_for_tier("aggregate") if s.direction > 0)
+    bad_stump = Stump(
+        spec=spec, robust_center=0.0, robust_scale=1.0, threshold=0.0,
+        low_value=1.0, high_value=-1.0,  # backwards for a positive-direction feature
+    )
+    with pytest.raises(ArtifactValidationError):
+        _build_nonlinear(MODEL_FAMILY_BOOSTED_STUMPS, boosted_stumps=(bad_stump,))
+
+
+def test_monotonic_tree_rejects_structurally_broken_tree():
+    spec = next(s for s in feature_contract_for_tier("aggregate") if s.direction > 0)
+    broken_tree = TreeNode(
+        is_leaf=False, spec=spec, robust_center=0.0, robust_scale=1.0, threshold=0.0,
+        low=TreeNode(is_leaf=True, value=5.0), high=TreeNode(is_leaf=True, value=-5.0),
+    )
+    with pytest.raises(ArtifactValidationError):
+        _build_nonlinear(MODEL_FAMILY_MONOTONIC_TREE, monotonic_tree=broken_tree)
+
+
+def test_monotonic_tree_rejects_tampered_then_rehashed_tree():
+    # Build a valid artifact, then hand-tamper its serialized tree to
+    # break monotonicity and recompute the hash to match (the "rehashed
+    # tamper" scenario) -- Artifact.load must still reject it on
+    # structural re-verification, independent of hash agreement.
+    artifact = _build_nonlinear(MODEL_FAMILY_MONOTONIC_TREE, monotonic_tree=_tree())
+    payload = artifact.to_dict()
+    payload["monotonic_tree"]["low"]["value"], payload["monotonic_tree"]["high"]["value"] = (
+        payload["monotonic_tree"]["high"]["value"], payload["monotonic_tree"]["low"]["value"],
+    )
+    tampered = Artifact.from_dict(payload)
+    rehashed = tampered.with_content_hash()  # recompute hash over the tampered payload
+    with pytest.raises(ArtifactValidationError):
+        rehashed.validate()
+
+
+def test_unknown_model_family_rejected():
+    with pytest.raises(ArtifactValidationError):
+        _build_nonlinear("not_a_real_family", gam_shapes=_gam_shapes())
+
+
+def test_nonlinear_artifact_save_and_load_round_trip(tmp_path):
+    for model_family, shape_kwargs in (
+        (MODEL_FAMILY_GAM, {"gam_shapes": _gam_shapes()}),
+        (MODEL_FAMILY_BOOSTED_STUMPS, {"boosted_stumps": _stumps()}),
+        (MODEL_FAMILY_MONOTONIC_TREE, {"monotonic_tree": _tree()}),
+    ):
+        artifact = _build_nonlinear(model_family, **shape_kwargs)
+        path = tmp_path / f"{model_family}.json"
+        artifact.save(path)
+        loaded = Artifact.load(path)
+        assert loaded.content_hash == artifact.content_hash
+        assert loaded.model_family == model_family
+        assert loaded.to_dict() == artifact.to_dict()
+
+
+def test_loading_a_pre_model_family_artifact_defaults_to_linear():
+    # Backward compatibility: an artifact JSON saved before this field
+    # existed (no "model_family" key at all) must still load as the
+    # linear family, not raise a KeyError.
+    artifact = _build()
+    payload = artifact.to_dict()
+    del payload["model_family"]
+    del payload["gam_shapes"]
+    del payload["boosted_stumps"]
+    del payload["monotonic_tree"]
+    restored = Artifact.from_dict(payload)
+    assert restored.model_family == MODEL_FAMILY_LINEAR
+    assert restored.gam_shapes is None

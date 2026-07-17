@@ -13,6 +13,11 @@ Sections:
      artifact.evidence_source`.
   8. `score_game`'s genuine group-level `rank_confidence` (score
      gaps/interval overlap), distinct from per-participant `confidence`.
+  9. `model_family` dispatch: GAM/boosted_stumps/monotonic_tree score via
+     `score_v2.model_shapes`, missing-feature-count reflects only the
+     features that family actually uses (not the full tier contract for
+     a family using a subset), and save/load round-trips to an identical
+     score.
 """
 
 import dataclasses
@@ -20,8 +25,17 @@ import datetime
 
 import pytest
 
-from score_v2.artifact import FeatureCoefficient, RoleCalibration, build_artifact
+from score_v2.artifact import (
+    Artifact,
+    FeatureCoefficient,
+    MODEL_FAMILY_BOOSTED_STUMPS,
+    MODEL_FAMILY_GAM,
+    MODEL_FAMILY_MONOTONIC_TREE,
+    RoleCalibration,
+    build_artifact,
+)
 from score_v2.feature_spec import feature_contract_for_tier
+from score_v2.model_shapes import FeatureShapeFit, Stump, TreeNode
 from score_v2.runtime import (
     ArtifactUnavailableError,
     EvidenceTierMismatchError,
@@ -367,3 +381,158 @@ def test_ranked_score_result_to_dict_includes_rank_fields():
     assert "rank_confidence" in payload
     assert "score" in payload
     assert "rank_confidence" not in ranked[1].result.to_dict()  # not on ScoreResult itself
+
+
+# ── 9. model_family dispatch (GAM / boosted_stumps / monotonic_tree) ───────
+
+def _gam_artifact(evidence_source="aggregate"):
+    specs = feature_contract_for_tier(evidence_source)
+    shapes = tuple(
+        FeatureShapeFit(
+            spec=spec, robust_center=0.0, robust_scale=1.0,
+            knot_x=(-1.0, 0.0, 1.0),
+            knot_y=(
+                (-2.0, 0.0, 2.0) if spec.direction > 0
+                else (2.0, 0.0, -2.0) if spec.direction < 0 else (0.0, 0.0, 0.0)
+            ),
+        )
+        for spec in specs
+    )
+    return _artifact(
+        evidence_source, model_family=MODEL_FAMILY_GAM, coefficients=(), intercept=0.0,
+        gam_shapes=shapes,
+    )
+
+
+def _boosted_stumps_artifact(evidence_source="aggregate"):
+    specs = feature_contract_for_tier(evidence_source)
+    stumps = tuple(
+        Stump(
+            spec=spec, robust_center=0.0, robust_scale=1.0, threshold=0.0,
+            low_value=(-1.5 if spec.direction >= 0 else 1.5),
+            high_value=(1.5 if spec.direction >= 0 else -1.5),
+        )
+        for spec in specs
+    )
+    return _artifact(
+        evidence_source, model_family=MODEL_FAMILY_BOOSTED_STUMPS, coefficients=(),
+        intercept=0.0, boosted_stumps=stumps,
+    )
+
+
+def _monotonic_tree_artifact(evidence_source="aggregate"):
+    spec = feature_contract_for_tier(evidence_source)[0]  # raw_kills, DIRECTION_POSITIVE
+    tree = TreeNode(
+        is_leaf=False, spec=spec, robust_center=0.0, robust_scale=1.0, threshold=0.0,
+        low=TreeNode(is_leaf=True, value=-3.0), high=TreeNode(is_leaf=True, value=3.0),
+    )
+    return _artifact(
+        evidence_source, model_family=MODEL_FAMILY_MONOTONIC_TREE, coefficients=(),
+        intercept=0.0, monotonic_tree=tree,
+    )
+
+
+def test_gam_artifact_scores_higher_kills_higher():
+    artifact = _gam_artifact()
+    game = _game_features(
+        {"1": _full_block(kills=9, deaths=0), "2": _full_block(kills=0, deaths=9)},
+        evidence_source="aggregate",
+    )
+    result1 = score_participant(artifact, game, 1)
+    result2 = score_participant(artifact, game, 2)
+    assert result1.score > result2.score
+
+
+def test_boosted_stumps_artifact_scores_higher_kills_higher():
+    artifact = _boosted_stumps_artifact()
+    game = _game_features(
+        {"1": _full_block(kills=9, deaths=0), "2": _full_block(kills=0, deaths=9)},
+        evidence_source="aggregate",
+    )
+    result1 = score_participant(artifact, game, 1)
+    result2 = score_participant(artifact, game, 2)
+    assert result1.score > result2.score
+
+
+def test_monotonic_tree_artifact_scores_higher_kills_higher():
+    artifact = _monotonic_tree_artifact()
+    game = _game_features(
+        {"1": _full_block(kills=9, deaths=0), "2": _full_block(kills=0, deaths=9)},
+        evidence_source="aggregate",
+    )
+    result1 = score_participant(artifact, game, 1)
+    result2 = score_participant(artifact, game, 2)
+    assert result1.score > result2.score
+
+
+def test_gam_artifact_missing_feature_count_reflects_only_shapes_it_uses():
+    # A GAM using only ONE of aggregate's 3 features should report
+    # total_feature_count=1, not the full tier contract size -- the
+    # features it structurally does not use are not "missing evidence"
+    # for IT specifically.
+    specs = feature_contract_for_tier("aggregate")
+    one_spec = specs[0]
+    shape = FeatureShapeFit(
+        spec=one_spec, robust_center=0.0, robust_scale=1.0,
+        knot_x=(-1.0, 1.0), knot_y=(-1.0, 1.0),
+    )
+    artifact = _artifact(
+        "aggregate", model_family=MODEL_FAMILY_GAM, coefficients=(), intercept=0.0,
+        gam_shapes=(shape,),
+    )
+    game = _game_features({"1": _full_block(kills=5, deaths=2)}, evidence_source="aggregate")
+    result = score_participant(artifact, game, 1)
+    assert result.total_feature_count == 1
+
+
+def test_boosted_stumps_missing_feature_contributes_zero_for_that_stump():
+    # aggregate contract used, but simulate a missing feature by scoring
+    # with a block lacking the raw stats path entirely.
+    artifact = _boosted_stumps_artifact()
+    game = _game_features({"1": {"baseline": {"role": "mid"}}}, evidence_source="aggregate")
+    result = score_participant(artifact, game, 1)
+    assert result.present_feature_count == 0
+    assert result.raw_linear_score == 0.0  # every stump contributed 0.0
+
+
+def test_boosted_stumps_count_unique_input_features_for_confidence():
+    spec = feature_contract_for_tier("aggregate")[0]
+    stumps = tuple(
+        Stump(
+            spec=spec, robust_center=0.0, robust_scale=1.0,
+            threshold=float(index), low_value=-1.0, high_value=1.0,
+        )
+        for index in range(5)
+    )
+    artifact = _artifact(
+        "aggregate", model_family=MODEL_FAMILY_BOOSTED_STUMPS,
+        coefficients=(), intercept=0.0, boosted_stumps=stumps,
+    )
+    missing_game = _game_features(
+        {"1": {"baseline": {"role": "mid"}}}, evidence_source="aggregate",
+    )
+    result = score_participant(artifact, missing_game, 1)
+    assert result.total_feature_count == 1
+    assert result.present_feature_count == 0
+    assert result.missing_features == (spec.name,)
+
+
+def test_nonlinear_artifacts_round_trip_through_save_load_and_score_identically(tmp_path):
+    game = _game_features(
+        {"1": _full_block(kills=7, deaths=1), "2": _full_block(kills=1, deaths=7)},
+        evidence_source="aggregate",
+    )
+    for build_fn, model_family in (
+        (_gam_artifact, MODEL_FAMILY_GAM),
+        (_boosted_stumps_artifact, MODEL_FAMILY_BOOSTED_STUMPS),
+        (_monotonic_tree_artifact, MODEL_FAMILY_MONOTONIC_TREE),
+    ):
+        artifact = build_fn()
+        path = tmp_path / f"{model_family}.json"
+        artifact.save(path)
+        loaded = Artifact.load(path)
+
+        result_before = score_participant(artifact, game, 1)
+        result_after = score_participant(loaded, game, 1)
+        assert result_before.score == result_after.score
+        assert result_before.confidence == result_after.confidence

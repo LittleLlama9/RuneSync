@@ -60,18 +60,25 @@ pass before that changes.
 score_v2/
   leakage.py       -- recursive outcome-key scanner (runtime + training)
   feature_spec.py  -- the canonical, hand-reviewed feature allowlist
-  artifact.py       -- immutable, SHA-256-hashed artifact format
-  runtime.py        -- dependency-free scorer + tier routing
+  artifact.py       -- immutable, SHA-256-hashed artifact format (all 4 model families)
+  model_shapes.py   -- shared GAM/boosted-stump/tree shape dataclasses + evaluation
+  runtime.py        -- dependency-free scorer + tier routing (dispatches by model_family)
   training/
-    dataset.py       -- FeatureRecord / PairLabel / StateValueLabel schema
-    baseline.py       -- regularized pairwise linear trainer
-    calibration.py    -- role offsets/shrinkage + score mapping
-    evaluate.py        -- grouped evaluation metrics
-    export.py          -- ties the above into a saved Artifact per tier
+    dataset.py         -- FeatureRecord / PairLabel / StateValueLabel schema
+    monotonic_utils.py -- shared pairwise-fit prep (normalization, PAVA, leakage-safe eval prep)
+    baseline.py         -- regularized pairwise LINEAR trainer
+    gam.py              -- monotonic GAM trainer (piecewise-linear per-feature shapes)
+    boosting.py         -- monotonic additive BOOSTING trainer (shallow stumps)
+    tree.py             -- monotonic TREE trainer (single depth-bounded CART)
+    calibration.py      -- role offsets/shrinkage + score mapping (linear + generic score_fn)
+    evaluate.py           -- grouped evaluation metrics
+    export.py             -- ties baseline+calibration into a saved linear Artifact per tier
+    compare.py             -- 4-family comparison orchestrator (train/validate/test discipline)
 scripts/score_v2/
   build_training_dataset.py -- HistoryStore + corpus manifest -> dataset.jsonl
-  train_model.py              -- dataset.jsonl -> artifacts/<tier>.json
+  train_model.py              -- dataset.jsonl -> artifacts/<tier>.json (linear only)
   evaluate_model.py            -- dataset.jsonl + artifacts -> report.json
+  compare_models.py             -- dataset.jsonl -> per-tier 4-family comparison report.json
 ```
 
 ## The feature contract (`score_v2/feature_spec.py`)
@@ -184,13 +191,15 @@ exported when a caller **explicitly lowers** `min_pairs_for_nontrivial_fit`
 below the tier's actual usable-pair count (e.g. for a documented research
 run) -- never silently.
 
-Richer model classes (regularized logistic/GAM, monotonic boosting,
-monotonic trees) are deferred until the corpus is large enough for their
-extra capacity to be evaluable, not implemented speculatively now. **This
-means the `score-v2-models` SQL todo's original scope (comparing GAM /
-monotonic-boosting / monotonic-tree baselines) is not yet complete** --
-only the single regularized linear pairwise baseline exists. The todo is
-intentionally left `in_progress`, not `done`.
+Richer model classes (a monotonic GAM, monotonic additive boosting, and a
+monotonic tree) now exist alongside this linear baseline and are compared
+against it -- see "Model family comparison" below. **The comparison/
+evaluation/export pipeline itself is complete**; what remains gated is
+*production calibration*, which still requires a real corpus (bulk
+Match-V5 acquisition + blinded human review), not more code. With today's
+real, near-zero-pairwise-label corpus, every family is honestly
+`ineligible` and the comparison's `selected_model` is `null` -- this is
+the expected, correct output at this data scale, not a bug.
 
 **Abstained records are excluded from training and calibration by
 default.** A `FeatureRecord` with `abstain=True` (e.g. `score_features.py`'s
@@ -198,7 +207,215 @@ own short-game flag) is excluded from robust-normalization fitting,
 pairwise training, and role/score calibration in
 `fit_pairwise_baseline`/`fit_role_calibration`/`fit_score_calibration` --
 its feature values are exactly the kind of noise the `abstain` flag warns
-about. `include_abstained=True` overrides this explicitly.
+about. `include_abstained=True` overrides this explicitly. Every other
+model family (GAM/boosting/tree) follows the identical exclusion rule via
+the shared `score_v2.training.monotonic_utils.prepare_pairwise_data`.
+
+## Model family comparison (`score_v2/training/compare.py`)
+
+Four monotonic model families are fit and compared, per evidence tier:
+
+| Family | Module | Model form | Capacity |
+|---|---|---|---|
+| `linear` | `training/baseline.py` | `sum_i coefficient_i * normalized(x_i)` | 1 parameter/feature |
+| `gam` | `training/gam.py` | `sum_i shape_i(x_i)`, each `shape_i` a small piecewise-linear curve | ~5 knots/feature |
+| `boosted_stumps` | `training/boosting.py` | `sum_t shrinkage * stump_t(x)`, many shallow additive weak learners | grows with rounds |
+| `monotonic_tree` | `training/tree.py` | one depth-bounded CART-style tree, captures feature INTERACTIONS | `2^depth - 1` splits |
+
+All four share the exact same per-tier feature contract, multi-tier
+`base_ref` semantics, abstain exclusion, `PairLabel` validation, and
+Bradley-Terry pairwise loss (via `training/monotonic_utils.py`) -- so a
+comparison across families is apples-to-apples (same items, same
+normalization statistics, same usable pairs). Monotonicity is enforced
+for every family, not just asserted after the fact:
+
+- **linear**: a scalar sign clip on the coefficient (pre-existing).
+- **GAM**: `training/monotonic_utils.isotonic_projection` (PAVA -- the
+  true L2-optimal monotonic projection) applied to each feature's knot
+  y-values after every gradient step.
+- **boosting**: PAVA applied to each stump's 2-element
+  `(low_value, high_value)` after every round.
+- **tree**: **value-range interval propagation** (the same technique used
+  by XGBoost/LightGBM's `monotone_constraints`) -- every node inherits an
+  allowed prediction interval from its parent, and a split narrows the
+  child intervals in the direction-consistent way, so the WHOLE TREE is
+  provably monotonic regardless of which features it splits on anywhere
+  in it. `score_v2.model_shapes.verify_tree_monotonicity` independently
+  re-verifies this bottom-up (does not trust the training code), and
+  `score_v2.artifact.Artifact.validate()` calls it on every loaded
+  `monotonic_tree` artifact.
+
+**`score_v2/model_shapes.py`** is a new, shared, stdlib-only RUNTIME-layer
+module holding the `FeatureShapeFit`/`Stump`/`TreeNode` dataclasses (each
+with `to_dict()`/`from_dict()`) and their `evaluate_*` functions.
+`score_v2.artifact`/`score_v2.runtime` (runtime layer) and
+`training/gam.py`/`boosting.py`/`tree.py` (training layer) both depend on
+it -- never the reverse -- so there is exactly one implementation of each
+shape's math, used identically whether scoring a fitted-in-memory
+candidate during comparison or a saved, hash-verified `Artifact` at
+shipped runtime.
+
+**Artifact/runtime extension.** `Artifact` gained `model_family` (one of
+`linear`/`gam`/`boosted_stumps`/`monotonic_tree`) plus three optional
+shape fields (`gam_shapes`/`boosted_stumps`/`monotonic_tree`, exactly one
+populated for a non-linear family). `Artifact.validate()` dispatches per
+family: the linear family still requires EXACT full coverage of its
+tier's canonical contract (as before); the three non-linear families may
+legitimately use only a SUBSET of it, but every feature spec they DO use
+must exactly match the canonical contract (name/path/direction/
+transform/capability/group), all knot/threshold/value parameters must be
+finite, and each family's monotonic order is independently re-verified
+(never just trusted from training). `score_v2.runtime.score_participant`
+dispatches raw-score computation by `artifact.model_family`; role/score
+calibration, confidence, abstention, and tier-mismatch enforcement are
+completely unchanged regardless of family. `total_feature_count`/
+`missing_features` reflect only the features THAT family actually uses
+-- a GAM using one of aggregate's three features is not penalized for
+"missing" the other two, which it never claimed to need.
+
+**Calibration** gained generic, family-agnostic siblings
+(`fit_role_calibration_for_score_fn`/`fit_score_calibration_for_score_fn`,
+taking a plain `score_fn(record) -> float` instead of a linear-specific
+`FittedBaseline`) so every non-linear candidate can be role/score
+calibrated identically to the linear family; the original linear-specific
+functions are now thin, behavior-preserving wrappers around these.
+
+**Eligibility gating (`compare_tier`).** Each family is fit on the TRAIN
+split unconditionally (for honest metadata/parameter-count reporting),
+but is only considered `eligible` for validation-based comparison if its
+`n_pairs_used` clears a per-family minimum -- deliberately conservative,
+materially higher multiples of the linear baseline's own long-established
+`MIN_PAIRS_FOR_NONTRIVIAL_FIT` (20), reflecting each family's higher
+capacity/overfitting risk:
+
+```
+MIN_PAIRS_LINEAR = 20            # unchanged from the linear-only stage
+MIN_PAIRS_GAM = 80
+MIN_PAIRS_BOOSTED_STUMPS = 120
+MIN_PAIRS_MONOTONIC_TREE = 60
+```
+
+**These thresholds are honest judgment calls, not empirically validated**
+-- there is no real corpus at any meaningful scale to validate them
+against yet (see the vault decision gating Score v2 on the blocked
+Match-V5 authorization). A degenerate tree fit (no split survives its own
+`min_samples_leaf`/`min_gain` guardrails, i.e. `tree_depth(root) <= 1`) is
+ALSO marked ineligible regardless of pair count -- a lone leaf is never
+presented as a genuine, architecturally-distinct tree candidate.
+
+**Selection is validation-only.** For every eligible candidate, one
+complete, self-consistent, hashed `Artifact` is built in memory (never
+saved to disk by `compare_tier` itself) and evaluated on the VALIDATION
+split via the real `score_v2.runtime.score_participant` path and the full
+`score_v2.training.evaluate.evaluate_dataset` suite. The family with the
+highest VALIDATION pairwise accuracy wins -- **train metrics never
+influence selection**. Ties are broken deterministically: fewer
+`n_parameters` first (prefer the simpler model), then family name. If no
+eligible candidate produced a scoreable validation pairwise accuracy,
+`selected_model=None` -- there is no fallback winner. Only AFTER
+selection is the winning artifact evaluated on the TEST split, purely for
+reporting; test evaluation never influences which family was chosen.
+
+**No validation/test leakage.** Every candidate's normalization
+statistics (`robust_center`/`robust_scale`) are fit from the TRAIN split
+alone via `prepare_pairwise_data`; validation/test scoring goes through
+`prepare_pairwise_eval_data`/the built `Artifact`'s stored (train-fit)
+normalization -- held-out data can never influence what "typical"/"scale"
+means for any feature. **This is enforced for boosting's own internal
+early-stopping mechanism too** (see "Boosting's inner early-stop split"
+below) -- the OUTER validation split stays completely unseen by every
+family, including boosting, until the cross-family selection step above.
+
+**Empirically verified, not merely claimed:** with a genuinely non-linear
+monotonic synthetic signal (a step function in `kills` -- flat below a
+threshold, then a sharp jump, a shape a single log1p-transformed linear
+coefficient represents poorly), `monotonic_tree`/`boosted_stumps` reach
+materially higher validation pairwise accuracy than `linear`/`gam` in
+`tests/test_score_v2_compare.py`'s dedicated test -- demonstrating
+non-linear candidates genuinely CAN win, not just that the code permits
+it in principle.
+
+**Split safety** matches the linear-only stage: an empty TRAIN split
+returns `status="insufficient_data"` immediately (no fitting attempted at
+all), never a silent fallback to the full dataset.
+
+**Boosting's inner early-stop split (never the outer validation set).**
+`fit_pairwise_boosted_stumps` supports validation-based early stopping in
+addition to train-loss-based stopping -- but the split it uses for that
+is a deterministic INNER `(fit, stop)` partition of the TRAIN dataset
+ALONE, derived by
+`score_v2.training.boosting.derive_inner_early_stop_split`, never the
+outer validation/test split. Games are grouped into connected components
+via their `PairLabel`s (so no pair, or transitively-linked chain of
+pairs, is ever split across the inner boundary); whole groups -- never
+individual records -- are assigned to inner-fit or inner-stop via a
+fixed-seed deterministic shuffle, so the SAME train dataset always
+produces a bit-identical inner split, whether during comparison or later
+during artifact re-derivation for export
+(`score_v2.training.compare.build_artifact_for_family` calls the exact
+same fitting path, so its content_hash matches the comparison's selected
+artifact exactly). If TRAIN has too few independent groups to safely form
+both non-trivial inner sides, early stopping is honestly disabled
+(fit on the whole TRAIN dataset, no validation-based stopping) rather
+than reaching for the outer validation/test split. This keeps the OUTER
+validation split an equally arms-length judge of every family -- boosting
+never gets an early "peek" at it before cross-family selection, and
+perturbing the outer validation or test split provably cannot change
+boosting's fitted structure (see the dedicated leakage tests in
+`tests/test_score_v2_compare.py`).
+
+Inner-split viability uses the same abstention policy as fitting. A
+partition whose fit or monitor side has no usable pair after abstained
+records are excluded is rejected, and boosting instead fits the complete
+TRAIN split without validation-based early stopping.
+
+The inner monitor begins with the zero-stump baseline and the returned
+ensemble is always restored to the best inner-stop checkpoint, including
+zero stumps when every learned round makes held-out loss worse. This
+applies even when training ends because of the round budget, no further
+gain, or a train-loss plateau rather than the patience trigger itself.
+
+CLI:
+
+```
+py scripts/score_v2/compare_models.py --dataset dataset.jsonl \
+    --model-version 0.1.0-dev --calibration-version 0.1.0-dev \
+    [--train-split train] [--validation-split validation] [--test-split test] \
+    [--include-abstained] [--report-out report.json] \
+    [--export-selected-dir DIR]
+```
+
+Prints one JSON comparison report per evidence tier. Never writes a
+production artifact; `--export-selected-dir` is an explicit, clearly-
+labeled opt-in that additionally saves the winning candidate's artifact
+(always `production_ready=False`, comparison-only release notes) for
+round-trip inspection -- not a release step.
+
+**Known limitations of this comparison stage** (see also
+`docs/SCORE_V2_MODEL_CARD_TEMPLATE.md`):
+
+- The monotonic tree is a SINGLE tree (one greedy CART pass against a
+  point-wise pairwise-pseudo-gradient proxy target), not an ensemble --
+  deliberately, since `boosting.py` already covers "many simple additive
+  weak learners" and a full iterative gradient-boosted-tree ensemble was
+  judged unnecessary added complexity for this stage.
+- Only `boosting.py` has an internal early-stopping mechanism (in
+  addition to train-loss-based stopping), and it uses an INNER split of
+  TRAIN alone (see "Boosting's inner early-stop split" above), never the
+  outer validation split; GAM and the tree rely solely on the
+  orchestrator's post-hoc validation-based selection and eligibility
+  gating for overfitting protection.
+- Boosting's inner early-stop split spends a fraction of TRAIN (~20% by
+  default) purely on monitoring when to stop, so its effective fitting
+  set -- and therefore its reported `n_pairs_used`/`n_items` -- is
+  honestly smaller than the other three families', which each use the
+  whole TRAIN split. This is the standard, expected tradeoff of any
+  internal validation-based early-stopping mechanism, not a bug.
+- The per-family minimum-pairs thresholds above are judgment calls, to be
+  revisited once a real corpus exists at meaningful scale.
+- No hyperparameter search is performed for any family (fixed defaults
+  per family) -- with today's near-zero-label corpus, a search would have
+  nothing meaningful to optimize against.
 
 ## Calibration (`score_v2/training/calibration.py`)
 
@@ -215,6 +432,13 @@ about. `include_abstained=True` overrides this explicitly.
   `neutral_score_calibration`): every offset/shrinkage_weight is `0.0`
   and `scale` is the fixed default -- used by `train_tier`'s
   `"insufficient_data"` path (see above).
+- **Generic, family-agnostic variants** (`fit_role_calibration_for_score_fn`/
+  `fit_score_calibration_for_score_fn`): identical math, but parameterized
+  by a plain `score_fn(record) -> float` instead of a linear-specific
+  `FittedBaseline` -- this is what lets `score_v2.training.compare` role/
+  score-calibrate a GAM/boosting/tree candidate exactly the same way the
+  linear family already is. `fit_role_calibration`/`fit_score_calibration`
+  are now thin, behavior-preserving wrappers around these.
 
 ## Runtime scoring (`score_v2/runtime.py`)
 
@@ -222,10 +446,13 @@ about. `include_abstained=True` overrides this explicitly.
 verifies `game_features["evidence_source"] == artifact.evidence_source`
 (raising `EvidenceTierMismatchError` otherwise -- an artifact must never
 score evidence from a tier it was not built for, even if a caller
-bypasses `select_artifact`/`score_game`), then computes the linear score
-from present features only (missing features contribute nothing --
-neutral in normalized space, not a guessed value), subtracts the role
-offset, maps through the score calibration, then:
+bypasses `select_artifact`/`score_game`), then computes the raw model
+score -- dispatched by `artifact.model_family` to a plain coefficient sum
+(`linear`) or `score_v2.model_shapes.evaluate_gam_shapes`/
+`evaluate_boosted_stumps`/`evaluate_tree` (the three non-linear
+families) -- from present features only (missing features contribute
+nothing for every family -- neutral, not a guessed value), subtracts the
+role offset, maps through the score calibration, then:
 
 - **Confidence** = `(1 - missing_feature_penalty * missing_fraction) *
   ((1 - evidence_quality_weight) + evidence_quality_weight *
@@ -367,18 +594,32 @@ py scripts/score_v2/evaluate_model.py \
     --dataset dataset.jsonl --artifacts-dir artifacts/dev \
     [--split validation|train|test|none] [--report-out report.json]
 
+py scripts/score_v2/compare_models.py \
+    --dataset dataset.jsonl --model-version 0.1.0-dev \
+    --calibration-version 0.1.0-dev \
+    [--train-split train] [--validation-split validation] [--test-split test] \
+    [--include-abstained] [--report-out report.json] [--export-selected-dir DIR]
+
 py -m score_v2.training.dataset validate <dataset.jsonl>
 ```
 
 `train_model.py` writes one immutable, hashed `artifacts/<tier>.json` per
-evidence tier present in the dataset, all `production_ready: false`.
-`evaluate_model.py` loads (and hash-verifies) those artifacts and scores
-every matching record through the real `score_v2.runtime.score_participant`
-path, so evaluation reflects exactly what the shipped runtime would
-compute. **Both `train_model.py` and `evaluate_model.py` FAIL (nonzero
-exit) if the requested `--split` matches zero records** -- neither
+evidence tier present in the dataset, all `production_ready: false`
+(linear family only -- see "Model family comparison" above for the other
+three families). `evaluate_model.py` loads (and hash-verifies) those
+artifacts and scores every matching record through the real
+`score_v2.runtime.score_participant` path, so evaluation reflects exactly
+what the shipped runtime would compute. `compare_models.py` fits and
+compares all four families per tier, selecting on validation metrics only
+(see "Model family comparison"); it never writes any artifact to disk
+unless `--export-selected-dir` is explicitly passed. **`train_model.py`,
+`evaluate_model.py`, and `compare_models.py` (via its required, always-
+distinct train/validation/test splits) all FAIL or honestly report
+`insufficient_data` if a requested split matches zero records** -- none
 silently falls back to the full dataset; `--split none` is the only
-explicit "use every record" path.
+explicit "use every record" path (for `train_model.py`/`evaluate_model.py`
+only -- `compare_models.py` intrinsically needs three genuinely disjoint
+splits, so it has no `none` escape hatch).
 
 ## Tests
 
@@ -386,25 +627,52 @@ explicit "use every record" path.
 `test_score_v2_artifact.py`, `test_score_v2_runtime.py`,
 `test_score_v2_dataset.py`, `test_score_v2_baseline.py`,
 `test_score_v2_calibration.py`, `test_score_v2_evaluate.py`,
-`test_score_v2_export.py`, `test_score_v2_scripts.py`, and
-`test_score_v2_adversarial_cases.py` (275 tests total) cover: recursive
-leakage rejection (including the `lead_windows`/"windows" false-positive
+`test_score_v2_export.py`, `test_score_v2_scripts.py`,
+`test_score_v2_adversarial_cases.py`, `test_score_v2_monotonic_utils.py`,
+`test_score_v2_model_shapes.py`, `test_score_v2_gam.py`,
+`test_score_v2_boosting.py`, `test_score_v2_tree.py`, and
+`test_score_v2_compare.py` (394 tests total) cover: recursive leakage
+rejection (including the `lead_windows`/"windows" false-positive
 regression), deterministic artifact hashing/tamper/rehashed/malformed
-rejection, exact per-tier feature-contract matching, monotonic
-coefficient-sign invariants (with no trained/phantom intercept), honest
-convergence, role-calibration shrinkage and abstain exclusion,
-missing-feature confidence reduction, abstention (short game,
-insufficient features, low confidence), participant/dict-order
-invariance, tier-routing rejection of implicit substitution,
-evidence-tier mismatch rejection at score time, genuine group-level rank
-confidence, multi-tier record coexistence, `PairLabel` construction
-validation, homogeneous-only slice evaluation, game-clustered bootstrap,
-pairwise-loss training correction on separable synthetic data, every
+rejection (all four model families, including the tree's independent
+structural `verify_tree_monotonicity` re-check), exact per-tier
+feature-contract matching (full coverage for linear, valid subset for the
+three non-linear families), monotonic coefficient/knot/stump/tree-split
+invariants (with no trained/phantom intercept for any family), honest
+convergence (`None`/real-criterion, never fabricated for a family with no
+applicable stopping rule), role-calibration shrinkage and abstain
+exclusion (linear-specific and the new generic `_for_score_fn` siblings,
+proven behavior-identical), missing-feature confidence reduction
+(reflecting only the features each family actually uses),
+abstention (short game, insufficient features, low confidence),
+participant/dict-order invariance, tier-routing rejection of implicit
+substitution, evidence-tier mismatch rejection at score time, genuine
+group-level rank confidence, multi-tier record coexistence, `PairLabel`
+construction validation, homogeneous-only slice evaluation,
+game-clustered bootstrap, pairwise-loss training correction on separable
+synthetic data (all four families), a genuine feature-INTERACTION signal
+only the tree can capture, monotonic counterfactual invariants
+(perturbing one feature never regresses a fitted model's score, for
+every family), leakage-safe validation/test normalization (never
+re-derived from held-out data, verified against a held-out split with a
+deliberately extreme, different distribution), deterministic 4-family
+selection (bit-identical winner across repeated runs), empirically
+demonstrated non-linear-beats-linear on a genuinely non-linear synthetic
+signal, per-family minimum-data eligibility gating (including the tree's
+structural degenerate-single-leaf case), "no model wins on training
+metrics alone", honest current-corpus no-selection behavior, every
 evaluation metric, real end-to-end CLI runs (with both zero and
-synthetic pairwise labels, split-safety failure, and malformed/tampered
-artifact rejection), and the two verified adversarial cases (Sion 8:30
-short game; K'Sante/Seraphine/Vel'Koz) represented honestly -- one test
-shows the pipeline genuinely resolves the case given supervision, a
-second explicitly shows today's real, unlabeled corpus does not yet (a
-tie, not a fabricated discrimination). All fixtures are synthetic or the
-existing sanitized `tests/fixtures/` data; no secrets or real identities.
+synthetic pairwise labels, split-safety failure, malformed/tampered
+artifact rejection, and `compare_models.py`'s honest no-selection/
+deterministic-report/export-nothing-when-unselected behavior),
+boosting's inner early-stop split (grouped/deterministic/leak-free, honest
+disabling on tiny train, and -- the key regression guard -- perturbing
+the OUTER validation or test split provably cannot change boosting's
+fitted structure, content hash, or runtime predictions, and an
+early-stopped boosting winner re-derives and exports with an identical
+hash), and the two verified adversarial cases (Sion 8:30 short game;
+K'Sante/Seraphine/Vel'Koz) represented honestly -- one test shows the
+pipeline genuinely resolves the case given supervision, a second
+explicitly shows today's real, unlabeled corpus does not yet (a tie, not
+a fabricated discrimination). All fixtures are synthetic or the existing
+sanitized `tests/fixtures/` data; no secrets or real identities.
