@@ -27,6 +27,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import datetime
 import json
 import sys
 from pathlib import Path
@@ -43,6 +44,132 @@ from score_v2.training.dataset import (
     TrainingDataset,
     build_feature_record,
 )
+
+
+def _assign_temporal_personal(
+        entries, ratios: dict[str, float],
+        evidence_hashes: dict[str, str]) -> dict[str, str]:
+    """Assign whole games chronologically for a personal-model beta.
+
+    This deliberately permits the same local player to appear across splits.
+    It is therefore unsuitable for public/general model validation and exists
+    only because a single user's archive is one player-connected component.
+    """
+    parent = {entry.entry_id: entry.entry_id for entry in entries}
+
+    def find(entry_id):
+        root = entry_id
+        while parent[root] != root:
+            root = parent[root]
+        while parent[entry_id] != root:
+            parent[entry_id], entry_id = root, parent[entry_id]
+        return root
+
+    def union(left, right):
+        left_root, right_root = find(left), find(right)
+        if left_root == right_root:
+            return
+        if right_root < left_root:
+            left_root, right_root = right_root, left_root
+        parent[right_root] = left_root
+
+    first_by_match = {}
+    first_by_content_hash = {}
+    first_by_evidence_hash = {}
+    for entry in entries:
+        for key, index in (
+                (entry.leakage.match_group_key, first_by_match),
+                (entry.content_hash, first_by_content_hash)):
+            if key in index:
+                union(entry.entry_id, index[key])
+            else:
+                index[key] = entry.entry_id
+        evidence_hash = evidence_hashes.get(entry.entry_id)
+        if evidence_hash:
+            if evidence_hash in first_by_evidence_hash:
+                union(entry.entry_id, first_by_evidence_hash[evidence_hash])
+            else:
+                first_by_evidence_hash[evidence_hash] = entry.entry_id
+
+    grouped = {}
+    for entry in entries:
+        grouped.setdefault(find(entry.entry_id), []).append(entry)
+
+    created_at_by_component = {}
+    for component_id, component_entries in grouped.items():
+        parsed_dates = []
+        for entry in component_entries:
+            raw_date = entry.game_metadata.game_creation_date
+            if not raw_date:
+                raise DatasetValidationError(
+                    f"entry {entry.entry_id!r} lacks a creation date; "
+                    "cannot guarantee a chronological split"
+                )
+            try:
+                parsed = datetime.datetime.fromisoformat(
+                    raw_date.replace("Z", "+00:00")
+                )
+            except ValueError as exc:
+                raise DatasetValidationError(
+                    f"entry {entry.entry_id!r} has invalid creation date "
+                    f"{raw_date!r}; cannot guarantee a chronological split"
+                ) from exc
+            if parsed.tzinfo is None or parsed.utcoffset() is None:
+                raise DatasetValidationError(
+                    f"entry {entry.entry_id!r} has timezone-naive creation "
+                    "date; cannot guarantee a chronological split"
+                )
+            parsed_dates.append(parsed.astimezone(datetime.timezone.utc))
+        if not parsed_dates:
+            raise DatasetValidationError(
+                f"component {component_id!r} has no creation dates; "
+                "cannot guarantee a chronological split"
+            )
+        # A duplicate observed later must not move future information into an
+        # earlier split, so date the whole component by its newest member.
+        created_at_by_component[component_id] = max(parsed_dates)
+
+    ordered_components = sorted(
+        grouped,
+        key=lambda component_id: (
+            created_at_by_component[component_id], component_id,
+        ),
+    )
+    if len(ordered_components) < 3:
+        raise DatasetValidationError(
+            "temporal-personal splitting requires at least 3 independent "
+            "match/content components"
+        )
+    ratio_total = sum(ratios.values())
+    if any(ratio < 0 for ratio in ratios.values()) or ratio_total <= 0:
+        raise DatasetValidationError(
+            "split ratios must be non-negative and sum to more than zero"
+        )
+    normalized = {
+        name: ratios[name] / ratio_total
+        for name in ("train", "validation", "test")
+    }
+    n_components = len(ordered_components)
+    validation_count = max(1, round(n_components * normalized["validation"]))
+    test_count = max(1, round(n_components * normalized["test"]))
+    train_count = n_components - validation_count - test_count
+    if train_count < 1:
+        raise DatasetValidationError(
+            "temporal-personal split ratios leave no training games"
+        )
+    split_by_component = {}
+    for index, component_id in enumerate(ordered_components):
+        if index < train_count:
+            split = "train"
+        elif index < train_count + validation_count:
+            split = "validation"
+        else:
+            split = "test"
+        split_by_component[component_id] = split
+    return {
+        entry.entry_id: split_by_component[find(entry.entry_id)]
+        for entry in entries
+    }
 
 
 def _load_pair_labels(labels_path: Path, token_map_path: Path) -> tuple[PairLabel, ...]:
@@ -70,25 +197,53 @@ def _load_pair_labels(labels_path: Path, token_map_path: Path) -> tuple[PairLabe
 def build_dataset(
         *, history_db: Path, manifest_path: Path, split_seed: str,
         labels_path: Path = None, token_map_path: Path = None,
+        split_strategy: str = "strict-grouped",
         train_ratio: float = DEFAULT_SPLIT_RATIOS["train"],
         validation_ratio: float = DEFAULT_SPLIT_RATIOS["validation"],
         test_ratio: float = DEFAULT_SPLIT_RATIOS["test"]) -> TrainingDataset:
     manifest = CorpusManifest.load(manifest_path)
     entries = manifest.to_list()
-    config = SplitConfig(
-        seed=split_seed,
-        ratios={"train": train_ratio, "validation": validation_ratio, "test": test_ratio},
-    )
-    assignments, leakage_report = assign_splits_strict(entries, config)
-    if leakage_report.warnings:
-        for warning in leakage_report.warnings:
-            print(f"SPLIT WARNING: {warning}", file=sys.stderr)
-
     store = HistoryStore(history_db)
+    stored_by_entry = {
+        entry.entry_id: store.get_feature_set(
+            entry.game_id, evidence_source=entry.source,
+        )
+        for entry in entries
+    }
+    ratios = {
+        "train": train_ratio,
+        "validation": validation_ratio,
+        "test": test_ratio,
+    }
+    if split_strategy == "strict-grouped":
+        config = SplitConfig(seed=split_seed, ratios=ratios)
+        assignments, leakage_report = assign_splits_strict(entries, config)
+        if leakage_report.warnings:
+            for warning in leakage_report.warnings:
+                print(f"SPLIT WARNING: {warning}", file=sys.stderr)
+    elif split_strategy == "temporal-personal":
+        assignments = _assign_temporal_personal(
+            entries, ratios,
+            {
+                entry_id: stored["input_hash"]
+                for entry_id, stored in stored_by_entry.items()
+                if stored is not None and stored.get("input_hash")
+            },
+        )
+        print(
+            "SPLIT WARNING: temporal-personal permits the same player across "
+            "chronological splits and is valid only for an opt-in personal beta",
+            file=sys.stderr,
+        )
+    else:
+        raise DatasetValidationError(
+            f"unknown split_strategy {split_strategy!r}"
+        )
+
     feature_records = []
     skipped_missing_feature_set = []
     for entry in entries:
-        stored = store.get_feature_set(entry.game_id, evidence_source=entry.source)
+        stored = stored_by_entry[entry.entry_id]
         if stored is None:
             skipped_missing_feature_set.append(entry.entry_id)
             continue
@@ -135,6 +290,11 @@ def _cli() -> int:
     parser.add_argument("--history-db", required=True, type=Path)
     parser.add_argument("--manifest", required=True, type=Path)
     parser.add_argument("--split-seed", required=True)
+    parser.add_argument(
+        "--split-strategy",
+        choices=("strict-grouped", "temporal-personal"),
+        default="strict-grouped",
+    )
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--labels", type=Path, default=None)
     parser.add_argument("--token-map", type=Path, default=None)
@@ -152,7 +312,8 @@ def _cli() -> int:
         dataset = build_dataset(
             history_db=args.history_db, manifest_path=args.manifest,
             split_seed=args.split_seed, labels_path=args.labels,
-            token_map_path=args.token_map, train_ratio=args.train_ratio,
+            token_map_path=args.token_map, split_strategy=args.split_strategy,
+            train_ratio=args.train_ratio,
             validation_ratio=args.validation_ratio, test_ratio=args.test_ratio,
         )
     except (SplitLeakageError, DatasetValidationError) as exc:

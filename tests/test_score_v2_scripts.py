@@ -31,6 +31,7 @@ from corpus.manifest import CorpusManifest, load_or_create_identity_salt
 from corpus.review import PairwiseItem, ReviewLabelStore, build_presentation, make_label
 from history_store import HistoryStore
 from score_features import extract_game_features
+from score_v2.training.dataset import TrainingDataset
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ROLES = ["top", "jungle", "mid", "bot", "support"]
@@ -205,6 +206,139 @@ def test_pipeline_with_synthetic_pairwise_labels_reaches_fitted_status(corpus_en
     assert summary["aggregate"]["status"] == "fitted"
     assert summary["aggregate"]["n_pairs_used"] == len(game_ids)
     assert summary["aggregate"]["production_ready"] is False
+
+
+def test_temporal_personal_split_keeps_games_whole_and_chronological(
+        corpus_environment):
+    tmp_path = corpus_environment["tmp_path"]
+    dataset_path = tmp_path / "temporal-personal.jsonl"
+    result = _run(
+        "build_training_dataset.py",
+        "--history-db", str(corpus_environment["db_path"]),
+        "--manifest", str(corpus_environment["manifest_path"]),
+        "--split-seed", "ignored-for-temporal",
+        "--split-strategy", "temporal-personal",
+        "--output", str(dataset_path),
+    )
+    assert result.returncode == 0, result.stderr
+    assert "valid only for an opt-in personal beta" in result.stderr
+
+    dataset = TrainingDataset.load_jsonl(dataset_path)
+    split_by_game = {}
+    for record in dataset.feature_records:
+        split_by_game.setdefault(record.game_id, set()).add(record.split)
+    assert all(len(splits) == 1 for splits in split_by_game.values())
+    ordered = [
+        next(iter(split_by_game[game_id]))
+        for game_id in sorted(corpus_environment["game_ids"])
+    ]
+    assert ordered == [
+        "train", "train", "train", "train", "validation", "test",
+    ]
+
+
+def test_temporal_personal_split_rejects_missing_creation_date(
+        corpus_environment):
+    tmp_path = corpus_environment["tmp_path"]
+    manifest_rows = json.loads(
+        corpus_environment["manifest_path"].read_text(encoding="utf-8")
+    )
+    manifest_rows[0]["game_metadata"]["game_creation_date"] = None
+    manifest_path = tmp_path / "manifest-missing-date.json"
+    manifest_path.write_text(json.dumps(manifest_rows), encoding="utf-8")
+
+    result = _run(
+        "build_training_dataset.py",
+        "--history-db", str(corpus_environment["db_path"]),
+        "--manifest", str(manifest_path),
+        "--split-seed", "ignored-for-temporal",
+        "--split-strategy", "temporal-personal",
+        "--output", str(tmp_path / "should-not-exist.jsonl"),
+    )
+    assert result.returncode == 1
+    assert "cannot guarantee a chronological split" in result.stdout
+
+
+def test_temporal_personal_split_rejects_timezone_naive_creation_date(
+        corpus_environment):
+    tmp_path = corpus_environment["tmp_path"]
+    manifest_rows = json.loads(
+        corpus_environment["manifest_path"].read_text(encoding="utf-8")
+    )
+    manifest_rows[0]["game_metadata"]["game_creation_date"] = "2026-07-01T00:00:00"
+    manifest_path = tmp_path / "manifest-naive-date.json"
+    manifest_path.write_text(json.dumps(manifest_rows), encoding="utf-8")
+
+    result = _run(
+        "build_training_dataset.py",
+        "--history-db", str(corpus_environment["db_path"]),
+        "--manifest", str(manifest_path),
+        "--split-seed", "ignored-for-temporal",
+        "--split-strategy", "temporal-personal",
+        "--output", str(tmp_path / "should-not-exist.jsonl"),
+    )
+    assert result.returncode == 1
+    assert "timezone-naive creation date" in result.stdout
+
+
+@pytest.mark.parametrize("group_source", ["match_group_key", "retained_input_hash"])
+def test_temporal_personal_split_keeps_duplicate_components_together(
+        corpus_environment, group_source):
+    tmp_path = corpus_environment["tmp_path"]
+    manifest_rows = json.loads(
+        corpus_environment["manifest_path"].read_text(encoding="utf-8")
+    )
+    for index, row in enumerate(manifest_rows):
+        row["game_metadata"]["game_creation_date"] = (
+            f"2026-07-{index + 1:02d}T00:00:00Z"
+        )
+    if group_source == "match_group_key":
+        manifest_rows[-1]["leakage"]["match_group_key"] = (
+            manifest_rows[0]["leakage"]["match_group_key"]
+        )
+    else:
+        store = corpus_environment["store"]
+        first_stored = store.get_feature_set(
+            manifest_rows[0]["game_id"], evidence_source="aggregate",
+        )
+        last_stored = store.get_feature_set(
+            manifest_rows[-1]["game_id"], evidence_source="aggregate",
+        )
+        store.save_feature_set(
+            manifest_rows[-1]["game_id"],
+            last_stored["feature_version"],
+            last_stored["evidence_source"],
+            last_stored["features"],
+            evidence=last_stored["evidence"],
+            input_hash=first_stored["input_hash"],
+        )
+    manifest_path = tmp_path / f"manifest-duplicate-{group_source}.json"
+    manifest_path.write_text(json.dumps(manifest_rows), encoding="utf-8")
+    dataset_path = tmp_path / f"dataset-duplicate-{group_source}.jsonl"
+
+    result = _run(
+        "build_training_dataset.py",
+        "--history-db", str(corpus_environment["db_path"]),
+        "--manifest", str(manifest_path),
+        "--split-seed", "ignored-for-temporal",
+        "--split-strategy", "temporal-personal",
+        "--output", str(dataset_path),
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    dataset = TrainingDataset.load_jsonl(dataset_path)
+    split_by_game = {
+        game_id: {
+            record.split
+            for record in dataset.feature_records
+            if record.game_id == game_id
+        }
+        for game_id in (
+            manifest_rows[0]["game_id"], manifest_rows[-1]["game_id"],
+        )
+    }
+    assert split_by_game[manifest_rows[0]["game_id"]] == (
+        split_by_game[manifest_rows[-1]["game_id"]]
+    )
 
 
 # ── 3. malformed/tampered artifact rejection ────────────────────────────────
