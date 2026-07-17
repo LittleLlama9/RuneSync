@@ -1,0 +1,293 @@
+{
+  "activePlayer": {
+    "summonerName": "LocalSummoner",
+    "level": 11,
+    "currentGold": 1875.4,
+    "abilities": {
+      "Q": {"abilityLevel": 3, "displayName": "Q Ability", "id": "QAbility"},
+      "W": {"abilityLevel": 2, "displayName": "W Ability", "id": "WAbility"},
+      "E": {"abilityLevel": 3, "displayName": "E Ability", "id": "EAbility"},
+      "R": {"abilityLevel": 1, "displayName": "R Ability", "id": "RAbility"},
+      "Passive": {"displayName": "Passive", "id": "Passive"}
+    },
+    "championStats": {
+      "abilityPower": 0.0,
+      "armor": 68.4,
+      "attackDamage": 112.6,
+      "attackSpeed": 0.78,
+      "currentHealth": 1420.5,
+      "maxHealth": 1780.0,
+      "moveSpeed": 350.0,
+      "resourceType": "MANA",
+      "currentResource": 210.0,
+      "resourceMax": 420.0,
+      "spellVamp": 0.0
+    },
+    "fullRunes": {
+      "keystone": {"displayName": "Conqueror", "id": 8010},
+      "primaryRuneTree": {"displayName": "Precision", "id": 8000},
+      "secondaryRuneTree": {"displayName": "Resolve", "id": 8400},
+      "generalRunes": [{"displayName": "Overheal", "id": 8009}]
+    }
+  },
+  "allPlayers": [
+    {
+      "riotId": "LocalSummoner#NA1",
+      "riotIdGameName": "LocalSummoner",
+      "riotIdTagLine": "NA1",
+      "summonerName": "LocalSummoner",
+      "championName": "Darius",
+      "team": "ORDER",
+      "position": "TOP",
+      "level": 11,
+      "isBot": false,
+      "isDead": false,
+      "respawnTimer": 0.0,
+      "items": [
+        {"itemID": 3071, "displayName": "Black Cleaver", "count": 1, "price": 3200, "canUse": false, "consumable": false, "slot": 0}
+      ],
+      "scores": {"kills": 4, "deaths": 2, "assists": 3, "creepScore": 142, "wardScore": 6.5},
+      "summonerSpells": {
+        "summonerSpellOne": {"displayName": "Flash", "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description"},
+        "summonerSpellTwo": {"displayName": "Teleport", "rawDescription": "GeneratedTip_SummonerSpell_SummonerTeleport_Description"}
+      },
+      "runes": {
+        "keystone": {"displayName": "Conqueror", "id": 8010},
+        "primaryRuneTree": {"displayName": "Precision", "id": 8000},
+        "secondaryRuneTree": {"displayName": "Resolve", "id": 8400}
+      }
+    },
+    {
+      "riotId": "JungleFriend#NA1",
+      "riotIdGameName": "JungleFriend",
+      "riotIdTagLine": "NA1",
+      "summonerName": "JungleFriend",
+      "championName": "LeeSin",
+      "team": "ORDER",
+      "position": "JUNGLE",
+      "level": 10,
+      "isBot": false,
+      "isDead": false,
+      "respawnTimer": 0.0,
+      "items": [],
+      "scores": {"kills": 5, "deaths": 1, "assists": 6, "creepScore": 98, "wardScore": 9.0},
+      "summonerSpells": {
+        "summonerSpellOne": {"displayName": "Smite", "rawDescription": ""},
+        "summonerSpellTwo": {"displayName": "Flash", "rawDescription": ""}
+      },
+      "runes": {
+        "keystone": {"displayName": "Electrocute", "id": 8112},
+        "primaryRuneTree": {"displayName": "Domination", "id": 8100},
+        "secondaryRuneTree": {"displayName": "Precision", "id": 8000}
+      }
+    },
+    {
+      "riotId": "MidLaner#NA1",
+      "riotIdGameName": "MidLaner",
+      "riotIdTagLine": "NA1",
+      "summonerName": "MidLaner",
+      "championName": "Zed",
+      "team": "ORDER",
+      "position": "MIDDLE",
+      "level": 12,
+      "isBot": false,
+      "isDead": false,
+      "respawnTimer": 0.0,
+      "items": [],
+      "scores": {"kills": 6, "deaths": 3, "assists": 2, "creepScore": 165, "wardScore": 4.0},
+      "summonerSpells": {
+        "summonerSpellOne": {"displayName": "Flash", "rawDescription": ""},
+        "summonerSpellTwo": {"displayName": "Ignite", "rawDescription": ""}
+      },
+      "runes": {
+        "keystone": {"displayName": "Electrocute", "id": 8112},
+        "primaryRuneTree": {"displayName": "Domination", "id": 8100},
+        "secondaryRuneTree": {"displayName": "Sorcery", "id": 8200}
+      }
+    },
+    {
+      "riotId": "BotCarry#NA1",
+      "riotIdGameName": "BotCarry",
+      "riotIdTagLine": "NA1",
+      "summonerName": "BotCarry",
+      "championName": "KogMaw",
+      "team": "ORDER",
+      "position": "BOTTOM",
+      "level": 11,
+      "isBot": false,
+      "isDead": false,
+      "respawnTimer": 0.0,
+      "items": [],
+      "scores": {"kills": 3, "deaths": 2, "assists": 5, "creepScore": 178, "wardScore": 3.5},
+      "summonerSpells": {
+        "summonerSpellOne": {"displayName": "Flash", "rawDescription": ""},
+        "summonerSpellTwo": {"displayName": "Heal", "rawDescription": ""}
+      },
+      "runes": {
+        "keystone": {"displayName": "Lethal Tempo", "id": 8008},
+        "primaryRuneTree": {"displayName": "Precision", "id": 8000},
+        "secondaryRuneTree": {"displayName": "Domination", "id": 8100}
+      }
+    },
+    {
+      "riotId": "SupportFriend#NA1",
+      "riotIdGameName": "SupportFriend",
+      "riotIdTagLine": "NA1",
+      "summonerName": "SupportFriend",
+      "championName": "Lulu",
+      "team": "ORDER",
+      "position": "UTILITY",
+      "level": 9,
+      "isBot": false,
+      "isDead": false,
+      "respawnTimer": 0.0,
+      "items": [],
+      "scores": {"kills": 0, "deaths": 4, "assists": 10, "creepScore": 22, "wardScore": 22.5},
+      "summonerSpells": {
+        "summonerSpellOne": {"displayName": "Flash", "rawDescription": ""},
+        "summonerSpellTwo": {"displayName": "Exhaust", "rawDescription": ""}
+      },
+      "runes": {
+        "keystone": {"displayName": "Guardian", "id": 8465},
+        "primaryRuneTree": {"displayName": "Resolve", "id": 8400},
+        "secondaryRuneTree": {"displayName": "Inspiration", "id": 8300}
+      }
+    },
+    {
+      "riotId": "EnemyTop#NA1",
+      "riotIdGameName": "EnemyTop",
+      "riotIdTagLine": "NA1",
+      "summonerName": "EnemyTop",
+      "championName": "Garen",
+      "team": "CHAOS",
+      "position": "TOP",
+      "level": 10,
+      "isBot": false,
+      "isDead": true,
+      "respawnTimer": 12.4,
+      "items": [],
+      "scores": {"kills": 2, "deaths": 4, "assists": 1, "creepScore": 120, "wardScore": 2.0},
+      "summonerSpells": {
+        "summonerSpellOne": {"displayName": "Flash", "rawDescription": ""},
+        "summonerSpellTwo": {"displayName": "Teleport", "rawDescription": ""}
+      },
+      "runes": {
+        "keystone": {"displayName": "Grasp of the Undying", "id": 8437},
+        "primaryRuneTree": {"displayName": "Resolve", "id": 8400},
+        "secondaryRuneTree": {"displayName": "Precision", "id": 8000}
+      }
+    },
+    {
+      "riotId": "EnemyJungle#NA1",
+      "riotIdGameName": "EnemyJungle",
+      "riotIdTagLine": "NA1",
+      "summonerName": "EnemyJungle",
+      "championName": "Vi",
+      "team": "CHAOS",
+      "position": "JUNGLE",
+      "level": 9,
+      "isBot": false,
+      "isDead": false,
+      "respawnTimer": 0.0,
+      "items": [],
+      "scores": {"kills": 1, "deaths": 3, "assists": 4, "creepScore": 84, "wardScore": 5.5},
+      "summonerSpells": {
+        "summonerSpellOne": {"displayName": "Smite", "rawDescription": ""},
+        "summonerSpellTwo": {"displayName": "Flash", "rawDescription": ""}
+      },
+      "runes": {
+        "keystone": {"displayName": "Aftershock", "id": 8439},
+        "primaryRuneTree": {"displayName": "Resolve", "id": 8400},
+        "secondaryRuneTree": {"displayName": "Domination", "id": 8100}
+      }
+    },
+    {
+      "riotId": "EnemyMid#NA1",
+      "riotIdGameName": "EnemyMid",
+      "riotIdTagLine": "NA1",
+      "summonerName": "EnemyMid",
+      "championName": "Ahri",
+      "team": "CHAOS",
+      "position": "MIDDLE",
+      "level": 11,
+      "isBot": false,
+      "isDead": false,
+      "respawnTimer": 0.0,
+      "items": [],
+      "scores": {"kills": 3, "deaths": 4, "assists": 2, "creepScore": 155, "wardScore": 3.0},
+      "summonerSpells": {
+        "summonerSpellOne": {"displayName": "Flash", "rawDescription": ""},
+        "summonerSpellTwo": {"displayName": "Ignite", "rawDescription": ""}
+      },
+      "runes": {
+        "keystone": {"displayName": "Arcane Comet", "id": 8229},
+        "primaryRuneTree": {"displayName": "Sorcery", "id": 8200},
+        "secondaryRuneTree": {"displayName": "Domination", "id": 8100}
+      }
+    },
+    {
+      "riotId": "EnemyBot#NA1",
+      "riotIdGameName": "EnemyBot",
+      "riotIdTagLine": "NA1",
+      "summonerName": "EnemyBot",
+      "championName": "Jinx",
+      "team": "CHAOS",
+      "position": "BOTTOM",
+      "level": 10,
+      "isBot": false,
+      "isDead": false,
+      "respawnTimer": 0.0,
+      "items": [],
+      "scores": {"kills": 2, "deaths": 3, "assists": 3, "creepScore": 160, "wardScore": 2.5},
+      "summonerSpells": {
+        "summonerSpellOne": {"displayName": "Flash", "rawDescription": ""},
+        "summonerSpellTwo": {"displayName": "Heal", "rawDescription": ""}
+      },
+      "runes": {
+        "keystone": {"displayName": "Lethal Tempo", "id": 8008},
+        "primaryRuneTree": {"displayName": "Precision", "id": 8000},
+        "secondaryRuneTree": {"displayName": "Inspiration", "id": 8300}
+      }
+    },
+    {
+      "riotId": "EnemySupport#NA1",
+      "riotIdGameName": "EnemySupport",
+      "riotIdTagLine": "NA1",
+      "summonerName": "EnemySupport",
+      "championName": "Thresh",
+      "team": "CHAOS",
+      "position": "UTILITY",
+      "level": 9,
+      "isBot": false,
+      "isDead": false,
+      "respawnTimer": 0.0,
+      "items": [],
+      "scores": {"kills": 0, "deaths": 2, "assists": 8, "creepScore": 30, "wardScore": 18.0},
+      "summonerSpells": {
+        "summonerSpellOne": {"displayName": "Flash", "rawDescription": ""},
+        "summonerSpellTwo": {"displayName": "Ignite", "rawDescription": ""}
+      },
+      "runes": {
+        "keystone": {"displayName": "Aftershock", "id": 8439},
+        "primaryRuneTree": {"displayName": "Resolve", "id": 8400},
+        "secondaryRuneTree": {"displayName": "Inspiration", "id": 8300}
+      }
+    }
+  ],
+  "events": {
+    "Events": [
+      {"EventID": 0, "EventName": "GameStart", "EventTime": 0.0},
+      {"EventID": 1, "EventName": "MinionsSpawning", "EventTime": 65.0},
+      {"EventID": 2, "EventName": "ChampionKill", "EventTime": 245.6, "KillerName": "LocalSummoner", "VictimName": "EnemyTop", "Assisters": []},
+      {"EventID": 3, "EventName": "TurretKilled", "EventTime": 610.2, "KillerName": "LocalSummoner", "TurretKilled": "Turret_T2_L_03_A"},
+      {"EventID": 4, "EventName": "DragonKill", "EventTime": 780.9, "KillerName": "JungleFriend", "DragonType": "Infernal", "Stolen": false}
+    ]
+  },
+  "gameData": {
+    "gameMode": "CLASSIC",
+    "gameTime": 812.4,
+    "mapName": "Map11",
+    "mapNumber": 11,
+    "mapTerrain": "Default"
+  }
+}

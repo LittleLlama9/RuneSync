@@ -494,3 +494,153 @@ def test_schema_upgrade_backs_up_and_migrates_legacy_scores(tmp_path):
     assert len(runs) == 1
     assert runs[0]["evidence_source"] == "aggregate_legacy"
     assert runs[0]["is_active"] is True
+
+
+# ── live client capture (live_capture_sessions/events/snapshots) ────────────
+
+def test_live_capture_session_starts_without_a_known_game(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+
+    store.start_live_capture_session("sess-1", metadata={"expected_game_id": None})
+
+    session = store.get_live_capture_session("sess-1")
+    assert session["game_id"] is None
+    assert session["status"] == "active"
+    assert session["completeness"] == 0.0
+    assert session["last_event_id"] == -1
+    assert session["metadata"] == {"expected_game_id": None}
+
+
+def test_live_capture_events_are_deduplicated_by_event_id(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    store.start_live_capture_session("sess-1")
+    events = [
+        {"event_id": 0, "event_time": 0.0, "event_type": "GameStart", "payload": {"EventID": 0}},
+        {"event_id": 1, "event_time": 10.0, "event_type": "MinionsSpawning", "payload": {"EventID": 1}},
+    ]
+
+    first_batch = store.record_live_capture_events("sess-1", events)
+    # A later poll re-sends the full cumulative Events list -- only the
+    # genuinely new event should be counted/inserted.
+    second_batch = store.record_live_capture_events("sess-1", events + [
+        {"event_id": 2, "event_time": 20.0, "event_type": "ChampionKill", "payload": {"EventID": 2}},
+    ])
+
+    assert first_batch == 2
+    assert second_batch == 1
+    stored = store.get_live_capture_events("sess-1")
+    assert [e["event_id"] for e in stored] == [0, 1, 2]
+    assert stored[2]["event_type"] == "ChampionKill"
+
+
+def test_live_capture_snapshot_skips_identical_consecutive_payloads(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    store.start_live_capture_session("sess-1")
+    payload = {"players": [{"kills": 1}]}
+
+    first = store.record_live_capture_snapshot("sess-1", 10.0, payload)
+    duplicate = store.record_live_capture_snapshot("sess-1", 25.0, dict(payload))
+    changed = store.record_live_capture_snapshot("sess-1", 40.0, {"players": [{"kills": 2}]})
+
+    assert first is True
+    assert duplicate is False  # identical content -- storage budget, not persisted again
+    assert changed is True
+    snapshots = store.get_live_capture_snapshots("sess-1")
+    assert [s["snapshot_time"] for s in snapshots] == [10.0, 40.0]
+
+
+def test_live_capture_reconciliation_matches_and_flags_mismatch(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    store.start_live_capture_session("sess-unknown")
+    store.start_live_capture_session("sess-known", game_id=555)
+
+    assert store.reconcile_live_capture_session("sess-unknown", 555) == "reconciled"
+    assert store.get_live_capture_session("sess-unknown")["game_id"] == 555
+
+    assert store.reconcile_live_capture_session("sess-known", 555) == "reconciled"
+
+    assert store.reconcile_live_capture_session("sess-known", 999) == "mismatch"
+    mismatched = store.get_live_capture_session("sess-known")
+    assert mismatched["game_id"] == 555
+    assert mismatched["status"] == "reconciliation_mismatch"
+
+
+def test_live_capture_reconciliation_rejects_unknown_session(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+
+    with pytest.raises(ValueError):
+        store.reconcile_live_capture_session("does-not-exist", 123)
+
+
+def test_find_resumable_live_capture_session_prefers_matching_game(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    store.start_live_capture_session("older", game_id=None, started_at="2026-07-16T00:00:00Z")
+    store.start_live_capture_session("newer", game_id=777, started_at="2026-07-16T01:00:00Z")
+
+    assert store.find_resumable_live_capture_session(777) == "newer"
+    assert store.find_resumable_live_capture_session(111) == "older"
+
+    store.finalize_live_capture_session("older", status="completed")
+    store.finalize_live_capture_session("newer", status="completed")
+    assert store.find_resumable_live_capture_session(777) is None
+
+
+def test_finalize_and_list_live_capture_sessions_by_status(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    store.start_live_capture_session("a")
+    store.start_live_capture_session("b")
+    store.finalize_live_capture_session("a", status="partial_no_data")
+
+    active = store.list_live_capture_sessions(status="active")
+    partial = store.list_live_capture_sessions(status="partial_no_data")
+
+    assert [s["session_id"] for s in active] == ["b"]
+    assert [s["session_id"] for s in partial] == ["a"]
+    assert store.get_live_capture_session("a")["ended_at"] is not None
+
+
+def test_live_capture_snapshot_payload_is_compressed(tmp_path):
+    store = HistoryStore(tmp_path / "history.db")
+    store.start_live_capture_session("sess-1")
+    payload = {"players": [{"championName": "Darius", "scores": {"kills": 1}}] * 10}
+
+    store.record_live_capture_snapshot("sess-1", 5.0, payload)
+
+    with sqlite3.connect(store.path) as conn:
+        compressed_size = conn.execute(
+            "SELECT length(payload_zlib) FROM live_capture_snapshots "
+            "WHERE session_id = ?",
+            ("sess-1",),
+        ).fetchone()[0]
+    assert compressed_size < len(json.dumps(payload))
+    assert store.get_live_capture_snapshots("sess-1")[0]["payload"] == payload
+
+
+def test_live_capture_events_survive_concurrent_writers(tmp_path):
+    import threading
+
+    store = HistoryStore(tmp_path / "history.db")
+    store.start_live_capture_session("sess-1")
+    errors = []
+
+    def writer(offset):
+        try:
+            for i in range(20):
+                event_id = offset * 100 + i
+                store.record_live_capture_events("sess-1", [{
+                    "event_id": event_id, "event_time": float(event_id),
+                    "event_type": "Tick", "payload": {"EventID": event_id},
+                }])
+        except Exception as exc:  # pragma: no cover - failure path only
+            errors.append(exc)
+
+    threads = [threading.Thread(target=writer, args=(offset,)) for offset in range(5)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join(timeout=10)
+
+    assert not errors
+    stored = store.get_live_capture_events("sess-1")
+    assert len(stored) == 100
+    assert len({e["event_id"] for e in stored}) == 100

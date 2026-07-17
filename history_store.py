@@ -310,6 +310,10 @@ class HistoryStore:
     def _hash(cls, value) -> str:
         return hashlib.sha256(cls._json(value).encode("utf-8")).hexdigest()
 
+    @staticmethod
+    def _hash_bytes(raw: bytes) -> str:
+        return hashlib.sha256(raw).hexdigest()
+
     def _migrate_legacy_scores(self, conn: sqlite3.Connection) -> None:
         matches = conn.execute(
             "SELECT game_id, active_score_run_id FROM matches"
@@ -826,6 +830,250 @@ class HistoryStore:
                 """,
                 (game_id, source),
             )
+
+    # ── live client capture (live_capture_sessions/events/snapshots) ────────
+    # Supplemental/fallback local evidence collected while a game is active
+    # by live_client.py. `game_id` starts NULL (the Live Client Data API
+    # never reports one) and is attached later via
+    # reconcile_live_capture_session once the LCU's authoritative game/match
+    # ID is known, so there is intentionally no foreign key to `matches`.
+    # `last_event_id` starts at -1 (not 0): Riot's EventID sequence itself
+    # starts at 0, so the "nothing captured yet" sentinel must sort below
+    # every real event ID.
+
+    def start_live_capture_session(
+            self, session_id: str, game_id: Optional[int] = None,
+            metadata: Optional[dict] = None,
+            started_at: Optional[str] = None) -> None:
+        now = started_at or datetime.datetime.now(datetime.timezone.utc).isoformat()
+        with self._connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO live_capture_sessions (
+                    session_id, game_id, started_at, ended_at, status,
+                    completeness, last_event_id, metadata_json, updated_at
+                ) VALUES (?, ?, ?, NULL, 'active', 0.0, -1, ?, ?)
+                """,
+                (session_id, game_id, now, self._json(metadata or {}), now),
+            )
+
+    @staticmethod
+    def _live_capture_session_row(row: sqlite3.Row) -> dict:
+        item = dict(row)
+        item["metadata"] = json.loads(item.pop("metadata_json"))
+        return item
+
+    def get_live_capture_session(self, session_id: str) -> Optional[dict]:
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT * FROM live_capture_sessions WHERE session_id = ?",
+                (session_id,),
+            ).fetchone()
+        return self._live_capture_session_row(row) if row else None
+
+    def list_live_capture_sessions(self, status: Optional[str] = None) -> list[dict]:
+        with self._connect() as conn:
+            if status:
+                rows = conn.execute(
+                    """
+                    SELECT * FROM live_capture_sessions
+                    WHERE status = ? ORDER BY started_at
+                    """,
+                    (status,),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    "SELECT * FROM live_capture_sessions ORDER BY started_at",
+                ).fetchall()
+        return [self._live_capture_session_row(row) for row in rows]
+
+    def find_resumable_live_capture_session(
+            self, game_id: Optional[int]) -> Optional[str]:
+        """Return the most recent still-'active' session eligible to resume.
+
+        Eligible means it has no game_id yet, or already carries the same
+        one we expect to attach -- either way, continuing it (rather than
+        starting a fresh session) is how crash/reconnect recovery works.
+        """
+        with self._connect() as conn:
+            row = conn.execute(
+                """
+                SELECT session_id FROM live_capture_sessions
+                WHERE status = 'active' AND (game_id IS NULL OR game_id = ?)
+                ORDER BY started_at DESC LIMIT 1
+                """,
+                (game_id,),
+            ).fetchone()
+        return row["session_id"] if row else None
+
+    def update_live_capture_session(
+            self, session_id: str, last_event_id: Optional[int] = None,
+            completeness: Optional[float] = None) -> None:
+        now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        fields = ["updated_at = ?"]
+        params: list = [now]
+        if last_event_id is not None:
+            fields.append("last_event_id = ?")
+            params.append(int(last_event_id))
+        if completeness is not None:
+            fields.append("completeness = ?")
+            params.append(max(0.0, min(1.0, float(completeness))))
+        params.append(session_id)
+        with self._connect() as conn:
+            conn.execute(
+                f"UPDATE live_capture_sessions SET {', '.join(fields)} "
+                "WHERE session_id = ?",
+                params,
+            )
+
+    def finalize_live_capture_session(
+            self, session_id: str, status: str,
+            ended_at: Optional[str] = None) -> None:
+        now = ended_at or datetime.datetime.now(datetime.timezone.utc).isoformat()
+        with self._connect() as conn:
+            conn.execute(
+                """
+                UPDATE live_capture_sessions
+                SET status = ?, ended_at = ?, updated_at = ?
+                WHERE session_id = ?
+                """,
+                (status, now, now, session_id),
+            )
+
+    def reconcile_live_capture_session(self, session_id: str, game_id: int) -> str:
+        """Attach the authoritative LCU game ID to a capture session.
+
+        Returns 'reconciled' when the session had no game_id yet (or already
+        matched), or 'mismatch' when it was already attached to a
+        *different* game_id -- in that case the session is relabeled
+        explicitly instead of silently overwritten, since something about
+        the earlier reconciliation (or this one) is wrong.
+        """
+        now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT game_id FROM live_capture_sessions WHERE session_id = ?",
+                (session_id,),
+            ).fetchone()
+            if not row:
+                raise ValueError(f"Unknown live capture session {session_id}")
+            existing_game_id = row["game_id"]
+            if existing_game_id is not None and int(existing_game_id) != int(game_id):
+                conn.execute(
+                    """
+                    UPDATE live_capture_sessions
+                    SET status = 'reconciliation_mismatch', updated_at = ?
+                    WHERE session_id = ?
+                    """,
+                    (now, session_id),
+                )
+                return "mismatch"
+            conn.execute(
+                """
+                UPDATE live_capture_sessions
+                SET game_id = ?, updated_at = ? WHERE session_id = ?
+                """,
+                (game_id, now, session_id),
+            )
+        return "reconciled"
+
+    def record_live_capture_events(
+            self, session_id: str, events: list[dict]) -> int:
+        """Insert new events, deduplicated by (session_id, event_id). Returns
+        the number actually inserted (already-seen events are ignored)."""
+        if not events:
+            return 0
+        now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        inserted = 0
+        with self._connect() as conn:
+            for event in events:
+                cursor = conn.execute(
+                    """
+                    INSERT OR IGNORE INTO live_capture_events (
+                        session_id, event_id, event_time, event_type, payload_json
+                    ) VALUES (?, ?, ?, ?, ?)
+                    """,
+                    (
+                        session_id, int(event["event_id"]),
+                        float(event["event_time"]), str(event["event_type"]),
+                        self._json(event["payload"]),
+                    ),
+                )
+                if cursor.rowcount:
+                    inserted += 1
+            conn.execute(
+                "UPDATE live_capture_sessions SET updated_at = ? WHERE session_id = ?",
+                (now, session_id),
+            )
+        return inserted
+
+    def get_live_capture_events(self, session_id: str) -> list[dict]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT event_id, event_time, event_type, payload_json
+                FROM live_capture_events WHERE session_id = ? ORDER BY event_id
+                """,
+                (session_id,),
+            ).fetchall()
+        return [
+            {
+                "event_id": row["event_id"], "event_time": row["event_time"],
+                "event_type": row["event_type"],
+                "payload": json.loads(row["payload_json"]),
+            }
+            for row in rows
+        ]
+
+    def record_live_capture_snapshot(
+            self, session_id: str, snapshot_time: float, payload: dict) -> bool:
+        """Persist a snapshot, skipping it if identical to the session's most
+        recent one (storage budget: avoid paying for no-op repeats), and
+        deduplicating by (session_id, snapshot_time) as a concurrency
+        backstop. Returns True iff a new row was written."""
+        raw = self._json(payload).encode("utf-8")
+        content_hash = self._hash_bytes(raw)
+        with self._connect() as conn:
+            last = conn.execute(
+                """
+                SELECT content_hash FROM live_capture_snapshots
+                WHERE session_id = ? ORDER BY snapshot_time DESC LIMIT 1
+                """,
+                (session_id,),
+            ).fetchone()
+            if last and last["content_hash"] == content_hash:
+                return False
+            cursor = conn.execute(
+                """
+                INSERT OR IGNORE INTO live_capture_snapshots (
+                    session_id, snapshot_time, content_hash, payload_zlib
+                ) VALUES (?, ?, ?, ?)
+                """,
+                (
+                    session_id, float(snapshot_time), content_hash,
+                    zlib.compress(raw, level=9),
+                ),
+            )
+        return bool(cursor.rowcount)
+
+    def get_live_capture_snapshots(self, session_id: str) -> list[dict]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT snapshot_time, payload_zlib FROM live_capture_snapshots
+                WHERE session_id = ? ORDER BY snapshot_time
+                """,
+                (session_id,),
+            ).fetchall()
+        return [
+            {
+                "snapshot_time": row["snapshot_time"],
+                "payload": json.loads(
+                    zlib.decompress(row["payload_zlib"]).decode("utf-8")
+                ),
+            }
+            for row in rows
+        ]
 
     def save_feature_set(
             self, game_id: int, feature_version: str, evidence_source: str,

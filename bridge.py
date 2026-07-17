@@ -18,6 +18,7 @@ from ugg_api import UGGClient
 from overrides import OverrideManager
 from monitor import ACTIVE_GAME_PHASES, TERMINAL_GAME_PHASES, ChampSelectMonitor
 from match_history import MatchHistoryService
+from live_client import LiveCaptureManager
 from tray import is_autostart_enabled, set_autostart as _reg_set_autostart
 
 SUMMONER_SPELLS = {
@@ -93,6 +94,13 @@ class Api:
         except Exception as e:
             self._history_error = f"Local history unavailable: {e}"
             self._emit(self._history_error, "warn")
+        # Supplemental/fallback Live Client Data capture (live_client.py).
+        # Only meaningful alongside a working history store; if that failed
+        # to construct there is nowhere to persist capture sessions.
+        self.live_capture = (
+            LiveCaptureManager(self.history.store, on_log=self._emit)
+            if self.history else None
+        )
 
     # ── snapshot helpers ──────────────────────────────────────────────────────
     @staticmethod
@@ -436,6 +444,10 @@ class Api:
                     self._emit("✓ Connected to League Client", "success")
                     self._set_status("connected")
                     self._start()
+                    if self.live_capture:
+                        threading.Thread(
+                            target=self._recover_stale_live_capture, daemon=True,
+                        ).start()
                     if self.history:
                         threading.Thread(
                             target=(
@@ -620,7 +632,7 @@ class Api:
         finally:
             self.pusher.push("history_sync", {"active": False})
 
-    def _ingest_postgame(self):
+    def _ingest_postgame(self, live_capture_session_id=None):
         if not self.history:
             return
         self.pusher.push("history_sync", {"active": True})
@@ -628,6 +640,11 @@ class Api:
             game_id = self.history.ingest_after_game()
             if game_id is None:
                 self._emit("Post-game report skipped for this queue or remake.", "info")
+            elif self.live_capture and live_capture_session_id:
+                try:
+                    self.live_capture.reconcile(game_id, live_capture_session_id)
+                except Exception as e:
+                    self._emit(f"Live client capture reconciliation failed: {e}", "warn")
         except Exception as e:
             self._emit(str(e), "warn")
             self.pusher.push("history_error", {"message": str(e)})
@@ -637,13 +654,41 @@ class Api:
     def _on_history_updated(self):
         self.pusher.push("history_updated")
 
+    def _recover_stale_live_capture(self):
+        """Sweep any capture session left 'active' by a crashed prior
+        process. Skipped while a game is currently active/reconnecting --
+        that path is handled by _on_game(True)'s resume logic instead, which
+        needs to know the authoritative game ID before deciding what to keep."""
+        if not self.live_capture:
+            return
+        try:
+            phase = self.lcu.get_game_flow_phase()
+        except Exception:
+            return
+        if phase not in ACTIVE_GAME_PHASES:
+            try:
+                self.live_capture.recover_stale_sessions()
+            except Exception as e:
+                self._emit(f"Live client capture recovery failed: {e}", "warn")
+
     def _recover_postgame_after_reconnect(self):
         try:
             phase = self.lcu.get_game_flow_phase()
             if phase in TERMINAL_GAME_PHASES:
+                # No live_capture_session_id: this process never started a
+                # capture session for this game (it wasn't running while the
+                # game happened), so there is nothing to reconcile against --
+                # reconciliation only ever targets a session this process
+                # itself stopped, never a guess at "the latest" one.
                 self._ingest_postgame()
             elif phase in ACTIVE_GAME_PHASES:
                 self._emit("Game still active after reconnect; post-game recovery deferred.", "info")
+                if self.live_capture and self.history:
+                    try:
+                        self.history.capture_active_game()
+                        self.live_capture.start(self.history.active_game_id)
+                    except Exception as e:
+                        self._emit(f"Live client capture could not resume: {e}", "warn")
         finally:
             self._pending_postgame_recovery = False
         self._sync_history()
@@ -666,5 +711,24 @@ class Api:
                     self.history.capture_active_game()
                 except Exception as e:
                     self._emit(f"Could not capture active game metadata: {e}", "warn")
-        elif import_postgame and self.history:
-            threading.Thread(target=self._ingest_postgame, daemon=True).start()
+            if self.live_capture:
+                try:
+                    self.live_capture.start(
+                        self.history.active_game_id if self.history else None,
+                    )
+                except Exception as e:
+                    self._emit(f"Live client capture could not start: {e}", "warn")
+        else:
+            stopped_session_id = None
+            if self.live_capture:
+                try:
+                    stopped_session_id, _ = self.live_capture.stop(
+                        status=None if import_postgame else "partial_client_closed",
+                    )
+                except Exception as e:
+                    self._emit(f"Live client capture stop failed: {e}", "warn")
+            if import_postgame and self.history:
+                threading.Thread(
+                    target=self._ingest_postgame,
+                    args=(stopped_session_id,), daemon=True,
+                ).start()

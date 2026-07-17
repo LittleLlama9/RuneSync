@@ -219,6 +219,15 @@ class MatchHistoryService:
             self._champion_names = self.lcu.get_champion_name_map()
         return self._champion_names
 
+    @property
+    def active_game_id(self) -> Optional[int]:
+        """The authoritative LCU game ID for the currently active game, if
+        known. Used by the Live Client Data collector (live_client.py) to
+        reconcile its capture sessions -- the Live Client Data API itself
+        never reports a game/match ID."""
+        with self._state_lock:
+            return self._active_game_id
+
     def capture_active_game(self) -> None:
         session = self.lcu.get_gameflow_session() or {}
         game_data = session.get("gameData") or {}
