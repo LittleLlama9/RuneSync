@@ -7,9 +7,9 @@ Covers the four surfaces of the feature:
                       the bundle predates duo data (ships inert).
   * monitor         — locked-partner detection: fires only when your botlane
                       lane partner has LOCKED and you have not locked yet.
-  * build_data_bundle — the UNVERIFIED u.gg `champion_duos` parser and its
-                      band/games curation (shape is documented-guess; these
-                      lock the normalization we WILL apply once confirmed).
+  * build_data_bundle — the duo fetch (fetch_duos_server) that pulls partner
+                      data from the local build-time data provider, and its
+                      band/games curation of the returned duo list.
 """
 import importlib.util
 from pathlib import Path
@@ -218,7 +218,7 @@ class TestLockedPartnerDetection:
         assert fired == {"recs": []}
 
 
-# ── build_data_bundle duo parser (UNVERIFIED shape) ──────────────────────────
+# ── build_data_bundle duo fetch (local data provider) ────────────────────────
 def _load_builder():
     spec = importlib.util.spec_from_file_location("bdb_duo", str(_BUILDER_PATH))
     mod = importlib.util.module_from_spec(spec)
@@ -228,63 +228,74 @@ def _load_builder():
 
 @pytest.mark.skipif(not _BUILDER_PATH.exists(),
                     reason="gitignored dev builder not present (e.g. CI)")
-class TestBuilderDuoParser:
-    ID_TO_NAME = {"412": "Thresh", "497": "Rakan", "555": "Pyke", "99": "Lux"}
+class TestBuilderDuoFetch:
+    # Raw per-partner shape returned by the local duo data provider, one
+    # partner per dict, sorted by win rate.
+    def _raw_partners(self):
+        return [
+            {"champion": "Thresh", "win_rate": 54.2, "games": 1200},
+            {"champion": "Rakan", "win_rate": 33.0, "games": 900},    # below band
+            {"champion": "Pyke", "win_rate": 52.0, "games": 1000},
+            {"champion": "Lux", "win_rate": 66.7, "games": 120},      # above band max
+            {"champion": "Taric", "win_rate": 53.1, "games": 50},     # < games floor
+        ]
 
-    def _payload_4field(self):
-        # region 12 -> rank 10 -> role_id "3" (bot) -> [[ entries ]]
-        # entry: [partner_id, partner_role_id(2=support), wins, matches]
-        return {"12": {"10": {"3": [[
-            ["412", 2, 650, 1200],   # Thresh 54.2%
-            ["497", 2, 300, 900],    # Rakan 33% -> below build floor, dropped
-            ["555", 2, 520, 1000],   # Pyke 52.0%
-            ["99", 2, 80, 120],      # Lux 66.7% -> above max, dropped
-            ["412", 2, 40, 50],      # Thresh again but <100 games -> dropped
-        ]]}}}
+    def _patch_server(self, mod, monkeypatch, raw):
+        monkeypatch.setattr(mod, "_duos_server_available", lambda: True)
+        monkeypatch.setattr(mod, "_duos_server_fetch",
+                            lambda champ, role, top_n: raw)
 
-    def test_parser_is_marked_unverified_by_default(self):
-        # The shipped-safe default: duo data must not reach a bundle until the
-        # champion_duos shape is confirmed and this flag is deliberately flipped.
+    def test_curates_band_and_games_floor(self, monkeypatch):
         mod = _load_builder()
-        assert mod._DUO_PARSER_VERIFIED is False
-
-    def test_parses_and_curates_botlane_pairs(self, monkeypatch):
-        mod = _load_builder()
-        monkeypatch.setattr(mod, "_ugg_fetch", lambda url: self._payload_4field())
-        out = mod.fetch_duos_ugg("16.14.1", "1.5.0", "222", "Jinx",
-                                 ["bot"], self.ID_TO_NAME)
+        self._patch_server(mod, monkeypatch, self._raw_partners())
+        out = mod.fetch_duos_server("Jinx", ["bot"])
         names = [e["champion"] for e in out["bot"]]
-        assert names == ["Thresh", "Pyke"]           # sorted desc, flukes dropped
-        assert out["bot"][0]["role"] == "support"
+        assert names == ["Thresh", "Pyke"]        # sorted desc, flukes dropped
+        assert out["bot"][0]["role"] == "support"  # complementary botlane role
         assert out["bot"][0]["games"] == 1200
 
-    def test_three_field_shape_infers_complementary_role(self, monkeypatch):
+    def test_infers_complementary_role(self, monkeypatch):
         mod = _load_builder()
-        payload = {"12": {"10": {"3": [[["412", 650, 1200], ["555", 520, 1000]]]}}}
-        monkeypatch.setattr(mod, "_ugg_fetch", lambda url: payload)
-        out = mod.fetch_duos_ugg("16.14.1", "1.5.0", "222", "Jinx",
-                                 ["bot"], self.ID_TO_NAME)
-        assert out["bot"][0]["role"] == "support"
+        self._patch_server(mod, monkeypatch,
+                           [{"champion": "Jinx", "win_rate": 55.0, "games": 800}])
+        out = mod.fetch_duos_server("Thresh", ["support"])
+        assert out["support"][0]["role"] == "bot"
 
     def test_non_botlane_role_yields_nothing(self, monkeypatch):
         mod = _load_builder()
-        monkeypatch.setattr(mod, "_ugg_fetch", lambda url: self._payload_4field())
-        assert mod.fetch_duos_ugg("16.14.1", "1.5.0", "222", "Jinx",
-                                  ["top"], self.ID_TO_NAME) == {}
+        self._patch_server(mod, monkeypatch, self._raw_partners())
+        assert mod.fetch_duos_server("Jinx", ["top"]) == {}
+
+    def test_server_unavailable_yields_nothing(self, monkeypatch):
+        mod = _load_builder()
+        monkeypatch.setattr(mod, "_duos_server_available", lambda: False)
+        assert mod.fetch_duos_server("Jinx", ["bot"]) == {}
 
     def test_no_upstream_data_yields_nothing(self, monkeypatch):
         mod = _load_builder()
-        monkeypatch.setattr(mod, "_ugg_fetch", lambda url: None)
-        assert mod.fetch_duos_ugg("16.14.1", "1.5.0", "222", "Jinx",
-                                  ["bot"], self.ID_TO_NAME) == {}
+        monkeypatch.setattr(mod, "_duos_server_available", lambda: True)
+        monkeypatch.setattr(mod, "_duos_server_fetch",
+                            lambda champ, role, top_n: None)
+        assert mod.fetch_duos_server("Jinx", ["bot"]) == {}
+
+    def test_missing_games_entry_is_dropped(self, monkeypatch):
+        # A partner with no confirmable sample size must not ship in a curated
+        # bundle even if its win rate is in band.
+        mod = _load_builder()
+        self._patch_server(mod, monkeypatch, [
+            {"champion": "Nami", "win_rate": 55.0, "games": None},
+            {"champion": "Lulu", "win_rate": 55.0},
+            {"champion": "Yuumi", "win_rate": 54.0, "games": 800},
+        ])
+        out = mod.fetch_duos_server("Jinx", ["bot"])
+        assert [e["champion"] for e in out["bot"]] == ["Yuumi"]
 
     def test_bundle_schema_matches_client_read_path(self, monkeypatch):
         # The builder output for an anchor must be directly readable by the
         # client's get_best_partners without any reshaping.
         mod = _load_builder()
-        monkeypatch.setattr(mod, "_ugg_fetch", lambda url: self._payload_4field())
-        out = mod.fetch_duos_ugg("16.14.1", "1.5.0", "222", "Jinx",
-                                 ["bot"], self.ID_TO_NAME)
+        self._patch_server(mod, monkeypatch, self._raw_partners())
+        out = mod.fetch_duos_server("Jinx", ["bot"])
         bundle = {"duos": {"jinx": out}}
         monkeypatch.setattr(ugg_api, "_bundle", bundle, raising=False)
         ugg_api._bundle_ready_event.set()
