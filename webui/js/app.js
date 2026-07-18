@@ -582,12 +582,6 @@
           `<b>${safeAmount.toFixed(1)}</b></div>`;
       }).join('')
       : '<div class="component-empty">Score v2 replaces legacy category bars with source-specific evidence, confidence, and calibrated intervals.</div>';
-    const observations = local.observations || [];
-    $('reportObservations').innerHTML = observations.length
-      ? observations.map(text =>
-        `<div><i aria-hidden="true"></i><span>${esc(text)}</span></div>`
-      ).join('')
-      : '<div class="observation-empty">No participant-level observations were retained for this score run.</div>';
     $('reportCoaching').innerHTML = renderCoaching(local.coaching || {}, local);
     const localTeam = local.team_id;
     let previousTeam = null;

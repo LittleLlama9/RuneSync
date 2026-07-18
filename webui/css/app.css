@@ -368,18 +368,13 @@ body {
 .report-trust span { color:var(--pd); font:10px 'Space Mono',monospace; letter-spacing:.08em; }
 .report-trust strong { color:var(--pb); font-size:17px; font-weight:normal; margin-top:5px; }
 .report-trust small { color:var(--pd); font-size:11px; margin-top:3px; }
-.report-grid { display:grid; grid-template-columns:1.05fr .95fr; gap:12px; margin-top:18px; }
+.report-grid { display:grid; grid-template-columns:1fr; gap:12px; margin-top:18px; }
 .component-list { display:flex; flex-direction:column; gap:7px; }
 .component-row { display:grid; grid-template-columns:112px 1fr 38px; gap:8px; align-items:center; font-size:15px; }
 .component-track { height:10px; border:1px solid var(--pdd); }
 .component-track i { display:block; height:100%; background:var(--p); }
 .component-row b { color:var(--pb); font-weight:normal; text-align:right; }
-.component-empty, .observation-empty { color:var(--pd); font-size:14px; line-height:1.5; }
-.observation-list { display:flex; flex-direction:column; gap:8px; color:var(--pb);
-  font-size:14px; line-height:1.45; }
-.observation-list > div:not(.observation-empty) { display:grid; grid-template-columns:7px 1fr; gap:9px; }
-.observation-list i { width:5px; height:5px; margin-top:7px; background:var(--p);
-  box-shadow:0 0 7px var(--glow); }
+.component-empty { color:var(--pd); font-size:14px; line-height:1.5; }
 .report-coaching { margin-top:12px; }
 .coaching-head { display:flex; align-items:center; justify-content:space-between; gap:12px;
   color:var(--pd); font:10px 'Space Mono',monospace; letter-spacing:.06em; }
@@ -1091,12 +1086,7 @@ body {
 :root[data-interface="standard"] .report-trust small {
   color:var(--std-muted); font:11px "Segoe UI",sans-serif;
 }
-:root[data-interface="standard"] .component-empty,
-:root[data-interface="standard"] .observation-empty { color:var(--std-muted); }
-:root[data-interface="standard"] .observation-list { color:var(--std-text); }
-:root[data-interface="standard"] .observation-list i {
-  background:var(--p); box-shadow:none; border-radius:50%;
-}
+:root[data-interface="standard"] .component-empty { color:var(--std-muted); }
 :root[data-interface="standard"] .report-coaching {
   border:1px solid var(--std-line); border-radius:7px; background:var(--std-surface);
 }
