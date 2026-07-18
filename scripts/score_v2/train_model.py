@@ -64,6 +64,13 @@ def _cli() -> int:
         "--include-abstained", action="store_true",
         help="Train/calibrate on abstained (e.g. short-game) records too -- off by default.",
     )
+    parser.add_argument(
+        "--score-scale-multiplier", type=float, default=1.0,
+        help="Widen the fitted tanh score-mapping scale by this factor "
+             "(default 1.0 = unchanged). ~2.0 pulls heavy tails off the "
+             "0/100 rails while preserving ordering; see "
+             "score_v2.training.calibration.fit_score_calibration_for_score_fn.",
+    )
     parser.add_argument("--summary-out", type=Path, default=None)
     args = parser.parse_args()
 
@@ -88,6 +95,7 @@ def _cli() -> int:
         loss_tolerance=args.loss_tolerance, gradient_tolerance=args.gradient_tolerance,
         min_pairs_for_nontrivial_fit=args.min_pairs_for_nontrivial_fit,
         include_abstained=args.include_abstained,
+        scale_sigma_multiplier=args.score_scale_multiplier,
     )
 
     args.output_dir.mkdir(parents=True, exist_ok=True)

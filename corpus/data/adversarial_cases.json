@@ -25,10 +25,16 @@
         "subject_role": "top",
         "subject_team_result": "win",
         "subject_stats": {
-          "kills": 1, "deaths": 1, "assists": 0,
-          "gold_earned": 2951, "cs": 57, "champion_level": 7,
-          "damage_to_champions": 2515, "damage_to_objectives": 2649,
-          "damage_to_turrets": 1142, "damage_taken": 4368,
+          "kills": 1,
+          "deaths": 1,
+          "assists": 0,
+          "gold_earned": 2951,
+          "cs": 57,
+          "champion_level": 7,
+          "damage_to_champions": 2515,
+          "damage_to_objectives": 2649,
+          "damage_to_turrets": 1142,
+          "damage_taken": 4368,
           "vision_score": 3
         }
       },
@@ -38,7 +44,11 @@
         "reason": "A game under 900s (15 minutes) does not contain enough accumulated evidence for a confident rank/score; the reviewer or model must report insufficient_evidence rather than a confident verdict."
       },
       "rationale": "Short/remake-length games are a known failure mode where a partial statline can look decisive by chance. The corpus and review tooling must recognize insufficient evidence rather than let a small sample produce a false-confidence score.",
-      "tags": ["short_game", "insufficient_evidence", "remake_adjacent"]
+      "tags": [
+        "short_game",
+        "insufficient_evidence",
+        "remake_adjacent"
+      ]
     },
     {
       "case_id": "verified-5602827182-ksante-seraphine-velkoz",
@@ -69,23 +79,56 @@
             "last_frame_seconds": 1861,
             "observed_facts": {
               "ksante_grub_events": [
-                {"minute": 9.1, "relation": "secure"},
-                {"minute": 9.2, "relation": "assist"}
+                {
+                  "minute": 9.1,
+                  "relation": "secure"
+                },
+                {
+                  "minute": 9.2,
+                  "relation": "assist"
+                }
               ],
               "ksante_turret_kills": [
-                {"minute": 20.2, "lane": "BOT_LANE"},
-                {"minute": 22.0, "lane": "MID_LANE"}
+                {
+                  "minute": 20.2,
+                  "lane": "BOT_LANE"
+                },
+                {
+                  "minute": 22.0,
+                  "lane": "MID_LANE"
+                }
               ],
               "ksante_gold_lead_vs_yone": [
-                {"minute": 5, "gold_diff": 401},
-                {"minute": 10, "gold_diff": 351},
-                {"minute": 15, "gold_diff": 1349},
-                {"minute": 20, "gold_diff": 1688},
-                {"minute": 25, "gold_diff": 2143},
-                {"minute": 30, "gold_diff": 1806}
+                {
+                  "minute": 5,
+                  "gold_diff": 401
+                },
+                {
+                  "minute": 10,
+                  "gold_diff": 351
+                },
+                {
+                  "minute": 15,
+                  "gold_diff": 1349
+                },
+                {
+                  "minute": 20,
+                  "gold_diff": 1688
+                },
+                {
+                  "minute": 25,
+                  "gold_diff": 2143
+                },
+                {
+                  "minute": 30,
+                  "gold_diff": 1806
+                }
               ],
               "velkoz_direct_map_events": [
-                {"minute": 22.0, "relation": "turret_assist"}
+                {
+                  "minute": 22.0,
+                  "relation": "turret_assist"
+                }
               ],
               "seraphine_direct_map_event_count": 0
             }
@@ -98,27 +141,48 @@
         "queue_id": 400,
         "participants": {
           "K'Sante": {
-            "role": "mid", "team_result": "loss",
-            "kills": 8, "deaths": 7, "assists": 4,
-            "gold_earned": 12262, "cs": 184, "champion_level": 15,
-            "damage_to_champions": 21543, "damage_to_objectives": 3153,
-            "damage_to_turrets": 1897, "damage_taken": 36399,
+            "role": "mid",
+            "team_result": "loss",
+            "kills": 8,
+            "deaths": 7,
+            "assists": 4,
+            "gold_earned": 12262,
+            "cs": 184,
+            "champion_level": 15,
+            "damage_to_champions": 21543,
+            "damage_to_objectives": 3153,
+            "damage_to_turrets": 1897,
+            "damage_taken": 36399,
             "vision_score": 29
           },
           "Vel'Koz": {
-            "role": "bot", "team_result": "loss",
-            "kills": 9, "deaths": 12, "assists": 7,
-            "gold_earned": 12032, "cs": 140, "champion_level": 14,
-            "damage_to_champions": 28959, "damage_to_objectives": 5909,
-            "damage_to_turrets": 5609, "damage_taken": 28185,
+            "role": "bot",
+            "team_result": "loss",
+            "kills": 9,
+            "deaths": 12,
+            "assists": 7,
+            "gold_earned": 12032,
+            "cs": 140,
+            "champion_level": 14,
+            "damage_to_champions": 28959,
+            "damage_to_objectives": 5909,
+            "damage_to_turrets": 5609,
+            "damage_taken": 28185,
             "vision_score": 22
           },
           "Seraphine": {
-            "role": "support", "team_result": "loss",
-            "kills": 3, "deaths": 15, "assists": 14,
-            "gold_earned": 9358, "cs": 30, "champion_level": 13,
-            "damage_to_champions": 11819, "damage_to_objectives": 3258,
-            "damage_to_turrets": 2489, "damage_taken": 32982,
+            "role": "support",
+            "team_result": "loss",
+            "kills": 3,
+            "deaths": 15,
+            "assists": 14,
+            "gold_earned": 9358,
+            "cs": 30,
+            "champion_level": 13,
+            "damage_to_champions": 11819,
+            "damage_to_objectives": 3258,
+            "damage_to_turrets": 2489,
+            "damage_taken": 32982,
             "vision_score": 79
           }
         }
@@ -143,7 +207,12 @@
         ]
       },
       "rationale": "This is the canonical disputed-score case for DAEMON Score v2: direct conversion and death cost must outweigh raw vision or turret-damage magnitude when the timeline supports that ordering.",
-      "tags": ["disputed_score", "vision_without_conversion", "raw_economy_without_influence", "objective_contact_without_contest"]
+      "tags": [
+        "disputed_score",
+        "vision_without_conversion",
+        "raw_economy_without_influence",
+        "objective_contact_without_contest"
+      ]
     },
     {
       "case_id": "synthetic-tank-frontline-not-penalized",
@@ -155,18 +224,29 @@
       "sanitized_facts": {
         "subject_champion": "SyntheticTank",
         "comparator_champion": "SyntheticLowImpactCarry",
-        "subject_role": "top", "subject_team_result": "win",
+        "subject_role": "top",
+        "subject_team_result": "win",
         "subject_stats": {
-          "kills": 1, "deaths": 3, "assists": 9,
-          "gold_earned": 11000, "cs": 160,
-          "damage_to_champions": 9000, "damage_taken": 42000,
-          "damage_mitigated": 38000, "vision_score": 18
+          "kills": 1,
+          "deaths": 3,
+          "assists": 9,
+          "gold_earned": 11000,
+          "cs": 160,
+          "damage_to_champions": 9000,
+          "damage_taken": 42000,
+          "damage_mitigated": 38000,
+          "vision_score": 18
         },
         "comparator_stats": {
-          "kills": 4, "deaths": 6, "assists": 2,
-          "gold_earned": 13000, "cs": 190,
-          "damage_to_champions": 21000, "damage_taken": 18000,
-          "damage_mitigated": 2000, "vision_score": 8
+          "kills": 4,
+          "deaths": 6,
+          "assists": 2,
+          "gold_earned": 13000,
+          "cs": 190,
+          "damage_to_champions": 21000,
+          "damage_taken": 18000,
+          "damage_mitigated": 2000,
+          "vision_score": 8
         }
       },
       "expectation": {
@@ -177,7 +257,10 @@
         "reason": "The tank's frontline/enabling role must be credited even though raw kill and damage-to-champions numbers are low."
       },
       "rationale": "Raw damage-to-champions and KDA systematically undervalue tanks. The corpus must include a case that fails if a model scores tanks purely on those numbers.",
-      "tags": ["tank", "low_kda_influence"]
+      "tags": [
+        "tank",
+        "low_kda_influence"
+      ]
     },
     {
       "case_id": "synthetic-support-vision-and-peel-credited",
@@ -189,18 +272,29 @@
       "sanitized_facts": {
         "subject_champion": "SyntheticSupport",
         "comparator_champion": "SyntheticSelfishMidLaner",
-        "subject_role": "support", "subject_team_result": "win",
+        "subject_role": "support",
+        "subject_team_result": "win",
         "subject_stats": {
-          "kills": 0, "deaths": 2, "assists": 17,
-          "gold_earned": 7200, "cs": 22,
-          "damage_to_champions": 4000, "vision_score": 61,
-          "wards_placed": 22, "wards_killed": 6
+          "kills": 0,
+          "deaths": 2,
+          "assists": 17,
+          "gold_earned": 7200,
+          "cs": 22,
+          "damage_to_champions": 4000,
+          "vision_score": 61,
+          "wards_placed": 22,
+          "wards_killed": 6
         },
         "comparator_stats": {
-          "kills": 5, "deaths": 4, "assists": 3,
-          "gold_earned": 13500, "cs": 210,
-          "damage_to_champions": 19000, "vision_score": 10,
-          "wards_placed": 2, "wards_killed": 0
+          "kills": 5,
+          "deaths": 4,
+          "assists": 3,
+          "gold_earned": 13500,
+          "cs": 210,
+          "damage_to_champions": 19000,
+          "vision_score": 10,
+          "wards_placed": 2,
+          "wards_killed": 0
         }
       },
       "expectation": {
@@ -211,7 +305,10 @@
         "reason": "Do not require economy parity to credit a support's vision and assist-driven contribution."
       },
       "rationale": "Naive economy-weighted scoring devalues support performances by construction. This case fails if raw gold/CS dominate the comparison.",
-      "tags": ["support", "vision_without_conversion"]
+      "tags": [
+        "support",
+        "vision_without_conversion"
+      ]
     },
     {
       "case_id": "synthetic-split-pusher-turret-pressure-credited",
@@ -223,17 +320,26 @@
       "sanitized_facts": {
         "subject_champion": "SyntheticSplitPusher",
         "comparator_champion": "SyntheticTeamfightOnlyCarry",
-        "subject_role": "top", "subject_team_result": "win",
+        "subject_role": "top",
+        "subject_team_result": "win",
         "subject_stats": {
-          "kills": 2, "deaths": 3, "assists": 1,
-          "gold_earned": 14500, "cs": 245,
-          "damage_to_champions": 10000, "damage_to_turrets": 9800,
+          "kills": 2,
+          "deaths": 3,
+          "assists": 1,
+          "gold_earned": 14500,
+          "cs": 245,
+          "damage_to_champions": 10000,
+          "damage_to_turrets": 9800,
           "vision_score": 9
         },
         "comparator_stats": {
-          "kills": 6, "deaths": 5, "assists": 8,
-          "gold_earned": 13800, "cs": 200,
-          "damage_to_champions": 20000, "damage_to_turrets": 1200,
+          "kills": 6,
+          "deaths": 5,
+          "assists": 8,
+          "gold_earned": 13800,
+          "cs": 200,
+          "damage_to_champions": 20000,
+          "damage_to_turrets": 1200,
           "vision_score": 14
         }
       },
@@ -245,7 +351,10 @@
         "reason": "Split push value should keep the split pusher competitive (within a small gap) even without matching kill participation; it should not be scored far below the teamfight carry."
       },
       "rationale": "Kill-participation-heavy scoring punishes legitimate split-push strategy. This case uses a small negative min_gap to express 'must stay competitive', not 'must strictly win'.",
-      "tags": ["split_pusher", "objective_contact_without_contest"]
+      "tags": [
+        "split_pusher",
+        "objective_contact_without_contest"
+      ]
     },
     {
       "case_id": "synthetic-weak-side-not-blamed",
@@ -257,16 +366,25 @@
       "sanitized_facts": {
         "subject_champion": "SyntheticWeakSide",
         "comparator_champion": "SyntheticStrongSideBeneficiary",
-        "subject_role": "bot", "subject_team_result": "win",
+        "subject_role": "bot",
+        "subject_team_result": "win",
         "subject_stats": {
-          "kills": 1, "deaths": 1, "assists": 3,
-          "gold_earned": 9500, "cs": 170,
-          "damage_to_champions": 8000, "vision_score": 15
+          "kills": 1,
+          "deaths": 1,
+          "assists": 3,
+          "gold_earned": 9500,
+          "cs": 170,
+          "damage_to_champions": 8000,
+          "vision_score": 15
         },
         "comparator_stats": {
-          "kills": 7, "deaths": 2, "assists": 6,
-          "gold_earned": 16000, "cs": 205,
-          "damage_to_champions": 24000, "vision_score": 12
+          "kills": 7,
+          "deaths": 2,
+          "assists": 6,
+          "gold_earned": 16000,
+          "cs": 205,
+          "damage_to_champions": 24000,
+          "vision_score": 12
         }
       },
       "expectation": {
@@ -277,7 +395,10 @@
         "reason": "A weak-side player should not be scored dramatically below a strong-side beneficiary purely on raw kill/gold counts driven by where the game's action happened."
       },
       "rationale": "Without map-side context, raw KDA/gold naturally penalizes weak-side players for macro conditions outside their control.",
-      "tags": ["weak_side_play", "low_kda_influence"]
+      "tags": [
+        "weak_side_play",
+        "low_kda_influence"
+      ]
     },
     {
       "case_id": "synthetic-low-kda-high-influence-credited",
@@ -289,17 +410,26 @@
       "sanitized_facts": {
         "subject_champion": "SyntheticLowKdaHighInfluence",
         "comparator_champion": "SyntheticHighKdaLowInfluence",
-        "subject_role": "jungle", "subject_team_result": "win",
+        "subject_role": "jungle",
+        "subject_team_result": "win",
         "subject_stats": {
-          "kills": 2, "deaths": 6, "assists": 4,
-          "gold_earned": 11500, "cs": 130,
-          "damage_to_objectives": 15000, "damage_to_turrets": 4000,
+          "kills": 2,
+          "deaths": 6,
+          "assists": 4,
+          "gold_earned": 11500,
+          "cs": 130,
+          "damage_to_objectives": 15000,
+          "damage_to_turrets": 4000,
           "vision_score": 20
         },
         "comparator_stats": {
-          "kills": 5, "deaths": 1, "assists": 2,
-          "gold_earned": 12000, "cs": 140,
-          "damage_to_objectives": 500, "damage_to_turrets": 0,
+          "kills": 5,
+          "deaths": 1,
+          "assists": 2,
+          "gold_earned": 12000,
+          "cs": 140,
+          "damage_to_objectives": 500,
+          "damage_to_turrets": 0,
           "vision_score": 6
         }
       },
@@ -311,7 +441,9 @@
         "reason": "Objective/building influence should partially offset a poor KDA; the low-KDA player should stay competitive rather than being scored far below a safe high-KDA player with no objective participation."
       },
       "rationale": "KDA alone is a poor proxy for influence. This case fails if a model rewards a safe, low-participation high-KDA line far above real objective pressure.",
-      "tags": ["low_kda_influence"]
+      "tags": [
+        "low_kda_influence"
+      ]
     },
     {
       "case_id": "synthetic-vision-without-conversion-not-first",
@@ -322,11 +454,16 @@
       "game_id": null,
       "sanitized_facts": {
         "subject_champion": "SyntheticHighVisionNoConversion",
-        "subject_role": "support", "subject_team_result": "loss",
+        "subject_role": "support",
+        "subject_team_result": "loss",
         "subject_stats": {
-          "kills": 0, "deaths": 8, "assists": 5,
-          "gold_earned": 8000, "cs": 20,
-          "damage_to_champions": 3000, "vision_score": 95
+          "kills": 0,
+          "deaths": 8,
+          "assists": 5,
+          "gold_earned": 8000,
+          "cs": 20,
+          "damage_to_champions": 3000,
+          "vision_score": 95
         }
       },
       "expectation": {
@@ -336,7 +473,9 @@
         "reason": "The highest raw vision score in the game must not by itself make this the top-ranked performance when conversion was absent."
       },
       "rationale": "Raw vision score is easy to farm passively; it must be discounted when it did not translate into kills, objectives, or map control that mattered.",
-      "tags": ["vision_without_conversion"]
+      "tags": [
+        "vision_without_conversion"
+      ]
     },
     {
       "case_id": "synthetic-raw-economy-without-influence-not-first",
@@ -347,11 +486,16 @@
       "game_id": null,
       "sanitized_facts": {
         "subject_champion": "SyntheticFarmerNoInfluence",
-        "subject_role": "mid", "subject_team_result": "loss",
+        "subject_role": "mid",
+        "subject_team_result": "loss",
         "subject_stats": {
-          "kills": 1, "deaths": 3, "assists": 0,
-          "gold_earned": 18500, "cs": 320,
-          "damage_to_champions": 6000, "damage_to_objectives": 0,
+          "kills": 1,
+          "deaths": 3,
+          "assists": 0,
+          "gold_earned": 18500,
+          "cs": 320,
+          "damage_to_champions": 6000,
+          "damage_to_objectives": 0,
           "vision_score": 8
         }
       },
@@ -362,7 +506,9 @@
         "reason": "The highest raw gold total in the game must not by itself make this the top-ranked performance when it was not converted into fight or objective influence."
       },
       "rationale": "Gold and CS measure resource accumulation, not impact. This is the raw-economy companion to the vision-without-conversion case.",
-      "tags": ["raw_economy_without_influence"]
+      "tags": [
+        "raw_economy_without_influence"
+      ]
     },
     {
       "case_id": "synthetic-objective-contact-without-contest-not-first",
@@ -373,11 +519,16 @@
       "game_id": null,
       "sanitized_facts": {
         "subject_champion": "SyntheticObjectivePoke",
-        "subject_role": "mid", "subject_team_result": "loss",
+        "subject_role": "mid",
+        "subject_team_result": "loss",
         "subject_stats": {
-          "kills": 0, "deaths": 4, "assists": 1,
-          "gold_earned": 9000, "cs": 150,
-          "damage_to_objectives": 12000, "damage_to_champions": 4000,
+          "kills": 0,
+          "deaths": 4,
+          "assists": 1,
+          "gold_earned": 9000,
+          "cs": 150,
+          "damage_to_objectives": 12000,
+          "damage_to_champions": 4000,
           "vision_score": 10
         }
       },
@@ -388,7 +539,9 @@
         "reason": "Damage logged against an objective is not the same as contesting or securing it; the highest raw objective-damage figure must not alone rank this performance first."
       },
       "rationale": "Objective damage can be inflated by poke or a Smite fight the team lost; it must be evaluated alongside whether the objective was actually secured.",
-      "tags": ["objective_contact_without_contest"]
+      "tags": [
+        "objective_contact_without_contest"
+      ]
     },
     {
       "case_id": "synthetic-disputed-manual-review-required",
@@ -399,11 +552,16 @@
       "game_id": null,
       "sanitized_facts": {
         "subject_champion": "SyntheticAmbiguousPerformance",
-        "subject_role": "jungle", "subject_team_result": "loss",
+        "subject_role": "jungle",
+        "subject_team_result": "loss",
         "subject_stats": {
-          "kills": 3, "deaths": 4, "assists": 3,
-          "gold_earned": 11000, "cs": 120,
-          "damage_to_objectives": 9000, "damage_to_champions": 12000,
+          "kills": 3,
+          "deaths": 4,
+          "assists": 3,
+          "gold_earned": 11000,
+          "cs": 120,
+          "damage_to_objectives": 9000,
+          "damage_to_champions": 12000,
           "vision_score": 25
         }
       },
@@ -412,7 +570,42 @@
         "reason": "Signals are deliberately mixed; automated evaluation must report 'no automatic verdict' rather than fabricate one."
       },
       "rationale": "Not every case should resolve automatically. This case validates that evaluate_case() and the blinded review tool both support an honest 'insufficient consensus, needs a human' outcome.",
-      "tags": ["disputed_score"]
+      "tags": [
+        "disputed_score"
+      ]
+    },
+    {
+      "case_id": "synthetic-deathless-moderate-influence-ceiling-cap",
+      "category": "low_kda_influence",
+      "title": "A deathless but only moderately influential player must not receive a near-maximal score from a spotless KDA line alone",
+      "description": "A synthetic (not a real captured match) performance: the player never died and posted a clean KDA, but their kill participation and objective/economy conversion were only moderate. A spotless survivability line must not by itself pin the score to the top of the 0-100 scale; that magnitude is reserved for genuinely dominant carries. This is the regression guard for the v2.1 calibration fix that pulled deathless-but-moderate performances off the score ceiling (deathless frac>=95 fell from 38.65% to 4.22% corpus-wide).",
+      "verification_status": "synthetic",
+      "game_id": null,
+      "sanitized_facts": {
+        "subject_champion": "SyntheticDeathlessModerate",
+        "subject_role": "mid",
+        "subject_stats": {
+          "kills": 4,
+          "deaths": 0,
+          "assists": 5,
+          "kill_participation": 0.35,
+          "converted_lead_windows": 1
+        },
+        "note": "Deathless, clean KDA, but ~35% KP and little lead conversion -- influential enough for an above-average score, not a max-band carry."
+      },
+      "expectation": {
+        "type": "must_not_exceed",
+        "subject": "SyntheticDeathlessModerate",
+        "max_score": 92.0
+      },
+      "rationale": "Before v2.1 the tanh score mapping saturated at ~1 robust std, so any clean deathless line pinned to ~95-98. Widening the calibration scale (multiplier 2.0) plus dominance-mined ordering labels keeps genuine spread while capping the magnitude a merely-moderate deathless game can reach.",
+      "tags": [
+        "deathless",
+        "kda_inflation",
+        "calibration",
+        "score_v2_1",
+        "ceiling_cap"
+      ]
     }
   ]
 }

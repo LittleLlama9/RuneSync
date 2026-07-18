@@ -87,6 +87,7 @@ def train_tier(
         gradient_tolerance: float = DEFAULT_GRADIENT_TOLERANCE,
         min_pairs_for_nontrivial_fit: int = MIN_PAIRS_FOR_NONTRIVIAL_FIT,
         include_abstained: bool = False,
+        scale_sigma_multiplier: float = 1.0,
         fallback: Optional[Mapping] = None,
         now: Optional[datetime.datetime] = None) -> TierTrainingResult:
     """Fit, calibrate, and export one evidence tier's development artifact.
@@ -128,7 +129,9 @@ def train_tier(
             tier_dataset, fitted, include_abstained=include_abstained,
         )
         score_calibration = calibration_mod.fit_score_calibration(
-            tier_dataset, fitted, role_calibration, include_abstained=include_abstained,
+            tier_dataset, fitted, role_calibration,
+            scale_sigma_multiplier=scale_sigma_multiplier,
+            include_abstained=include_abstained,
         )
         coefficients = tuple(
             FeatureCoefficient(

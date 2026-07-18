@@ -227,3 +227,67 @@ def test_evaluate_case_handles_disputed_manual_review_type():
     )
     result = evaluate_case(disputed_manual, scores={"Anything": 1.0})
     assert result.passed is None
+
+
+# ── must_not_exceed (v2.1 deathless-ceiling calibration guard) ─────────────
+
+def _ceiling_cap_case():
+    cases = load_library()
+    return next(
+        c for c in cases
+        if c.case_id == "synthetic-deathless-moderate-influence-ceiling-cap"
+    )
+
+
+def test_ceiling_cap_case_is_present_and_well_formed():
+    case = _ceiling_cap_case()
+    assert case.expectation["type"] == "must_not_exceed"
+    assert case.expectation["subject"] == "SyntheticDeathlessModerate"
+    assert case.expectation["max_score"] == 92.0
+
+
+def test_ceiling_cap_passes_when_moderate_deathless_score_is_capped():
+    case = _ceiling_cap_case()
+    result = evaluate_case(case, scores={"SyntheticDeathlessModerate": 74.0})
+    assert result.passed is True
+
+
+def test_ceiling_cap_passes_at_exactly_the_cap():
+    case = _ceiling_cap_case()
+    result = evaluate_case(case, scores={"SyntheticDeathlessModerate": 92.0})
+    assert result.passed is True
+
+
+def test_ceiling_cap_fails_when_moderate_deathless_line_pins_to_the_top():
+    case = _ceiling_cap_case()
+    result = evaluate_case(case, scores={"SyntheticDeathlessModerate": 97.5})
+    assert result.passed is False
+
+
+def test_ceiling_cap_cannot_resolve_without_scores():
+    case = _ceiling_cap_case()
+    assert evaluate_case(case).passed is None
+    assert evaluate_case(case, scores={"SomeoneElse": 50.0}).passed is None
+
+
+def test_must_not_exceed_requires_subject_and_numeric_max_score(tmp_path):
+    for bad_expectation in (
+        {"type": "must_not_exceed", "subject": "X"},           # missing max_score
+        {"type": "must_not_exceed", "max_score": 90.0},         # missing subject
+        {"type": "must_not_exceed", "subject": "X", "max_score": "high"},  # non-numeric
+        {"type": "must_not_exceed", "subject": "X", "max_score": True},    # bool rejected
+    ):
+        bad_path = tmp_path / "bad_cases.json"
+        bad_path.write_text(json.dumps({
+            "schema_version": 1,
+            "cases": [{
+                "case_id": "bad-cap-case",
+                "category": "low_kda_influence",
+                "title": "Bad cap case",
+                "verification_status": "synthetic",
+                "description": "x",
+                "expectation": bad_expectation,
+            }],
+        }), encoding="utf-8")
+        with pytest.raises(AdversarialCaseError):
+            load_library(bad_path)

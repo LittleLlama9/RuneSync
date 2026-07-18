@@ -48,6 +48,7 @@ EXPECTATION_TYPES = (
     "insufficient_evidence",
     "pairwise_minimum_gap",
     "must_not_rank_first_solely_on_metric",
+    "must_not_exceed",
     "disputed_manual_review",
     "compound",
 )
@@ -170,6 +171,18 @@ def _validate_expectation(case_id: str, expectation: Mapping) -> None:
                     f"Case '{case_id}' must_not_rank_first_solely_on_metric "
                     f"expectation missing '{key}'"
                 )
+    elif expectation_type == "must_not_exceed":
+        for key in ("subject", "max_score"):
+            if key not in expectation:
+                raise AdversarialCaseError(
+                    f"Case '{case_id}' must_not_exceed expectation "
+                    f"missing '{key}'"
+                )
+        max_score = expectation["max_score"]
+        if not isinstance(max_score, (int, float)) or isinstance(max_score, bool):
+            raise AdversarialCaseError(
+                f"Case '{case_id}' must_not_exceed 'max_score' must be numeric"
+            )
     elif expectation_type == "insufficient_evidence":
         if "duration_threshold_seconds" not in expectation:
             raise AdversarialCaseError(
@@ -275,6 +288,24 @@ def _evaluate_expectation(
             detail=(
                 f"top scorer is '{top_scorer}' "
                 f"({'not' if passed else 'is'} '{subject}')"
+            ),
+        )
+
+    if expectation_type == "must_not_exceed":
+        if scores is None:
+            return EvaluationResult(passed=None, detail="scores were not supplied.")
+        subject = expectation["subject"]
+        if subject not in scores:
+            return EvaluationResult(
+                passed=None, detail=f"scores missing '{subject}'.",
+            )
+        max_score = expectation["max_score"]
+        passed = scores[subject] <= max_score
+        return EvaluationResult(
+            passed=passed,
+            detail=(
+                f"{subject}({scores[subject]}) "
+                f"{'<=' if passed else '>'} max_score={max_score}"
             ),
         )
 

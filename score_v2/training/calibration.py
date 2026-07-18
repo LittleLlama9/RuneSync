@@ -107,6 +107,7 @@ def fit_score_calibration_for_score_fn(
         dataset: TrainingDataset, score_fn: ScoreFn,
         role_calibration: Mapping[str, RoleCalibration],
         *, default_scale: float = DEFAULT_SCORE_SCALE,
+        scale_sigma_multiplier: float = 1.0,
         include_abstained: bool = False) -> dict:
     """Fit the score-mapping `scale` from `dataset`'s adjusted raw model
     scores, for ANY model family -- see `fit_role_calibration_for_score_fn`
@@ -114,7 +115,21 @@ def fit_score_calibration_for_score_fn(
 
     `include_abstained=False` (the default) excludes abstained records
     from the spread measurement, matching `fit_role_calibration_for_score_fn`.
+
+    `scale_sigma_multiplier` (default 1.0 = unchanged) widens the fitted
+    tanh `scale` by a constant factor. At 1.0 the mapping's inflection
+    matches ~1 robust std of adjusted scores, so a heavy-tailed
+    distribution pins a large mass to the 0/100 rails (the v2 "extreme
+    magnitude" defect). A multiplier of ~2.0 moves the tanh knee out to
+    ~2 std, keeping genuine ordering/spread while pulling the tails off the
+    rails. Only the fitted spread is scaled; the fixed `default_scale`
+    fallback (no measurable spread) is left alone so degenerate tiers stay
+    on their documented neutral default.
     """
+    if scale_sigma_multiplier <= 0:
+        raise ValueError(
+            f"scale_sigma_multiplier must be > 0, got {scale_sigma_multiplier}"
+        )
     adjusted_scores = []
     for record in dataset.feature_records:
         if record.abstain and not include_abstained:
@@ -127,7 +142,7 @@ def fit_score_calibration_for_score_fn(
     if len(adjusted_scores) >= 2:
         center = statistics.median(adjusted_scores)
         mad = statistics.median(abs(value - center) for value in adjusted_scores)
-        candidate_scale = mad * _MAD_TO_STD
+        candidate_scale = mad * _MAD_TO_STD * scale_sigma_multiplier
         if candidate_scale >= _MAD_EPSILON:
             scale = candidate_scale
 
@@ -160,18 +175,24 @@ def fit_score_calibration(
         dataset: TrainingDataset, fitted: FittedBaseline,
         role_calibration: Mapping[str, RoleCalibration],
         *, default_scale: float = DEFAULT_SCORE_SCALE,
+        scale_sigma_multiplier: float = 1.0,
         include_abstained: bool = False) -> dict:
     """Fit the score-mapping `scale` from `dataset`'s adjusted linear scores.
 
     `include_abstained=False` (the default) excludes abstained records
     from the spread measurement, matching `fit_role_calibration`.
 
+    `scale_sigma_multiplier` (default 1.0 = unchanged) is forwarded to
+    widen the fitted tanh knee -- see
+    `fit_score_calibration_for_score_fn`.
+
     A thin, behavior-preserving wrapper around
     `fit_score_calibration_for_score_fn` specialized to the linear family.
     """
     return fit_score_calibration_for_score_fn(
         dataset, lambda record: raw_linear_score(record, fitted), role_calibration,
-        default_scale=default_scale, include_abstained=include_abstained,
+        default_scale=default_scale, scale_sigma_multiplier=scale_sigma_multiplier,
+        include_abstained=include_abstained,
     )
 
 
