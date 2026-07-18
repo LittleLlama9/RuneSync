@@ -41,10 +41,8 @@ Produces `dist/RuneSync.exe` via PyInstaller.
 
 ## Data sources
 
-Rune recommendations and matchup win rates are aggregated with attribution from:
-
-- [lolalytics.com](https://lolalytics.com)
-- [u.gg](https://u.gg)
+Rune recommendations and matchup win rates are built from aggregated public
+champion statistics (builds, matchups, and synergies).
 
 Match history and post-game statistics come from the locally running League
 Client API. They are not uploaded anywhere and never leave your machine.
@@ -82,7 +80,14 @@ custom games, and remakes are not scored.
 DAEMON Score is RuneSync's own transparent 0-100 performance summary. It is not
 an imported U.GG/OP.GG score and is not an MMR, ELO, LP, or Riot rank estimate.
 
-The versioned formula compares all 10 players using role-aware components:
+It is designed for reviewing and improving **your own** gameplay, not for
+evaluating, judging, or shaming other players. Scores are computed only from
+objective post-game statistics of a single match you played in, are shown only
+in your own local post-game report, never leave your machine, and do not persist
+as a rating, leaderboard, or profile of any other player.
+
+The versioned formula compares all 10 players in that one match using role-aware
+components:
 
 - combat
 - economy

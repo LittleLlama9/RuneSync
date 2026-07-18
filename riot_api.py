@@ -15,7 +15,7 @@ from typing import Any, Callable, Optional
 # Riot's edge (Cloudflare) rejects requests carrying urllib's default
 # ``Python-urllib/x.y`` User-Agent with HTTP 403, even when the API key is
 # valid. Sending an explicit User-Agent avoids the spurious auth failure.
-USER_AGENT = "RuneSync/1.0 (+https://github.com/RuneSync)"
+USER_AGENT = "RuneSync/1.0 (+https://github.com/LittleLlama9/RuneSync)"
 
 
 REGIONAL_ROUTES = {
