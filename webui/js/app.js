@@ -105,7 +105,7 @@
     report: null,
     settings: {
       rank: 'Platinum+', region: 'World', auto_role: true, trigger: 'hover',
-      phosphor: 'amber', interface_style: 'standard', score_v2_beta: false,
+      phosphor: 'amber', interface_style: 'standard', score_v2_beta: true,
       score_v2_beta_sources: [], score_v2_beta_error: '', autostart: false
     }
   };
@@ -279,9 +279,9 @@
     } else if (betaSources.length) {
       betaStatus.textContent = '# loaded: ' + betaSources.join(', ').replaceAll('_', ' ');
     } else if (s.score_v2_beta) {
-      betaStatus.textContent = '# no beta model loaded; v1 fallback active';
+      betaStatus.textContent = '# on by default; no local model installed, v1 active';
     } else {
-      betaStatus.textContent = '# off by default; restart after enabling';
+      betaStatus.textContent = '# disabled; DAEMON Score v1 active';
     }
     document.querySelectorAll('[data-trig]').forEach(el => {
       const selected = el.dataset.trig === s.trigger;

@@ -24,7 +24,7 @@ def test_interface_style_defaults_and_persists(monkeypatch):
     monkeypatch.setattr(bridge, "is_autostart_enabled", lambda: False)
 
     assert api._settings()["interface_style"] == "standard"
-    assert api._settings()["score_v2_beta"] is False
+    assert api._settings()["score_v2_beta"] is True
     assert api._settings()["score_v2_beta_sources"] == []
     assert api.set_interface("classic") == {
         "ok": True, "interface_style": "classic",
@@ -51,30 +51,34 @@ def test_interface_style_defaults_and_persists(monkeypatch):
     })
 
 
-def test_score_v2_beta_setting_is_explicit_and_persists(monkeypatch):
+def test_score_v2_defaults_on_and_disable_persists(monkeypatch):
     api = _api()
     api.overrides = MagicMock()
     api.overrides.settings = {}
     api.overrides.save_settings = MagicMock()
     api.monitor = None
 
-    assert bridge._load_configured_score_v2_artifacts(
-        api.overrides.settings, "ignored",
-    ) == {}
-
     loader = MagicMock(return_value={"lcu_timeline": object()})
     monkeypatch.setattr(bridge, "load_score_v2_artifacts", loader)
-    loaded = bridge._load_configured_score_v2_artifacts(
-        {"score_v2_beta": True}, "artifacts",
-    )
+
+    # Default-on: absent setting loads installed artifacts (v2 is the default).
+    loaded = bridge._load_configured_score_v2_artifacts({}, "artifacts")
     assert tuple(loaded) == ("lcu_timeline",)
     loader.assert_called_once_with(
         "artifacts", require_production_ready=False,
     )
 
-    assert api.save_settings({"score_v2_beta": True}) == {"ok": True}
+    # Explicitly disabled: nothing is loaded and v1 stays active.
+    loader.reset_mock()
+    assert bridge._load_configured_score_v2_artifacts(
+        {"score_v2_beta": False}, "artifacts",
+    ) == {}
+    loader.assert_not_called()
+
+    # An explicit off toggle persists.
+    assert api.save_settings({"score_v2_beta": False}) == {"ok": True}
     api.overrides.save_settings.assert_called_once_with({
-        "score_v2_beta": True,
+        "score_v2_beta": False,
         "interface_style": "standard",
     })
 

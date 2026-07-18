@@ -1,14 +1,16 @@
 # DAEMON Score v2 routing
 
-**Status: integrated, opt-in beta, inactive by default.** RuneSync ships no
-trained Score v2 artifact yet. The retained v1 scorer remains the active
-fallback until the user enables the beta and a valid exact-tier artifact is
-installed.
+**Status: integrated; the default scorer whenever a valid local artifact is
+installed.** RuneSync ships no trained Score v2 artifact, so a fresh install
+has nothing to load and the retained v1 scorer stays active. When a valid
+exact-tier artifact is present in the artifacts directory, Score v2 becomes the
+active scorer automatically, with no opt-in required. A user may turn it off to
+force v1.
 
 ## Artifact loading
 
-When **DAEMON Score v2 beta** is enabled in Settings, RuneSync checks at
-startup:
+Unless **DAEMON Score v2** is explicitly disabled in Settings, RuneSync checks
+at startup:
 
 ```text
 %APPDATA%\RuneSync\score-v2-artifacts\
@@ -22,11 +24,11 @@ for exact-tier files named `match_v5.json`, `lcu_timeline.json`,
 - use that tier's canonical feature contract; and
 - contain a fitted signal rather than an `insufficient_data` neutral prior.
 
-The beta may load a development artifact without `production_ready=true`, but
-that does not promote or publish it. Any invalid or neutral artifact is
-rejected and logged. A missing directory or missing tier file is normal and
-leaves v1 active. Disabling the setting prevents artifacts from loading; a
-restart applies changes to the runtime router.
+The runtime may load a development artifact without `production_ready=true`
+(RuneSync ships none), but that does not promote or publish it. Any invalid or
+neutral artifact is rejected and logged. A missing directory or missing tier
+file is normal and leaves v1 active. Explicitly disabling the setting prevents
+artifacts from loading; a restart applies changes to the runtime router.
 
 ## Route selection
 
@@ -59,7 +61,8 @@ run unchanged.
 
 ## Release boundary
 
-Routing integration does not make Score v2 production-ready. Authorized
+Making Score v2 the default when a local artifact is installed does not make it
+production-ready, and it does not ship an artifact in the build. Authorized
 Match-V5 cross-source verification, real blinded-label calibration, shadow
 comparison, coaching/UI work, and the remaining release gates must still pass
 before RuneSync ships or enables a production artifact.

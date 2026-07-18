@@ -116,7 +116,7 @@ def test_standard_interface_mode_contract():
     assert 'role="switch" aria-checked="true"' in html
     assert 'id="setScoreV2Beta" data-set="score_v2_beta" role="switch"' in html
     assert "state.settings.score_v2_beta = !state.settings.score_v2_beta" in js
-    assert "no beta model loaded; v1 fallback active" in js
+    assert "on by default; no local model installed, v1 active" in js
     assert 'class="trigger-options" role="radiogroup"' in html
     assert '<span class="standard-copy">Save changes</span>' in html
     assert ":root[data-interface=\"standard\"] .classic-copy" in css

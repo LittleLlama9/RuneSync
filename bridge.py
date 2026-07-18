@@ -32,7 +32,11 @@ _LOG_CLS = {"success": "ok", "warn": "warn", "error": "error", "champ": "champ",
 
 
 def _load_configured_score_v2_artifacts(settings, directory):
-    if settings.get("score_v2_beta") is not True:
+    # DAEMON Score v2 is the default scorer whenever valid local artifacts are
+    # installed; it is only skipped when the user has explicitly turned it off.
+    # The shipped build ships no artifacts, so a fresh install loads nothing and
+    # v1 stays active until a user installs artifacts locally.
+    if settings.get("score_v2_beta") is False:
         return {}
     return load_score_v2_artifacts(
         directory,
@@ -97,7 +101,7 @@ class Api:
         self._history_error = ""
         self._score_v2_beta_sources: tuple[str, ...] = ()
         self._score_v2_beta_error = ""
-        score_v2_beta = self.overrides.settings.get("score_v2_beta") is True
+        score_v2_beta = self.overrides.settings.get("score_v2_beta") is not False
         score_v2_artifacts = {}
         try:
             score_v2_artifacts = _load_configured_score_v2_artifacts(
@@ -149,7 +153,7 @@ class Api:
             "rank": s.get("rank", "Platinum+"), "region": s.get("region", "World"),
             "auto_role": s.get("auto_role", True), "trigger": s.get("trigger", "hover"),
             "phosphor": s.get("phosphor", "amber"), "interface_style": interface_style,
-            "score_v2_beta": s.get("score_v2_beta") is True,
+            "score_v2_beta": s.get("score_v2_beta") is not False,
             "score_v2_beta_sources": list(
                 getattr(self, "_score_v2_beta_sources", ()),
             ),

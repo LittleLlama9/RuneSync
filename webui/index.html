@@ -179,12 +179,12 @@
               <div class="settings-group">
                 <div class="comment"><span class="classic-copy"># experimental analytics</span><span class="standard-copy">Analytics beta</span></div>
                 <div class="crow">
-                  <span class="k"><span class="classic-copy">score_v2_beta</span><span class="standard-setting"><strong>DAEMON Score v2 beta</strong><small>Use installed local beta models with automatic v1 fallback.</small></span></span>
+                  <span class="k"><span class="classic-copy">score_v2_beta</span><span class="standard-setting"><strong>DAEMON Score v2</strong><small>Default scorer when a local model is installed; turn off to force v1.</small></span></span>
                   <span class="setting-eq">=</span>
-                  <span class="vlit setting-switch" id="setScoreV2Beta" data-set="score_v2_beta" role="switch" aria-checked="false" tabindex="0" aria-label="Enable DAEMON Score v2 beta">
+                  <span class="vlit setting-switch" id="setScoreV2Beta" data-set="score_v2_beta" role="switch" aria-checked="true" tabindex="0" aria-label="Enable DAEMON Score v2">
                     <span class="classic-toggle">[ ]</span><span class="standard-toggle" aria-hidden="true"><i></i></span>
                   </span>
-                  <span class="note" id="scoreV2BetaStatus"># v1 remains active until a beta model is loaded</span>
+                  <span class="note" id="scoreV2BetaStatus"># on by default; DAEMON Score v1 is the automatic fallback</span>
                 </div>
               </div>
 
