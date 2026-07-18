@@ -8,12 +8,24 @@ component." It turns persisted causal features and signed timeline events into:
 * one measurable challenge evaluated over the next five comparable games.
 
 Advice is withheld unless evidence, confidence, and recurrence gates all pass.
+
+The catalogue of controllable negative patterns is **role-specific** and lives
+in ``coaching_catalog.json`` next to this module. It was authored by a
+three-model expert panel and reconciled into a consensus set. Each rule declares
+which roles it applies to (with a per-role priority weight), a declarative
+trigger condition over real feature fields, and an optional role-aware
+``suppress_if`` compensator that excuses a bad-looking signal when a
+role-appropriate justification is present (for example, deaths that were traded,
+or leads left unconverted because the player was enabling allies instead).
 """
 
 from __future__ import annotations
 
+import json
+import os
+import re
 from dataclasses import dataclass
-from typing import Callable, Iterable, Mapping, Optional, Sequence
+from typing import Iterable, Mapping, Optional, Sequence
 
 
 MIN_COACHING_CONFIDENCE = 0.65
@@ -21,6 +33,19 @@ MIN_TIMELINE_COMPLETENESS = 0.7
 MIN_PATTERN_OCCURRENCES = 2
 CHALLENGE_TARGET_SUCCESSES = 3
 CHALLENGE_WINDOW_GAMES = 5
+
+VALID_ROLES = frozenset({"top", "jungle", "mid", "bot", "support"})
+VALID_OPS = frozenset({">=", "<=", ">", "<", "==", "!="})
+
+# Fields that never carry usable signal on the historical LCU timeline tier and
+# therefore must not back a triggerable pattern (they would silently never fire).
+FORBIDDEN_FIELD_PREFIXES = ("vision_influence.", "live_state.")
+FORBIDDEN_FIELDS = frozenset({
+    "objective_participation.turret_plates",
+    "structure_pressure.turret_plates",
+})
+
+_CATALOG_PATH = os.path.join(os.path.dirname(__file__), "coaching_catalog.json")
 
 
 @dataclass(frozen=True)
@@ -44,17 +69,9 @@ class CoachingResult:
         }
 
 
-@dataclass(frozen=True)
-class _FocusRule:
-    focus_id: str
-    title: str
-    priority: int
-    triggered: Callable[[Mapping], bool]
-    evidence_summary: Callable[[Mapping], str]
-    target: str
-    measurement: str
-    anti_gaming_guardrail: str
-
+# --------------------------------------------------------------------------- #
+# Declarative catalogue interpreter
+# --------------------------------------------------------------------------- #
 
 def _nested(block: Mapping, *path, default=None):
     node = block
@@ -65,162 +82,266 @@ def _nested(block: Mapping, *path, default=None):
     return default if node is None else node
 
 
-def _untraded_deaths(block: Mapping) -> int:
-    return int(_nested(block, "fight_influence", "untraded_deaths", default=0) or 0)
+def _field(block: Mapping, dotted: str):
+    node = block
+    for key in dotted.split("."):
+        if not isinstance(node, Mapping):
+            return None
+        node = node.get(key)
+    return node
 
 
-def _rapid_death_pairs(block: Mapping) -> int:
-    return int(_nested(block, "death_tempo", "rapid_death_pairs", default=0) or 0)
+def _is_number(value) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
-def _lead_windows(block: Mapping) -> int:
-    return int(_nested(block, "resource_conversion", "lead_windows", default=0) or 0)
+def _compare(left, op: str, right) -> bool:
+    if op == ">=":
+        return left >= right
+    if op == "<=":
+        return left <= right
+    if op == ">":
+        return left > right
+    if op == "<":
+        return left < right
+    if op == "==":
+        return left == right
+    if op == "!=":
+        return left != right
+    return False
 
 
-def _conversion_rate(block: Mapping) -> float:
-    return float(_nested(block, "resource_conversion", "conversion_rate", default=0.0) or 0.0)
+def _eval_condition(block: Mapping, cond: Mapping) -> bool:
+    """Evaluate one leaf condition. None/missing fields are always False."""
+    if "available" in cond:
+        return bool(_field(block, f"{cond['available']}.available"))
+
+    op = cond.get("op")
+    if op not in VALID_OPS:
+        return False
+
+    if "num" in cond and "den" in cond:
+        num = _field(block, cond["num"])
+        den = _field(block, cond["den"])
+        if not _is_number(num) or not _is_number(den):
+            return False
+        den_min = cond.get("den_min", 1)
+        if den == 0 or den < den_min:
+            return False
+        return _compare(num / den, op, cond["value"])
+
+    value = cond.get("value")
+    field_value = _field(block, cond.get("field", ""))
+    if isinstance(value, bool):
+        actual = bool(field_value) if field_value is not None else False
+        return _compare(actual, op, value)
+    if not _is_number(field_value):
+        return False
+    return _compare(field_value, op, value)
 
 
-def _objective_contacts(block: Mapping) -> int:
-    objective = _nested(block, "objective_participation", default={}) or {}
-    return sum(
-        int(objective.get(key) or 0)
-        for key in ("epic_monster_assists", "grub_assists")
-    )
+def _eval_group(block: Mapping, group: Optional[Mapping]) -> bool:
+    """A group triggers when every ``all`` passes and at least one ``any`` passes."""
+    if not group:
+        return False
+    all_conds = group.get("all") or []
+    any_conds = group.get("any") or []
+    if not all_conds and not any_conds:
+        return False
+    if all_conds and not all(_eval_condition(block, c) for c in all_conds):
+        return False
+    if any_conds and not any(_eval_condition(block, c) for c in any_conds):
+        return False
+    return True
 
 
-def _objective_fight_involvements(block: Mapping) -> int:
-    return int(
-        _nested(
-            block, "objective_participation",
-            "objective_fight_involvements", default=0,
-        ) or 0
-    )
+def _role_of(block: Mapping) -> Optional[str]:
+    role = _field(block, "baseline.role")
+    return role if isinstance(role, str) else None
 
 
-def _objective_secures(block: Mapping) -> int:
-    objective = _nested(block, "objective_participation", default={}) or {}
-    return sum(
-        int(objective.get(key) or 0)
-        for key in ("epic_monster_secures", "grub_secures")
-    )
+def _rule_config_for_role(rule: Mapping, role: Optional[str]):
+    """Return (priority, trigger, suppress_if) for a role, or None if N/A."""
+    roles = rule.get("roles") or {}
+    if role not in roles:
+        return None
+    priority = roles[role]
+    trigger = rule.get("trigger")
+    suppress = rule.get("suppress_if")
+    override = (rule.get("role_overrides") or {}).get(role)
+    if isinstance(override, Mapping):
+        if "priority" in override:
+            priority = override["priority"]
+        if "trigger" in override:
+            trigger = override["trigger"]
+        if "suppress_if" in override:
+            suppress = override["suppress_if"]
+    return priority, trigger, suppress
 
 
-def _actionable_vision_opportunities(block: Mapping) -> int:
-    vision = _nested(block, "vision_influence", default={}) or {}
-    return int(vision.get("wards_placed_events") or 0) + int(
-        vision.get("wards_killed_events") or 0
-    )
+def _rule_triggers(rule: Mapping, block: Mapping) -> bool:
+    config = _rule_config_for_role(rule, _role_of(block))
+    if config is None:
+        return False
+    _priority, trigger, suppress = config
+    if not _eval_group(block, trigger):
+        return False
+    if suppress and _eval_group(block, suppress):
+        return False
+    return True
 
 
-def _actionable_vision_rate(block: Mapping) -> float:
-    return float(
-        _nested(
-            block, "vision_influence", "vision_actionable_rate", default=0.0,
-        ) or 0.0
-    )
+_TEMPLATE_RE = re.compile(r"\{([a-zA-Z0-9_.]+)(?::(pct|int|\d?f))?\}")
 
 
-FOCUS_RULES: tuple[_FocusRule, ...] = (
-    _FocusRule(
-        focus_id="death_value",
-        title="Reduce untraded deaths",
-        priority=100,
-        triggered=lambda block: _untraded_deaths(block) >= 2,
-        evidence_summary=lambda block: (
-            f"{_untraded_deaths(block)} deaths had no confirmed allied return kill "
-            "inside the trade window."
-        ),
-        target="Finish with at most one untraded death in 3 of the next 5 comparable games.",
-        measurement="Timeline-confirmed untraded_deaths <= 1.",
-        anti_gaming_guardrail=(
-            "Do not avoid necessary frontline or contest play solely to preserve "
-            "the target; only timeline-confirmed trade context counts."
-        ),
-    ),
-    _FocusRule(
-        focus_id="reset_timing",
-        title="Stabilize reset timing after deaths",
-        priority=90,
-        triggered=lambda block: _rapid_death_pairs(block) >= 1,
-        evidence_summary=lambda block: (
-            f"{_rapid_death_pairs(block)} repeated-death sequence(s) occurred "
-            "inside the configured short interval."
-        ),
-        target="Record zero rapid-death pairs in 3 of the next 5 comparable games.",
-        measurement="death_tempo.rapid_death_pairs == 0.",
-        anti_gaming_guardrail=(
-            "The target does not reward passive play; necessary fights remain "
-            "valid when the reset, route, and objective timing are sound."
-        ),
-    ),
-    _FocusRule(
-        focus_id="lead_conversion",
-        title="Convert lane leads into influence",
-        priority=80,
-        triggered=lambda block: (
-            _lead_windows(block) >= 2 and _conversion_rate(block) < 0.5
-        ),
-        evidence_summary=lambda block: (
-            f"Only {_conversion_rate(block) * 100:.0f}% of "
-            f"{_lead_windows(block)} observable lead windows converted into a "
-            "fight, objective, or structure event."
-        ),
-        target="Convert at least half of observable lead windows in 3 of the next 5 comparable games.",
-        measurement="resource_conversion.conversion_rate >= 0.50 with at least 2 lead windows.",
-        anti_gaming_guardrail=(
-            "Do not force low-value fights to create credit; only conversions "
-            "already recognized by the causal event window count."
-        ),
-    ),
-    _FocusRule(
-        focus_id="objective_influence",
-        title="Make objective rotations influence the contest",
-        priority=70,
-        triggered=lambda block: (
-            _objective_contacts(block) >= 2
-            and _objective_fight_involvements(block) == 0
-            and _objective_secures(block) == 0
-        ),
-        evidence_summary=lambda block: (
-            f"{_objective_contacts(block)} objective assist contact(s) produced "
-            "no confirmed nearby fight involvement."
-        ),
-        target="When recording 2+ objective contacts, add confirmed fight involvement or a direct secure in 3 of the next 5 eligible games.",
-        measurement=(
-            "objective_fight_involvements >= 1 or a direct epic/grub secure; "
-            "games with fewer than 2 contacts are excluded."
-        ),
-        anti_gaming_guardrail=(
-            "Do not abandon lane or force a contest only to satisfy the target; "
-            "no real objective opportunity means the game is not eligible."
-        ),
-    ),
-    _FocusRule(
-        focus_id="vision_conversion",
-        title="Place vision that converts into action",
-        priority=60,
-        triggered=lambda block: (
-            _actionable_vision_opportunities(block) >= 3
-            and _actionable_vision_rate(block) < 0.34
-        ),
-        evidence_summary=lambda block: (
-            f"{_actionable_vision_rate(block) * 100:.0f}% of "
-            f"{_actionable_vision_opportunities(block)} observable vision "
-            "opportunities had a nearby allied follow-up."
-        ),
-        target="Reach at least a 34% actionable-vision rate in 3 of the next 5 comparable games.",
-        measurement=(
-            "vision_influence.actionable_vision_rate >= 0.34 with at least "
-            "3 observable opportunities."
-        ),
-        anti_gaming_guardrail=(
-            "Do not place unsafe or redundant wards to increase volume; only "
-            "spatially and temporally linked allied follow-up counts."
-        ),
-    ),
-)
+def _render_template(block: Mapping, template: str) -> str:
+    def _replace(match: "re.Match") -> str:
+        value = _field(block, match.group(1))
+        spec = match.group(2)
+        if value is None:
+            return "?"
+        if spec == "pct":
+            try:
+                return f"{float(value) * 100:.0f}%"
+            except (TypeError, ValueError):
+                return str(value)
+        if spec == "int":
+            try:
+                return str(int(value))
+            except (TypeError, ValueError):
+                return str(value)
+        if spec and spec.endswith("f"):
+            digits = spec[:-1] or "1"
+            try:
+                return f"{float(value):.{int(digits)}f}"
+            except (TypeError, ValueError):
+                return str(value)
+        if isinstance(value, float) and not value.is_integer():
+            return f"{value:.2f}"
+        return str(value)
 
+    return _TEMPLATE_RE.sub(_replace, template)
+
+
+def _iter_condition_fields(group: Optional[Mapping]) -> Iterable[str]:
+    if not isinstance(group, Mapping):
+        return
+    for key in ("all", "any"):
+        for cond in group.get(key) or []:
+            if not isinstance(cond, Mapping):
+                continue
+            if "available" in cond:
+                yield f"{cond['available']}.available"
+            for field_key in ("field", "num", "den"):
+                if field_key in cond and isinstance(cond[field_key], str):
+                    yield cond[field_key]
+
+
+def _iter_rule_fields(rule: Mapping) -> Iterable[str]:
+    yield from _iter_condition_fields(rule.get("trigger"))
+    yield from _iter_condition_fields(rule.get("suppress_if"))
+    for override in (rule.get("role_overrides") or {}).values():
+        if isinstance(override, Mapping):
+            yield from _iter_condition_fields(override.get("trigger"))
+            yield from _iter_condition_fields(override.get("suppress_if"))
+    for match in _TEMPLATE_RE.finditer(rule.get("evidence_template", "")):
+        yield match.group(1)
+
+
+def lint_catalog(catalog: Mapping) -> list[str]:
+    """Return a list of structural / policy problems; empty means healthy."""
+    problems: list[str] = []
+    rules = catalog.get("rules")
+    if not isinstance(rules, list) or not rules:
+        return ["catalog has no rules"]
+    seen_ids: set[str] = set()
+    for index, rule in enumerate(rules):
+        tag = rule.get("focus_id", f"#{index}")
+        if not rule.get("focus_id"):
+            problems.append(f"{tag}: missing focus_id")
+        elif rule["focus_id"] in seen_ids:
+            problems.append(f"{tag}: duplicate focus_id")
+        else:
+            seen_ids.add(rule["focus_id"])
+        if not rule.get("title"):
+            problems.append(f"{tag}: missing title")
+        roles = rule.get("roles")
+        if not isinstance(roles, Mapping) or not roles:
+            problems.append(f"{tag}: missing roles map")
+        else:
+            for role, priority in roles.items():
+                if role not in VALID_ROLES:
+                    problems.append(f"{tag}: unknown role {role!r}")
+                if not isinstance(priority, (int, float)) or isinstance(priority, bool):
+                    problems.append(f"{tag}: non-numeric priority for {role}")
+        if not _eval_group_is_shaped(rule.get("trigger")):
+            problems.append(f"{tag}: trigger must have a non-empty all/any group")
+        for text_key in ("target", "measurement", "anti_gaming_guardrail"):
+            if not rule.get(text_key):
+                problems.append(f"{tag}: missing {text_key}")
+        for field in _iter_rule_fields(rule):
+            if field.startswith(FORBIDDEN_FIELD_PREFIXES):
+                problems.append(f"{tag}: references unavailable field {field!r}")
+            if field in FORBIDDEN_FIELDS:
+                problems.append(f"{tag}: references always-zero field {field!r}")
+        for op in _iter_condition_ops(rule):
+            if op not in VALID_OPS:
+                problems.append(f"{tag}: invalid op {op!r}")
+    return problems
+
+
+def _eval_group_is_shaped(group) -> bool:
+    if not isinstance(group, Mapping):
+        return False
+    return bool(group.get("all") or group.get("any"))
+
+
+def _iter_condition_ops(rule: Mapping) -> Iterable[str]:
+    groups = [rule.get("trigger"), rule.get("suppress_if")]
+    for override in (rule.get("role_overrides") or {}).values():
+        if isinstance(override, Mapping):
+            groups.extend([override.get("trigger"), override.get("suppress_if")])
+    for group in groups:
+        if not isinstance(group, Mapping):
+            continue
+        for key in ("all", "any"):
+            for cond in group.get(key) or []:
+                if isinstance(cond, Mapping) and "available" not in cond and "op" in cond:
+                    yield cond["op"]
+
+
+def load_catalog(path: str = _CATALOG_PATH) -> dict:
+    with open(path, encoding="utf-8") as handle:
+        catalog = json.load(handle)
+    problems = lint_catalog(catalog)
+    if problems:
+        raise ValueError(
+            "coaching catalogue failed validation: " + "; ".join(problems)
+        )
+    return catalog
+
+
+def _load_shipped_catalog() -> dict:
+    """Load the bundled catalogue, degrading to an empty (coaching-off) set if
+    the data file is absent.
+
+    A missing file is treated as "coaching disabled" so a packaging slip cannot
+    crash application import; a malformed/invalid file still raises loudly (and
+    is caught by the test suite before shipping).
+    """
+    try:
+        return load_catalog()
+    except FileNotFoundError:
+        return {"rules": []}
+
+
+CATALOG = _load_shipped_catalog()
+FOCUS_RULES: tuple[Mapping, ...] = tuple(CATALOG.get("rules", ()))
+
+
+# --------------------------------------------------------------------------- #
+# Observations (unchanged: timestamped facts, never inferred intent)
+# --------------------------------------------------------------------------- #
 
 _EVENT_TEXT = {
     "champion_kill": "Secured a champion kill.",
@@ -290,6 +411,10 @@ def build_observations(
     )
 
 
+# --------------------------------------------------------------------------- #
+# Coaching selection
+# --------------------------------------------------------------------------- #
+
 def build_coaching(
         participant_features: Mapping,
         participant_id: int,
@@ -324,20 +449,27 @@ def build_coaching(
             f"{MIN_TIMELINE_COMPLETENESS:.2f}."
         )
 
+    role = _role_of(participant_features)
     patterns = []
     for rule in FOCUS_RULES:
-        if not rule.triggered(participant_features):
+        config = _rule_config_for_role(rule, role)
+        if config is None:
+            continue
+        if not _rule_triggers(rule, participant_features):
             continue
         prior_occurrences = sum(
-            1 for block in recent_comparable_features if rule.triggered(block)
+            1 for block in recent_comparable_features if _rule_triggers(rule, block)
         )
         occurrences = 1 + prior_occurrences
         patterns.append({
-            "focus_id": rule.focus_id,
-            "title": rule.title,
+            "focus_id": rule["focus_id"],
+            "title": rule["title"],
             "occurrences": occurrences,
             "games_considered": 1 + len(recent_comparable_features),
-            "current_evidence": rule.evidence_summary(participant_features),
+            "current_evidence": _render_template(
+                participant_features, rule.get("evidence_template", ""),
+            ),
+            "priority": config[0],
         })
 
     recurring = [
@@ -366,10 +498,10 @@ def build_coaching(
             withheld_reasons=tuple(withheld),
         )
 
-    rules_by_id = {rule.focus_id: rule for rule in FOCUS_RULES}
+    rules_by_id = {rule["focus_id"]: rule for rule in FOCUS_RULES}
     recurring.sort(
         key=lambda pattern: (
-            -rules_by_id[pattern["focus_id"]].priority,
+            -pattern["priority"],
             -pattern["occurrences"],
             pattern["focus_id"],
         )
@@ -377,17 +509,17 @@ def build_coaching(
     chosen_pattern = recurring[0]
     chosen = rules_by_id[chosen_pattern["focus_id"]]
     challenge = {
-        "focus_id": chosen.focus_id,
+        "focus_id": chosen["focus_id"],
         "target_successes": CHALLENGE_TARGET_SUCCESSES,
         "window_games": CHALLENGE_WINDOW_GAMES,
-        "target": chosen.target,
-        "measurement": chosen.measurement,
-        "anti_gaming_guardrail": chosen.anti_gaming_guardrail,
+        "target": chosen["target"],
+        "measurement": chosen["measurement"],
+        "anti_gaming_guardrail": chosen["anti_gaming_guardrail"],
     }
     return CoachingResult(
         observations=observations,
         eligible=True,
-        primary_focus=chosen.title,
+        primary_focus=chosen["title"],
         challenges=(challenge,),
         recurring_patterns=tuple(recurring),
         withheld_reasons=(),

@@ -1,0 +1,357 @@
+{
+  "provenance": "Reconciled consensus of the opus + gpt + gemini coaching catalogs for RuneSync Primary Focus. Shared patterns (>=2 models) were merged with unioned roles and compensators; thresholds were pulled off the p90 anchors the proposers used and recalibrated against GROUNDING.md to roughly role p70-p80 for excess patterns and p20-p30 for deficiency patterns, because the downstream recurrence gate (repeat in >=2 of 5 comparable games) already filters one-off noise. Obeys all HARD TIER CONSTRAINTS: no vision_influence.* triggers, no turret_plates, every conversion_rate condition also requires lead_windows>=2, all conditions None-safe, only schema fields.",
+  "role_notes": {
+    "top": "A good top game turns lane autonomy into something concrete: deaths that trade or buy a structure, side-lane time that produces towers, and leads that become buildings. Naturally low kill-participation (median ~0.33) is fine; the failure is dying isolated with nothing to show for it.",
+    "jungle": "A good jungle game is tempo and objectives, not raw kills: early grub/dragon contact, presence in the fight that decides an objective, and deaths that trade because you fought around a secure. The core failure is going invisible on the objective map early or tagging objectives without being in the fight.",
+    "mid": "A good mid game converts a naturally high fight presence (KP median ~0.44) into converted leads and structures. Mid dies most in the early/mid phases, so watch for dying alone, collecting leads that never become towers, and winning fights that close nothing.",
+    "bot": "A good bot game is the team's damage anchor: highest KP floor and highest expected traded deaths from grouped fights. Failure modes are being absent from decisive fights and dying alone from bad positioning, especially late.",
+    "support": "A good support game is enablement and lockdown, not a kill count: assists and CC dwarf kills. The non-obvious failures are the passive no-CC no-enable game and the inverted kill-hungry game that starves the carries of gold."
+  },
+  "rules": [
+    {
+      "focus_id": "reduce_untraded_deaths",
+      "title": "Make your deaths trade",
+      "rationale": "Untraded deaths (a death with no allied return kill) are the single most controllable loss of tempo and gold. All three models flagged this. Role medians sit at 3-4 and p90 at 6-8; triggering around each role's p70-p80 flags a genuinely repeated costly pattern while excusing deaths that mostly traded or bought objectives.",
+      "roles": { "top": 92, "jungle": 90, "mid": 92, "bot": 92, "support": 90 },
+      "trigger": {
+        "all": [ {"field": "fight_influence.untraded_deaths", "op": ">=", "value": 5} ]
+      },
+      "suppress_if": {
+        "any": [
+          {"num": "fight_influence.traded_deaths", "den": "death_tempo.death_count", "op": ">=", "value": 0.5, "den_min": 5},
+          {"num": "objective_participation.objective_fight_involvements", "den": "death_tempo.death_count", "op": ">=", "value": 0.4, "den_min": 5},
+          {"field": "enablement_suppression.ally_enablement_assists", "op": ">=", "value": 18},
+          {"field": "structure_pressure.structure_secures", "op": ">=", "value": 4}
+        ]
+      },
+      "role_overrides": {
+        "mid": { "trigger": {"all": [ {"field": "fight_influence.untraded_deaths", "op": ">=", "value": 6} ]} },
+        "bot": { "trigger": {"all": [ {"field": "fight_influence.untraded_deaths", "op": ">=", "value": 6} ]} },
+        "support": { "trigger": {"all": [ {"field": "fight_influence.untraded_deaths", "op": ">=", "value": 6} ]} }
+      },
+      "evidence_template": "{fight_influence.untraded_deaths} of your {death_tempo.death_count} deaths brought no allied return kill.",
+      "target": "In 3 of your next 5 comparable games, keep untraded deaths at or below your role's healthy median.",
+      "measurement": "fight_influence.untraded_deaths at or below the role median (top 3, jungle 3, mid 4, bot 4, support 4) in at least 3 of the next 5 comparable games.",
+      "anti_gaming_guardrail": "Do not achieve this by never fighting. A traded death or a death contesting an objective still counts as fine; the goal is fewer solo, no-return deaths, not fewer deaths at any cost."
+    },
+    {
+      "focus_id": "stabilize_reset_timing",
+      "title": "Stop chain-feeding after death",
+      "rationale": "rapid_death_pairs counts deaths that arrive in quick succession, the classic tilt / walk-back-in int. All three models flagged it. It is near-zero for every role (p90=0, max 1-3), so even a single pair is a rare, high-signal, fully controllable event; no percentile softening is needed for a floor-zero field.",
+      "roles": { "top": 85, "jungle": 85, "mid": 85, "bot": 86, "support": 85 },
+      "trigger": {
+        "all": [ {"field": "death_tempo.rapid_death_pairs", "op": ">=", "value": 1} ]
+      },
+      "suppress_if": {
+        "any": [
+          {"num": "fight_influence.traded_deaths", "den": "death_tempo.death_count", "op": ">=", "value": 0.6, "den_min": 3}
+        ]
+      },
+      "evidence_template": "{death_tempo.rapid_death_pairs} time(s) you died again almost immediately after a prior death.",
+      "target": "In 3 of your next 5 comparable games, record zero rapid death pairs.",
+      "measurement": "death_tempo.rapid_death_pairs == 0 in at least 3 of the next 5 comparable games.",
+      "anti_gaming_guardrail": "This is tempo discipline after a death, not hiding all game. Full-clear your reset, buy, and re-path with vision instead of running straight back into the same lost fight."
+    },
+    {
+      "focus_id": "convert_leads",
+      "title": "Cash in your leads",
+      "rationale": "conversion_rate (converted lead windows / lead windows) has a role median around 0.42-0.48 and is None whenever lead_windows==0. All three flagged failed conversion. Requiring lead_windows>=4 (satisfies the hard >=2 guard) and conversion_rate<0.3 catches players who repeatedly got ahead but let it decay, a roughly p25-p30 conversion outcome, not the average game.",
+      "roles": { "top": 78, "jungle": 76, "mid": 80, "bot": 80, "support": 68 },
+      "trigger": {
+        "all": [
+          {"available": "resource_conversion"},
+          {"field": "resource_conversion.lead_windows", "op": ">=", "value": 4},
+          {"field": "resource_conversion.conversion_rate", "op": "<", "value": 0.3}
+        ]
+      },
+      "suppress_if": {
+        "any": [
+          {"field": "enablement_suppression.ally_enablement_assists", "op": ">=", "value": 13},
+          {"field": "structure_pressure.structure_secures", "op": ">=", "value": 3},
+          {"field": "objective_participation.epic_monster_secures", "op": ">=", "value": 2}
+        ]
+      },
+      "role_overrides": {
+        "support": { "priority": 68, "trigger": {"all": [ {"available": "resource_conversion"}, {"field": "resource_conversion.lead_windows", "op": ">=", "value": 5}, {"field": "resource_conversion.conversion_rate", "op": "<", "value": 0.25} ]} }
+      },
+      "evidence_template": "You had {resource_conversion.lead_windows} lead windows but converted only {resource_conversion.converted_lead_windows} of them.",
+      "target": "In 3 of your next 5 games with at least 2 lead windows, convert 40% or more of them.",
+      "measurement": "resource_conversion.lead_windows >= 2 AND resource_conversion.conversion_rate >= 0.4 in at least 3 of the next 5 comparable games.",
+      "anti_gaming_guardrail": "Do not farm fake safe leads and immediately recall. Convert by taking the objective, tower, or pick the lead enabled, or by turning it into a teammate's lead if you play an enabling role."
+    },
+    {
+      "focus_id": "survive_the_laning_phase",
+      "title": "Survive the laning phase",
+      "rationale": "Early-phase untraded deaths compound: they surrender lane prio, XP, and tempo before the game opens. Opus and GPT both flagged this. Role early-death p90s sit at 3-5, so 3-4 early untraded deaths is a p75-p85 lane-loss pattern, excused by early trades, first blood, or an early grub.",
+      "roles": { "top": 80, "jungle": 76, "mid": 80, "bot": 82, "support": 80 },
+      "trigger": {
+        "all": [ {"field": "phase_breakdown.early.fight.untraded_deaths", "op": ">=", "value": 3} ]
+      },
+      "suppress_if": {
+        "any": [
+          {"field": "phase_breakdown.early.fight.traded_deaths", "op": ">=", "value": 2},
+          {"field": "phase_breakdown.early.fight.first_blood", "op": "==", "value": true},
+          {"field": "phase_breakdown.early.objective.grub_secures", "op": ">=", "value": 1}
+        ]
+      },
+      "role_overrides": {
+        "mid": { "trigger": {"all": [ {"field": "phase_breakdown.early.fight.untraded_deaths", "op": ">=", "value": 4} ]} },
+        "bot": { "trigger": {"all": [ {"field": "phase_breakdown.early.fight.untraded_deaths", "op": ">=", "value": 4} ]} },
+        "support": { "trigger": {"all": [ {"field": "phase_breakdown.early.fight.untraded_deaths", "op": ">=", "value": 4} ]} }
+      },
+      "evidence_template": "You gave up {phase_breakdown.early.fight.untraded_deaths} untraded deaths in the early game.",
+      "target": "In 3 of your next 5 games, take at most 2 untraded deaths in the early phase.",
+      "measurement": "phase_breakdown.early.fight.untraded_deaths <= 2 in at least 3 of the next 5 comparable games.",
+      "anti_gaming_guardrail": "Do not concede the whole lane to avoid deaths. Trade patiently, respect the enemy jungler's pathing, and back before you are forced, rather than never contesting."
+    },
+    {
+      "focus_id": "get_into_teamfights",
+      "title": "Show up to fights",
+      "rationale": "All three flagged carry absence. Kill-participation near each role's p20-p30 means the team's damage or tempo engine missed most kills. Excludes top (median KP ~0.33 is naturally low from split duty). Suppressed when the player was pressuring structures, converting a lead, or scaling on heavy CS instead.",
+      "roles": { "bot": 88, "mid": 82, "jungle": 72 },
+      "trigger": {
+        "all": [ {"field": "fight_influence.event_kill_participation", "op": "<=", "value": 0.33} ]
+      },
+      "suppress_if": {
+        "any": [
+          {"field": "structure_pressure.structure_secures", "op": ">=", "value": 3},
+          {"field": "resource_conversion.converted_lead_windows", "op": ">=", "value": 6},
+          {"field": "raw.cs", "op": ">=", "value": 240}
+        ]
+      },
+      "role_overrides": {
+        "bot": { "trigger": {"all": [ {"field": "fight_influence.event_kill_participation", "op": "<=", "value": 0.38} ]} },
+        "jungle": { "trigger": {"all": [ {"field": "fight_influence.event_kill_participation", "op": "<=", "value": 0.30} ]} }
+      },
+      "evidence_template": "You were involved in only {fight_influence.event_kill_participation} of your team's kills.",
+      "target": "In 3 of your next 5 games, reach your role's median kill participation (bot 0.50, mid 0.44, jungle 0.44).",
+      "measurement": "fight_influence.event_kill_participation >= the role median (bot 0.50, mid 0.44, jungle 0.44) in at least 3 of the next 5 comparable games.",
+      "anti_gaming_guardrail": "Do not chase every skirmish and throw for participation. If you are farming a game-winning split or scaling lead that is fine; the target only applies when you were neither fighting nor pressuring the map."
+    },
+    {
+      "focus_id": "make_objective_rotations_count",
+      "title": "Be in the objective fight",
+      "rationale": "All three flagged tagging objectives without influencing the deciding fight. A player who racks up epic/grub assists but has zero objective_fight_involvements and zero secures showed up late. This is a rotation-timing / commitment gap, suppressed when they instead cracked a tower or the context is genuinely unknown.",
+      "roles": { "jungle": 72, "support": 62, "mid": 58, "bot": 55, "top": 52 },
+      "trigger": {
+        "all": [
+          {"field": "objective_participation.objective_fight_involvements", "op": "==", "value": 0},
+          {"field": "objective_participation.epic_monster_secures", "op": "==", "value": 0},
+          {"field": "objective_participation.grub_secures", "op": "==", "value": 0}
+        ],
+        "any": [
+          {"field": "objective_participation.epic_monster_assists", "op": ">=", "value": 2},
+          {"field": "objective_participation.grub_assists", "op": ">=", "value": 2}
+        ]
+      },
+      "suppress_if": {
+        "any": [
+          {"field": "objective_participation.turret_kills", "op": ">=", "value": 2},
+          {"field": "structure_pressure.structure_secures", "op": ">=", "value": 2},
+          {"field": "objective_participation.unknown_objective_contest_context", "op": ">=", "value": 1}
+        ]
+      },
+      "evidence_template": "You assisted {objective_participation.epic_monster_assists} epic and {objective_participation.grub_assists} grub objectives but were in the deciding objective fight {objective_participation.objective_fight_involvements} times.",
+      "target": "In 3 of your next 5 games, be involved in the fight for at least one epic or grub objective.",
+      "measurement": "objective_participation.objective_fight_involvements >= 1 OR (epic_monster_secures + grub_secures) >= 1 in at least 3 of the next 5 comparable games.",
+      "anti_gaming_guardrail": "Do not force a coin-flip smite fight with no vision just to tag the stat. Arrive early and hold the fight, rather than walking in after it starts."
+    },
+    {
+      "focus_id": "contest_early_objectives",
+      "title": "Path to early objectives",
+      "rationale": "All three flagged junglers skipping the early objective map. Zero grub secures AND zero epic secures AND direct_objective_contacts at or below 2 (jungle p10=1, median 4, so a p25 outcome) means the neutral map was ignored. Voidgrubs and dragons always spawn, so this is pure pathing priority.",
+      "roles": { "jungle": 90 },
+      "trigger": {
+        "all": [
+          {"field": "objective_participation.grub_secures", "op": "==", "value": 0},
+          {"field": "objective_participation.epic_monster_secures", "op": "==", "value": 0},
+          {"field": "objective_participation.direct_objective_contacts", "op": "<=", "value": 2}
+        ]
+      },
+      "suppress_if": {
+        "any": [
+          {"field": "fight_influence.event_kill_participation", "op": ">=", "value": 0.6},
+          {"field": "enablement_suppression.ally_enablement_assists", "op": ">=", "value": 14},
+          {"field": "objective_participation.objective_fight_involvements", "op": ">=", "value": 2}
+        ]
+      },
+      "evidence_template": "You made {objective_participation.direct_objective_contacts} objective contacts and secured no grubs or epics this game.",
+      "target": "In 3 of your next 5 games, secure or assist a voidgrub or epic, or reach 4+ objective contacts.",
+      "measurement": "(grub_secures + epic_monster_secures) >= 1 OR direct_objective_contacts >= 4 in at least 3 of the next 5 comparable games.",
+      "anti_gaming_guardrail": "Do not throw for grubs into a lost topside. Path to arrive with prio and vision, or trade grubs for a dragon or a gank, rather than farming your own quadrant all game."
+    },
+    {
+      "focus_id": "create_early_map_agency",
+      "title": "Do something early",
+      "rationale": "GPT and Gemini both flagged the AFK-farming jungler. Zero early kills, assists, grub secures, and epic secures means the player produced no observable early lever at all. Using phase count fields (not phase KP) keeps it None-safe. Suppressed when they were at least in an early objective fight.",
+      "roles": { "jungle": 86 },
+      "trigger": {
+        "all": [
+          {"field": "phase_breakdown.early.fight.kill_events", "op": "==", "value": 0},
+          {"field": "phase_breakdown.early.fight.assist_events", "op": "==", "value": 0},
+          {"field": "phase_breakdown.early.objective.grub_secures", "op": "==", "value": 0},
+          {"field": "phase_breakdown.early.objective.epic_monster_secures", "op": "==", "value": 0},
+          {"field": "phase_breakdown.early.objective.direct_objective_contacts", "op": "<=", "value": 1}
+        ]
+      },
+      "suppress_if": {
+        "any": [
+          {"field": "phase_breakdown.early.objective.objective_fight_involvements", "op": ">=", "value": 1}
+        ]
+      },
+      "evidence_template": "In the early game you had {phase_breakdown.early.fight.kill_events} kills, {phase_breakdown.early.fight.assist_events} assists, and {phase_breakdown.early.objective.direct_objective_contacts} objective contacts.",
+      "target": "In 3 of your next 5 games, make at least one early kill, assist, grub, or objective contact.",
+      "measurement": "phase_breakdown.early.fight.kill_events >= 1 OR phase_breakdown.early.fight.assist_events >= 1 OR phase_breakdown.early.objective.direct_objective_contacts >= 2 in at least 3 of the next 5 comparable games.",
+      "anti_gaming_guardrail": "Do not force a bad level-three play. Pick the highest-probability lane or neutral window before pathing, and keep your farm while acting."
+    },
+    {
+      "focus_id": "split_with_purpose",
+      "title": "Make your split pay",
+      "rationale": "All three challenged the naive belief that split-pushing is always fine. High isolated_frame_samples (near role p75) with zero structure secures and zero structure assists means the player spent the game alone on the side lane and took no buildings. Suppressed by real teamfight presence or a tower.",
+      "roles": { "top": 88, "mid": 78 },
+      "trigger": {
+        "all": [
+          {"field": "structure_pressure.isolated_frame_samples", "op": ">=", "value": 21},
+          {"field": "structure_pressure.structure_secures", "op": "==", "value": 0},
+          {"field": "structure_pressure.structure_assists", "op": "==", "value": 0}
+        ]
+      },
+      "suppress_if": {
+        "any": [
+          {"field": "fight_influence.event_kill_participation", "op": ">=", "value": 0.5},
+          {"field": "objective_participation.turret_kills", "op": ">=", "value": 2},
+          {"field": "objective_participation.inhibitor_kills", "op": ">=", "value": 1}
+        ]
+      },
+      "role_overrides": {
+        "mid": { "trigger": {"all": [ {"field": "structure_pressure.isolated_frame_samples", "op": ">=", "value": 17}, {"field": "structure_pressure.structure_secures", "op": "==", "value": 0}, {"field": "structure_pressure.structure_assists", "op": "==", "value": 0} ]} }
+      },
+      "evidence_template": "You spent many frames isolated on the side lane and took {structure_pressure.structure_secures} structures.",
+      "target": "In 3 of your next 5 games, either take a structure from your split or join your team for an objective fight.",
+      "measurement": "structure_pressure.structure_secures >= 1 OR structure_pressure.structure_assists >= 1 OR objective_participation.objective_fight_involvements >= 1 in at least 3 of the next 5 comparable games.",
+      "anti_gaming_guardrail": "Do not force the split when your team is contesting a fight 4v5 across the map. Split only when it draws pressure or takes a tower; otherwise group and win the objective with your team."
+    },
+    {
+      "focus_id": "snowball_into_structures",
+      "title": "Turn leads into towers",
+      "rationale": "Opus and GPT both flagged leads that never became buildings. A laner or carry with 8+ lead windows (above the role median) but zero turret kills, zero structure secures, and zero structure assists kept getting ahead and never pressed it into the resource that ends games. Jungle is excluded (turret-kill median is naturally 0).",
+      "roles": { "top": 76, "mid": 72, "bot": 72 },
+      "trigger": {
+        "all": [
+          {"field": "resource_conversion.lead_windows", "op": ">=", "value": 8},
+          {"field": "objective_participation.turret_kills", "op": "==", "value": 0},
+          {"field": "structure_pressure.structure_secures", "op": "==", "value": 0},
+          {"field": "structure_pressure.structure_assists", "op": "==", "value": 0}
+        ]
+      },
+      "suppress_if": {
+        "any": [
+          {"field": "objective_participation.turret_assists", "op": ">=", "value": 2},
+          {"field": "objective_participation.inhibitor_kills", "op": ">=", "value": 1},
+          {"field": "resource_conversion.converted_lead_windows", "op": ">=", "value": 8}
+        ]
+      },
+      "evidence_template": "You had {resource_conversion.lead_windows} lead windows but took no towers or structures.",
+      "target": "In 3 of your next 5 games with a lead, take or help take at least one tower.",
+      "measurement": "objective_participation.turret_kills >= 1 OR objective_participation.turret_assists >= 1 OR structure_pressure.structure_secures >= 1 in at least 3 of the next 5 comparable games.",
+      "anti_gaming_guardrail": "Do not dive a tower alone into a losing map for the stat. When you win your lane or a fight, use the pressure to crash a wave and chip the tower with your team, rather than only farming the lead."
+    },
+    {
+      "focus_id": "survive_late_fights",
+      "title": "Survive the decisive fight",
+      "rationale": "GPT and Gemini both flagged squishy carries dying untraded late while isolated, which throws otherwise-won games. Late untraded deaths near each role's late-death p75-p90 erase wave clear and sustained damage. Suppressed when they were converting the split into structures instead.",
+      "roles": { "mid": 84, "bot": 86 },
+      "trigger": {
+        "all": [
+          {"field": "phase_breakdown.late.fight.untraded_deaths", "op": ">=", "value": 3},
+          {"field": "death_tempo.deaths_by_phase.late", "op": ">=", "value": 3}
+        ]
+      },
+      "suppress_if": {
+        "any": [
+          {"field": "structure_pressure.structure_secures", "op": ">=", "value": 2},
+          {"field": "objective_participation.inhibitor_kills", "op": ">=", "value": 1}
+        ]
+      },
+      "role_overrides": {
+        "bot": { "trigger": {"all": [ {"field": "phase_breakdown.late.fight.untraded_deaths", "op": ">=", "value": 3}, {"field": "death_tempo.deaths_by_phase.late", "op": ">=", "value": 4} ]} }
+      },
+      "evidence_template": "You died {death_tempo.deaths_by_phase.late} times late, with {phase_breakdown.late.fight.untraded_deaths} of them untraded.",
+      "target": "In 3 of your next 5 games, keep late untraded deaths at 2 or fewer.",
+      "measurement": "phase_breakdown.late.fight.untraded_deaths <= 2 in at least 3 of the next 5 comparable games.",
+      "anti_gaming_guardrail": "Still deal damage; fix your entry timing and threat spacing instead of standing outside effective range, and retreat before the enemy can collapse on you."
+    },
+    {
+      "focus_id": "engage_or_peel",
+      "title": "Impact fights with CC",
+      "rationale": "All three flagged the passive, invisible support. suppression_events near p20-p25 (support p10=5, median 17) AND ally_enablement_assists near p20-p25 (p10=3, median 13) means the player did almost no lockdown and set up almost nothing. CC and enable output is controllable regardless of the ADC's game.",
+      "roles": { "support": 88 },
+      "trigger": {
+        "all": [
+          {"field": "enablement_suppression.suppression_events", "op": "<=", "value": 8},
+          {"field": "enablement_suppression.ally_enablement_assists", "op": "<=", "value": 7}
+        ]
+      },
+      "suppress_if": {
+        "any": [
+          {"field": "raw.kills", "op": ">=", "value": 8},
+          {"field": "objective_participation.objective_fight_involvements", "op": ">=", "value": 2},
+          {"field": "objective_participation.direct_objective_contacts", "op": ">=", "value": 4}
+        ]
+      },
+      "evidence_template": "You applied {enablement_suppression.suppression_events} lockdown events and set up {enablement_suppression.ally_enablement_assists} allied plays.",
+      "target": "In 3 of your next 5 games, reach your role's median for either CC events or enable assists.",
+      "measurement": "enablement_suppression.suppression_events >= 17 OR enablement_suppression.ally_enablement_assists >= 13 in at least 3 of the next 5 comparable games.",
+      "anti_gaming_guardrail": "Do not throw out CC on cooldown into nothing to farm the stat. Land engage or peel in fights that matter, and prioritize being where your carries need protection."
+    },
+    {
+      "focus_id": "dont_hoard_kills",
+      "title": "Feed the carries, not yourself",
+      "rationale": "All three flagged the inverted-role support: high kills (near role p90) but low ally_enablement_assists means the player absorbed gold that should have bought the carries' items. Kill-supports exist, so this is suppressed when the player was still heavily setting others up via assists or CC.",
+      "roles": { "support": 70 },
+      "trigger": {
+        "all": [
+          {"field": "raw.kills", "op": ">=", "value": 7},
+          {"field": "enablement_suppression.ally_enablement_assists", "op": "<=", "value": 8}
+        ]
+      },
+      "suppress_if": {
+        "any": [
+          {"field": "raw.assists", "op": ">=", "value": 15},
+          {"field": "enablement_suppression.suppression_events", "op": ">=", "value": 25}
+        ]
+      },
+      "evidence_template": "You took {raw.kills} kills but set up only {enablement_suppression.ally_enablement_assists} allied plays.",
+      "target": "In 3 of your next 5 games, set up 13+ allied plays while keeping your kills below your carries'.",
+      "measurement": "enablement_suppression.ally_enablement_assists >= 13 in at least 3 of the next 5 comparable games.",
+      "anti_gaming_guardrail": "Do not deliberately avoid last-hitting kills you must secure. When you would otherwise steal a kill from a healthy carry, hold your damage and let them take the gold instead."
+    },
+    {
+      "focus_id": "make_an_impact",
+      "title": "Stop playing invisible",
+      "rationale": "Opus and GPT both flagged pure passivity. lead_windows at or below 2, kill-participation below 0.25, AND fewer than 5 deaths means the player was neither ahead, nor fighting, nor even dying, just absent. Low deaths distinguish this from inting; excused when clearly scaling on CS or quietly enabling allies.",
+      "roles": { "top": 68, "jungle": 66, "mid": 70, "bot": 72 },
+      "trigger": {
+        "all": [
+          {"field": "resource_conversion.lead_windows", "op": "<=", "value": 2},
+          {"field": "fight_influence.event_kill_participation", "op": "<", "value": 0.25},
+          {"field": "death_tempo.death_count", "op": "<=", "value": 4}
+        ]
+      },
+      "suppress_if": {
+        "any": [
+          {"field": "raw.cs", "op": ">=", "value": 220},
+          {"field": "enablement_suppression.ally_enablement_assists", "op": ">=", "value": 13},
+          {"field": "structure_pressure.structure_secures", "op": ">=", "value": 3}
+        ]
+      },
+      "role_overrides": {
+        "jungle": { "trigger": {"all": [ {"field": "resource_conversion.lead_windows", "op": "<=", "value": 2}, {"field": "fight_influence.event_kill_participation", "op": "<", "value": 0.28}, {"field": "death_tempo.death_count", "op": "<=", "value": 4} ]} }
+      },
+      "evidence_template": "You had {resource_conversion.lead_windows} lead windows and {fight_influence.event_kill_participation} kill participation, with {death_tempo.death_count} deaths.",
+      "target": "In 3 of your next 5 games, create a lead window or reach 0.35+ kill participation.",
+      "measurement": "resource_conversion.lead_windows >= 3 OR fight_influence.event_kill_participation >= 0.35 in at least 3 of the next 5 comparable games.",
+      "anti_gaming_guardrail": "Do not force fights just to raise a number. Look for one proactive play a wave: a trade, a roam, a crash-and-help, rather than farming a safe lane the entire game."
+    }
+  ]
+}
