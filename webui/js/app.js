@@ -199,7 +199,6 @@
     $('duoSample').textContent = duo.sample || '';
   }
 
-  function titleCase(s) { s = s || ''; return s.charAt(0).toUpperCase() + s.slice(1); }
   function fmtGames(n) {
     n = Number(n) || 0;
     return n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + 'k' : String(n);
