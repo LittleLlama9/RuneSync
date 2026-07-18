@@ -35,7 +35,7 @@ def _load_catalog_blocking():
     patch = _fetch_latest_patch()
     _PATCH = patch
 
-    cache_path = os.path.join(_cache_dir(), f"_catalog_{patch}.json")
+    cache_path = os.path.join(_cache_dir(), f"_catalog2_{patch}.json")
     if os.path.exists(cache_path):
         try:
             _ITEM_CATALOG = json.loads(open(cache_path, encoding="utf-8").read())
@@ -56,6 +56,7 @@ def _load_catalog_blocking():
                 "id": int(iid),
                 "name": idata["name"],
                 "image": idata["image"]["full"],
+                "gold": int((idata.get("gold") or {}).get("total") or 0),
             })
         items.sort(key=lambda x: x["name"])
         _ITEM_CATALOG = items
@@ -110,6 +111,37 @@ def icon_url(item_id) -> str:
             return (f"https://ddragon.leagueoflegends.com/cdn/{_PATCH}"
                     f"/img/item/{i['image']}")
     return ""
+
+
+def gold_value(item_id) -> int:
+    """Total gold value of an item id (0 if unknown/consumable/not ready).
+
+    Uses Data Dragon's `gold.total`, i.e. the full build cost of the item, so a
+    sum over a player's held items approximates their invested gold.
+    """
+    try:
+        iid = int(item_id)
+    except (TypeError, ValueError):
+        return 0
+    for i in _ITEM_CATALOG:
+        if i["id"] == iid:
+            return int(i.get("gold") or 0)
+    return 0
+
+
+def estimate_gold_from_items(item_ids) -> int:
+    """Approximate a player's invested gold by summing held-item gold values.
+
+    This is the same visible-inventory proxy other companion tools use to show a
+    gold lead: the Live Client Data API exposes every player's item IDs but not
+    enemy/teammate unspent gold, so summed item value is the closest local
+    estimate. Trinkets/consumables contribute their (small/zero) catalog value.
+    Returns 0 until the catalog has loaded.
+    """
+    total = 0
+    for item_id in item_ids or []:
+        total += gold_value(item_id)
+    return total
 
 
 def search(query: str, max_results: int = 12) -> list:

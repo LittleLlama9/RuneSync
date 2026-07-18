@@ -551,6 +551,7 @@ class Api:
             on_build_detail=self._on_build,
             on_champ_select_enter=self._on_champ_select_enter,
             on_duo_recommendations=self._on_duo,
+            on_hud=self._on_hud,
         )
         threading.Thread(target=self.monitor.run, daemon=True).start()
 
@@ -634,6 +635,13 @@ class Api:
         }
         self.snap["duo"] = payload if recs else None
         self.pusher.push("duo_recs", payload)
+
+    def _on_hud(self, hud):
+        # Live in-game HUD snapshot (CS/min, lane deltas, gold estimate,
+        # objective timers). Additive/read-only; stored on the snapshot so a
+        # late-hydrating UI can pull it, and pushed for the live panel.
+        self.snap["hud"] = hud
+        self.pusher.push("hud", hud or {})
 
     def _on_import(self, champ):
         self.snap["imported"] = True

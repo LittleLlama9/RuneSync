@@ -41,7 +41,7 @@ def test_history_and_report_views_are_wired():
     assert "loadHistory(false)" in js
     assert "closest('.history-card')" in js
     assert "case 'postgame_ready'" in js
-    assert "overflow-y:scroll" in css
+    assert "overflow-y:auto; padding:18px" in css
     assert ".history-card" in css
     assert ".report-rankbox" in css
     assert ".report-trust" in css

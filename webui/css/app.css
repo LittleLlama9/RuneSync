@@ -81,7 +81,7 @@ body {
 
 /* ── body / screens ── */
 .body {
-  flex:1; min-height:0; overflow-y:scroll; padding:18px;
+  flex:1; min-height:0; overflow-y:auto; padding:18px;
   scrollbar-gutter:stable; overscroll-behavior:contain; touch-action:pan-y;
 }
 .body:focus { outline:none; }
@@ -169,6 +169,24 @@ body {
 :root[data-interface="standard"] .duo-row .duo-wr small { color:var(--std-muted); }
 :root[data-interface="standard"] .duo-row .duo-wr { color:var(--std-text); font-weight:600; }
 :root[data-interface="standard"] .duo-row .duo-tier { color:var(--std-muted); border-color:var(--std-muted); }
+
+
+/* live in-game HUD */
+.hud { font-size:15px; line-height:1.7; }
+.hud-row { display:flex; gap:10px; align-items:baseline; }
+.hud-row .hud-k { color:var(--pd); min-width:42px; flex-shrink:0; font-size:12px; letter-spacing:.5px; }
+.hud-row .hud-v { flex:1 1 auto; min-width:0; color:var(--p); }
+.hud-delta { font-weight:600; }
+.hud-delta.up { color:var(--pb); }
+.hud-delta.down { color:var(--danger); }
+.hud-objs .hud-v { display:flex; flex-wrap:wrap; gap:4px 14px; }
+.hud-obj { white-space:nowrap; }
+.hud-obj b { color:var(--pd); font-weight:400; }
+.hud-obj .up { color:var(--pb); }
+:root[data-interface="standard"] .hud { font-size:14px; }
+:root[data-interface="standard"] .hud-row .hud-k { color:var(--std-muted); }
+:root[data-interface="standard"] .hud-row .hud-v { color:var(--std-text); }
+:root[data-interface="standard"] .hud-obj b { color:var(--std-muted); }
 
 
 /* dispatch log */

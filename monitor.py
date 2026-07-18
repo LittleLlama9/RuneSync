@@ -8,6 +8,8 @@ from lcu import LCUClient, LCUConnectionError, RUNE_TREE_IDS, KEYSTONE_IDS
 from ugg_api import UGGClient
 from overrides import OverrideManager
 from champion_roles import infer_roles, infer_full_assignment
+from live_client import LiveClientDataClient, LiveClientDataError
+import live_hud
 
 # Standard lane second-summoner (paired with Flash) used to replace a jungle
 # Smite when an off-role fallback build is imported for a laner. Smite is
@@ -31,7 +33,8 @@ class ChampSelectMonitor:
                  on_game_start=None, on_game_end=None, on_league_closed=None,
                  on_matchup_winrate=None, on_item_build=None, on_import=None,
                  on_runes_imported=None, on_champ_detected=None, on_build_detail=None,
-                 on_champ_select_enter=None, on_duo_recommendations=None):
+                 on_champ_select_enter=None, on_duo_recommendations=None,
+                 on_hud=None):
         self.lcu = lcu
         self.ugg = ugg
         self.overrides = overrides
@@ -63,6 +66,16 @@ class ChampSelectMonitor:
         # additive; ships inert (empty recs, no callback noise) when the data
         # bundle has no `duos` section yet.
         self._on_duo_recommendations = on_duo_recommendations
+        # (hud_dict) fired ~once per second while a game is in progress with the
+        # live in-game HUD snapshot (CS/min, lane deltas, gold estimate,
+        # objective timers) derived from the local Live Client Data API. Purely
+        # read-only/additive; ships inert when the Live Client endpoint is not
+        # reachable (e.g. pre-loading screen, spectator gaps).
+        self._on_hud = on_hud
+        # Lazily-created Live Client Data client + light throttle so the HUD poll
+        # only hits :2999 every few ticks, and only while actually in a game.
+        self._live_client: Optional[LiveClientDataClient] = None
+        self._hud_unavailable_logged = False
         self._stop_event = threading.Event()
         # Serializes rune/item-set imports. The Reimport button (main.py) pushes
         # _import_runes on its own thread while the poll loop also calls it on
@@ -156,6 +169,32 @@ class ChampSelectMonitor:
             time.sleep(self.POLL_INTERVAL)
         self.log("Monitor stopped.", "info")
 
+    def _poll_hud(self):
+        """Fetch the live HUD snapshot from the Live Client Data API and emit it.
+
+        Best-effort and fully contained: the :2999 endpoint is unreachable for
+        the first several seconds of loading and during brief spectator gaps, so
+        any failure just skips this tick without disturbing the rest of the
+        monitor loop. Never raises to the caller.
+        """
+        try:
+            if self._live_client is None:
+                self._live_client = LiveClientDataClient()
+            data = self._live_client.get_all_game_data()
+            hud = live_hud.build_hud(data, fallback_role=self._my_role)
+        except LiveClientDataError:
+            # Expected while the game is still loading; stay quiet after once.
+            if not self._hud_unavailable_logged:
+                self._hud_unavailable_logged = True
+            return
+        except Exception:
+            return
+        if hud and self._on_hud:
+            try:
+                self._on_hud(hud)
+            except Exception:
+                pass
+
     def _tick(self):
         phase = self.lcu.get_game_flow_phase()
 
@@ -168,8 +207,13 @@ class ChampSelectMonitor:
         elif phase in TERMINAL_GAME_PHASES and self._in_game:
             self._in_game = False
             self.log("Game ended.", "info")
+            self._hud_unavailable_logged = False
             if self._on_game_end:
                 self._on_game_end()
+
+        # ── Live in-game HUD (only while a game is actually in progress) ───────
+        if self._in_game and self._on_hud:
+            self._poll_hud()
 
         if phase != "ChampSelect":
             if self._last_phase == "ChampSelect":

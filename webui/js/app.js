@@ -168,6 +168,7 @@
     $('buildList').innerHTML = renderBuildList(state.build);
 
     renderDuo();
+    renderHud();
     renderLog();
   }
 
@@ -197,6 +198,62 @@
         `</div>`;
     }).join('');
     $('duoSample').textContent = duo.sample || '';
+  }
+
+  function mmss(sec) {
+    sec = Math.max(0, Math.round(Number(sec) || 0));
+    const m = Math.floor(sec / 60), s = sec % 60;
+    return `${m}:${String(s).padStart(2, '0')}`;
+  }
+  function signed(n) { n = Number(n) || 0; return (n > 0 ? '+' : '') + n; }
+
+  function renderHud() {
+    const panel = $('hudPanel');
+    if (!panel) return;
+    const hud = state.hud;
+    if (!state.inGame || !hud || !hud.me) { panel.hidden = true; return; }
+    panel.hidden = false;
+    const standard = standardInterface();
+    $('hudTitle').textContent = standard
+      ? `Live · ${mmss(hud.game_time)}`
+      : `LIVE // ${mmss(hud.game_time)}`;
+
+    const me = hud.me, opp = hud.opponent, d = hud.delta;
+    const rows = [];
+
+    // CS / min — the core farming feedback line.
+    const oppCs = opp ? `${esc(opp.champion)} ${opp.cs} (${opp.cs_per_min.toFixed(1)})` : '—';
+    const csDelta = d ? `<span class="hud-delta ${d.cs >= 0 ? 'up' : 'down'}">${signed(d.cs)}</span>` : '';
+    rows.push(
+      `<div class="hud-row"><span class="hud-k">CS</span>` +
+      `<span class="hud-v">You ${me.cs} (${me.cs_per_min.toFixed(1)}/m) · vs ${oppCs} ${csDelta}</span></div>`);
+
+    // Gold — lane estimate (from held items) + team total.
+    if (d || hud.team_gold) {
+      const laneG = d ? `<span class="hud-delta ${d.gold >= 0 ? 'up' : 'down'}">${signed(d.gold)}g lane</span>` : '';
+      const teamG = hud.team_gold
+        ? `<span class="hud-delta ${hud.team_gold.diff >= 0 ? 'up' : 'down'}">${signed(hud.team_gold.diff)}g team</span>` : '';
+      rows.push(`<div class="hud-row"><span class="hud-k">GOLD</span><span class="hud-v">${laneG} · ${teamG}</span></div>`);
+    }
+
+    // Level.
+    if (opp && d) {
+      const lvlDelta = `<span class="hud-delta ${d.level >= 0 ? 'up' : 'down'}">${signed(d.level)}</span>`;
+      rows.push(`<div class="hud-row"><span class="hud-k">LVL</span><span class="hud-v">${me.level} vs ${opp.level} ${lvlDelta}</span></div>`);
+    }
+
+    // Objective timers.
+    const objs = (hud.objectives || []).map(o => {
+      let t;
+      if (o.state === 'gone') t = '—';
+      else if (o.next_seconds == null) t = 'up';
+      else t = mmss(o.next_seconds);
+      const cls = (o.next_seconds == null && o.state !== 'gone') ? 'up' : '';
+      return `<span class="hud-obj"><b>${esc(o.name)}</b> <span class="${cls}">${t}</span></span>`;
+    }).join('');
+    if (objs) rows.push(`<div class="hud-row hud-objs"><span class="hud-k">OBJ</span><span class="hud-v">${objs}</span></div>`);
+
+    $('hudBody').innerHTML = rows.join('');
   }
 
   function fmtGames(n) {
@@ -1240,7 +1297,11 @@
       case 'rune_page': state.runes = p; renderMonitor(); break;
       case 'build': state.buildSrc = p.src; state.build = p.items || []; renderMonitor(); break;
       case 'import_ok': state.imported = true; renderMonitor(); break;
-      case 'game': state.inGame = !!p.in_game; if (p.in_game) state.selecting = false; renderOverlay(); break;
+      case 'game':
+        state.inGame = !!p.in_game;
+        if (p.in_game) state.selecting = false; else state.hud = null;
+        renderOverlay(); renderMonitor(); break;
+      case 'hud': state.hud = (p && p.me) ? p : null; renderHud(); break;
       case 'history_sync': state.history.syncing = !!p.active; renderHistory(); break;
       case 'history_updated': state.history.loaded = false; loadHistory(true); break;
       case 'history_error': state.history.error = p.message || 'history sync failed'; renderHistory(); break;
@@ -1268,6 +1329,7 @@
     if (s.runes) state.runes = s.runes;
     state.buildSrc = s.buildSrc || 'idle'; state.build = s.build || []; state.inGame = !!s.inGame;
     state.duo = (s.duo && s.duo.active) ? s.duo : null;
+    state.hud = (s.hud && s.hud.me) ? s.hud : null;
     state.history.error = s.historyError || state.history.error;
     applyInterface(state.settings.interface_style);
     applyTheme(s.theme || state.settings.phosphor);
