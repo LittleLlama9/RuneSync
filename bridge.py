@@ -12,6 +12,7 @@ import time, threading, datetime
 import webview
 import ugg_api
 import item_data
+import champion_data
 import perks
 from lcu import LCUClient, LCUConnectionError
 from ugg_api import UGGClient
@@ -142,7 +143,7 @@ class Api:
             "runes": {"keystone": "", "primary": "", "secondary": "",
                       "primaryMinor": "", "secondaryMinor": "", "summoners": ""},
             "buildSrc": "idle", "build": [], "inGame": False,
-            "duo": None,
+            "duo": None, "hud": None, "draft": None, "itemRecs": None,
         }
 
     def _settings(self) -> dict:
@@ -179,6 +180,7 @@ class Api:
     def boot(self):
         perks.warm()
         item_data.init()
+        champion_data.init()   # Data Dragon champion classes for the recommenders
         if self.log_queue is not None:
             threading.Thread(target=self._drain_log, daemon=True).start()
         threading.Thread(target=self._load_bundle, daemon=True).start()
@@ -552,6 +554,8 @@ class Api:
             on_champ_select_enter=self._on_champ_select_enter,
             on_duo_recommendations=self._on_duo,
             on_hud=self._on_hud,
+            on_draft=self._on_draft,
+            on_item_recs=self._on_item_recs,
         )
         threading.Thread(target=self.monitor.run, daemon=True).start()
 
@@ -642,6 +646,18 @@ class Api:
         # late-hydrating UI can pull it, and pushed for the live panel.
         self.snap["hud"] = hud
         self.pusher.push("hud", hud or {})
+
+    def _on_draft(self, recs):
+        # Champ-select draft/composition analysis (damage balance, engage, CC of
+        # CHAMPIONS only). Additive/read-only. None => nothing to analyse yet.
+        self.snap["draft"] = recs
+        self.pusher.push("draft", recs or {})
+
+    def _on_item_recs(self, recs):
+        # In-game defensive item suggestions from the enemy damage profile.
+        # About the user's own itemisation vs the enemy comp; additive/read-only.
+        self.snap["itemRecs"] = recs
+        self.pusher.push("item_recs", recs or {})
 
     def _on_import(self, champ):
         self.snap["imported"] = True

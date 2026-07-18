@@ -10,6 +10,8 @@ from overrides import OverrideManager
 from champion_roles import infer_roles, infer_full_assignment
 from live_client import LiveClientDataClient, LiveClientDataError
 import live_hud
+import item_recs
+import draft_recs
 
 # Standard lane second-summoner (paired with Flash) used to replace a jungle
 # Smite when an off-role fallback build is imported for a laner. Smite is
@@ -34,7 +36,7 @@ class ChampSelectMonitor:
                  on_matchup_winrate=None, on_item_build=None, on_import=None,
                  on_runes_imported=None, on_champ_detected=None, on_build_detail=None,
                  on_champ_select_enter=None, on_duo_recommendations=None,
-                 on_hud=None):
+                 on_hud=None, on_draft=None, on_item_recs=None):
         self.lcu = lcu
         self.ugg = ugg
         self.overrides = overrides
@@ -76,6 +78,19 @@ class ChampSelectMonitor:
         # only hits :2999 every few ticks, and only while actually in a game.
         self._live_client: Optional[LiveClientDataClient] = None
         self._hud_unavailable_logged = False
+        # (recs_dict | None) fired during champ select whenever the set of picked
+        # champions on either team changes, with a neutral draft/composition
+        # analysis (damage balance, engage, CC) of CHAMPIONS only — never a
+        # judgment of players. Read-only/additive; degrades to safe defaults for
+        # champions missing from the curated attribute catalog.
+        self._on_draft = on_draft
+        # (recs_dict | None) fired ~once per second in-game with defensive item
+        # suggestions derived from the enemy team's damage profile (from the same
+        # Live Client poll as the HUD). About the user's own itemisation vs the
+        # enemy comp — never a rating of players. Ships inert when the Live Client
+        # endpoint is unreachable or the attribute catalog is missing.
+        self._on_item_recs = on_item_recs
+        self._draft_done_for: frozenset = frozenset()  # champ set we last analysed
         self._stop_event = threading.Event()
         # Serializes rune/item-set imports. The Reimport button (main.py) pushes
         # _import_runes on its own thread while the poll loop also calls it on
@@ -181,7 +196,6 @@ class ChampSelectMonitor:
             if self._live_client is None:
                 self._live_client = LiveClientDataClient()
             data = self._live_client.get_all_game_data()
-            hud = live_hud.build_hud(data, fallback_role=self._my_role)
         except LiveClientDataError:
             # Expected while the game is still loading; stay quiet after once.
             if not self._hud_unavailable_logged:
@@ -189,9 +203,20 @@ class ChampSelectMonitor:
             return
         except Exception:
             return
-        if hud and self._on_hud:
+
+        if self._on_hud:
             try:
-                self._on_hud(hud)
+                hud = live_hud.build_hud(data, fallback_role=self._my_role)
+                if hud:
+                    self._on_hud(hud)
+            except Exception:
+                pass
+
+        if self._on_item_recs:
+            try:
+                recs = item_recs.build_item_recs(data)
+                if recs:
+                    self._on_item_recs(recs)
             except Exception:
                 pass
 
@@ -211,8 +236,8 @@ class ChampSelectMonitor:
             if self._on_game_end:
                 self._on_game_end()
 
-        # ── Live in-game HUD (only while a game is actually in progress) ───────
-        if self._in_game and self._on_hud:
+        # ── Live in-game HUD + item recommender (only while in a game) ────────
+        if self._in_game and (self._on_hud or self._on_item_recs):
             self._poll_hud()
 
         if phase != "ChampSelect":
@@ -231,6 +256,8 @@ class ChampSelectMonitor:
                 self._all_picks_finalized = False
                 self._duo_done_for = ""
                 self._my_champ = ""
+                self._draft_done_for = frozenset()
+                self._clear_draft()
             self._last_phase = phase
             return
         if self._last_phase != "ChampSelect":
@@ -247,6 +274,8 @@ class ChampSelectMonitor:
             self._matchup_override = None
             self._all_picks_finalized = False
             self._duo_done_for = ""
+            self._draft_done_for = frozenset()
+            self._clear_draft()
             if self._on_champ_select_enter:
                 self._on_champ_select_enter()
         self._last_phase = phase
@@ -319,6 +348,9 @@ class ChampSelectMonitor:
             self._all_picks_finalized = True
             self._enemy_names_evaluated = frozenset()
         self._update_enemy_laner(session)
+
+        # ── Draft/composition analysis (inline; fires on any pick change) ─────
+        self._maybe_emit_draft(session)
 
         # ── Botlane duo recommendation ─────────────────────────────────────
         # When your botlane lane partner has locked their champ and you have not
@@ -472,6 +504,69 @@ class ChampSelectMonitor:
             champion_id = None
         name = self._champ_name_map.get(champion_id, "")
         return name if name in enemy_names else None
+
+    def _get_ally_champ_names(self, session: dict) -> list[str]:
+        """Return names of all ally champions locked in (completed picks).
+
+        Mirrors _get_enemy_champ_names for the myTeam cells so the draft
+        recommender can analyse both compositions as they fill in.
+        """
+        names = []
+        my_team_cells = {p.get("cellId") for p in session.get("myTeam", [])}
+        for action_group in session.get("actions", []):
+            for action in action_group:
+                if action.get("type") != "pick":
+                    continue
+                if not action.get("completed", False):
+                    continue
+                cid = action.get("championId", 0)
+                if cid <= 0:
+                    continue
+                cell = action.get("actorCellId", -1)
+                if cell in my_team_cells:
+                    name = self._champ_name_map.get(cid, "")
+                    if name and name not in names:
+                        names.append(name)
+        return names
+
+    def _clear_draft(self):
+        """Push an empty draft so the UI hides last selection's analysis.
+
+        Fired on champ-select enter and leave (e.g. after a dodge) so stale
+        observations never linger into the next lobby or the loading screen.
+        """
+        if not self._on_draft:
+            return
+        try:
+            self._on_draft(None)
+        except Exception:
+            pass
+
+    def _maybe_emit_draft(self, session: dict):
+        """Compute + emit a draft/composition analysis when the picks change.
+
+        Cheap pure logic (no network), so it runs inline each champ-select tick
+        but only fires the callback when the combined champ set actually changes.
+        """
+        if not self._on_draft:
+            return
+        ally = self._get_ally_champ_names(session)
+        # Include our own hovered/picked champ even before it's a completed pick.
+        if self._my_champ and self._my_champ not in ally:
+            ally = ally + [self._my_champ]
+        enemy = self._get_enemy_champ_names(session)
+        key = frozenset(ally) | frozenset("~" + e for e in enemy)
+        if key == self._draft_done_for:
+            return
+        self._draft_done_for = key
+        try:
+            recs = draft_recs.build_draft_recs(ally, enemy)
+        except Exception:
+            return
+        try:
+            self._on_draft(recs)
+        except Exception:
+            pass
 
     def _get_enemy_champ_names(self, session: dict) -> list[str]:
         """Return names of all enemy champions that have been locked in (completed=True)."""

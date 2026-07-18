@@ -68,14 +68,23 @@ def _player_identity(player: dict) -> tuple[str, str]:
 def _find_active_player(all_game_data: dict) -> Optional[dict]:
     riot_id, summoner = _active_identity(all_game_data)
     players = all_game_data.get("allPlayers") or []
-    for player in players:
-        if not isinstance(player, dict):
-            continue
-        p_riot, p_summoner = _player_identity(player)
-        if riot_id and p_riot and riot_id == p_riot:
-            return player
-        if summoner and p_summoner and summoner == p_summoner:
-            return player
+    # Exact Riot ID (name#tag) is globally unique — always prefer it, scanning
+    # every player before falling back so a shared game name never mismatches.
+    if riot_id:
+        for player in players:
+            if not isinstance(player, dict):
+                continue
+            p_riot, _ = _player_identity(player)
+            if p_riot and p_riot == riot_id:
+                return player
+    # Fallback: summoner name (legacy payloads without a Riot ID).
+    if summoner:
+        for player in players:
+            if not isinstance(player, dict):
+                continue
+            _, p_summoner = _player_identity(player)
+            if p_summoner and p_summoner == summoner:
+                return player
     return None
 
 

@@ -74,6 +74,9 @@
     },
     buildSrc: 'u.gg',
     duo: null,
+    hud: null,
+    itemRecs: null,
+    draft: null,
     build: [
       { i: 1, name: "Doran's Blade", tag: 'start', icon: 'https://ddragon.leagueoflegends.com/cdn/15.6.1/img/item/1055.png' },
       { i: 2, name: 'Health Potion', tag: 'start', icon: 'https://ddragon.leagueoflegends.com/cdn/15.6.1/img/item/2003.png' },
@@ -169,6 +172,8 @@
 
     renderDuo();
     renderHud();
+    renderItemRecs();
+    renderDraft();
     renderLog();
   }
 
@@ -254,6 +259,48 @@
     if (objs) rows.push(`<div class="hud-row hud-objs"><span class="hud-k">OBJ</span><span class="hud-v">${objs}</span></div>`);
 
     $('hudBody').innerHTML = rows.join('');
+  }
+
+  function renderItemRecs() {
+    const panel = $('itemRecPanel');
+    if (!panel) return;
+    const r = state.itemRecs;
+    if (!state.inGame || !r || !r.suggestions) { panel.hidden = true; return; }
+    if (!r.suggestions.length && !(r.notes || []).length) { panel.hidden = true; return; }
+    panel.hidden = false;
+    const standard = standardInterface();
+    $('itemRecTitle').textContent = standard ? 'Defensive buys' : 'DEFENSE // vs enemy comp';
+    const parts = [];
+    (r.suggestions || []).forEach(s => {
+      const items = (s.items || []).map(it =>
+        `<span class="ir-item" title="${esc(it.name)} · ${it.gold}g">${esc(it.name)}</span>`
+      ).join('');
+      parts.push(`<div class="ir-row"><span class="ir-reason">${esc(s.reason)}</span>` +
+        `<span class="ir-items">${items}</span></div>`);
+    });
+    (r.notes || []).forEach(n => {
+      parts.push(`<div class="ir-note">${esc(n)}</div>`);
+    });
+    $('itemRecBody').innerHTML = parts.join('');
+  }
+
+  function renderDraft() {
+    const panel = $('draftPanel');
+    if (!panel) return;
+    const d = state.draft;
+    // Only meaningful in champ select; hide in-game and when there's nothing to say.
+    if (!d || !d.observations || !d.observations.length || state.inGame) {
+      panel.hidden = true; return;
+    }
+    panel.hidden = false;
+    const standard = standardInterface();
+    $('draftTitle').textContent = standard ? 'Draft analysis' : 'DRAFT // composition';
+    $('draftBody').innerHTML = d.observations.map(o => {
+      const lvl = (o.level === 'warn') ? 'warn' : (o.level === 'good') ? 'good' : 'info';
+      const mark = lvl === 'warn' ? '!' : lvl === 'good' ? '✓' : '›';
+      return `<div class="draft-row ${lvl}"><span class="draft-mark">${mark}</span>` +
+        `<span class="draft-text">${esc(o.text)}</span></div>`;
+    }).join('');
   }
 
   function fmtGames(n) {
@@ -1299,9 +1346,12 @@
       case 'import_ok': state.imported = true; renderMonitor(); break;
       case 'game':
         state.inGame = !!p.in_game;
-        if (p.in_game) state.selecting = false; else state.hud = null;
+        if (p.in_game) { state.selecting = false; state.draft = null; }
+        else { state.hud = null; state.itemRecs = null; }
         renderOverlay(); renderMonitor(); break;
       case 'hud': state.hud = (p && p.me) ? p : null; renderHud(); break;
+      case 'item_recs': state.itemRecs = (p && p.suggestions) ? p : null; renderItemRecs(); break;
+      case 'draft': state.draft = (p && p.observations) ? p : null; renderDraft(); break;
       case 'history_sync': state.history.syncing = !!p.active; renderHistory(); break;
       case 'history_updated': state.history.loaded = false; loadHistory(true); break;
       case 'history_error': state.history.error = p.message || 'history sync failed'; renderHistory(); break;
@@ -1330,6 +1380,8 @@
     state.buildSrc = s.buildSrc || 'idle'; state.build = s.build || []; state.inGame = !!s.inGame;
     state.duo = (s.duo && s.duo.active) ? s.duo : null;
     state.hud = (s.hud && s.hud.me) ? s.hud : null;
+    state.itemRecs = (s.itemRecs && s.itemRecs.suggestions) ? s.itemRecs : null;
+    state.draft = (s.draft && s.draft.observations) ? s.draft : null;
     state.history.error = s.historyError || state.history.error;
     applyInterface(state.settings.interface_style);
     applyTheme(s.theme || state.settings.phosphor);

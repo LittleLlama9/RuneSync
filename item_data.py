@@ -35,7 +35,7 @@ def _load_catalog_blocking():
     patch = _fetch_latest_patch()
     _PATCH = patch
 
-    cache_path = os.path.join(_cache_dir(), f"_catalog2_{patch}.json")
+    cache_path = os.path.join(_cache_dir(), f"_catalog5_{patch}.json")
     if os.path.exists(cache_path):
         try:
             _ITEM_CATALOG = json.loads(open(cache_path, encoding="utf-8").read())
@@ -52,11 +52,25 @@ def _load_catalog_blocking():
         for iid, idata in data.get("data", {}).items():
             if not idata.get("gold", {}).get("purchasable", True):
                 continue
+            stats = idata.get("stats") or {}
+            tags = list(idata.get("tags") or [])
+            maps = idata.get("maps") or {}
             items.append({
                 "id": int(iid),
                 "name": idata["name"],
                 "image": idata["image"]["full"],
                 "gold": int((idata.get("gold") or {}).get("total") or 0),
+                "tags": tags,
+                # Compact defensive-stat subset the item recommender filters on.
+                "armor": int(stats.get("FlatArmorMod") or 0),
+                "mr": int(stats.get("FlatSpellBlockMod") or 0),
+                "hp": int(stats.get("FlatHPPoolMod") or 0),
+                "depth": len(idata.get("from") or []),
+                # Summoner's Rift availability. Map 11 is SR, but some Arena /
+                # special-mode items (6-digit IDs like 663058) are still flagged
+                # on map 11 by Data Dragon, so also require a base-game item ID
+                # (< 100000) to exclude them from resist suggestions.
+                "sr": bool(maps.get("11")) and int(iid) < 100000,
             })
         items.sort(key=lambda x: x["name"])
         _ITEM_CATALOG = items
@@ -142,6 +156,44 @@ def estimate_gold_from_items(item_ids) -> int:
     for item_id in item_ids or []:
         total += gold_value(item_id)
     return total
+
+
+def defensive_items(kind: str, min_gold: int = 800) -> list:
+    """Purchasable items granting a defensive stat, richest first.
+
+    `kind` is 'armor', 'mr', or 'hp'. Used by the item recommender to surface
+    concrete resist buys that counter the enemy's damage profile. Filters to
+    meaningfully-sized items (>= `min_gold`) so components aren't suggested.
+    Returns [{id, name, image, gold, value}] where value is the stat amount.
+    """
+    key = {"armor": "armor", "mr": "mr", "hp": "hp"}.get(kind)
+    if not key or not _catalog_loaded.is_set():
+        return []
+    out = []
+    for i in _ITEM_CATALOG:
+        v = int(i.get(key) or 0)
+        if v <= 0 or int(i.get("gold") or 0) < min_gold:
+            continue
+        if not i.get("sr", True):        # skip Arena / special-mode-only items
+            continue
+        if "Consumable" in (i.get("tags") or []):
+            continue
+        out.append({"id": i["id"], "name": i["name"], "image": i["image"],
+                    "gold": int(i.get("gold") or 0), "value": v})
+    out.sort(key=lambda x: x["value"], reverse=True)
+    return out
+
+
+def item_tags(item_id) -> list:
+    """Data Dragon tags for an item id ([] if unknown/not ready)."""
+    try:
+        iid = int(item_id)
+    except (TypeError, ValueError):
+        return []
+    for i in _ITEM_CATALOG:
+        if i["id"] == iid:
+            return list(i.get("tags") or [])
+    return []
 
 
 def search(query: str, max_results: int = 12) -> list:

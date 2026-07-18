@@ -189,6 +189,31 @@ body {
 :root[data-interface="standard"] .hud-obj b { color:var(--std-muted); }
 
 
+/* in-game defensive item recommender */
+.itemrec { font-size:14px; line-height:1.6; }
+.ir-row { display:flex; flex-direction:column; gap:2px; padding:4px 0; border-bottom:1px dotted var(--pdd); }
+.ir-row:last-child { border-bottom:0; }
+.ir-reason { color:var(--pd); font-size:12px; }
+.ir-items { display:flex; flex-wrap:wrap; gap:4px 10px; }
+.ir-item { color:var(--pb); }
+.ir-note { color:var(--p); font-size:13px; padding:5px 0 0; }
+:root[data-interface="standard"] .itemrec { font-size:13px; }
+:root[data-interface="standard"] .ir-reason { color:var(--std-muted); }
+:root[data-interface="standard"] .ir-item { color:var(--std-text); font-weight:600; }
+
+/* champ-select draft/composition analysis */
+.draft { font-size:14px; line-height:1.55; }
+.draft-row { display:flex; gap:8px; align-items:baseline; padding:3px 0; }
+.draft-row .draft-mark { flex-shrink:0; width:14px; text-align:center; color:var(--pd); }
+.draft-row.warn .draft-mark { color:var(--danger); }
+.draft-row.good .draft-mark { color:var(--pb); }
+.draft-row .draft-text { flex:1 1 auto; min-width:0; color:var(--p); }
+.draft-row.warn .draft-text { color:var(--pb); }
+:root[data-interface="standard"] .draft { font-size:13px; }
+:root[data-interface="standard"] .draft-row .draft-text { color:var(--std-text); }
+:root[data-interface="standard"] .draft-row .draft-mark { color:var(--std-muted); }
+
+
 /* dispatch log */
 .log { font-family:'Space Mono',monospace; font-size:11px; line-height:1.95; color:var(--p);
   max-height:150px; overflow-y:auto; }

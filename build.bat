@@ -27,9 +27,9 @@ cd /d "%~dp0"
 :: DLLs + JS shim (without it the onefile exe shows a blank window). --hidden-import
 :: clr for pythonnet. webui/ is the HTML/CSS/JS/fonts frontend, bundled as data.
 if exist icon.ico (
-    py -m PyInstaller --noconfirm --clean --onefile --windowed --name "RuneSync" --icon=icon.ico --hidden-import psutil --hidden-import clr --collect-all webview --add-data "webui;webui" --add-data "icon.ico;." --add-data "score_v2\coaching_catalog.json;score_v2" app.py
+    py -m PyInstaller --noconfirm --clean --onefile --windowed --name "RuneSync" --icon=icon.ico --hidden-import psutil --hidden-import clr --collect-all webview --add-data "webui;webui" --add-data "icon.ico;." --add-data "score_v2\coaching_catalog.json;score_v2" --add-data "score_v2\champion_attrs.json;score_v2" app.py
 ) else (
-    py -m PyInstaller --noconfirm --clean --onefile --windowed --name "RuneSync" --hidden-import psutil --hidden-import clr --collect-all webview --add-data "webui;webui" --add-data "icon.ico;." --add-data "score_v2\coaching_catalog.json;score_v2" app.py
+    py -m PyInstaller --noconfirm --clean --onefile --windowed --name "RuneSync" --hidden-import psutil --hidden-import clr --collect-all webview --add-data "webui;webui" --add-data "icon.ico;." --add-data "score_v2\coaching_catalog.json;score_v2" --add-data "score_v2\champion_attrs.json;score_v2" app.py
 )
 if errorlevel 1 (
     echo ERROR: RuneSync build failed!

@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_all
 
-datas = [('webui', 'webui'), ('icon.ico', '.'), ('score_v2\\coaching_catalog.json', 'score_v2')]
+datas = [('webui', 'webui'), ('icon.ico', '.'), ('score_v2\\coaching_catalog.json', 'score_v2'), ('score_v2\\champion_attrs.json', 'score_v2')]
 binaries = []
 hiddenimports = ['psutil', 'clr']
 tmp_ret = collect_all('webview')

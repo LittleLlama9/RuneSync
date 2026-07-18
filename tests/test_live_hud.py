@@ -128,3 +128,29 @@ def test_objective_alive_when_past_spawn_untaken():
     # Dragon initial 300, no kill, game at 360 -> alive now.
     assert objs["Dragon"]["state"] == "alive"
     assert objs["Dragon"]["next_seconds"] is None
+
+
+def test_find_active_prefers_exact_riot_id_over_shared_name():
+    # An enemy shares the local player's game name ("Me") but has a different
+    # Riot ID/tag. The exact Riot ID must win regardless of player ordering.
+    me = _player("Me", "ORDER", "MIDDLE", 100, 9, items=[6672])
+    me["riotId"] = "Me#NA1"
+    imposter = _player("Me", "CHAOS", "MIDDLE", 80, 8, items=[3153])
+    imposter["riotId"] = "Me#EUW"
+    imposter["riotIdTagLine"] = "EUW"
+    imposter["summonerName"] = "Me"
+    # Imposter listed FIRST so a name-first match would grab it.
+    data = {"activePlayer": {"riotId": "Me#NA1", "summonerName": "Me"},
+            "allPlayers": [imposter, me]}
+    found = live_hud._find_active_player(data)
+    assert found is me
+    assert found["team"] == "ORDER"
+
+
+def test_find_active_summoner_fallback_without_riot_id():
+    p = _player("Solo", "ORDER", "MIDDLE", 10, 3)
+    p["riotId"] = ""
+    p["riotIdGameName"] = ""
+    p["riotIdTagLine"] = ""
+    data = {"activePlayer": {"summonerName": "Solo"}, "allPlayers": [p]}
+    assert live_hud._find_active_player(data) is p
