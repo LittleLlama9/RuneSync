@@ -33,7 +33,11 @@ from riot_api import (
     RiotApiTransientError,
     RiotApiTransportError,
 )
-from secret_store import RiotSecretStore, SecretStoreStatus
+from secret_store import (
+    RiotSecretStore,
+    SecretStoreStatus,
+    SecretStoreUnavailableError,
+)
 from timeline_provider import is_private_match_v5_enabled
 
 
@@ -185,7 +189,16 @@ def get_default_status_tracker() -> RiotProviderStatusTracker:
     """
     global _default_tracker
     if _default_tracker is None:
-        _default_tracker = RiotProviderStatusTracker(store=RiotSecretStore())
+        try:
+            store: Optional[RiotSecretStore] = RiotSecretStore()
+        except SecretStoreUnavailableError:
+            # No secure credential store on this platform (e.g. a non-Windows
+            # host without DPAPI): there is nowhere to hold a Riot key, so the
+            # provider is simply MISSING. A None store yields exactly that
+            # status and never exposes token material. This keeps the service
+            # constructible off-Windows (CI, Linux) instead of crashing.
+            store = None
+        _default_tracker = RiotProviderStatusTracker(store=store)
     return _default_tracker
 
 
