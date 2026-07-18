@@ -472,9 +472,15 @@ def build_coaching(
             "priority": config[0],
         })
 
+    min_occ_by_id = {
+        rule["focus_id"]: rule.get("min_occurrences", MIN_PATTERN_OCCURRENCES)
+        for rule in FOCUS_RULES
+    }
     recurring = [
         pattern for pattern in patterns
-        if pattern["occurrences"] >= MIN_PATTERN_OCCURRENCES
+        if pattern["occurrences"] >= min_occ_by_id.get(
+            pattern["focus_id"], MIN_PATTERN_OCCURRENCES
+        )
     ]
     if not recurring:
         if not recent_comparable_features:
