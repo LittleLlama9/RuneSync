@@ -12,6 +12,7 @@ import json, os, ssl, sys, threading, time, urllib.request, urllib.error, urllib
 from typing import Optional
 
 from matchup_bands import is_counter_wr, is_matchup_wr
+from duo_bands import is_duo_wr, duo_tier
 
 # ── bundle config ──────────────────────────────────────────────────────────
 BUNDLE_URL = (
@@ -626,6 +627,50 @@ class UGGClient:
         if result is not None:
             _WINRATE_CACHE[key] = {"patch": patch, "result": result}
         return result
+
+    def get_best_partners(self, anchor_champ: str, anchor_role: str,
+                          top_n: int = 5) -> list[dict]:
+        """Return the best botlane partners for an already-locked champ.
+
+        ``anchor_champ`` is the champion your botlane lane partner has locked,
+        ``anchor_role`` is that partner's role ("bot"/"adc" or "support"). The
+        returned list is the top partner champions to pair with it (in the
+        complementary role), each ``{champion, win_rate, games, tier,
+        tier_label}``, sorted by winrate and clamped to the sane duo band.
+
+        Answered entirely from the bundle's ``duos`` section; there is no server
+        fallback, so an older bundle without duo data simply returns ``[]`` and
+        the feature stays silent.
+        """
+        _wait_for_bundle()
+        role = {"adc": "bot"}.get((anchor_role or "").lower(), (anchor_role or "").lower())
+        if role not in ("bot", "support"):
+            return []
+        if not _bundle:
+            return []
+        entries = ((_bundle.get("duos", {}) or {})
+                          .get(anchor_champ.lower(), {})
+                          .get(role) or [])
+        if not isinstance(entries, list):
+            return []
+        cleaned: list[dict] = []
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+            name = entry.get("champion")
+            wr = entry.get("win_rate")
+            if not isinstance(name, str) or not is_duo_wr(wr):
+                continue
+            tier, label = duo_tier(wr)
+            cleaned.append({
+                "champion": name,
+                "win_rate": float(wr),
+                "games": int(entry.get("games") or 0),
+                "tier": tier,
+                "tier_label": label,
+            })
+        cleaned.sort(key=lambda e: e["win_rate"], reverse=True)
+        return cleaned[:top_n]
 
     def get_current_patch(self) -> str:
         if _bundle and _bundle.get("patch"):

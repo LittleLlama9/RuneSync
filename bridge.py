@@ -142,6 +142,7 @@ class Api:
             "runes": {"keystone": "", "primary": "", "secondary": "",
                       "primaryMinor": "", "secondaryMinor": "", "summoners": ""},
             "buildSrc": "idle", "build": [], "inGame": False,
+            "duo": None,
         }
 
     def _settings(self) -> dict:
@@ -549,6 +550,7 @@ class Api:
             on_champ_detected=self._on_champ,
             on_build_detail=self._on_build,
             on_champ_select_enter=self._on_champ_select_enter,
+            on_duo_recommendations=self._on_duo,
         )
         threading.Thread(target=self.monitor.run, daemon=True).start()
 
@@ -616,6 +618,22 @@ class Api:
                           "wrLabel": clean, "wrTag": tag, "sample": sample})
         self.pusher.push("matchup", {"champ": champ, "enemy": enemy, "wr": wr,
                                      "label": clean, "tag": tag, "sample": sample})
+
+    def _on_duo(self, partner_champ, partner_role, my_role, recs):
+        # Best champs to pick alongside a locked botlane partner. Empty recs =>
+        # no duo data in the bundle; push an inactive payload so the panel hides.
+        s = self.overrides.settings
+        sample = f"{s.get('rank', 'Platinum+')} · {s.get('region', 'World')}".upper()
+        payload = {
+            "partner": partner_champ,
+            "partnerRole": partner_role,
+            "myRole": my_role,
+            "recs": recs or [],
+            "sample": sample,
+            "active": bool(recs),
+        }
+        self.snap["duo"] = payload if recs else None
+        self.pusher.push("duo_recs", payload)
 
     def _on_import(self, champ):
         self.snap["imported"] = True

@@ -73,6 +73,7 @@
       summoners: 'FLASH / HEAL'
     },
     buildSrc: 'u.gg',
+    duo: null,
     build: [
       { i: 1, name: "Doran's Blade", tag: 'start', icon: 'https://ddragon.leagueoflegends.com/cdn/15.6.1/img/item/1055.png' },
       { i: 2, name: 'Health Potion', tag: 'start', icon: 'https://ddragon.leagueoflegends.com/cdn/15.6.1/img/item/2003.png' },
@@ -166,7 +167,42 @@
       : `BUILD // ${state.buildSrc}`;
     $('buildList').innerHTML = renderBuildList(state.build);
 
+    renderDuo();
     renderLog();
+  }
+
+  function renderDuo() {
+    const standard = standardInterface();
+    const panel = $('duoPanel');
+    if (!panel) return;
+    const duo = state.duo;
+    const recs = (duo && Array.isArray(duo.recs)) ? duo.recs : [];
+    if (!duo || !recs.length) { panel.hidden = true; return; }
+    panel.hidden = false;
+    const myRole = (duo.myRole || '').toUpperCase();
+    $('duoTitle').textContent = standard
+      ? `Best ${titleCase(duo.myRole)} pairs with ${duo.partner}`
+      : `BEST PAIRS // ${myRole} × ${(duo.partner || '').toUpperCase()}`;
+    $('duoList').innerHTML = recs.map((r, i) => {
+      const wr = (typeof r.win_rate === 'number') ? r.win_rate.toFixed(1) : '—';
+      const tier = esc(r.tier || '');
+      const label = esc(r.tier_label || '');
+      const games = r.games ? `<span class="duo-games">${fmtGames(r.games)} games</span>` : '';
+      return `<div class="duo-row">` +
+        `<span class="duo-rank">${i + 1}</span>` +
+        `<span class="duo-champ">${esc(r.champion || '')}</span>` +
+        `<span class="duo-tier tier-${tier}" title="${label}">${tier}</span>` +
+        `<span class="duo-wr">${wr}<small>%</small></span>` +
+        games +
+        `</div>`;
+    }).join('');
+    $('duoSample').textContent = duo.sample || '';
+  }
+
+  function titleCase(s) { s = s || ''; return s.charAt(0).toUpperCase() + s.slice(1); }
+  function fmtGames(n) {
+    n = Number(n) || 0;
+    return n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + 'k' : String(n);
   }
 
   function renderBuildList(items) {
@@ -1200,6 +1236,8 @@
         state.champ = p.champ || state.champ; state.enemy = p.enemy; state.wr = p.wr;
         state.wrLabel = p.label; state.wrTag = p.tag; state.sample = p.sample; state.selecting = false;
         renderMonitor(); renderOverlay(); break;
+      case 'duo_recs':
+        state.duo = (p && p.active) ? p : null; renderMonitor(); break;
       case 'rune_page': state.runes = p; renderMonitor(); break;
       case 'build': state.buildSrc = p.src; state.build = p.items || []; renderMonitor(); break;
       case 'import_ok': state.imported = true; renderMonitor(); break;
@@ -1230,6 +1268,7 @@
     state.wrLabel = s.wrLabel || ''; state.wrTag = s.wrTag || 'info'; state.sample = s.sample || '';
     if (s.runes) state.runes = s.runes;
     state.buildSrc = s.buildSrc || 'idle'; state.build = s.build || []; state.inGame = !!s.inGame;
+    state.duo = (s.duo && s.duo.active) ? s.duo : null;
     state.history.error = s.historyError || state.history.error;
     applyInterface(state.settings.interface_style);
     applyTheme(s.theme || state.settings.phosphor);
@@ -1240,6 +1279,7 @@
       selecting: true,
       champ: '', champMeta: '[ in champ select · selecting… ]', imported: false,
       enemy: '', wr: null, wrLabel: '', wrTag: 'info', sample: '', buildSrc: 'idle', build: [],
+      duo: null,
       runes: { keystone: '', primary: '', secondary: '', primaryMinor: '', secondaryMinor: '', summoners: '' }
     });
   }
@@ -1247,6 +1287,7 @@
     Object.assign(state, {
       champ: '', champMeta: '[ awaiting champ select ]', imported: false, selecting: false,
       enemy: '', wr: null, wrLabel: '', sample: '', buildSrc: 'idle', build: [], log: [], inGame: false,
+      duo: null,
       runes: { keystone: '', primary: '', secondary: '', primaryMinor: '', secondaryMinor: '', summoners: '' }
     });
   }

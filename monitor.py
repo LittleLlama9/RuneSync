@@ -31,7 +31,7 @@ class ChampSelectMonitor:
                  on_game_start=None, on_game_end=None, on_league_closed=None,
                  on_matchup_winrate=None, on_item_build=None, on_import=None,
                  on_runes_imported=None, on_champ_detected=None, on_build_detail=None,
-                 on_champ_select_enter=None):
+                 on_champ_select_enter=None, on_duo_recommendations=None):
         self.lcu = lcu
         self.ugg = ugg
         self.overrides = overrides
@@ -57,6 +57,12 @@ class ChampSelectMonitor:
         # () fired once each time we freshly enter champ select, so the UI can
         # clear last game's champ/matchup panels back to a "selecting" state.
         self._on_champ_select_enter = on_champ_select_enter
+        # (partner_champ, partner_role, my_role, recs[]) fired once when your
+        # botlane lane partner has LOCKED their champ and you have not locked
+        # yet — recs is the best champions for you to pair with it. Read-only /
+        # additive; ships inert (empty recs, no callback noise) when the data
+        # bundle has no `duos` section yet.
+        self._on_duo_recommendations = on_duo_recommendations
         self._stop_event = threading.Event()
         # Serializes rune/item-set imports. The Reimport button (main.py) pushes
         # _import_runes on its own thread while the poll loop also calls it on
@@ -81,6 +87,7 @@ class ChampSelectMonitor:
         self._pick_turn_fired: bool = False  # whether we've fired counterpick for this turn
         self._matchup_override: Optional[str] = None
         self._all_picks_finalized: bool = False
+        self._duo_done_for: str = ""         # partner champ we already ran duo recs for
         # Game state
         self._in_game: bool = False
         self._lcu_fail_count: int = 0
@@ -178,6 +185,7 @@ class ChampSelectMonitor:
                 self._pick_turn_fired = False
                 self._matchup_override = None
                 self._all_picks_finalized = False
+                self._duo_done_for = ""
                 self._my_champ = ""
             self._last_phase = phase
             return
@@ -194,6 +202,7 @@ class ChampSelectMonitor:
             self._pick_turn_fired = False
             self._matchup_override = None
             self._all_picks_finalized = False
+            self._duo_done_for = ""
             if self._on_champ_select_enter:
                 self._on_champ_select_enter()
         self._last_phase = phase
@@ -266,6 +275,21 @@ class ChampSelectMonitor:
             self._all_picks_finalized = True
             self._enemy_names_evaluated = frozenset()
         self._update_enemy_laner(session)
+
+        # ── Botlane duo recommendation ─────────────────────────────────────
+        # When your botlane lane partner has locked their champ and you have not
+        # locked yet, recommend the best champs for YOU to pair with it. Fires
+        # once per locked partner champ. Silent/inert until the bundle carries
+        # duo data (get_best_partners returns []).
+        if self._my_role in ("bot", "support") and not self._my_pick_completed(session):
+            partner_champ, partner_role = self._get_locked_botlane_partner(session)
+            if partner_champ and self._duo_done_for != partner_champ:
+                self._duo_done_for = partner_champ
+                threading.Thread(
+                    target=self._run_duo_lookup,
+                    args=(partner_champ, partner_role, self._my_role),
+                    daemon=True,
+                ).start()
 
         # ── It's your pick turn and you haven't locked in yet ──────────────
         # Fire once per turn: show counterpick suggestions if enemy laner is
@@ -451,6 +475,68 @@ class ChampSelectMonitor:
                 self.log(f"     {i}. {c['champion']}  ({c['win_rate']:.1f}% WR)", "success")
         except Exception as e:
             self.log(f"  ⚠  Counters lookup failed: {e}", "warn")
+
+    def _my_pick_completed(self, session: dict) -> bool:
+        """True once our own pick action is locked in (completed)."""
+        my_cell = session.get("localPlayerCellId", -1)
+        for action_group in session.get("actions", []):
+            for action in action_group:
+                if (action.get("actorCellId") == my_cell
+                        and action.get("type") == "pick"
+                        and action.get("completed", False)):
+                    return True
+        return False
+
+    def _get_locked_botlane_partner(self, session: dict):
+        """Return (partner_champ_name, partner_role) if our botlane lane partner
+        has locked their champion, else (None, None).
+
+        Partner = the teammate assigned to the complementary botlane role
+        (bot<->support). "Locked" means their pick action is completed; a mere
+        hover (myTeam.championId set with no completed action) does not count.
+        """
+        if self._my_role not in ("bot", "support"):
+            return None, None
+        partner_role = "support" if self._my_role == "bot" else "bot"
+        partner_cell = None
+        for p in session.get("myTeam", []):
+            pos = (p.get("assignedPosition") or "").lower()
+            if _LCU_POSITION_TO_ROLE.get(pos) == partner_role:
+                partner_cell = p.get("cellId")
+                break
+        if partner_cell is None:
+            return None, None
+        for action_group in session.get("actions", []):
+            for action in action_group:
+                if (action.get("actorCellId") == partner_cell
+                        and action.get("type") == "pick"
+                        and action.get("completed", False)
+                        and action.get("championId", 0) > 0):
+                    name = self._champ_name_map.get(action.get("championId"), "")
+                    if name:
+                        return name, partner_role
+        return None, None
+
+    def _run_duo_lookup(self, partner_champ: str, partner_role: str, my_role: str):
+        """Background thread: find the best champs to pair with a locked partner."""
+        try:
+            recs = self.ugg.get_best_partners(partner_champ, partner_role, top_n=5)
+        except Exception as e:
+            self.log(f"  ⚠ Duo lookup failed: {e}", "warn")
+            return
+        if not recs:
+            # Bundle has no duo data yet — stay inert (no log spam), but still
+            # notify the UI so any stale panel clears.
+            if self._on_duo_recommendations:
+                self._on_duo_recommendations(partner_champ, partner_role, my_role, [])
+            return
+        role_label = my_role.title()
+        self.log(f"  ✓  Best {role_label} pairs with locked {partner_champ}:", "success")
+        for i, r in enumerate(recs, 1):
+            self.log(f"     {i}. {r['champion']}  ({r['win_rate']:.1f}% WR — {r['tier_label']})",
+                     "success")
+        if self._on_duo_recommendations:
+            self._on_duo_recommendations(partner_champ, partner_role, my_role, recs)
 
     def _run_matchup_lookup(self, my_champ: str, enemy_champ: str, role: str):
         """Background thread: scrape u.gg matchup data and emit to log."""

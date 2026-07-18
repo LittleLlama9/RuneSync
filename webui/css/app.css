@@ -152,6 +152,25 @@ body {
 }
 .build-list .bitem-name { }
 
+/* best-pairs (botlane duo recommendations) */
+.duo-list { font-size:18px; line-height:1.6; }
+.duo-row { display:flex; align-items:center; gap:8px; }
+.duo-row .duo-rank { color:var(--pd); min-width:18px; flex-shrink:0; }
+.duo-row .duo-champ { flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.duo-row .duo-tier { flex-shrink:0; font-size:12px; padding:0 5px; border:1px solid var(--pd); border-radius:2px; color:var(--pd); }
+.duo-row .duo-tier.tier-S { color:var(--pb); border-color:var(--pb); }
+.duo-row .duo-tier.tier-A { color:var(--pb); }
+.duo-row .duo-wr { color:var(--pb); flex-shrink:0; min-width:52px; text-align:right; }
+.duo-row .duo-wr small { font-size:11px; color:var(--pd); }
+.duo-row .duo-games { color:var(--pd); font-size:12px; flex-shrink:0; }
+:root[data-interface="standard"] .duo-list { font-size:14px; line-height:1.6; }
+:root[data-interface="standard"] .duo-row .duo-rank,
+:root[data-interface="standard"] .duo-row .duo-games,
+:root[data-interface="standard"] .duo-row .duo-wr small { color:var(--std-muted); }
+:root[data-interface="standard"] .duo-row .duo-wr { color:var(--std-text); font-weight:600; }
+:root[data-interface="standard"] .duo-row .duo-tier { color:var(--std-muted); border-color:var(--std-muted); }
+
+
 /* dispatch log */
 .log { font-family:'Space Mono',monospace; font-size:11px; line-height:1.95; color:var(--p);
   max-height:150px; overflow-y:auto; }
