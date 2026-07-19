@@ -31,6 +31,15 @@ _ROLE_TO_POSITION = {
     "utility": "UTILITY",
 }
 
+# Live Client Data `position` value  ->  app role token (for skill-order lookup).
+_POSITION_TO_ROLE = {
+    "TOP": "top", "JUNGLE": "jungle", "MIDDLE": "mid",
+    "BOTTOM": "bot", "UTILITY": "support",
+}
+
+# Ability slots in level-up order of interest.
+_ABILITIES = ("Q", "W", "E", "R")
+
 # Neutral-objective spawn/respawn model. Times are in SECONDS of game clock and
 # reflect the live balance state current as of patch 16.x — update the numbers
 # here (only here) when Riot changes objective timings.
@@ -200,15 +209,126 @@ def _team_gold(all_game_data: dict, me: dict, gold_fn) -> Optional[dict]:
     return {"ours": ours, "theirs": theirs, "diff": ours - theirs}
 
 
+def _position_to_role(position: str) -> str:
+    return _POSITION_TO_ROLE.get(str(position or "").upper(), "")
+
+
+def _ability_ranks(all_game_data: dict) -> dict:
+    """Current Q/W/E/R ranks for the local player from Live Client Data.
+
+    `activePlayer.abilities` is present only for the local player (no other
+    player's ability levels are exposed), which keeps this strictly about the
+    user's own skill leveling.
+    """
+    ap = all_game_data.get("activePlayer") or {}
+    abilities = ap.get("abilities") or {}
+    ranks = {}
+    for slot in _ABILITIES:
+        entry = abilities.get(slot) or {}
+        try:
+            ranks[slot] = int(entry.get("abilityLevel") or 0)
+        except (TypeError, ValueError):
+            ranks[slot] = 0
+    return ranks
+
+
+def _ult_cap(level: int) -> int:
+    """Max ultimate rank legal at a given champion level (6/11/16 unlocks)."""
+    if level >= 16:
+        return 3
+    if level >= 11:
+        return 2
+    if level >= 6:
+        return 1
+    return 0
+
+
+def next_skill(ranks: dict, level: int,
+               skill_seq=None, skill_max=None) -> Optional[str]:
+    """Recommend the next ability to level ("Q"/"W"/"E"/"R"), or None if maxed.
+
+    The popular *exact* level order (`skill_seq`, e.g. ["W","Q","E","Q",...]) is
+    authoritative and is walked point-by-point: the recommendation is the
+    earliest scheduled point the player has not yet taken. When the player is
+    exactly on script this is simply the next entry; when they deviated (say
+    they skipped an early W) it catches that missed ability up rather than
+    blindly following the index.
+
+    Crucially the sequence also encodes each champion's *real* ability caps and
+    unlock timing — Q/W/E appear five times, R three (or six for Udyr), and R
+    can appear at level 1 for champions that allow it. So the walk never needs
+    the generic 5/6/11/16 rules and works for nonstandard kits. Those generic
+    caps are only used as a last-resort fallback for a champion with no scraped
+    order at all (`skill_seq` empty), where `skill_max` priority is the best
+    available signal. `level` likewise only matters to that fallback; the
+    sequence walk is purely points-based, which also handles banked points.
+    """
+    ranks = {k: int((ranks or {}).get(k) or 0) for k in _ABILITIES}
+    seq = [s for s in (skill_seq or []) if s in _ABILITIES]
+
+    if seq:
+        # Walk the popular order; the first scheduled point the player is behind
+        # on is the pick. On script that's the next entry; off script it catches
+        # up the earliest missed ability. Per-ability counts in `seq` are the
+        # champion's real caps, so nothing illegal can be returned.
+        seen = {k: 0 for k in _ABILITIES}
+        for ab in seq:
+            seen[ab] += 1
+            if seen[ab] > ranks[ab]:
+                return ab
+        # Player has taken every point the scraped order schedules (typically
+        # levels 16-18, beyond the popular 15-point sequence): fall through to
+        # the generic-cap fallback for the remaining points.
+
+    level = int(level or 0)
+    if ranks["Q"] >= 5 and ranks["W"] >= 5 and ranks["E"] >= 5 and ranks["R"] >= 3:
+        return None
+
+    spent = sum(ranks.values())
+    # The next point (the spent+1-th) is gained at champion level spent+1; with
+    # banked points the player may already be higher, so allow the current level.
+    target = max(level, spent + 1)
+    ult_cap = _ult_cap(target)
+    qwe_cap = min(5, (target + 1) // 2)
+
+    def can(ab: str) -> bool:
+        if ab == "R":
+            return ranks["R"] < ult_cap
+        return ab in ("Q", "W", "E") and ranks[ab] < 5 and ranks[ab] < qwe_cap
+
+    # Rank the ultimate whenever it's available, else the max-priority basic
+    # that's still legal to level.
+    if can("R"):
+        return "R"
+    order = [s for s in (skill_max or []) if s in ("Q", "W", "E")]
+    for s in ("Q", "W", "E"):
+        if s not in order:
+            order.append(s)
+    for ab in order:
+        if can(ab):
+            return ab
+    # Every basic is at this level's cap: take the highest priority not-yet-maxed.
+    for ab in order:
+        if ranks[ab] < 5:
+            return ab
+    if ranks["R"] < 3:
+        return "R"
+    return None
+
+
 def build_hud(all_game_data: dict,
               fallback_role: Optional[str] = None,
-              gold_fn=None) -> Optional[dict]:
+              gold_fn=None,
+              skill_lookup=None) -> Optional[dict]:
     """Build a UI-ready HUD snapshot, or None if the payload is unusable.
 
     `fallback_role` is the local player's champ-select role (app token like
     "mid"/"bot"); used only when the Live Client Data `position` is blank.
     `gold_fn(item_ids)->int` estimates a player's invested gold from their held
     items (defaults to the item_data catalog); injectable for testing.
+    `skill_lookup(champion, role)->{"order":[...],"max":[...]}|None` supplies the
+    champion's popular skill order (from the U.GG-sourced bundle) so the HUD can
+    show which ability to level next; omitted (no skill block) when unavailable.
     """
     if not isinstance(all_game_data, dict):
         return None
@@ -268,4 +388,24 @@ def build_hud(all_game_data: dict,
             "level": my_level - opp_level,
             "gold": my_item_gold - opp_item_gold,
         }
+
+    if skill_lookup is not None:
+        try:
+            role_token = (_position_to_role(hud["me"]["position"])
+                          or (str(fallback_role).strip().lower()
+                              if fallback_role else ""))
+            info = skill_lookup(hud["me"]["champion"], role_token) or {}
+        except Exception:
+            info = {}
+        seq = info.get("order") or []
+        smax = info.get("max") or []
+        if seq or smax:
+            ranks = _ability_ranks(all_game_data)
+            nxt = next_skill(ranks, my_level, seq, smax)
+            hud["skill"] = {
+                "next": nxt,
+                "ranks": ranks,
+                "max_order": smax,
+                "maxed": nxt is None,
+            }
     return hud

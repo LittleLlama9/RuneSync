@@ -247,6 +247,24 @@
       rows.push(`<div class="hud-row"><span class="hud-k">LVL</span><span class="hud-v">${me.level} vs ${opp.level} ${lvlDelta}</span></div>`);
     }
 
+    // Next ability to level (from the popular skill order in the data bundle).
+    if (hud.skill) {
+      const sk = hud.skill;
+      let v;
+      if (sk.maxed || !sk.next) {
+        v = 'all abilities maxed';
+      } else {
+        const nextBadge = `<span class="hud-skill-next">${esc(sk.next)}</span>`;
+        const r = sk.ranks || {};
+        const ranks = ['Q', 'W', 'E', 'R']
+          .map(k => `${k}${r[k] || 0}`).join(' ');
+        const maxOrder = (sk.max_order && sk.max_order.length)
+          ? ` · max ${sk.max_order.map(esc).join('>')}` : '';
+        v = `level ${nextBadge} next · <span class="hud-skill-ranks">${ranks}</span>${maxOrder}`;
+      }
+      rows.push(`<div class="hud-row"><span class="hud-k">SKILL</span><span class="hud-v">${v}</span></div>`);
+    }
+
     // Objective timers.
     const objs = (hud.objectives || []).map(o => {
       let t;

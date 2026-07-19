@@ -183,10 +183,15 @@ body {
 .hud-obj { white-space:nowrap; }
 .hud-obj b { color:var(--pd); font-weight:400; }
 .hud-obj .up { color:var(--pb); }
+.hud-skill-next { display:inline-block; min-width:16px; padding:0 5px; border-radius:3px;
+  background:var(--pb); color:var(--bg); font-weight:700; text-align:center; }
+.hud-skill-ranks { color:var(--pd); letter-spacing:.5px; }
 :root[data-interface="standard"] .hud { font-size:14px; }
 :root[data-interface="standard"] .hud-row .hud-k { color:var(--std-muted); }
 :root[data-interface="standard"] .hud-row .hud-v { color:var(--std-text); }
 :root[data-interface="standard"] .hud-obj b { color:var(--std-muted); }
+:root[data-interface="standard"] .hud-skill-next { background:var(--std-accent, var(--pb)); color:#fff; }
+:root[data-interface="standard"] .hud-skill-ranks { color:var(--std-muted); }
 
 
 /* in-game defensive item recommender */

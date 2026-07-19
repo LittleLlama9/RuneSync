@@ -206,7 +206,8 @@ class ChampSelectMonitor:
 
         if self._on_hud:
             try:
-                hud = live_hud.build_hud(data, fallback_role=self._my_role)
+                hud = live_hud.build_hud(data, fallback_role=self._my_role,
+                                         skill_lookup=self._skill_lookup)
                 if hud:
                     self._on_hud(hud)
             except Exception:
@@ -219,6 +220,17 @@ class ChampSelectMonitor:
                     self._on_item_recs(recs)
             except Exception:
                 pass
+
+    def _skill_lookup(self, champion: str, role: str):
+        """Popular skill order for `champion`/`role` from the bundle, or None.
+
+        Non-blocking wrapper around the U.GG-sourced bundle so the HUD can show
+        which ability to level next. Any failure yields None (skill line hidden).
+        """
+        try:
+            return self.ugg.get_skill_order(champion, role or "auto")
+        except Exception:
+            return None
 
     def _tick(self):
         phase = self.lcu.get_game_flow_phase()

@@ -549,6 +549,35 @@ class UGGClient:
             raise RuntimeError(f"Failed to fetch build for {champion_name} from server.")
         return result
 
+    def get_skill_order(self, champion_name: str,
+                        role: str = "auto") -> Optional[dict]:
+        """Popular skill-level order for the in-game HUD, or None if unavailable.
+
+        Returns {"order": ["W","Q","E",...], "max": ["Q","E","W"]} where `order`
+        is the popular exact level sequence and `max` is the ability max
+        priority. Bundle-only and non-blocking (the HUD polls ~1x/sec, so this
+        never triggers a live fetch or waits on the download); missing skill
+        data — e.g. an older bundle built before skill scraping — yields None so
+        the HUD simply omits the "next skill" line.
+        """
+        if not _bundle:
+            return None
+        champ_builds = _bundle.get("builds", {}).get(champion_name.lower(), {})
+        if not champ_builds:
+            return None
+        entry = champ_builds.get(role) if role and role != "auto" else None
+        if not entry or not (entry.get("skill_order") or entry.get("skill_max")):
+            # Fall back to any role that actually carries skill data.
+            entry = next((b for b in champ_builds.values()
+                          if b.get("skill_order") or b.get("skill_max")), entry)
+        if not entry:
+            return None
+        order = entry.get("skill_order") or []
+        smax = entry.get("skill_max") or []
+        if not order and not smax:
+            return None
+        return {"order": order, "max": smax}
+
     def get_counters(self, enemy_champ: str, role: str = "auto",
                      top_n: int = 5) -> list[dict]:
         _wait_for_bundle()

@@ -154,3 +154,84 @@ def test_find_active_summoner_fallback_without_riot_id():
     p["riotIdTagLine"] = ""
     data = {"activePlayer": {"summonerName": "Solo"}, "allPlayers": [p]}
     assert live_hud._find_active_player(data) is p
+
+
+# ---- next_skill: which ability to level next ----
+
+def _ranks(q=0, w=0, e=0, r=0):
+    return {"Q": q, "W": w, "E": e, "R": r}
+
+
+def test_next_skill_follows_popular_first_point():
+    # W-first opener: nothing spent, level 1 -> take the sequence's first pick.
+    seq = ["W", "Q", "E", "Q", "Q", "R", "Q", "W"]
+    assert live_hud.next_skill(_ranks(), 1, seq, ["Q", "E", "W"]) == "W"
+
+
+def test_next_skill_indexes_by_points_spent():
+    seq = ["Q", "W", "Q", "E", "Q", "R"]
+    # Two points spent (Q1, W1) -> third pick in the sequence is Q.
+    assert live_hud.next_skill(_ranks(q=1, w=1), 2, seq, ["Q", "W", "E"]) == "Q"
+
+
+def test_next_skill_takes_ultimate_at_level_six():
+    seq = ["Q", "W", "E", "Q", "Q", "R"]
+    # 5 basics spent, level 6 -> the sequence's 6th pick is R and it's now legal.
+    assert live_hud.next_skill(_ranks(q=3, w=1, e=1), 6, seq, ["Q", "E", "W"]) == "R"
+
+
+def test_next_skill_self_corrects_off_script():
+    # Popular order is W,Q,E,... but the player took W then E (skipped Q).
+    # The walk catches up the earliest missed scheduled ability: Q.
+    seq = ["W", "Q", "E", "Q", "Q", "R"]
+    assert live_hud.next_skill(_ranks(w=1, e=1), 3, seq, ["Q", "E", "W"]) == "Q"
+
+
+def test_next_skill_trusts_sequence_for_nonstandard_ult_timing():
+    # A champion whose popular order levels R at level 1 (e.g. Udyr-style).
+    # Generic 6/11/16 unlock rules would forbid it; the scraped order must win.
+    seq = ["R", "Q", "W", "E", "R", "Q"]
+    assert live_hud.next_skill(_ranks(), 1, seq, ["Q", "W", "E"]) == "R"
+
+
+def test_next_skill_data_driven_caps_allow_extra_ranks():
+    # Udyr's R has six ranks; the popular order lists R six times, so a player
+    # with five points in R can still be told to take a sixth.
+    seq = ["R"] * 6 + ["Q", "W", "E"]
+    assert live_hud.next_skill(_ranks(r=5), 11, seq, ["R", "Q", "W"]) == "R"
+
+
+def test_next_skill_returns_none_when_maxed():
+    assert live_hud.next_skill(_ranks(q=5, w=5, e=5, r=3), 18, [], []) is None
+
+
+def test_next_skill_priority_fallback_without_sequence():
+    # No exact sequence available -> use max priority (E>Q>W) with ult rules.
+    assert live_hud.next_skill(_ranks(), 1, [], ["E", "Q", "W"]) == "E"
+
+
+def test_build_hud_includes_skill_block():
+    data = _payload()
+    data["allPlayers"][0]["level"] = 6  # the local "Me" player
+    data["activePlayer"]["abilities"] = {
+        "Q": {"abilityLevel": 3}, "W": {"abilityLevel": 1},
+        "E": {"abilityLevel": 1}, "R": {"abilityLevel": 0},
+    }
+
+    def lookup(champ, role):
+        assert champ == "Me"
+        return {"order": ["Q", "W", "E", "Q", "Q", "R"], "max": ["Q", "E", "W"]}
+
+    hud = live_hud.build_hud(data, gold_fn=_gold, skill_lookup=lookup)
+    assert hud["skill"]["ranks"] == {"Q": 3, "W": 1, "E": 1, "R": 0}
+    assert hud["skill"]["max_order"] == ["Q", "E", "W"]
+    # 5 points spent, level 6 -> the sequence's 6th pick (the ultimate).
+    assert hud["skill"]["next"] == "R"
+    assert hud["skill"]["maxed"] is False
+
+
+def test_build_hud_omits_skill_when_lookup_empty():
+    hud = live_hud.build_hud(_payload(), gold_fn=_gold,
+                             skill_lookup=lambda c, r: None)
+    assert "skill" not in hud
+
