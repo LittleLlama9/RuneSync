@@ -1568,7 +1568,16 @@ class HistoryStore:
                          WHERE r2.run_id = sr.id
                            AND p2.team_id = p.team_id
                            AND r2.participant_id <> m.local_participant_id
-                       ) AS team_best_other_rank
+                       ) AS team_best_other_rank,
+                       (SELECT MAX(r3.match_rank)
+                          FROM score_results r3
+                          JOIN participants p3
+                            ON p3.game_id = m.game_id
+                           AND p3.participant_id = r3.participant_id
+                         WHERE r3.run_id = sr.id
+                           AND p3.team_id = p.team_id
+                           AND r3.participant_id <> m.local_participant_id
+                       ) AS team_worst_other_rank
                 FROM matches m
                 JOIN participants p
                   ON p.game_id = m.game_id

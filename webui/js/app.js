@@ -485,13 +485,17 @@
     return 'ROUGH GAME';
   }
   function contextLabel(rank, ctx) {
-    if (!ctx) return null;
-    const teamBestOther = Number(ctx.teamBestOther);
-    if (!Number.isFinite(teamBestOther) || ctx.won == null) return null;
-    if (!Number.isFinite(rank)) return null;
-    if (rank <= 3 && teamBestOther >= 5) {
-      return ctx.won ? 'CARRIED' : 'UNLUCKY';
-    }
+    if (!ctx || ctx.won == null || !Number.isFinite(rank)) return null;
+    const tbo = Number(ctx.teamBestOther);
+    const two = Number(ctx.teamWorstOther);
+    const won = !!ctx.won;
+    const teamBest = Number.isFinite(tbo) && rank < tbo;
+    if (won && rank <= 3 && Number.isFinite(tbo) && tbo >= 5) return 'HARD CARRY';
+    if (!won && rank <= 3 && Number.isFinite(tbo) && tbo >= 5) return 'UNLUCKY';
+    if (won && rank <= 5 && Number.isFinite(two) && two <= 5) return 'STOMP';
+    if (won && rank >= 6 && Number.isFinite(tbo) && tbo <= 3) return 'PASSENGER';
+    if (!won && teamBest && rank >= 4 && rank <= 6) return 'LONE WOLF';
+    if (!won && rank >= 6 && Number.isFinite(tbo) && tbo >= 6) return 'OUTCLASSED';
     return null;
   }
   function scoreBand(score) {
@@ -548,14 +552,14 @@
   }
   function rankOrderLabel(row, ctx) {
     const rank = Number(row.match_rank);
+    const hasConf = !(row.rank_confidence == null || row.rank_confidence === '');
+    const confidence = hasConf ? Number(row.rank_confidence) : null;
+    if (confidence != null && Number.isFinite(confidence) && confidence < 0.7) {
+      return 'CLOSE RANKING';
+    }
     const context = contextLabel(rank, ctx);
     if (context) return context;
-    if (row.rank_confidence == null || row.rank_confidence === '') {
-      return rankLabel(rank);
-    }
-    const confidence = Number(row.rank_confidence);
-    if (!Number.isFinite(confidence)) return rankLabel(rank);
-    return confidence < 0.7 ? 'CLOSE RANKING' : rankLabel(rank);
+    return rankLabel(rank);
   }
   function shortHash(value) {
     const text = String(value || '');
@@ -647,7 +651,7 @@
           `<div class="history-score"><span><span class="classic-copy">DAEMON</span><span class="standard-copy">DAEMON score</span></span>` +
             `<strong>${score.toFixed(1)}</strong><em>${row.abstain ? 'WITHHELD' : scoreBand(score)}</em>` +
             `<small>${esc(range)}</small></div>` +
-          `<div class="history-rank ${rankClass(rank)}"><span>Match rank</span><strong>#${rank}</strong><em>${rankOrderLabel(row, { teamBestOther: row.team_best_other_rank, won: !!row.local_win })}</em></div>` +
+          `<div class="history-rank ${rankClass(rank)}"><span>Match rank</span><strong>#${rank}</strong><em>${rankOrderLabel(row, { teamBestOther: row.team_best_other_rank, teamWorstOther: row.team_worst_other_rank, won: !!row.local_win })}</em></div>` +
         `</article>`;
       }).join('');
     }
@@ -707,7 +711,11 @@
     const rankCtx = (p) => {
       const self = Number(p.match_rank);
       const others = (teamRanks[p.team_id] || []).filter(r => r !== self);
-      return { teamBestOther: others.length ? Math.min(...others) : NaN, won: !!p.win };
+      return {
+        teamBestOther: others.length ? Math.min(...others) : NaN,
+        teamWorstOther: others.length ? Math.max(...others) : NaN,
+        won: !!p.win,
+      };
     };
     $('reportResult').textContent = local.win ? 'VICTORY' : 'DEFEAT';
     $('reportResult').className = 'report-result ' + (local.win ? 'win' : 'loss');
