@@ -175,6 +175,19 @@
     renderItemRecs();
     renderDraft();
     renderLog();
+    applyOverlayCollapse();
+  }
+
+  function applyOverlayCollapse() {
+    // When the in-client overlay is painting the matchup + draft, hide the
+    // duplicated panels in the app window (and show a slim note); restore them
+    // when the overlay isn't up.
+    const collapse = state.overlayActive === true;
+    const mp = $('matchupPanel');
+    if (mp) mp.hidden = collapse;
+    if (collapse) { const dp = $('draftPanel'); if (dp) dp.hidden = true; }
+    const note = $('overlayNote');
+    if (note) note.hidden = !collapse;
   }
 
   function renderDuo() {
@@ -223,15 +236,8 @@
       ? `Live · ${mmss(hud.game_time)}`
       : `LIVE // ${mmss(hud.game_time)}`;
 
-    const me = hud.me, opp = hud.opponent, d = hud.delta;
+    const d = hud.delta;
     const rows = [];
-
-    // CS / min — the core farming feedback line.
-    const oppCs = opp ? `${esc(opp.champion)} ${opp.cs} (${opp.cs_per_min.toFixed(1)})` : '—';
-    const csDelta = d ? `<span class="hud-delta ${d.cs >= 0 ? 'up' : 'down'}">${signed(d.cs)}</span>` : '';
-    rows.push(
-      `<div class="hud-row"><span class="hud-k">CS</span>` +
-      `<span class="hud-v">You ${me.cs} (${me.cs_per_min.toFixed(1)}/m) · vs ${oppCs} ${csDelta}</span></div>`);
 
     // Gold — lane estimate (from held items) + team total.
     if (d || hud.team_gold) {
@@ -239,12 +245,6 @@
       const teamG = hud.team_gold
         ? `<span class="hud-delta ${hud.team_gold.diff >= 0 ? 'up' : 'down'}">${signed(hud.team_gold.diff)}g team</span>` : '';
       rows.push(`<div class="hud-row"><span class="hud-k">GOLD</span><span class="hud-v">${laneG} · ${teamG}</span></div>`);
-    }
-
-    // Level.
-    if (opp && d) {
-      const lvlDelta = `<span class="hud-delta ${d.level >= 0 ? 'up' : 'down'}">${signed(d.level)}</span>`;
-      rows.push(`<div class="hud-row"><span class="hud-k">LVL</span><span class="hud-v">${me.level} vs ${opp.level} ${lvlDelta}</span></div>`);
     }
 
     // Next ability to level (from the popular skill order in the data bundle).
@@ -264,17 +264,6 @@
       }
       rows.push(`<div class="hud-row"><span class="hud-k">SKILL</span><span class="hud-v">${v}</span></div>`);
     }
-
-    // Objective timers.
-    const objs = (hud.objectives || []).map(o => {
-      let t;
-      if (o.state === 'gone') t = '—';
-      else if (o.next_seconds == null) t = 'up';
-      else t = mmss(o.next_seconds);
-      const cls = (o.next_seconds == null && o.state !== 'gone') ? 'up' : '';
-      return `<span class="hud-obj"><b>${esc(o.name)}</b> <span class="${cls}">${t}</span></span>`;
-    }).join('');
-    if (objs) rows.push(`<div class="hud-row hud-objs"><span class="hud-k">OBJ</span><span class="hud-v">${objs}</span></div>`);
 
     $('hudBody').innerHTML = rows.join('');
   }
@@ -1406,6 +1395,8 @@
       case 'hud': state.hud = (p && p.me) ? p : null; renderHud(); break;
       case 'item_recs': state.itemRecs = (p && p.suggestions) ? p : null; renderItemRecs(); break;
       case 'draft': state.draft = (p && p.observations) ? p : null; renderDraft(); break;
+      case 'overlay_active':
+        state.overlayActive = !!(p && p.active); applyOverlayCollapse(); break;
       case 'history_sync': state.history.syncing = !!p.active; renderHistory(); break;
       case 'history_updated': state.history.loaded = false; loadHistory(true); break;
       case 'history_error': state.history.error = p.message || 'history sync failed'; renderHistory(); break;
@@ -1436,6 +1427,7 @@
     state.hud = (s.hud && s.hud.me) ? s.hud : null;
     state.itemRecs = (s.itemRecs && s.itemRecs.suggestions) ? s.itemRecs : null;
     state.draft = (s.draft && s.draft.observations) ? s.draft : null;
+    state.overlayActive = !!s.overlay_active;
     state.history.error = s.historyError || state.history.error;
     applyInterface(state.settings.interface_style);
     applyTheme(s.theme || state.settings.phosphor);

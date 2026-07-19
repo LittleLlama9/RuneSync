@@ -241,18 +241,75 @@ def _draft_of(st: dict):
     return None
 
 
+def _palette(interface: str, phosphor: str) -> dict:
+    """Colours for the overlay, derived from RuneSync's OWN interface + phosphor
+    so the panel reads as part of the app rather than the League client.
+
+    interface ∈ {"standard","classic"}; phosphor ∈ {"amber","green","ice"}.
+    Keys mirror the drawing code's colour roles. `deco` selects decoration:
+    "clean" (Standard: minimal), "crt" (Classic: brackets + scanlines).
+    """
+    phosphor = phosphor if phosphor in ("amber", "green", "ice") else "amber"
+    if interface == "classic":
+        accent, accent_br, dark, dd = {
+            "amber": ((255, 176, 0),   (255, 216, 122), (201, 138, 46), (107, 74, 0)),
+            "green": ((57, 255, 140),  (188, 255, 214), (43, 191, 106), (15, 94, 53)),
+            "ice":   ((127, 223, 255), (210, 244, 255), (79, 168, 207), (26, 74, 94)),
+        }[phosphor]
+        return {
+            "bg_top": (18, 16, 10), "bg_bot": (8, 7, 10), "alpha": 214,
+            "border": dd, "accent": accent, "accent_br": accent_br,
+            "hair": dd, "bullet": accent, "text": accent_br,
+            "muted": dark, "good": accent, "bad": (255, 85, 68),
+            "track": (255, 255, 255, 22), "deco": "crt",
+        }
+    # standard (default): dark navy + phosphor accent, matching the app's
+    # Standard interface tokens (--std-surface / --std-text / accent).
+    accent, accent_br = {
+        "amber": ((239, 183, 75),  (247, 221, 150)),
+        "green": ((98, 211, 154),  (176, 240, 208)),
+        "ice":   ((114, 201, 229), (188, 236, 247)),
+    }[phosphor]
+    return {
+        "bg_top": (26, 36, 52), "bg_bot": (9, 14, 22), "alpha": 206,
+        "border": (39, 52, 71), "accent": accent, "accent_br": accent_br,
+        "hair": (39, 52, 71), "bullet": accent, "text": (243, 240, 231),
+        "muted": (152, 166, 184), "good": (90, 192, 138), "bad": (239, 102, 96),
+        "track": (255, 255, 255, 26), "deco": "clean",
+    }
+
+
 def render_panel(state, theme: str = "amber", width: int = PANEL_WIDTH):
     """Render the overlay panel to an RGBA image, or None if there's nothing to
     show yet (state is falsy). Always renders at least a header while in champ
     select so the user can see the overlay is live.
 
-    The look is modelled on the League client itself: a deep-navy hextech panel
-    with a gold border, gold corner brackets, a filigree divider under the
-    wordmark, teal section bullets, and win-rate bars. `width` is the full image
-    width; the visible panel is inset by `_POUT` on every side for the shadow.
+    The palette matches RuneSync's own interface (`interface_style`) and phosphor
+    accent so the panel reads as part of the app, not the League client. Standard
+    is a clean dark-navy panel; Classic is an amber-CRT variant with corner
+    brackets and scanlines. `width` is the full image width; the visible panel is
+    inset by `_POUT` on every side for the translucent drop shadow.
     """
     if not state or not _HAVE_PIL:
         return None
+
+    interface = state.get("interface_style") or "standard"
+    phosphor = state.get("phosphor") or state.get("theme") or theme or "amber"
+    pal = _palette(interface, phosphor)
+    _GOLD    = pal["accent"]
+    _GOLD_BR = pal["accent_br"]
+    _GOLD_DK = pal["hair"]
+    _TEAL    = pal["bullet"]
+    _TEXT    = pal["text"]
+    _MUTED   = pal["muted"]
+    _GOOD    = pal["good"]
+    _BAD     = pal["bad"]
+    _BG_TOP  = pal["bg_top"]
+    _BG_BOT  = pal["bg_bot"]
+    _PANEL_A = pal["alpha"]
+    _TRACK   = pal["track"]
+    _BORDER  = pal["border"]
+    deco     = pal["deco"]
 
     # ── fonts ──
     f_title = _font("title", 17)
@@ -338,23 +395,30 @@ def render_panel(state, theme: str = "amber", width: int = PANEL_WIDTH):
 
     d = ImageDraw.Draw(img)
 
+    # ── CRT scanlines (Classic only): faint horizontal lines over the fill ──
+    if deco == "crt":
+        for yy in range(py0 + 2, py1 - 1, 3):
+            d.line([(px0 + 2, yy), (px1 - 2, yy)], fill=(0, 0, 0, 46), width=1)
+
+
     # subtle top sheen so the panel isn't flat
     d.rounded_rectangle([px0 + 1, py0 + 1, px1 - 1, py0 + 22],
                         radius=13, fill=(255, 255, 255, 12))
     d.rectangle([px0 + 1, py0 + 12, px1 - 1, py0 + 22], fill=(0, 0, 0, 0))
 
-    # ── border: dark gold frame + bright inner hairline ──
+    # ── border: hairline frame + faint inner accent line ──
     d.rounded_rectangle([px0, py0, px1 - 1, py1 - 1], radius=14,
-                        outline=_GOLD_DK + (255,), width=1)
+                        outline=_BORDER + (255,), width=1)
     d.rounded_rectangle([px0 + 1, py0 + 1, px1 - 2, py1 - 2], radius=13,
-                        outline=_GOLD + (70,), width=1)
+                        outline=_GOLD + (60,), width=1)
 
-    # ── gold corner brackets ──
-    cl = 14
-    _corner(d, px0 + 6, py0 + 6,  1,  1, cl, _GOLD_BR + (235,))
-    _corner(d, px1 - 6, py0 + 6, -1,  1, cl, _GOLD_BR + (235,))
-    _corner(d, px0 + 6, py1 - 6,  1, -1, cl, _GOLD_BR + (235,))
-    _corner(d, px1 - 6, py1 - 6, -1, -1, cl, _GOLD_BR + (235,))
+    # ── corner brackets: a terminal motif for Classic; Standard stays clean ──
+    if deco != "clean":
+        cl = 14
+        _corner(d, px0 + 6, py0 + 6,  1,  1, cl, _GOLD_BR + (235,))
+        _corner(d, px1 - 6, py0 + 6, -1,  1, cl, _GOLD_BR + (235,))
+        _corner(d, px0 + 6, py1 - 6,  1, -1, cl, _GOLD_BR + (235,))
+        _corner(d, px1 - 6, py1 - 6, -1, -1, cl, _GOLD_BR + (235,))
 
     # ── header: wordmark + phase tag + filigree divider ──
     d.text((tx, py0 + 13), "RUNE", font=f_title, fill=_GOLD_BR + (255,))
@@ -365,16 +429,22 @@ def render_panel(state, theme: str = "amber", width: int = PANEL_WIDTH):
         tw = d.textlength(tag, font=f_tag)
         d.text((rx - tw, py0 + 18), tag, font=f_tag, fill=_MUTED + (255,))
     dv = py0 + 40
-    midx = (tx + rx) // 2
-    d.line([(tx, dv), (midx - 6, dv)], fill=_GOLD_DK + (200,), width=1)
-    d.line([(midx + 6, dv), (rx, dv)], fill=_GOLD_DK + (200,), width=1)
-    _diamond(d, midx, dv, 3, _GOLD + (255,))
+    if deco == "clean":
+        d.line([(tx, dv), (rx, dv)], fill=_GOLD_DK + (150,), width=1)
+    else:
+        midx = (tx + rx) // 2
+        d.line([(tx, dv), (midx - 6, dv)], fill=_GOLD_DK + (200,), width=1)
+        d.line([(midx + 6, dv), (rx, dv)], fill=_GOLD_DK + (200,), width=1)
+        _diamond(d, midx, dv, 3, _GOLD + (255,))
 
     # ── draw pass ──
     cy = py0 + HEAD_H
     for kind, payload, h in items:
         if kind == "section":
-            _diamond(d, tx + 3, cy + 8, 3, _TEAL + (255,))
+            if deco == "clean":
+                d.rectangle([tx + 1, cy + 3, tx + 4, cy + 12], fill=_TEAL + (255,))
+            else:
+                _diamond(d, tx + 3, cy + 8, 3, _TEAL + (255,))
             d.text((tx + 13, cy), _fit(d, payload, f_label, inner_w - 13),
                    font=f_label, fill=_GOLD + (235,))
             lw = d.textlength(payload, font=f_label)
@@ -662,12 +732,26 @@ class OverlayController:
     """
 
     def __init__(self, state_provider: Callable[[], dict],
-                 should_show: Callable[[], bool]):
+                 should_show: Callable[[], bool],
+                 on_visibility: Optional[Callable[[bool], None]] = None):
         self._state_provider = state_provider
         self._should_show = should_show
+        self._on_visibility = on_visibility
         self._overlay = LayeredOverlay()
         self._stop = threading.Event()
         self._thread: Optional[threading.Thread] = None
+        self._last_visible: Optional[bool] = None
+
+    def _set_visible(self, visible: bool):
+        """Report a visibility change exactly once, best-effort."""
+        if visible == self._last_visible:
+            return
+        self._last_visible = visible
+        if self._on_visibility is not None:
+            try:
+                self._on_visibility(visible)
+            except Exception:
+                pass
 
     def start(self):
         if self._thread and self._thread.is_alive():
@@ -689,6 +773,7 @@ class OverlayController:
             self._overlay.destroy()
         except Exception:
             pass
+        self._set_visible(False)
 
     def _tick(self):
         if _HAVE_WIN32:
@@ -719,14 +804,17 @@ class OverlayController:
 
         if not want:
             self._overlay.hide()
+            self._set_visible(False)
             return
 
         if not self._overlay.ensure():
+            self._set_visible(False)
             return
         try:
             rect = win32gui.GetWindowRect(hwnd)
         except Exception:
             self._overlay.hide()
+            self._set_visible(False)
             return
 
         sx, sy, sw, sh = _screen_bounds()
@@ -734,3 +822,4 @@ class OverlayController:
         x, y = overlay_anchor(rect, w, h, sx, sy, sw, sh)
         if self._overlay.blit(img, x, y):
             self._overlay.show()
+            self._set_visible(True)

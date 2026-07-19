@@ -167,3 +167,70 @@ def test_premultiplied_bgra_order_and_size():
     b, g, r, a = tuple(overlay._to_premultiplied_bgra(px))
     assert a == 128 and r == 0 and b == 0
     assert 120 <= g <= 130                    # 255*128/255 ≈ 128, premultiplied
+
+
+# ── interface-matched re-skin ────────────────────────────────────────────────
+def test_palette_returns_distinct_standard_and_classic():
+    std = overlay._palette("standard", "amber")
+    cls = overlay._palette("classic", "amber")
+    for key in ("bg_top", "bg_bot", "text", "accent", "alpha", "deco", "border"):
+        assert key in std and key in cls
+    # Standard is the clean navy skin; Classic is the CRT terminal skin.
+    assert std["deco"] == "clean"
+    assert cls["deco"] == "crt"
+    # Both stay translucent so the client bleeds through.
+    assert 150 <= std["alpha"] <= 230
+    assert 150 <= cls["alpha"] <= 230
+
+
+def test_render_panel_interface_style_changes_output():
+    base = {"running": True, "champ": "Ahri", "enemy": "Zed",
+            "wr": 52.0, "wrLabel": "favored", "wrTag": "good"}
+    std = overlay.render_panel({**base, "interface_style": "standard", "phosphor": "amber"})
+    cls = overlay.render_panel({**base, "interface_style": "classic", "phosphor": "green"})
+    assert std is not None and cls is not None
+    # The two skins paint different pixels (scanlines/brackets/colors differ).
+    assert std.tobytes() != cls.tobytes()
+
+
+def test_render_panel_defaults_to_standard_interface():
+    # No interface_style key -> standard skin, backward-compatible signature.
+    img = overlay.render_panel({"running": True}, "amber")
+    ref = overlay.render_panel({"running": True, "interface_style": "standard"}, "amber")
+    assert img is not None and img.tobytes() == ref.tobytes()
+
+
+# ── overlay visibility -> app-panel collapse plumbing ────────────────────────
+def _visibility_api():
+    api = bridge.Api.__new__(bridge.Api)
+    api.pusher = bridge.Pusher()
+    api.snap = bridge.Api._idle_snapshot()
+    api.overlay_active = False
+    return api
+
+
+def test_on_overlay_visibility_pushes_and_tracks_state():
+    api = _visibility_api()
+    api._on_overlay_visibility(True)
+    assert api.overlay_active is True
+    assert api.snap["overlay_active"] is True
+    evts = api.pusher.drain()
+    assert len(evts) == 1
+    assert evts[0]["event"] == "overlay_active"
+    assert evts[0]["payload"] == {"active": True}
+
+    api._on_overlay_visibility(False)
+    assert api.overlay_active is False
+    p = api.pusher.drain()[0]["payload"]
+    assert p == {"active": False}
+
+
+def test_overlay_controller_reports_visibility_changes():
+    seen = []
+    ctl = overlay.OverlayController(state_provider=lambda: {},
+                                    should_show=lambda: False,
+                                    on_visibility=seen.append)
+    ctl._set_visible(True)
+    ctl._set_visible(True)      # no duplicate fire
+    ctl._set_visible(False)
+    assert seen == [True, False]

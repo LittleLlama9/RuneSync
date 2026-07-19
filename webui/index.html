@@ -53,7 +53,7 @@
                 <div class="champ-badge" id="champBadge" hidden>&gt;&gt; RUNES IMPORTED OK</div>
               </div>
 
-              <div class="panel">
+              <div class="panel" id="matchupPanel">
                 <span class="ptitle" id="matchupTitle">MATCHUP // idle</span>
                 <div class="wr-num" id="wrNum">—</div>
                 <div class="wr-dir" id="wrDir">awaiting matchup</div>
@@ -68,6 +68,11 @@
                   <input id="moInput" type="text" spellcheck="false" autocomplete="off">
                   <span class="go" id="moGo"><span class="classic-copy">[look up]</span><span class="standard-copy">Look up</span></span>
                 </div>
+              </div>
+
+              <div class="panel overlay-note" id="overlayNote" hidden>
+                <span class="ptitle">MATCHUP + DRAFT</span>
+                <div class="wr-dir">Shown in the in-client overlay while you're in champ select.</div>
               </div>
 
               <div class="panel" id="hudPanel" hidden>

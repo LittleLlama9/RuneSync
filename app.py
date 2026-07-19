@@ -77,6 +77,7 @@ def main():
         state_provider=api.get_overlay_state,
         should_show=lambda: bool(getattr(api, "running", False)
                                  and getattr(api, "in_champ_select", False)),
+        on_visibility=api._on_overlay_visibility,
     )
     api.overlay_ctl = overlay_ctl
 

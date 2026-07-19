@@ -89,6 +89,7 @@ class Api:
         self.status = "booting"
         self._quitting = False
         self.in_champ_select = False   # drives the champ-select overlay's visibility
+        self.overlay_active = False    # true while the in-client overlay is painted
         self._connect_lock = threading.Lock()
         self._connecting = False
         self._monitor_lock = threading.Lock()   # makes _start's check-and-set atomic
@@ -198,7 +199,22 @@ class Api:
             "counters": self.snap.get("counters"),
             "draft": self.snap.get("draft"),
             "theme": self.overrides.settings.get("phosphor", "amber"),
+            "phosphor": self.overrides.settings.get("phosphor", "amber"),
+            "interface_style": self._settings().get("interface_style", "standard"),
         }
+
+    def _on_overlay_visibility(self, active: bool):
+        """Called by the OverlayController when the in-client overlay shows/hides.
+        Pushes an `overlay_active` event so the app window can collapse the
+        matchup/draft panels the overlay is already showing (no redundancy),
+        and restore them when the overlay isn't up."""
+        active = bool(active)
+        self.overlay_active = active
+        self.snap["overlay_active"] = active
+        try:
+            self.pusher.push("overlay_active", {"active": active})
+        except Exception:
+            pass
 
     def boot(self):
         perks.warm()
@@ -241,6 +257,7 @@ class Api:
         st = {"status": self.status, "running": self.running,
               "theme": self.overrides.settings.get("phosphor", "amber"),
               "settings": self._settings(), "builds": self.get_builds(),
+              "overlay_active": self.overlay_active,
               "log": self.log_buf[-80:], "historyError": self._history_error}
         st.update(self.snap)
         return st
@@ -597,6 +614,8 @@ class Api:
     def _stop(self):
         self.running = False
         self.in_champ_select = False
+        if self.overlay_active:
+            self._on_overlay_visibility(False)
         if self.monitor:
             self.monitor.stop()
         self.pusher.push("running", {"on": False})
