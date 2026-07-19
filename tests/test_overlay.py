@@ -135,6 +135,25 @@ def test_render_panel_escapes_long_names_without_error():
     assert overlay.render_panel(state) is not None
 
 
+def test_render_panel_draft_picks_render_without_error():
+    # Observations carrying a `picks` list draw a second (gold) champion line.
+    state = {"running": True, "draft": {"observations": [
+        {"level": "warn", "short": "No hard engage",
+         "text": "Your team has no reliable hard engage.",
+         "picks": ["Leona", "Nautilus", "Rell"]},
+        {"level": "warn", "short": "All AD, add magic dmg",
+         "text": "Your team is fully AD.", "picks": ["Sylas"]},
+    ]}}
+    img = overlay.render_panel(state)
+    assert img is not None
+    # Picks add a line, so this is taller than the same obs without picks.
+    no_picks = overlay.render_panel({"running": True, "draft": {"observations": [
+        {"level": "warn", "short": "No hard engage", "text": "x"},
+        {"level": "warn", "short": "All AD, add magic dmg", "text": "y"},
+    ]}})
+    assert img.size[1] > no_picks.size[1]
+
+
 def test_premultiplied_bgra_order_and_size():
     # A 1x1 opaque red RGBA pixel -> premultiplied BGRA bytes = B,G,R,A.
     from PIL import Image

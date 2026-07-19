@@ -111,6 +111,77 @@ def test_every_observation_has_short_form():
             assert len(o["short"]) <= 30, f"short too long: {o['short']!r}"
 
 
+# ── champion suggestions (suggest_picks + picks wiring) ───────────────────────
+_SUGGEST_ATTRS = {
+    "Alpha":   {"damage_type": "AD", "cc": "none", "engage": True, "known": True},
+    "Bravo":   {"damage_type": "AD", "cc": "none", "engage": True, "known": True},
+    "Charlie": {"damage_type": "AP", "cc": "hard-aoe", "engage": False, "known": True},
+    "Delta":   {"damage_type": "AD", "cc": "none", "engage": True, "known": False},
+}
+_SUGGEST_WEIGHTS = {
+    "Alpha":   {"top": 80.0},
+    "Bravo":   {"top": 40.0, "jungle": 30.0},
+    "Charlie": {"top": 55.0},
+    "Delta":   {"top": 95.0},
+}
+
+
+def _sp(trait, role, taken=(), limit=3):
+    return draft_recs.suggest_picks(
+        trait, role, taken,
+        attrs_fn=lambda n: dict(_SUGGEST_ATTRS[n]),
+        roles_fn=lambda n: _SUGGEST_WEIGHTS.get(n, {}),
+        pool=list(_SUGGEST_ATTRS), limit=limit)
+
+
+def test_suggest_picks_ranks_by_role_rate_and_filters_trait():
+    # Only engage champs playable top, ranked by top play-rate. Charlie has no
+    # engage; Delta is not in the curated catalog (known=False) -> both dropped.
+    assert _sp("engage", "top") == ["Alpha", "Bravo"]
+
+
+def test_suggest_picks_excludes_taken_and_below_threshold():
+    # Alpha is taken; Bravo plays top at only 40% here but is above 12% -> kept.
+    assert _sp("engage", "top", taken={"Alpha"}) == ["Bravo"]
+    # Charlie only fits the hard_cc trait.
+    assert _sp("hard_cc", "top") == ["Charlie"]
+
+
+def test_suggest_picks_unknown_role_returns_empty():
+    assert _sp("engage", "auto") == []
+    assert _sp("engage", "") == []
+
+
+def test_ally_gaps_include_champion_picks():
+    def fake_suggest(trait, limit=3):
+        return {"engage": ["Leona", "Nautilus"], "ap": ["Sylas"]}.get(trait, [])
+
+    rec = draft_recs.build_draft_recs(["Darius", "Zed", "Jinx"], [],
+                                      profile_fn=_profile, suggest_fn=fake_suggest)
+    eng = next(o for o in rec["observations"] if o["short"] == "No hard engage")
+    assert eng["picks"] == ["Leona", "Nautilus"]
+    ad = next(o for o in rec["observations"] if o["short"] == "All AD, add magic dmg")
+    assert ad["picks"] == ["Sylas"]
+
+
+def test_enemy_reads_have_no_picks():
+    # Enemy-side observations are not pickable gaps -> never get a picks list,
+    # even if the suggester would return champions.
+    rec = draft_recs.build_draft_recs([], ["Darius", "Zed", "Graves"],
+                                      profile_fn=_profile,
+                                      suggest_fn=lambda trait, limit=3: ["Nope"])
+    assert rec["observations"]
+    assert all("picks" not in o for o in rec["observations"])
+
+
+def test_empty_picks_omits_key():
+    rec = draft_recs.build_draft_recs(["Darius", "Zed", "Jinx"], [],
+                                      profile_fn=_profile,
+                                      suggest_fn=lambda trait, limit=3: [])
+    eng = next(o for o in rec["observations"] if o["short"] == "No hard engage")
+    assert "picks" not in eng
+
+
 def test_strong_engage_comp_praised():
     rec = _call(["Leona", "Malphite", "Vi", "Jinx"], [])
     assert rec["ally"]["engage"] == 3

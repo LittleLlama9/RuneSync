@@ -217,6 +217,12 @@ body {
 :root[data-interface="standard"] .draft { font-size:13px; }
 :root[data-interface="standard"] .draft-row .draft-text { color:var(--std-text); }
 :root[data-interface="standard"] .draft-row .draft-mark { color:var(--std-muted); }
+.draft-picks { margin-top:5px; display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.draft-picks-lbl { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--pd); }
+.pick-chip { font-size:12px; font-weight:600; color:var(--pb); border:1px solid var(--pd);
+  border-radius:11px; padding:1px 9px; background:rgba(255,255,255,.035); }
+:root[data-interface="standard"] .draft-picks-lbl { color:var(--std-muted); }
+:root[data-interface="standard"] .pick-chip { color:var(--std-text); border-color:var(--std-muted); background:transparent; }
 
 
 /* dispatch log */

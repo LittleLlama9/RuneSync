@@ -583,18 +583,42 @@ class ChampSelectMonitor:
         if self._my_champ and self._my_champ not in ally:
             ally = ally + [self._my_champ]
         enemy = self._get_enemy_champ_names(session)
-        key = frozenset(ally) | frozenset("~" + e for e in enemy)
+        banned = self._get_banned_champ_names(session)
+        # Role gates the champion suggestions, so a lane swap must re-emit even
+        # if the picked champs are unchanged.
+        key = (frozenset(ally) | frozenset("~" + e for e in enemy)
+               | frozenset("!" + b for b in banned) | {"@" + (self._my_role or "")})
         if key == self._draft_done_for:
             return
         self._draft_done_for = key
         try:
-            recs = draft_recs.build_draft_recs(ally, enemy)
+            recs = draft_recs.build_draft_recs(
+                ally, enemy, my_role=self._my_role, taken=banned)
         except Exception:
             return
         try:
             self._on_draft(recs)
         except Exception:
             pass
+
+    def _get_banned_champ_names(self, session: dict) -> list[str]:
+        """Names of every banned champion (both teams), so the draft recommender
+        never suggests a champ that's off the board. Reads the session `bans`
+        block and any completed ban actions; degrades to [] on odd shapes."""
+        ids = set()
+        bans = session.get("bans")
+        if isinstance(bans, dict):
+            for grp in ("myTeamBans", "theirTeamBans"):
+                for cid in bans.get(grp) or []:
+                    if isinstance(cid, int) and cid > 0:
+                        ids.add(cid)
+        for action_group in session.get("actions", []):
+            for action in action_group:
+                if action.get("type") == "ban" and action.get("completed"):
+                    cid = action.get("championId", 0)
+                    if isinstance(cid, int) and cid > 0:
+                        ids.add(cid)
+        return [n for n in (self._champ_name_map.get(cid, "") for cid in ids) if n]
 
     def _get_enemy_champ_names(self, session: dict) -> list[str]:
         """Return names of all enemy champions that have been locked in (completed=True)."""

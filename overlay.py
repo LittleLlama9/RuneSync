@@ -300,12 +300,15 @@ def render_panel(state, theme: str = "amber", width: int = PANEL_WIDTH):
         add("section", "TEAM DRAFT", 22)
         for ob in (dr.get("observations") or [])[:3]:
             # Prefer the compact overlay phrasing; fall back to the full text
-            # (which the main window shows in full).
+            # (which the main window shows in full). `picks` names real champs
+            # the user could pick to fill the gap.
             if isinstance(ob, dict):
                 txt = ob.get("short") or ob.get("text")
+                picks = ob.get("picks") or []
             else:
                 txt = str(ob)
-            add("obs", txt, 21)
+                picks = []
+            add("obs", (txt, picks), 21 + (16 if picks else 0))
 
     if not (mu or co or dr):
         add("hint", "Analyzing draft…", 22)
@@ -438,9 +441,14 @@ def render_panel(state, theme: str = "amber", width: int = PANEL_WIDTH):
                                     radius=2, fill=_TEAL + (220,))
 
         elif kind == "obs":
+            txt, picks = payload
             _diamond(d, tx + 4, cy + 7, 2, _TEAL + (235,))
-            d.text((tx + 13, cy), _fit(d, payload or "", f_small, inner_w - 13),
+            d.text((tx + 13, cy), _fit(d, txt or "", f_small, inner_w - 13),
                    font=f_small, fill=_TEXT + (235,))
+            if picks:
+                pk = "→ " + ", ".join(picks[:3])
+                d.text((tx + 13, cy + 16), _fit(d, pk, f_small, inner_w - 13),
+                       font=f_small, fill=_GOLD + (240,))
 
         elif kind == "hint":
             d.text((tx, cy), payload, font=f_small, fill=_MUTED + (255,))

@@ -316,8 +316,14 @@
     $('draftBody').innerHTML = d.observations.map(o => {
       const lvl = (o.level === 'warn') ? 'warn' : (o.level === 'good') ? 'good' : 'info';
       const mark = lvl === 'warn' ? '!' : lvl === 'good' ? '✓' : '›';
+      let picks = '';
+      if (Array.isArray(o.picks) && o.picks.length) {
+        picks = `<div class="draft-picks"><span class="draft-picks-lbl">Consider</span>` +
+          o.picks.map(p => `<span class="pick-chip">${esc(p)}</span>`).join('') +
+          `</div>`;
+      }
       return `<div class="draft-row ${lvl}"><span class="draft-mark">${mark}</span>` +
-        `<span class="draft-text">${esc(o.text)}</span></div>`;
+        `<span class="draft-text">${esc(o.text)}${picks}</span></div>`;
     }).join('');
   }
 
