@@ -1,46 +1,9 @@
-"""Tests for the champ-select overlay: Pusher mirroring, the structured counters
-push, and the anchor geometry helper."""
+"""Tests for the champ-select overlay: the structured counters push, the anchor
+geometry helper (multi-monitor aware), and the Pillow panel renderer."""
 from unittest.mock import MagicMock
 
 import bridge
 import overlay
-
-
-# ── Pusher mirror ────────────────────────────────────────────────────────────
-def test_mirror_forwards_only_whitelisted_events():
-    main = bridge.Pusher()
-    ov = bridge.Pusher()
-    main.add_mirror(ov, {"matchup", "counters"})
-
-    main.push("matchup", {"wr": 53})
-    main.push("log", {"msg": "hi"})
-    main.push("counters", {"active": True})
-
-    # Main window sees everything.
-    main_events = [e["event"] for e in main.drain()]
-    assert main_events == ["matchup", "log", "counters"]
-    # Overlay sees only the whitelisted subset, in order.
-    ov_events = [e["event"] for e in ov.drain()]
-    assert ov_events == ["matchup", "counters"]
-
-
-def test_mirror_none_forwards_everything():
-    main = bridge.Pusher()
-    ov = bridge.Pusher()
-    main.add_mirror(ov)
-    main.push("a"); main.push("b")
-    assert [e["event"] for e in ov.drain()] == ["a", "b"]
-
-
-def test_drain_is_independent_per_queue():
-    # Draining the overlay queue must not empty the main queue (both are
-    # independent pull consumers).
-    main = bridge.Pusher()
-    ov = bridge.Pusher()
-    main.add_mirror(ov, {"matchup"})
-    main.push("matchup", {})
-    ov.drain()
-    assert len(main.drain()) == 1
 
 
 # ── structured counters push ─────────────────────────────────────────────────
@@ -91,55 +54,39 @@ def test_on_counters_skips_rows_without_champion():
     assert [c["champion"] for c in rows] == ["Malphite"]
 
 
-# ── overlay geometry ─────────────────────────────────────────────────────────
-def test_geometry_docks_to_right_when_room():
-    # 1280x720 client at (100,100)-(1380,820) on a 1920x1080 screen: room to
-    # the right, so dock the panel just past the client's right edge.
-    x, y, w, h = overlay.overlay_geometry((100, 100, 1380, 820), 1920, 1080, panel_w=300)
-    assert x == 1380
-    assert y == 100
-    assert w == 300
-    assert h == 720
+# ── overlay anchor geometry ──────────────────────────────────────────────────
+def test_anchor_docks_top_right_inside_client():
+    # Client (100,100)-(1380,820); a 300-wide panel anchors just inside the
+    # client's right edge, below its top bar.
+    x, y = overlay.overlay_anchor((100, 100, 1380, 820), 300, 400,
+                                  0, 0, 1920, 1080)
+    assert x == 1380 - 300 - overlay._MARGIN
+    assert y == 100 + overlay._TOP_OFFSET
 
 
-def test_geometry_docks_inside_when_no_room_right():
-    # Client hugs the right screen edge: no room outside, so tuck against the
-    # client's inner-right edge (overlapping) and stay on screen.
-    x, y, w, h = overlay.overlay_geometry((640, 100, 1920, 820), 1920, 1080, panel_w=300)
-    assert x == 1620          # 1920 - 300
-    assert x + w <= 1920
+def test_anchor_clamps_to_primary_screen():
+    # A panel that would run off the bottom/right is pulled back on screen.
+    x, y = overlay.overlay_anchor((0, 900, 1920, 1080), 300, 400,
+                                  0, 0, 1920, 1080)
+    assert x + 300 <= 1920
+    assert y + 400 <= 1080
 
 
-def test_geometry_clamps_height_and_bottom_to_screen():
-    # A tall client that would run the panel off the bottom gets clamped.
-    x, y, w, h = overlay.overlay_geometry((0, 0, 1280, 1200), 1920, 1080, panel_w=300)
-    assert h <= 1080
-    assert y + h <= 1080
-
-
-def test_geometry_enforces_minimum_height():
-    x, y, w, h = overlay.overlay_geometry((100, 100, 400, 180), 1920, 1080, panel_w=300)
-    assert h >= 240
-
-
-def test_geometry_negative_origin_monitor_left_of_primary():
+def test_anchor_negative_origin_monitor_left_of_primary():
     # Client on a monitor to the LEFT of the primary (negative x origin). The
-    # panel must dock relative to that monitor, not be yanked back to x=0.
-    x, y, w, h = overlay.overlay_geometry(
-        (-1820, 100, -540, 820), 1920, 1080, panel_w=300,
-        screen_x=-1920, screen_y=0)
-    assert x == -540          # just right of the client, still negative
-    assert y == 100
-    assert x >= -1920 and x + w <= 0
+    # panel must stay on that monitor, not be yanked back to x>=0.
+    x, y = overlay.overlay_anchor((-1820, 100, -540, 820), 300, 400,
+                                  -1920, 0, 1920, 1080)
+    assert x == -540 - 300 - overlay._MARGIN
+    assert -1920 <= x and x + 300 <= 0
 
 
-def test_geometry_negative_origin_monitor_above_primary():
+def test_anchor_negative_origin_monitor_above_primary():
     # Client on a monitor ABOVE the primary (negative y origin). y must not be
     # clamped up to 0 (which would detach the panel onto the primary monitor).
-    x, y, w, h = overlay.overlay_geometry(
-        (100, -980, 1380, -260), 1920, 1080, panel_w=300,
-        screen_x=0, screen_y=-1080)
-    assert y == -980
+    x, y = overlay.overlay_anchor((100, -980, 1380, -260), 300, 400,
+                                  0, -1080, 1920, 1080)
+    assert y == -980 + overlay._TOP_OFFSET
     assert y >= -1080
 
 
@@ -147,3 +94,57 @@ def test_find_client_window_safe_without_win32(monkeypatch):
     # When win32 is unavailable the finder must degrade to None, never raise.
     monkeypatch.setattr(overlay, "_HAVE_WIN32", False)
     assert overlay.find_client_window() is None
+
+
+# ── panel renderer ───────────────────────────────────────────────────────────
+def test_render_panel_none_when_no_state():
+    assert overlay.render_panel(None) is None
+    assert overlay.render_panel({}) is None
+
+
+def test_render_panel_header_only_when_no_data():
+    # In champ select but no data yet: still renders (a live header), not None.
+    img = overlay.render_panel({"running": True}, "amber")
+    assert img is not None
+    assert img.size[0] == overlay.PANEL_WIDTH
+    assert img.mode == "RGBA"
+
+
+def test_render_panel_with_matchup_and_counters():
+    state = {
+        "running": True, "champ": "Sion", "enemy": "Darius",
+        "wr": 48.5, "wrLabel": "LOSING", "wrTag": "warn",
+        "counters": {"active": True, "enemy": "Darius",
+                     "counters": [{"champion": "Quinn", "win_rate": 54.2},
+                                  {"champion": "Vayne", "win_rate": 52.0}]},
+        "draft": {"observations": [{"level": "info", "text": "Enemy is AD-heavy"}]},
+        "theme": "amber",
+    }
+    img = overlay.render_panel(state)
+    assert img is not None
+    # With three populated sections the panel is meaningfully taller than a
+    # header-only render.
+    header_only = overlay.render_panel({"running": True})
+    assert img.size[1] > header_only.size[1]
+
+
+def test_render_panel_escapes_long_names_without_error():
+    # Absurdly long champion/enemy names must render (truncated) not crash.
+    state = {"running": True, "champ": "X" * 200, "enemy": "Y" * 200,
+             "wr": 50.0, "wrLabel": "EVEN", "wrTag": "info"}
+    assert overlay.render_panel(state) is not None
+
+
+def test_premultiplied_bgra_order_and_size():
+    # A 1x1 opaque red RGBA pixel -> premultiplied BGRA bytes = B,G,R,A.
+    from PIL import Image
+    px = Image.new("RGBA", (1, 1), (255, 0, 0, 255))
+    buf = overlay._to_premultiplied_bgra(px)
+    assert len(buf) == 4
+    assert tuple(buf) == (0, 0, 255, 255)   # B=0, G=0, R=255, A=255
+
+    # Half-transparent green: channel is premultiplied by alpha (128*128//255).
+    px = Image.new("RGBA", (1, 1), (0, 255, 0, 128))
+    b, g, r, a = tuple(overlay._to_premultiplied_bgra(px))
+    assert a == 128 and r == 0 and b == 0
+    assert 120 <= g <= 130                    # 255*128/255 ≈ 128, premultiplied

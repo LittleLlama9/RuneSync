@@ -64,26 +64,12 @@ class Pusher:
     def __init__(self):
         self._q: list = []
         self._lock = threading.Lock()
-        self._mirrors: list = []   # (Pusher, frozenset|None) — forwarded events
-
-    def add_mirror(self, pusher: "Pusher", events=None):
-        """Forward pushes to `pusher` too — used to feed the champ-select overlay
-        window a copy of the events it cares about. `events` (a set of event
-        names) whitelists which events are mirrored; None mirrors everything.
-        The overlay drains its own queue, so the main window never loses events.
-        """
-        self._mirrors.append((pusher, frozenset(events) if events else None))
 
     def push(self, event: str, payload: dict | None = None):
         with self._lock:
             self._q.append({"event": event, "payload": payload or {}})
             if len(self._q) > 1000:  # backstop if JS ever stops polling
                 self._q = self._q[-500:]
-        # Mirror outside our lock (each mirror has its own lock) so a slow/second
-        # consumer can never stall the primary queue.
-        for mirror, allow in self._mirrors:
-            if allow is None or event in allow:
-                mirror.push(event, payload)
 
     def drain(self) -> list:
         with self._lock:
@@ -193,21 +179,12 @@ class Api:
         """JS drains queued Python->JS events here (called on a timer)."""
         return self.pusher.drain()
 
-    def poll_overlay_events(self) -> list:
-        """The champ-select overlay window drains its own mirrored queue here.
-
-        Separate from poll_events so the main window and the overlay never steal
-        each other's events (both are pull-model consumers). Safe before the
-        overlay pusher is attached — returns nothing.
-        """
-        op = getattr(self, "overlay_pusher", None)
-        return op.drain() if op is not None else []
-
     def get_overlay_state(self) -> dict:
-        """Hydrate the overlay on (re)load with the current champ-select panels.
+        """Compact champ-select snapshot the native overlay renders each tick.
 
-        A compact subset of the snapshot — only what the overlay renders — so a
-        freshly shown/reloaded overlay isn't blank until the next event fires.
+        Read by the OverlayController's anchor thread (not JS) — only the fields
+        the overlay paints, so a freshly shown overlay always reflects the
+        current champ-select state.
         """
         return {
             "running": self.running,
@@ -221,7 +198,6 @@ class Api:
             "counters": self.snap.get("counters"),
             "draft": self.snap.get("draft"),
             "theme": self.overrides.settings.get("phosphor", "amber"),
-            "interface_style": self._settings().get("interface_style", "standard"),
         }
 
     def boot(self):
@@ -511,8 +487,8 @@ class Api:
         except Exception: pass
         try:
             import webview
-            # Destroy every window (main + champ-select overlay) so the GUI loop
-            # actually returns; leaving the hidden overlay alive would hang exit.
+            # Destroy the webview window(s) so the GUI loop returns. The overlay
+            # is a native Win32 window torn down by overlay_ctl.stop() above.
             for w in list(getattr(webview, "windows", []) or []):
                 try:
                     w.destroy()

@@ -9,13 +9,7 @@ import webview
 
 from bridge import Api, Pusher
 from tray import TrayController, LeaguePoller
-from overlay import OverlayController, PANEL_WIDTH
-
-# Events the champ-select overlay mirrors from the main event stream. Kept in
-# sync with the pushes the overlay's JS understands (bridge._on_* handlers).
-_OVERLAY_EVENTS = frozenset({
-    "running", "game", "champ_select", "champ", "matchup", "counters", "draft",
-})
+from overlay import OverlayController
 
 _BASE_DIR = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
 
@@ -61,10 +55,7 @@ def main():
 
     minimized = "--minimized" in sys.argv
     pusher = Pusher()
-    overlay_pusher = Pusher()
-    pusher.add_mirror(overlay_pusher, _OVERLAY_EVENTS)
     api = Api(pusher)
-    api.overlay_pusher = overlay_pusher
     api.log_queue = log_queue   # feeds the debug console drain
 
     window = webview.create_window(
@@ -77,21 +68,13 @@ def main():
         hidden=minimized,
     )
 
-    # Champ-select overlay: a second frameless, always-on-top window docked to
-    # the League client. Created hidden; OverlayController shows/positions it
-    # only during champ select. Shares the js_api so it can pull its own event
-    # queue (poll_overlay_events) and hydrate via get_overlay_state.
-    overlay_window = webview.create_window(
-        "RuneSync Overlay",
-        url=resource_path("webui", "overlay.html"),
-        js_api=api,
-        width=PANEL_WIDTH, height=560,
-        resizable=False, frameless=True, on_top=True,
-        background_color="#0b1018",
-        hidden=True,
-    )
+    # Champ-select overlay: a native, see-through, click-through, always-on-top
+    # Win32 layered window painted directly over the League client. It renders
+    # champ-select data the monitor already produces (read-only) and is shown
+    # only during champ select. Runs on its own anchor thread; nothing here
+    # touches the pywebview window.
     overlay_ctl = OverlayController(
-        overlay_window,
+        state_provider=api.get_overlay_state,
         should_show=lambda: bool(getattr(api, "running", False)
                                  and getattr(api, "in_champ_select", False)),
     )
