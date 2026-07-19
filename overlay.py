@@ -36,7 +36,7 @@ except Exception:  # pragma: no cover - non-Windows / missing pywin32
     _HAVE_WIN32 = False
 
 try:
-    from PIL import Image, ImageDraw, ImageFont  # type: ignore
+    from PIL import Image, ImageDraw, ImageFont, ImageFilter  # type: ignore
     _HAVE_PIL = True
 except Exception:  # pragma: no cover
     _HAVE_PIL = False
@@ -47,25 +47,28 @@ except Exception:  # pragma: no cover
 _CLIENT_WINDOW_CLASS = "RCLIENT"
 _CLIENT_WINDOW_TITLE = "League of Legends"
 
-PANEL_WIDTH = 300
-_MARGIN = 16
-_TOP_OFFSET = 68           # clear the client's top bar
+# PANEL_WIDTH is the full rendered image width (the visible panel is inset by
+# _POUT on every side to leave room for the drop shadow).
+PANEL_WIDTH = 320
+_POUT = 16                 # shadow / bleed margin around the panel
+_MARGIN = 8
+_TOP_OFFSET = 64           # clear the client's top bar
 _POLL_INTERVAL = 0.5
 
-# ── theme ────────────────────────────────────────────────────────────────────
-_THEMES = {
-    "amber":   (255, 176, 0),
-    "green":   (74, 255, 145),
-    "ice":     (120, 200, 255),
-    "magenta": (255, 92, 205),
-    "red":     (255, 96, 96),
-}
-_BG = (9, 12, 18, 214)         # semi-transparent panel fill
-_BG_HEAD = (14, 19, 28, 232)   # slightly denser header band
-_MUTED = (150, 162, 178)
-_TEXT = (222, 230, 240)
-_WARN = (255, 138, 96)
-_GOOD = (86, 224, 140)
+# ── palette (League "hextech": gold trim, hextech teal, deep navy) ────────────
+# Sourced from the client's own Riot palette so the overlay reads as native.
+_GOLD    = (200, 170, 110)   # C8AA6E  primary gold trim / labels
+_GOLD_BR = (240, 230, 210)   # F0E6D2  bright gold, headline text
+_GOLD_DK = (120, 92, 46)     # 785C2E  dark gold hairline / dividers
+_TEAL    = (10, 200, 185)    # 0AC8B9  hextech accent (bullets, bars)
+_TEXT    = (224, 220, 205)   # warm off-white body text
+_MUTED   = (155, 160, 150)   # A0A096  secondary / captions
+_GOOD    = (72, 200, 140)    # favourable win rate
+_BAD     = (214, 92, 108)    # unfavourable win rate
+_BG_TOP  = (20, 33, 54)      # panel gradient top (navy)
+_BG_BOT  = (8, 16, 30)       # panel gradient bottom (near-black navy)
+_PANEL_A = 235               # panel opacity (0-255)
+_TRACK   = (255, 255, 255, 30)   # progress-bar track
 
 
 def _asset(*parts) -> str:
@@ -74,26 +77,68 @@ def _asset(*parts) -> str:
 
 
 _FONTS: dict = {}
+_WIN_FONTS = os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Fonts")
+# Segoe UI is present on every Win10/11 machine and reads as "client-native".
+# Fall back to the bundled SpaceMono so a stripped environment still renders.
+_FONT_FILES = {
+    "title":   ["seguisb.ttf", "segoeui.ttf"],
+    "semi":    ["seguisb.ttf", "segoeui.ttf"],
+    "regular": ["segoeui.ttf"],
+}
 
 
-def _font(bold: bool, size: int):
-    key = (bold, size)
-    f = _FONTS.get(key)
+def _font(kind: str, size: int):
+    """Load a UI font by role ('title'|'semi'|'regular'). Cached per (kind,size)."""
+    key = (kind, size)
+    if key in _FONTS:
+        return _FONTS[key]
+    f = None
+    for name in _FONT_FILES.get(kind, ["segoeui.ttf"]):
+        p = os.path.join(_WIN_FONTS, name)
+        if os.path.exists(p):
+            try:
+                f = ImageFont.truetype(p, size)
+                break
+            except Exception:
+                f = None
     if f is None:
-        name = "SpaceMono-Bold.ttf" if bold else "SpaceMono-Regular.ttf"
+        bundled = "SpaceMono-Regular.ttf" if kind == "regular" else "SpaceMono-Bold.ttf"
         try:
-            f = ImageFont.truetype(_asset("webui", "fonts", name), size)
+            f = ImageFont.truetype(_asset("webui", "fonts", bundled), size)
         except Exception:
             try:
                 f = ImageFont.load_default()
             except Exception:
                 f = None
-        _FONTS[key] = f
+    _FONTS[key] = f
     return f
 
 
-def _accent(theme: str):
-    return _THEMES.get((theme or "amber").lower(), _THEMES["amber"])
+def _vgrad(w: int, h: int, top, bot, alpha: int):
+    """A vertical top→bot gradient RGBA image of size (w, h) at constant alpha."""
+    h = max(1, h)
+    strip = Image.new("RGBA", (1, h))
+    px = strip.load()
+    denom = max(1, h - 1)
+    for yy in range(h):
+        t = yy / denom
+        px[0, yy] = (
+            int(top[0] + (bot[0] - top[0]) * t),
+            int(top[1] + (bot[1] - top[1]) * t),
+            int(top[2] + (bot[2] - top[2]) * t),
+            alpha,
+        )
+    return strip.resize((max(1, w), h))
+
+
+def _diamond(d, cx, cy, r, fill):
+    d.polygon([(cx, cy - r), (cx + r, cy), (cx, cy + r), (cx - r, cy)], fill=fill)
+
+
+def _corner(d, x, y, dx, dy, ln, col, w=2):
+    """An L-shaped corner bracket at (x, y) opening toward (dx, dy) ∈ {-1,1}."""
+    d.line([(x, y), (x + dx * ln, y)], fill=col, width=w)
+    d.line([(x, y), (x, y + dy * ln)], fill=col, width=w)
 
 
 # ── geometry ─────────────────────────────────────────────────────────────────
@@ -199,124 +244,203 @@ def _draft_of(st: dict):
 def render_panel(state, theme: str = "amber", width: int = PANEL_WIDTH):
     """Render the overlay panel to an RGBA image, or None if there's nothing to
     show yet (state is falsy). Always renders at least a header while in champ
-    select so the user can see the overlay is live."""
+    select so the user can see the overlay is live.
+
+    The look is modelled on the League client itself: a deep-navy hextech panel
+    with a gold border, gold corner brackets, a filigree divider under the
+    wordmark, teal section bullets, and win-rate bars. `width` is the full image
+    width; the visible panel is inset by `_POUT` on every side for the shadow.
+    """
     if not state or not _HAVE_PIL:
         return None
 
-    accent = _accent(theme or state.get("theme", "amber"))
-    pad = 14
-    inner_w = width - pad * 2
+    # ── fonts ──
+    f_title = _font("title", 17)
+    f_tag   = _font("semi", 9)
+    f_label = _font("semi", 10)
+    f_champ = _font("semi", 15)
+    f_wr    = _font("title", 22)
+    f_body  = _font("regular", 12)
+    f_small = _font("regular", 12)
 
-    f_head = _font(True, 15)
-    f_tag = _font(True, 10)
-    f_label = _font(True, 11)
-    f_body = _font(False, 13)
-    f_small = _font(False, 11)
+    pout = _POUT
+    pw = width - pout * 2               # visible panel width
+    padx = 16
+    tx = pout + padx                    # left text edge
+    rx = pout + pw - padx               # right text edge
+    inner_w = pw - padx * 2
 
-    def _line_h(font, extra=4):
-        try:
-            a, d = font.getmetrics()
-            return a + d + extra
-        except Exception:
-            return (getattr(font, "size", 12) or 12) + extra
+    HEAD_H = 52                         # wordmark + filigree divider
 
-    # Two-pass layout: build a flat item list + accumulate height, then draw.
+    # ── measure pass: flat item list, each carrying its own height ──
     items = []
-    y = pad
+    ih = HEAD_H
 
-    items.append(("head", ("RUNESYNC", "CHAMP SELECT")))
-    y += _line_h(f_head, 10)
+    def add(kind, payload, h):
+        nonlocal ih
+        items.append((kind, payload, h))
+        ih += h
 
     mu = _has_matchup(state)
     co = _counters_of(state)
     dr = _draft_of(state)
 
     if mu:
-        items.append(("rule", None)); y += 10
-        champ = state.get("champ") or "You"
-        enemy = state.get("enemy") or "?"
-        items.append(("section", "MATCHUP")); y += _line_h(f_label, 5)
-        items.append(("mvs", (champ, enemy))); y += _line_h(f_body, 3)
-        wr = state.get("wr")
-        lab = (state.get("wrLabel") or "").strip()
-        tag = state.get("wrTag") or "info"
-        wr_txt = (f"{wr:.1f}% WR" if isinstance(wr, (int, float)) else "WR —")
-        if lab:
-            wr_txt += f"  ·  {lab}"
-        items.append(("wr", (wr_txt, tag))); y += _line_h(f_body, 6)
+        add("section", "MATCHUP", 22)
+        add("champvs", (state.get("champ") or "You", state.get("enemy") or "?"), 24)
+        add("wr", state, 44)
 
     if co:
-        items.append(("rule", None)); y += 10
-        items.append(("section", f"COUNTERS vs {co.get('enemy', '')}".strip()))
-        y += _line_h(f_label, 5)
+        enemy = (co.get("enemy") or "").strip()
+        add("section", f"COUNTERS · {enemy}" if enemy else "COUNTERS", 22)
         for row in (co.get("counters") or [])[:4]:
-            items.append(("counter", row)); y += _line_h(f_small, 4)
+            add("counter", row, 27)
 
     if dr:
-        items.append(("rule", None)); y += 10
-        items.append(("section", "DRAFT")); y += _line_h(f_label, 5)
-        for ob in (dr.get("observations") or [])[:4]:
+        add("section", "TEAM DRAFT", 22)
+        for ob in (dr.get("observations") or [])[:3]:
             txt = ob.get("text") if isinstance(ob, dict) else str(ob)
-            items.append(("obs", txt)); y += _line_h(f_small, 4)
+            add("obs", txt, 21)
 
     if not (mu or co or dr):
-        items.append(("hint", "Reading lobby…")); y += _line_h(f_small, 4)
+        add("hint", "Analyzing draft…", 22)
 
-    height = y + pad
-    img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    panel_h = ih + 16                   # bottom padding
+    img_w = width
+    img_h = panel_h + pout * 2
+
+    img = Image.new("RGBA", (img_w, img_h), (0, 0, 0, 0))
+
+    # ── drop shadow ──
+    shadow = Image.new("RGBA", (img_w, img_h), (0, 0, 0, 0))
+    sd = ImageDraw.Draw(shadow)
+    sd.rounded_rectangle([pout - 2, pout + 3, pout + pw + 2, pout + panel_h + 6],
+                         radius=16, fill=(0, 0, 0, 150))
+    shadow = shadow.filter(ImageFilter.GaussianBlur(7))
+    img.alpha_composite(shadow)
+
+    # ── panel body: navy gradient clipped to a rounded rect ──
+    px0, py0 = pout, pout
+    px1, py1 = pout + pw, pout + panel_h
+    grad = _vgrad(pw, panel_h, _BG_TOP, _BG_BOT, _PANEL_A)
+    mask = Image.new("L", (pw, panel_h), 0)
+    ImageDraw.Draw(mask).rounded_rectangle([0, 0, pw - 1, panel_h - 1],
+                                           radius=14, fill=255)
+    img.paste(grad, (px0, py0), mask)
+
     d = ImageDraw.Draw(img)
 
-    radius = 12
-    d.rounded_rectangle([0, 0, width - 1, height - 1], radius=radius, fill=_BG)
-    d.rounded_rectangle([0, 0, width - 1, 34], radius=radius, fill=_BG_HEAD)
-    d.rectangle([0, 24, width - 1, 34], fill=_BG_HEAD)
-    d.line([0, 35, width - 1, 35], fill=accent + (90,), width=1)
-    d.rectangle([0, 0, 3, height - 1], fill=accent + (255,))  # left accent bar
+    # subtle top sheen so the panel isn't flat
+    d.rounded_rectangle([px0 + 1, py0 + 1, px1 - 1, py0 + 22],
+                        radius=13, fill=(255, 255, 255, 12))
+    d.rectangle([px0 + 1, py0 + 12, px1 - 1, py0 + 22], fill=(0, 0, 0, 0))
 
-    cy = pad
-    for kind, payload in items:
-        if kind == "head":
-            title, tag = payload
-            d.text((pad, cy), title, font=f_head, fill=accent + (255,))
-            if f_tag is not None:
-                tw = d.textlength(tag, font=f_tag)
-                d.text((width - pad - tw, cy + 4), tag, font=f_tag, fill=_MUTED + (255,))
-            cy += _line_h(f_head, 10)
-        elif kind == "rule":
-            d.line([pad, cy, width - pad, cy], fill=(255, 255, 255, 26), width=1)
-            cy += 10
-        elif kind == "section":
-            d.text((pad, cy), _fit(d, payload, f_label, inner_w),
-                   font=f_label, fill=accent + (220,))
-            cy += _line_h(f_label, 5)
-        elif kind == "mvs":
+    # ── border: dark gold frame + bright inner hairline ──
+    d.rounded_rectangle([px0, py0, px1 - 1, py1 - 1], radius=14,
+                        outline=_GOLD_DK + (255,), width=1)
+    d.rounded_rectangle([px0 + 1, py0 + 1, px1 - 2, py1 - 2], radius=13,
+                        outline=_GOLD + (70,), width=1)
+
+    # ── gold corner brackets ──
+    cl = 14
+    _corner(d, px0 + 6, py0 + 6,  1,  1, cl, _GOLD_BR + (235,))
+    _corner(d, px1 - 6, py0 + 6, -1,  1, cl, _GOLD_BR + (235,))
+    _corner(d, px0 + 6, py1 - 6,  1, -1, cl, _GOLD_BR + (235,))
+    _corner(d, px1 - 6, py1 - 6, -1, -1, cl, _GOLD_BR + (235,))
+
+    # ── header: wordmark + phase tag + filigree divider ──
+    d.text((tx, py0 + 13), "RUNE", font=f_title, fill=_GOLD_BR + (255,))
+    rw = d.textlength("RUNE", font=f_title)
+    d.text((tx + rw, py0 + 13), "SYNC", font=f_title, fill=_GOLD + (255,))
+    tag = "CHAMP SELECT"
+    if f_tag is not None:
+        tw = d.textlength(tag, font=f_tag)
+        d.text((rx - tw, py0 + 18), tag, font=f_tag, fill=_MUTED + (255,))
+    dv = py0 + 40
+    midx = (tx + rx) // 2
+    d.line([(tx, dv), (midx - 6, dv)], fill=_GOLD_DK + (200,), width=1)
+    d.line([(midx + 6, dv), (rx, dv)], fill=_GOLD_DK + (200,), width=1)
+    _diamond(d, midx, dv, 3, _GOLD + (255,))
+
+    # ── draw pass ──
+    cy = py0 + HEAD_H
+    for kind, payload, h in items:
+        if kind == "section":
+            _diamond(d, tx + 3, cy + 8, 3, _TEAL + (255,))
+            d.text((tx + 13, cy), _fit(d, payload, f_label, inner_w - 13),
+                   font=f_label, fill=_GOLD + (235,))
+            lw = d.textlength(payload, font=f_label)
+            lxs = tx + 13 + lw + 8
+            if lxs < rx:
+                d.line([(lxs, cy + 8), (rx, cy + 8)], fill=_GOLD_DK + (110,), width=1)
+
+        elif kind == "champvs":
             champ, enemy = payload
-            txt = _fit(d, f"{champ}  vs  {enemy}", f_body, inner_w)
-            d.text((pad, cy), txt, font=f_body, fill=_TEXT + (255,))
-            cy += _line_h(f_body, 3)
+            champ = (champ or "You")
+            enemy = (enemy or "?")
+            d.text((tx, cy), _fit(d, champ, f_champ, inner_w - 70),
+                   font=f_champ, fill=_GOLD_BR + (255,))
+            cw = d.textlength(_fit(d, champ, f_champ, inner_w - 70), font=f_champ)
+            vx = tx + cw + 8
+            d.text((vx, cy + 3), "vs", font=f_small, fill=_MUTED + (255,))
+            vw = d.textlength("vs", font=f_small)
+            ex = vx + vw + 8
+            d.text((ex, cy), _fit(d, enemy, f_champ, rx - ex),
+                   font=f_champ, fill=_TEXT + (255,))
+
         elif kind == "wr":
-            txt, tag = payload
-            col = _GOOD if tag == "success" else _WARN if tag in ("warn", "error") else _TEXT
-            d.text((pad, cy), _fit(d, txt, f_body, inner_w), font=f_body, fill=col + (255,))
-            cy += _line_h(f_body, 6)
+            st = payload
+            wr = st.get("wr")
+            lab = (st.get("wrLabel") or "").strip()
+            has_wr = isinstance(wr, (int, float))
+            col = _GOOD if (has_wr and wr >= 50) else _BAD if has_wr else _MUTED
+            wr_txt = f"{wr:.1f}%" if has_wr else "—"
+            d.text((tx, cy), wr_txt, font=f_wr, fill=col + (255,))
+            numw = d.textlength(wr_txt, font=f_wr)
+            bx0 = tx + numw + 14
+            bx1 = rx
+            by = cy + 13
+            if bx1 - bx0 > 20:
+                d.rounded_rectangle([bx0, by, bx1, by + 7], radius=3, fill=_TRACK)
+                frac = max(0.0, min(1.0, (wr / 100.0) if has_wr else 0.0))
+                if frac > 0:
+                    fillw = bx0 + int((bx1 - bx0) * frac)
+                    d.rounded_rectangle([bx0, by, max(bx0 + 3, fillw), by + 7],
+                                        radius=3, fill=col + (240,))
+            if lab:
+                lw = d.textlength(lab, font=f_small)
+                d.text((rx - lw, cy + 24), _fit(d, lab, f_small, inner_w),
+                       font=f_small, fill=col + (235,))
+
         elif kind == "counter":
             row = payload
             name = row.get("champion", "") if isinstance(row, dict) else str(row)
             wr = row.get("win_rate") if isinstance(row, dict) else None
-            wr_s = f"{wr:.1f}%" if isinstance(wr, (int, float)) else ""
-            name = _fit(d, name, f_small, inner_w - 46)
-            d.text((pad + 4, cy), name, font=f_small, fill=_TEXT + (255,))
+            has_wr = isinstance(wr, (int, float))
+            wr_s = f"{wr:.1f}%" if has_wr else ""
+            d.text((tx + 4, cy), _fit(d, name, f_body, inner_w - 60),
+                   font=f_body, fill=_TEXT + (255,))
             if wr_s:
-                tw = d.textlength(wr_s, font=f_small)
-                d.text((width - pad - tw, cy), wr_s, font=f_small, fill=_GOOD + (255,))
-            cy += _line_h(f_small, 4)
+                tw = d.textlength(wr_s, font=f_body)
+                d.text((rx - tw, cy), wr_s, font=f_body, fill=_TEAL + (255,))
+            # thin proportional bar (map a plausible 44-60% band to 0-1)
+            by = cy + 18
+            d.rounded_rectangle([tx + 4, by, rx, by + 4], radius=2, fill=_TRACK)
+            if has_wr:
+                frac = max(0.05, min(1.0, (wr - 44.0) / 16.0))
+                fillw = tx + 4 + int((rx - tx - 4) * frac)
+                d.rounded_rectangle([tx + 4, by, max(tx + 7, fillw), by + 4],
+                                    radius=2, fill=_TEAL + (220,))
+
         elif kind == "obs":
-            d.text((pad + 4, cy), _fit(d, "• " + (payload or ""), f_small, inner_w - 4),
-                   font=f_small, fill=_MUTED + (255,))
-            cy += _line_h(f_small, 4)
+            _diamond(d, tx + 4, cy + 7, 2, _TEAL + (235,))
+            d.text((tx + 13, cy), _fit(d, payload or "", f_small, inner_w - 13),
+                   font=f_small, fill=_TEXT + (235,))
+
         elif kind == "hint":
-            d.text((pad, cy), payload, font=f_small, fill=_MUTED + (255,))
-            cy += _line_h(f_small, 4)
+            d.text((tx, cy), payload, font=f_small, fill=_MUTED + (255,))
+
+        cy += h
 
     return img
 
