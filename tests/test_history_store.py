@@ -338,6 +338,7 @@ def test_score_v2_provenance_confidence_and_abstention_round_trip(tmp_path):
     assert history[0]["abstain"] is True
     assert history[0]["abstain_reasons"] == ["short_game"]
     assert history[0]["coaching"]["challenges"][0]["target_successes"] == 3
+    assert history[0]["team_best_other_rank"] == 2
 
 
 def test_explicit_score_run_report_does_not_change_active_run(tmp_path):

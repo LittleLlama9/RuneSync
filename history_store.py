@@ -1559,7 +1559,16 @@ class HistoryStore:
                        sr.calibration_version, sr.model_artifact_hash,
                        sr.artifact_model_version, sr.model_family,
                        sr.model_version AS active_model_version,
-                       sr.confidence_json
+                       sr.confidence_json,
+                       (SELECT MIN(r2.match_rank)
+                          FROM score_results r2
+                          JOIN participants p2
+                            ON p2.game_id = m.game_id
+                           AND p2.participant_id = r2.participant_id
+                         WHERE r2.run_id = sr.id
+                           AND p2.team_id = p.team_id
+                           AND r2.participant_id <> m.local_participant_id
+                       ) AS team_best_other_rank
                 FROM matches m
                 JOIN participants p
                   ON p.game_id = m.game_id

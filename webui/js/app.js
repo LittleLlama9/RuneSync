@@ -484,6 +484,16 @@
     if (rank <= 8) return 'MID PACK';
     return 'ROUGH GAME';
   }
+  function contextLabel(rank, ctx) {
+    if (!ctx) return null;
+    const teamBestOther = Number(ctx.teamBestOther);
+    if (!Number.isFinite(teamBestOther) || ctx.won == null) return null;
+    if (!Number.isFinite(rank)) return null;
+    if (rank <= 3 && teamBestOther >= 5) {
+      return ctx.won ? 'CARRIED' : 'UNLUCKY';
+    }
+    return null;
+  }
   function scoreBand(score) {
     if (score >= 80) return 'S-TIER';
     if (score >= 65) return 'A-TIER';
@@ -536,13 +546,16 @@
       : 'Insufficient evidence';
     return `Score withheld: ${detail}`;
   }
-  function rankOrderLabel(row) {
+  function rankOrderLabel(row, ctx) {
+    const rank = Number(row.match_rank);
+    const context = contextLabel(rank, ctx);
+    if (context) return context;
     if (row.rank_confidence == null || row.rank_confidence === '') {
-      return rankLabel(Number(row.match_rank));
+      return rankLabel(rank);
     }
     const confidence = Number(row.rank_confidence);
-    if (!Number.isFinite(confidence)) return rankLabel(Number(row.match_rank));
-    return confidence < 0.7 ? 'CLOSE RANKING' : rankLabel(Number(row.match_rank));
+    if (!Number.isFinite(confidence)) return rankLabel(rank);
+    return confidence < 0.7 ? 'CLOSE RANKING' : rankLabel(rank);
   }
   function shortHash(value) {
     const text = String(value || '');
@@ -634,7 +647,7 @@
           `<div class="history-score"><span><span class="classic-copy">DAEMON</span><span class="standard-copy">DAEMON score</span></span>` +
             `<strong>${score.toFixed(1)}</strong><em>${row.abstain ? 'WITHHELD' : scoreBand(score)}</em>` +
             `<small>${esc(range)}</small></div>` +
-          `<div class="history-rank ${rankClass(rank)}"><span>Match rank</span><strong>#${rank}</strong><em>${rankOrderLabel(row)}</em></div>` +
+          `<div class="history-rank ${rankClass(rank)}"><span>Match rank</span><strong>#${rank}</strong><em>${rankOrderLabel(row, { teamBestOther: row.team_best_other_rank, won: !!row.local_win })}</em></div>` +
         `</article>`;
       }).join('');
     }
@@ -687,6 +700,15 @@
     const match = report.match;
     const local = report.participants.find(p => p.participant_id === match.local_participant_id);
     if (!local) return;
+    const teamRanks = {};
+    report.participants.forEach(p => {
+      (teamRanks[p.team_id] || (teamRanks[p.team_id] = [])).push(Number(p.match_rank));
+    });
+    const rankCtx = (p) => {
+      const self = Number(p.match_rank);
+      const others = (teamRanks[p.team_id] || []).filter(r => r !== self);
+      return { teamBestOther: others.length ? Math.min(...others) : NaN, won: !!p.win };
+    };
     $('reportResult').textContent = local.win ? 'VICTORY' : 'DEFEAT';
     $('reportResult').className = 'report-result ' + (local.win ? 'win' : 'loss');
     $('reportHero').className = `report-hero ${local.win ? 'is-win' : 'is-loss'} ${rankClass(local.match_rank)}${local.abstain ? ' is-abstained' : ''}`;
@@ -699,7 +721,7 @@
       ? 'SCORE WITHHELD'
       : `${scoreBand(Number(local.total_score))} PERFORMANCE`;
     $('reportRank').textContent = `#${local.match_rank}`;
-    $('reportRankLabel').textContent = `${rankOrderLabel(local)} // OF 10`;
+    $('reportRankLabel').textContent = `${rankOrderLabel(local, rankCtx(local))} // OF 10`;
     $('reportModel').textContent = local.model_version;
     const source = evidenceSource(local.evidence_source);
     $('reportEvidenceSource').textContent = source.label;
@@ -760,7 +782,7 @@
         : `${confidenceText(player.participant_confidence)}; range ${playerInterval}`;
       return teamHeader +
         `<div class="report-player ${rankClass(rank)}${player.participant_id === match.local_participant_id ? ' local' : ''}${player.abstain ? ' is-abstained' : ''}">` +
-        `<span class="player-rank">#${rank}<i>${rankOrderLabel(player)}</i></span><span>${esc(player.summoner_name)}</span>` +
+        `<span class="player-rank">#${rank}<i>${rankOrderLabel(player, rankCtx(player))}</i></span><span>${esc(player.summoner_name)}</span>` +
         `<span>${esc(player.champion_name)}</span><span>${esc(player.role)}</span>` +
         `<span>${player.kills}/${player.deaths}/${player.assists}</span>` +
         `<span class="player-score" title="${esc(playerScoreState)}">${Number(player.total_score).toFixed(1)}</span></div>`;
