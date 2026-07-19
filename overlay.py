@@ -299,7 +299,12 @@ def render_panel(state, theme: str = "amber", width: int = PANEL_WIDTH):
     if dr:
         add("section", "TEAM DRAFT", 22)
         for ob in (dr.get("observations") or [])[:3]:
-            txt = ob.get("text") if isinstance(ob, dict) else str(ob)
+            # Prefer the compact overlay phrasing; fall back to the full text
+            # (which the main window shows in full).
+            if isinstance(ob, dict):
+                txt = ob.get("short") or ob.get("text")
+            else:
+                txt = str(ob)
             add("obs", txt, 21)
 
     if not (mu or co or dr):

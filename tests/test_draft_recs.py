@@ -51,9 +51,64 @@ def test_enemy_ad_heavy_read():
 
 
 def test_enemy_heavy_cc_read():
+    # Leona/Malphite/Amumu are all engage + hard-aoe -> the consolidated
+    # "wombo" warn fires (and suppresses the separate CC/engage info lines).
     rec = _call([], ["Leona", "Malphite", "Amumu"])
     assert rec["enemy"]["hard_cc"] == 3
-    assert any("hard-CC" in o["text"] for o in rec["observations"])
+    assert rec["enemy"]["engage"] == 3
+    assert any("strong engage and CC" in o["text"] for o in rec["observations"])
+    # No stacked "hard-CC champions" / "engage tools" lines when wombo fires.
+    assert not any("engage tools" in o["text"] for o in rec["observations"])
+
+
+def test_enemy_hard_cc_without_engage_reads_cc_line():
+    # 3 hard-CC champs but not enough engage -> the CC read fires (not wombo),
+    # and the tenacity caveat about knockups is present.
+    rec = _call([], ["Lux", "Syndra", "Darius"])
+    assert rec["enemy"]["hard_cc"] == 3
+    assert rec["enemy"]["engage"] == 0
+    cc = [o for o in rec["observations"] if "hard-CC champions" in o["text"]]
+    assert cc and "not knockups" in cc[0]["text"]
+
+
+def test_enemy_no_engage_reassurance():
+    rec = _call([], ["Lux", "Syndra", "Zed"])
+    assert rec["enemy"]["engage"] == 0
+    assert any("no reliable hard engage" in o["text"] and o["level"] == "info"
+               for o in rec["observations"])
+
+
+def test_soft_cc_only_refines_no_hard_cc_line():
+    # Ally has zero hard CC but multiple soft-CC picks -> the softer wording.
+    def prof(name):
+        table = {
+            "Jinx": {"damage_type": "AD", "cc": "soft", "engage": False},
+            "Ashe": {"damage_type": "AD", "cc": "soft", "engage": False},
+            "Zed": {"damage_type": "AD", "cc": "none", "engage": False},
+        }
+        return dict(table.get(name, {"damage_type": "AD", "cc": "none",
+                                     "engage": False}))
+
+    rec = draft_recs.build_draft_recs(["Jinx", "Ashe", "Zed"], [], profile_fn=prof)
+    assert rec["ally"]["hard_cc"] == 0 and rec["ally"]["soft_cc"] == 2
+    texts = " ".join(o["text"] for o in rec["observations"])
+    assert "all soft" in texts
+    assert "no hard CC" not in texts.lower()
+
+
+def test_every_observation_has_short_form():
+    # The overlay renders `short`; every emitted observation must supply one and
+    # it must stay compact enough for the narrow panel.
+    combos = [
+        (["Darius", "Zed", "Jinx"], ["Leona", "Malphite", "Amumu"]),
+        (["Leona", "Malphite", "Vi", "Jinx"], ["Lux", "Syndra", "Darius"]),
+        (["Lux", "Syndra"], ["Darius", "Zed", "Graves"]),
+    ]
+    for ally, enemy in combos:
+        rec = _call(ally, enemy)
+        for o in rec["observations"]:
+            assert o.get("short"), f"missing short: {o}"
+            assert len(o["short"]) <= 30, f"short too long: {o['short']!r}"
 
 
 def test_strong_engage_comp_praised():

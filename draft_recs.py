@@ -66,45 +66,71 @@ def build_draft_recs(ally_champs, enemy_champs, *, profile_fn=None) -> Optional[
     # ── Ally-side drafting gaps (actionable while you can still pick) ──────────
     if a["count"] >= 3:
         if a["engage"] == 0:
-            obs.append({"level": "warn",
+            obs.append({"level": "warn", "short": "No hard engage",
                         "text": "Your team has no reliable hard engage — consider "
                                 "a pick with lockdown to start fights."})
         if a["hard_cc"] == 0:
-            obs.append({"level": "warn",
-                        "text": "Your team has no hard CC — you may struggle to "
-                                "lock down priority targets."})
+            if a["soft_cc"] >= 2:
+                # Soft CC (slows/short roots) peels but can't lock a target down;
+                # distinguish it from a genuinely CC-less comp.
+                obs.append({"level": "warn", "short": "Soft CC only, no lockdown",
+                            "text": "Your CC is all soft (slows) — enough to peel, "
+                                    "but no reliable lockdown for priority targets."})
+            else:
+                obs.append({"level": "warn", "short": "No hard CC",
+                            "text": "Your team has no hard CC — you may struggle to "
+                                    "lock down priority targets."})
         # All-one-damage-type comps let the enemy stack a single resist. Only
         # call it "fully" AD/AP when there are no mixed-damage picks either.
         if a["ap"] == 0 and a["mixed"] == 0 and a["ad"] >= 3:
-            obs.append({"level": "warn",
+            obs.append({"level": "warn", "short": "All AD, add magic dmg",
                         "text": "Your team is fully AD — enemies can stack armor. "
                                 "A magic-damage pick would diversify."})
         elif a["ad"] == 0 and a["mixed"] == 0 and a["ap"] >= 3:
-            obs.append({"level": "warn",
+            obs.append({"level": "warn", "short": "All AP, add AD threat",
                         "text": "Your team is fully AP — enemies can stack magic "
                                 "resist. An AD pick would diversify."})
 
     # ── Enemy-side reads (inform your pick / your early itemisation) ───────────
     if e["count"] >= 3:
         if e["ap"] == 0 and e["mixed"] == 0 and e["ad"] >= 3:
-            obs.append({"level": "info",
+            obs.append({"level": "info", "short": "Enemy AD-heavy: buy armor",
                         "text": "Enemy comp is AD-heavy — armor will be efficient "
                                 "and MR picks give up less."})
         elif e["ad"] == 0 and e["mixed"] == 0 and e["ap"] >= 3:
-            obs.append({"level": "info",
+            obs.append({"level": "info", "short": "Enemy AP-heavy: buy MR",
                         "text": "Enemy comp is AP-heavy — magic resist will be "
                                 "efficient this game."})
-        if e["hard_cc"] >= 3:
-            obs.append({"level": "info",
-                        "text": f"Enemy has {e['hard_cc']} hard-CC champions — "
-                                "tenacity and mobility/peel will be valuable."})
-        if e["engage"] >= 2:
-            obs.append({"level": "info",
-                        "text": f"Enemy has {e['engage']} engage tools — disengage "
-                                "and vision around fights matter."})
+
+        # Wombo: heavy engage AND heavy hard CC. One consolidated warn instead of
+        # two stacked info lines (the CC and engage reads below).
+        if e["engage"] >= 2 and e["hard_cc"] >= 3:
+            obs.append({"level": "warn", "short": "Enemy wombo, disengage+peel",
+                        "text": "Enemy has strong engage and CC — expect all-ins; "
+                                "prioritise disengage, flank vision, and peel."})
+        else:
+            if e["hard_cc"] >= 3:
+                # Much of League's hard CC is knockup/displacement, which
+                # tenacity does NOT reduce — lead with positioning/peel.
+                obs.append({"level": "info",
+                            "short": f"{e['hard_cc']} hard CC: peel/tenacity",
+                            "text": f"Enemy has {e['hard_cc']} hard-CC champions — "
+                                    "positioning and peel matter most; tenacity "
+                                    "helps vs stuns/roots (not knockups)."})
+            if e["engage"] >= 2:
+                obs.append({"level": "info",
+                            "short": f"{e['engage']} engage tools, disengage",
+                            "text": f"Enemy has {e['engage']} engage tools — "
+                                    "disengage and vision around fights matter."})
+
+        if e["engage"] == 0:
+            obs.append({"level": "info", "short": "Enemy no engage, group free",
+                        "text": "Enemy has no reliable hard engage — you can group, "
+                                "take vision, and pick your fights; sidelaning is "
+                                "lower-risk."})
 
     if a["count"] >= 3 and a["engage"] >= 2 and a["hard_cc"] >= 2:
-        obs.append({"level": "good",
+        obs.append({"level": "good", "short": "Strong engage+CC, force it",
                     "text": "Your comp has strong engage and CC — look for "
                             "opportunities to force fights."})
 
