@@ -1,0 +1,94 @@
+/* RuneSync champ-select overlay — compact, opaque panel docked to the League
+   client. Self-contained styling (only depends on fonts.css); mirrors the
+   Standard interface palette from app.css so it feels like the same product. */
+
+:root {
+  --bg:#0b1018;
+  --surface:#111925;
+  --surface-raised:#172231;
+  --line:#273447;
+  --text:#f3f0e7;
+  --muted:#98a6b8;
+  --accent:#efb74b;
+  --win:#59a6d9;
+  --loss:#ef6660;
+  --good:#62d39a;
+  --warn:#e8b862;
+}
+:root[data-phosphor="green"] { --accent:#62d39a; }
+:root[data-phosphor="ice"]   { --accent:#72c9e5; }
+
+* { box-sizing:border-box; }
+html, body { margin:0; height:100%; }
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:"Segoe UI", Arial, sans-serif;
+  font-size:13px;
+  user-select:none;
+  cursor:default;
+  overflow:hidden;
+}
+::-webkit-scrollbar { width:8px; }
+::-webkit-scrollbar-thumb { background:var(--line); border-radius:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+
+.ov {
+  display:flex; flex-direction:column; height:100vh;
+  border-left:1px solid var(--line);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);
+}
+
+.ov-head {
+  flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
+  padding:10px 12px; border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, var(--surface-raised), var(--surface));
+}
+.ov-brand { font-weight:700; letter-spacing:1.5px; color:var(--accent); font-size:12px; }
+.ov-phase { font-size:10px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; }
+
+.ov-body {
+  flex:1; min-height:0; overflow-y:auto; overflow-x:hidden;
+  padding:10px 12px; display:flex; flex-direction:column; gap:12px;
+}
+
+.ov-sec { display:flex; flex-direction:column; gap:6px; }
+.ov-sec-h {
+  font-size:10px; letter-spacing:1.2px; text-transform:uppercase;
+  color:var(--muted); border-bottom:1px solid var(--line); padding-bottom:4px;
+}
+
+/* win rate */
+.ov-wr { display:flex; flex-direction:column; gap:3px; }
+.ov-wr-main { display:flex; align-items:baseline; gap:8px; }
+.ov-wr-pct { font-size:22px; font-weight:700; line-height:1; }
+.ov-wr-pct.win  { color:var(--win); }
+.ov-wr-pct.loss { color:var(--loss); }
+.ov-wr-pct.even { color:var(--text); }
+.ov-wr-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+.ov-wr-label.win  { color:var(--win); }
+.ov-wr-label.loss { color:var(--loss); }
+.ov-wr-vs { font-size:12px; color:var(--text); }
+.ov-wr-vs b { color:var(--accent); font-weight:600; }
+.ov-sample { font-size:10px; color:var(--muted); letter-spacing:.5px; }
+
+/* counters */
+.ov-counters { display:flex; flex-direction:column; gap:4px; }
+.ov-counter {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:5px 8px; background:var(--surface); border:1px solid var(--line);
+  border-radius:5px;
+}
+.ov-counter .ov-c-name { color:var(--text); font-weight:600; }
+.ov-counter .ov-c-wr { color:var(--win); font-weight:700; font-variant-numeric:tabular-nums; }
+.ov-counter .ov-c-games { color:var(--muted); font-size:10px; margin-left:6px; }
+
+/* draft */
+.ov-draft { display:flex; flex-direction:column; gap:4px; }
+.ov-draft-row { display:flex; gap:7px; align-items:flex-start; font-size:12px; line-height:1.35; }
+.ov-draft-row .ov-d-mark { flex-shrink:0; width:12px; text-align:center; color:var(--muted); }
+.ov-draft-row.warn .ov-d-mark { color:var(--warn); }
+.ov-draft-row.good .ov-d-mark { color:var(--good); }
+.ov-draft-row .ov-d-text { color:var(--text); }
+
+.ov-empty { color:var(--muted); font-size:12px; text-align:center; padding:24px 8px; }

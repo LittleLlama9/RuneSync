@@ -38,6 +38,7 @@ IMPORTABLE = [
     "item_data",
     "perks",
     "tray",
+    "overlay",
 ]
 
 

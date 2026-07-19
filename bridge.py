@@ -64,12 +64,26 @@ class Pusher:
     def __init__(self):
         self._q: list = []
         self._lock = threading.Lock()
+        self._mirrors: list = []   # (Pusher, frozenset|None) — forwarded events
+
+    def add_mirror(self, pusher: "Pusher", events=None):
+        """Forward pushes to `pusher` too — used to feed the champ-select overlay
+        window a copy of the events it cares about. `events` (a set of event
+        names) whitelists which events are mirrored; None mirrors everything.
+        The overlay drains its own queue, so the main window never loses events.
+        """
+        self._mirrors.append((pusher, frozenset(events) if events else None))
 
     def push(self, event: str, payload: dict | None = None):
         with self._lock:
             self._q.append({"event": event, "payload": payload or {}})
             if len(self._q) > 1000:  # backstop if JS ever stops polling
                 self._q = self._q[-500:]
+        # Mirror outside our lock (each mirror has its own lock) so a slow/second
+        # consumer can never stall the primary queue.
+        for mirror, allow in self._mirrors:
+            if allow is None or event in allow:
+                mirror.push(event, payload)
 
     def drain(self) -> list:
         with self._lock:
@@ -88,6 +102,7 @@ class Api:
         self.running = False
         self.status = "booting"
         self._quitting = False
+        self.in_champ_select = False   # drives the champ-select overlay's visibility
         self._connect_lock = threading.Lock()
         self._connecting = False
         self._monitor_lock = threading.Lock()   # makes _start's check-and-set atomic
@@ -144,6 +159,7 @@ class Api:
                       "primaryMinor": "", "secondaryMinor": "", "summoners": ""},
             "buildSrc": "idle", "build": [], "inGame": False,
             "duo": None, "hud": None, "draft": None, "itemRecs": None,
+            "counters": None,
         }
 
     def _settings(self) -> dict:
@@ -176,6 +192,37 @@ class Api:
     def poll_events(self) -> list:
         """JS drains queued Python->JS events here (called on a timer)."""
         return self.pusher.drain()
+
+    def poll_overlay_events(self) -> list:
+        """The champ-select overlay window drains its own mirrored queue here.
+
+        Separate from poll_events so the main window and the overlay never steal
+        each other's events (both are pull-model consumers). Safe before the
+        overlay pusher is attached — returns nothing.
+        """
+        op = getattr(self, "overlay_pusher", None)
+        return op.drain() if op is not None else []
+
+    def get_overlay_state(self) -> dict:
+        """Hydrate the overlay on (re)load with the current champ-select panels.
+
+        A compact subset of the snapshot — only what the overlay renders — so a
+        freshly shown/reloaded overlay isn't blank until the next event fires.
+        """
+        return {
+            "running": self.running,
+            "selecting": self.snap.get("selecting", False),
+            "champ": self.snap.get("champ", ""),
+            "enemy": self.snap.get("enemy", ""),
+            "wr": self.snap.get("wr"),
+            "wrLabel": self.snap.get("wrLabel", ""),
+            "wrTag": self.snap.get("wrTag", "info"),
+            "sample": self.snap.get("sample", ""),
+            "counters": self.snap.get("counters"),
+            "draft": self.snap.get("draft"),
+            "theme": self.overrides.settings.get("phosphor", "amber"),
+            "interface_style": self._settings().get("interface_style", "standard"),
+        }
 
     def boot(self):
         perks.warm()
@@ -453,14 +500,24 @@ class Api:
     def quit_app(self) -> dict:
         self._quitting = True
         try:
+            if getattr(self, "overlay_ctl", None):
+                self.overlay_ctl.stop()
+        except Exception: pass
+        try:
             if self.poller: self.poller.stop()
         except Exception: pass
         try:
             if self.tray: self.tray.stop()
         except Exception: pass
         try:
-            w = self._win()
-            if w: w.destroy()
+            import webview
+            # Destroy every window (main + champ-select overlay) so the GUI loop
+            # actually returns; leaving the hidden overlay alive would hang exit.
+            for w in list(getattr(webview, "windows", []) or []):
+                try:
+                    w.destroy()
+                except Exception:
+                    pass
         except Exception: pass
         return {"ok": True}
 
@@ -556,11 +613,14 @@ class Api:
             on_hud=self._on_hud,
             on_draft=self._on_draft,
             on_item_recs=self._on_item_recs,
+            on_counters=self._on_counters,
+            on_champ_select_leave=self._on_champ_select_leave,
         )
         threading.Thread(target=self.monitor.run, daemon=True).start()
 
     def _stop(self):
         self.running = False
+        self.in_champ_select = False
         if self.monitor:
             self.monitor.stop()
         self.pusher.push("running", {"on": False})
@@ -605,7 +665,15 @@ class Api:
         fresh["champMeta"] = "[ in champ select · selecting… ]"
         fresh["inGame"] = self.snap.get("inGame", False)
         self.snap.update(fresh)
+        self.in_champ_select = True
         self.pusher.push("champ_select", {"active": True})
+
+    def _on_champ_select_leave(self):
+        # Champ select ended (locked in / dodged / phase changed). Signals the
+        # overlay controller to hide the anchored panel.
+        self.in_champ_select = False
+        self.snap["counters"] = None
+        self.pusher.push("champ_select", {"active": False})
 
     def _on_champ(self, champ, role):
         lane = f"{role} lane" if role and role not in ("auto", "") else "lane"
@@ -621,6 +689,11 @@ class Api:
         sample = f"{s.get('rank', 'Platinum+')} · {s.get('region', 'World')}".upper()
         self.snap.update({"champ": champ, "enemy": enemy, "wr": wr, "selecting": False,
                           "wrLabel": clean, "wrTag": tag, "sample": sample})
+        # Once our pick is locked the counter-pick suggestions are stale (they
+        # only help before we choose), so drop them from the overlay.
+        if self.snap.get("counters"):
+            self.snap["counters"] = None
+            self.pusher.push("counters", {"enemy": enemy, "counters": [], "active": False})
         self.pusher.push("matchup", {"champ": champ, "enemy": enemy, "wr": wr,
                                      "label": clean, "tag": tag, "sample": sample})
 
@@ -658,6 +731,21 @@ class Api:
         # About the user's own itemisation vs the enemy comp; additive/read-only.
         self.snap["itemRecs"] = recs
         self.pusher.push("item_recs", recs or {})
+
+    def _on_counters(self, enemy, role, counters):
+        # Champ-select counter-pick suggestions vs the enemy laner (strongest
+        # picks against them by champion win rate). Read-only/additive; mainly
+        # feeds the champ-select overlay. Ships inert (hidden) when empty.
+        s = self.overrides.settings
+        sample = f"{s.get('rank', 'Platinum+')} · {s.get('region', 'World')}".upper()
+        rows = [{"champion": c.get("champion", ""),
+                 "win_rate": c.get("win_rate"),
+                 "games": c.get("games")}
+                for c in (counters or []) if c.get("champion")]
+        payload = {"enemy": enemy, "role": role, "counters": rows,
+                   "sample": sample, "active": bool(rows)}
+        self.snap["counters"] = payload if rows else None
+        self.pusher.push("counters", payload)
 
     def _on_import(self, champ):
         self.snap["imported"] = True

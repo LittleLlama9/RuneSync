@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html data-phosphor="amber" data-interface="standard">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/overlay.css">
+  <title>RuneSync Overlay</title>
+</head>
+<body>
+  <div class="ov">
+    <div class="ov-head pywebview-drag-region">
+      <span class="ov-brand">RUNESYNC</span>
+      <span class="ov-phase" id="ovPhase">CHAMP SELECT</span>
+    </div>
+
+    <div class="ov-body" id="ovBody">
+      <!-- matchup / win rate -->
+      <section class="ov-sec" id="ovWrSec" hidden>
+        <div class="ov-sec-h" id="ovWrHead">MATCHUP</div>
+        <div class="ov-wr" id="ovWr"></div>
+        <div class="ov-sample" id="ovWrSample"></div>
+      </section>
+
+      <!-- counter picks -->
+      <section class="ov-sec" id="ovCountersSec" hidden>
+        <div class="ov-sec-h" id="ovCountersHead">COUNTERS</div>
+        <div class="ov-counters" id="ovCounters"></div>
+        <div class="ov-sample" id="ovCountersSample"></div>
+      </section>
+
+      <!-- draft / composition -->
+      <section class="ov-sec" id="ovDraftSec" hidden>
+        <div class="ov-sec-h">DRAFT</div>
+        <div class="ov-draft" id="ovDraft"></div>
+      </section>
+
+      <div class="ov-empty" id="ovEmpty">Waiting for champ select…</div>
+    </div>
+  </div>
+  <script src="js/api.js"></script>
+  <script src="js/overlay.js"></script>
+</body>
+</html>

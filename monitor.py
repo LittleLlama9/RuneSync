@@ -36,7 +36,8 @@ class ChampSelectMonitor:
                  on_matchup_winrate=None, on_item_build=None, on_import=None,
                  on_runes_imported=None, on_champ_detected=None, on_build_detail=None,
                  on_champ_select_enter=None, on_duo_recommendations=None,
-                 on_hud=None, on_draft=None, on_item_recs=None):
+                 on_hud=None, on_draft=None, on_item_recs=None, on_counters=None,
+                 on_champ_select_leave=None):
         self.lcu = lcu
         self.ugg = ugg
         self.overrides = overrides
@@ -90,6 +91,16 @@ class ChampSelectMonitor:
         # enemy comp — never a rating of players. Ships inert when the Live Client
         # endpoint is unreachable or the attribute catalog is missing.
         self._on_item_recs = on_item_recs
+        # (enemy_champ, role, counters[]) fired during champ select when we know
+        # the enemy laner but haven't locked our own pick yet — the strongest
+        # counter picks against them (champion win rates only, never a player
+        # rating). Read-only/additive; ships inert when the bundle lacks counter
+        # data. Feeds the champ-select overlay's counter-pick list.
+        self._on_counters = on_counters
+        # () fired once when leaving champ select (locked in, dodged, or the
+        # phase otherwise ends), so the UI/overlay can tear down champ-select
+        # panels. Pairs with on_champ_select_enter.
+        self._on_champ_select_leave = on_champ_select_leave
         self._draft_done_for: frozenset = frozenset()  # champ set we last analysed
         self._stop_event = threading.Event()
         # Serializes rune/item-set imports. The Reimport button (main.py) pushes
@@ -270,6 +281,11 @@ class ChampSelectMonitor:
                 self._my_champ = ""
                 self._draft_done_for = frozenset()
                 self._clear_draft()
+                if self._on_champ_select_leave:
+                    try:
+                        self._on_champ_select_leave()
+                    except Exception:
+                        pass
             self._last_phase = phase
             return
         if self._last_phase != "ChampSelect":
@@ -618,14 +634,31 @@ class ChampSelectMonitor:
         self.log(f"  → Fetching counterpick suggestions vs {enemy_champ}...", "info")
         try:
             counters = self.ugg.get_counters(enemy_champ, role=role, top_n=5)
+            # The enemy laner can change while we scrape (re-pick / late assign),
+            # and each change spawns its own lookup thread. Ignore a result whose
+            # enemy is no longer the current one so a slow, stale scrape can't
+            # overwrite a newer enemy's counters (or a locked-in matchup).
+            if self._enemy_laner != enemy_champ:
+                return
             if counters is None or len(counters) == 0:
                 self.log(f"  ⚠  No counter data for {enemy_champ} — data bundle may be incomplete", "warn")
+                # Still notify so the overlay clears any stale counters from a
+                # previous enemy instead of showing the wrong champion.
+                self._emit_counters(enemy_champ, role, [])
                 return
             self.log(f"  ✓  Top counters vs {enemy_champ}:", "success")
             for i, c in enumerate(counters, 1):
                 self.log(f"     {i}. {c['champion']}  ({c['win_rate']:.1f}% WR)", "success")
+            self._emit_counters(enemy_champ, role, counters)
         except Exception as e:
             self.log(f"  ⚠  Counters lookup failed: {e}", "warn")
+
+    def _emit_counters(self, enemy_champ: str, role: str, counters):
+        if self._on_counters:
+            try:
+                self._on_counters(enemy_champ, role, counters)
+            except Exception:
+                pass
 
     def _my_pick_completed(self, session: dict) -> bool:
         """True once our own pick action is locked in (completed)."""

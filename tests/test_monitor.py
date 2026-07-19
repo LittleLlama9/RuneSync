@@ -206,3 +206,37 @@ def test_terminal_phase_ends_active_game_once():
 
     assert mon._in_game is False
     ended.assert_called_once()
+
+
+def test_counters_lookup_clears_overlay_on_empty_result():
+    """No counter data for the current enemy must still notify (with an empty
+    list) so the overlay clears a previous enemy's stale counters."""
+    events = []
+    mon = ChampSelectMonitor(
+        lcu=MagicMock(), ugg=MagicMock(), overrides=MagicMock(),
+        on_log=lambda *a, **k: None,
+        on_counters=lambda e, r, c: events.append((e, r, c)),
+    )
+    mon._enemy_laner = "Teemo"
+    mon.ugg.get_counters.return_value = []
+
+    mon._run_counters_lookup("Teemo", "top")
+
+    assert events == [("Teemo", "top", [])]
+
+
+def test_counters_lookup_ignores_stale_enemy():
+    """A slow lookup for an enemy who is no longer the current laner must not
+    fire the callback (it would overwrite the newer enemy's counters)."""
+    events = []
+    mon = ChampSelectMonitor(
+        lcu=MagicMock(), ugg=MagicMock(), overrides=MagicMock(),
+        on_log=lambda *a, **k: None,
+        on_counters=lambda e, r, c: events.append((e, r, c)),
+    )
+    mon._enemy_laner = "Darius"  # enemy already changed while we scraped
+    mon.ugg.get_counters.return_value = [{"champion": "Quinn", "win_rate": 54.0}]
+
+    mon._run_counters_lookup("Teemo", "top")  # stale lookup for the old enemy
+
+    assert events == []
