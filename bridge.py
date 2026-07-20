@@ -89,7 +89,10 @@ class Api:
         self.status = "booting"
         self._quitting = False
         self.in_champ_select = False   # drives the champ-select overlay's visibility
+        self.in_game = False           # drives the in-game overlay's visibility
         self.overlay_active = False    # true while the in-client overlay is painted
+        self.ingame_overlay_active = False  # true while the in-game overlay is painted
+        self.shop_detector = None      # set by app.py; used by calibrate_shop_detection
         self._connect_lock = threading.Lock()
         self._connecting = False
         self._monitor_lock = threading.Lock()   # makes _start's check-and-set atomic
@@ -216,7 +219,64 @@ class Api:
         except Exception:
             pass
 
-    def boot(self):
+    def get_ingame_overlay_state(self) -> dict:
+        """Compact in-game snapshot the InGameOverlayController renders each tick
+        (read by its anchor thread, not JS): the live HUD, the defensive item
+        recs, and the app skin so the overlay matches RuneSync's own look."""
+        return {
+            "hud": self.snap.get("hud"),
+            "item_recs": self.snap.get("itemRecs"),
+            "interface_style": self._settings().get("interface_style", "standard"),
+            "phosphor": self.overrides.settings.get("phosphor", "amber"),
+        }
+
+    def _on_ingame_overlay_visibility(self, active: bool):
+        """Fires when the in-game overlay shows/hides so the app window can
+        collapse its now-redundant live HUD + item panels (shown in the overlay)
+        and restore them when the overlay isn't up (e.g. exclusive fullscreen)."""
+        active = bool(active)
+        self.ingame_overlay_active = active
+        self.snap["ingame_overlay_active"] = active
+        try:
+            self.pusher.push("ingame_overlay_active", {"active": active})
+        except Exception:
+            pass
+
+    def shop_detect_config(self) -> dict:
+        """Persisted shop-detection config (region + calibrated fingerprint), or
+        {} if never calibrated. Loaded into the ShopDetector at startup."""
+        cfg = self.overrides.settings.get("shop_detect")
+        return dict(cfg) if isinstance(cfg, dict) else {}
+
+    def calibrate_shop_detection(self) -> dict:
+        """Capture the current shop region as the detection fingerprint. Must be
+        called from JS while a live game is up with the shop OPEN. Persists the
+        result so item recs only surface when the shop is actually open."""
+        detector = self.shop_detector
+        if detector is None:
+            return {"ok": False, "error": "Overlay not initialised."}
+        try:
+            import overlay
+            import win32gui
+        except Exception as exc:
+            return {"ok": False, "error": f"overlay unavailable: {exc}"}
+        hwnd = overlay.find_game_window()
+        if not hwnd:
+            return {"ok": False,
+                    "error": "No live game window found. Start a game, open the shop, then calibrate."}
+        try:
+            rect = win32gui.GetWindowRect(hwnd)
+        except Exception as exc:
+            return {"ok": False, "error": f"could not read game window: {exc}"}
+        cfg = detector.calibrate(rect)
+        if not cfg:
+            return {"ok": False, "error": "Screen capture failed."}
+        s = dict(self.overrides.settings)
+        s["shop_detect"] = cfg
+        self.overrides.save_settings(s)
+        pts = len(cfg.get("fingerprint") or [])
+        self._emit(f"Shop detection calibrated ({pts} sample points).", "success")
+        return {"ok": True, "points": pts}
         perks.warm()
         item_data.init()
         champion_data.init()   # Data Dragon champion classes for the recommenders
@@ -258,6 +318,7 @@ class Api:
               "theme": self.overrides.settings.get("phosphor", "amber"),
               "settings": self._settings(), "builds": self.get_builds(),
               "overlay_active": self.overlay_active,
+              "ingame_overlay_active": self.ingame_overlay_active,
               "log": self.log_buf[-80:], "historyError": self._history_error}
         st.update(self.snap)
         return st
@@ -614,8 +675,11 @@ class Api:
     def _stop(self):
         self.running = False
         self.in_champ_select = False
+        self.in_game = False
         if self.overlay_active:
             self._on_overlay_visibility(False)
+        if self.ingame_overlay_active:
+            self._on_ingame_overlay_visibility(False)
         if self.monitor:
             self.monitor.stop()
         self.pusher.push("running", {"on": False})
@@ -866,6 +930,7 @@ class Api:
             pass
 
     def _on_game(self, in_game, import_postgame=True):
+        self.in_game = bool(in_game)   # gates the in-game overlay's visibility
         self.snap["inGame"] = in_game
         self.pusher.push("game", {"in_game": in_game})
         if in_game:

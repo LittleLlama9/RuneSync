@@ -230,6 +230,9 @@
     if (!panel) return;
     const hud = state.hud;
     if (!state.inGame || !hud || !hud.me) { panel.hidden = true; return; }
+    // The in-game overlay paints the gold/skill readout over the game itself, so
+    // the companion copy would be redundant — hide it while the overlay is up.
+    if (state.ingameOverlayActive) { panel.hidden = true; return; }
     panel.hidden = false;
     const standard = standardInterface();
     $('hudTitle').textContent = standard
@@ -274,6 +277,7 @@
     const r = state.itemRecs;
     if (!state.inGame || !r || !r.suggestions) { panel.hidden = true; return; }
     if (!r.suggestions.length && !(r.notes || []).length) { panel.hidden = true; return; }
+    if (state.ingameOverlayActive) { panel.hidden = true; return; }
     panel.hidden = false;
     const standard = standardInterface();
     $('itemRecTitle').textContent = standard ? 'Defensive buys' : 'DEFENSE // vs enemy comp';
@@ -1038,6 +1042,19 @@
       window.API.call('save_settings', JSON.parse(JSON.stringify(state.settings)));
       const m = $('saveMsg'); m.hidden = false; clearTimeout(m._t); m._t = setTimeout(() => { m.hidden = true; }, 2600);
     });
+    $('calibShopBtn').addEventListener('click', () => {
+      const s = $('calibShopStatus');
+      s.textContent = standardInterface() ? 'Calibrating…' : '# calibrating…';
+      window.API.call('calibrate_shop_detection').then(r => {
+        const std = standardInterface();
+        if (r && r.ok) {
+          s.textContent = std ? `Calibrated (${r.points} points).` : `# calibrated ok (${r.points} points)`;
+        } else {
+          const err = (r && r.error) || 'calibration failed';
+          s.textContent = std ? err : `# ${err}`;
+        }
+      });
+    });
     $('moGo').addEventListener('click', submitMatchup);
     $('moInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') submitMatchup(); });
     $('historyRefresh').addEventListener('click', () => {
@@ -1397,6 +1414,8 @@
       case 'draft': state.draft = (p && p.observations) ? p : null; renderDraft(); break;
       case 'overlay_active':
         state.overlayActive = !!(p && p.active); applyOverlayCollapse(); break;
+      case 'ingame_overlay_active':
+        state.ingameOverlayActive = !!(p && p.active); renderHud(); renderItemRecs(); break;
       case 'history_sync': state.history.syncing = !!p.active; renderHistory(); break;
       case 'history_updated': state.history.loaded = false; loadHistory(true); break;
       case 'history_error': state.history.error = p.message || 'history sync failed'; renderHistory(); break;
@@ -1428,6 +1447,7 @@
     state.itemRecs = (s.itemRecs && s.itemRecs.suggestions) ? s.itemRecs : null;
     state.draft = (s.draft && s.draft.observations) ? s.draft : null;
     state.overlayActive = !!s.overlay_active;
+    state.ingameOverlayActive = !!s.ingame_overlay_active;
     state.history.error = s.historyError || state.history.error;
     applyInterface(state.settings.interface_style);
     applyTheme(s.theme || state.settings.phosphor);

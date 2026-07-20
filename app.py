@@ -10,6 +10,7 @@ import webview
 from bridge import Api, Pusher
 from tray import TrayController, LeaguePoller
 from overlay import OverlayController
+from ingame_overlay import InGameOverlayController, ShopDetector
 
 _BASE_DIR = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
 
@@ -81,6 +82,23 @@ def main():
     )
     api.overlay_ctl = overlay_ctl
 
+    # In-game overlay: the same layered-window technique aimed at the live GAME
+    # window ("League of Legends (TM) Client"). Paints small, League-HUD-aware
+    # indicators (gold on Tab, item recs while the shop is open, next skill to
+    # level) directly over the game. Read-only; requires Borderless. The shop
+    # detector samples a calibrated screen region (no shop signal exists in the
+    # :2999 API).
+    shop_detector = ShopDetector(config=api.shop_detect_config())
+    api.shop_detector = shop_detector
+    ingame_overlay_ctl = InGameOverlayController(
+        state_provider=api.get_ingame_overlay_state,
+        should_show=lambda: bool(getattr(api, "running", False)
+                                 and getattr(api, "in_game", False)),
+        shop_detector=shop_detector,
+        on_visibility=api._on_ingame_overlay_visibility,
+    )
+    api.ingame_overlay_ctl = ingame_overlay_ctl
+
     # tray + League auto-detect (callbacks run on their own daemon threads;
     # pywebview window methods are thread-safe).
     def _show():
@@ -107,6 +125,7 @@ def main():
         tray.start()
         poller.start()
         overlay_ctl.start()
+        ingame_overlay_ctl.start()
         api.boot()
 
     webview.start(

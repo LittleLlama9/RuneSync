@@ -47,6 +47,12 @@ except Exception:  # pragma: no cover
 _CLIENT_WINDOW_CLASS = "RCLIENT"
 _CLIENT_WINDOW_TITLE = "League of Legends"
 
+# The live GAME (not the client) renders in a separate DirectX window whose class
+# is "RiotWindowClass" and title "League of Legends (TM) Client". The in-game
+# overlay (ingame_overlay.py) anchors to this window, not the RCLIENT client.
+_GAME_WINDOW_CLASS = "RiotWindowClass"
+_GAME_WINDOW_TITLE = "League of Legends (TM) Client"
+
 # PANEL_WIDTH is the full rendered image width (the visible panel is inset by
 # _POUT on every side to leave room for the drop shadow).
 PANEL_WIDTH = 320
@@ -165,11 +171,10 @@ def overlay_anchor(client_rect, panel_w: int, panel_h: int,
     return x, y
 
 
-def find_client_window():
-    """HWND of the visible League client window, or None.
-
-    Matches on window class first (robust to title localisation) and falls back
-    to the English title. Returns only a visible, non-minimised window.
+def _find_window(match, min_w: int = 100, min_h: int = 100):
+    """HWND of the first visible, non-minimised window for which `match(cls,
+    title) -> bool`, or None. Shared by find_client_window / find_game_window.
+    Every Windows call is guarded so a hostile enum never raises to the caller.
     """
     if not _HAVE_WIN32:
         return None
@@ -181,10 +186,10 @@ def find_client_window():
                 return
             cls = win32gui.GetClassName(hwnd)
             title = win32gui.GetWindowText(hwnd)
-            if cls == _CLIENT_WINDOW_CLASS or title == _CLIENT_WINDOW_TITLE:
+            if match(cls, title):
                 rect = win32gui.GetWindowRect(hwnd)
                 # Skip zero-size / minimised windows (rect goes far negative).
-                if rect[2] - rect[0] > 100 and rect[3] - rect[1] > 100:
+                if rect[2] - rect[0] > min_w and rect[3] - rect[1] > min_h:
                     found.append(hwnd)
         except Exception:
             pass
@@ -194,6 +199,26 @@ def find_client_window():
     except Exception:
         return None
     return found[0] if found else None
+
+
+def find_client_window():
+    """HWND of the visible League client window, or None.
+
+    Matches on window class first (robust to title localisation) and falls back
+    to the English title. Returns only a visible, non-minimised window.
+    """
+    return _find_window(
+        lambda cls, title: cls == _CLIENT_WINDOW_CLASS or title == _CLIENT_WINDOW_TITLE)
+
+
+def find_game_window():
+    """HWND of the visible live-game window ("League of Legends (TM) Client"), or
+    None. This is the in-match DirectX window, distinct from the RCLIENT client.
+    Requires the game in Borderless/Windowed — an exclusive-fullscreen game has
+    no window a layered overlay can sit above.
+    """
+    return _find_window(
+        lambda cls, title: cls == _GAME_WINDOW_CLASS or title == _GAME_WINDOW_TITLE)
 
 
 def _screen_bounds():
