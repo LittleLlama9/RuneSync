@@ -149,3 +149,25 @@ def test_standard_interface_mode_contract():
         "SummonerSmite.png", "SummonerExhaust.png",
     ):
         assert (ROOT / "webui" / "assets" / "spells" / spell_icon).is_file()
+
+
+def test_standard_mode_has_no_leaked_terminal_syntax():
+    """Standard must use conventional copy, not Classic shell/terminal syntax
+    (RS-15). The champion import badge and the override/build editor titles are
+    the surfaces that previously leaked; each must offer a Standard variant."""
+    html = (ROOT / "webui" / "index.html").read_text(encoding="utf-8")
+    js = (ROOT / "webui" / "js" / "app.js").read_text(encoding="utf-8")
+
+    # Champion import badge: Classic keeps ">> RUNES IMPORTED OK", Standard is
+    # a conventional confirmation. The badge must not be a single ungated node.
+    assert '<span class="classic-copy">&gt;&gt; RUNES IMPORTED OK</span>' in html
+    assert '<span class="standard-copy">&#10003; Runes imported</span>' in html
+    assert 'id="champBadge" hidden>&gt;&gt; RUNES IMPORTED OK</div>' not in html
+
+    # Override editor and build builder titles are interface-aware in JS.
+    assert "$('edTitle').textContent = standardInterface()" in js
+    assert "edNew ? 'Add override' : 'Edit override'" in js
+    assert "standardInterface() ? 'Edit build \u00b7 ' : '~/edit build \u00b7 '" in js
+    # No un-gated shell-path title assignments remain.
+    assert "$('edTitle').textContent = edNew ? '~/add override'" not in js
+    assert "$('blTitle').textContent = '~/edit build" not in js

@@ -1122,7 +1122,9 @@
   }
 
   function renderEditor() {
-    $('edTitle').textContent = edNew ? '~/add override' : '~/edit override';
+    $('edTitle').textContent = standardInterface()
+      ? (edNew ? 'Add override' : 'Edit override')
+      : (edNew ? '~/add override' : '~/edit override');
     $('edChamp').value = ed.champ || '';
     $('edRole').textContent = (ed.role || 'auto') + ' ▾';
     $('edPrimary').textContent = (ed.primary_tree || 'Precision') + ' ▾';
@@ -1254,7 +1256,8 @@
     const ib = ed.items_build || {};
     SLOTS.forEach(([k]) => { bld[k] = (ib[k] || []).map(x => ({ id: x.id, name: x.name })); });
     bld.target = 'core';
-    $('blTitle').textContent = '~/edit build · ' + (ed.champ || $('edChamp').value.trim() || 'champion');
+    const blChamp = ed.champ || $('edChamp').value.trim() || 'champion';
+    $('blTitle').textContent = (standardInterface() ? 'Edit build · ' : '~/edit build · ') + blChamp;
     $('blQuery').value = ''; $('blResults').innerHTML = '';
     $('blTarget').textContent = SLOT_LABEL(bld.target) + ' ▾';
     renderBuilderSlots();
