@@ -171,3 +171,26 @@ def test_standard_mode_has_no_leaked_terminal_syntax():
     # No un-gated shell-path title assignments remain.
     assert "$('edTitle').textContent = edNew ? '~/add override'" not in js
     assert "$('blTitle').textContent = '~/edit build" not in js
+
+
+def test_overlays_toggle_present_and_wired():
+    """The window-only / overlay master switch must exist in Settings, hydrate
+    from state, gate the overlay controllers, and persist immediately."""
+    html = (ROOT / "webui" / "index.html").read_text(encoding="utf-8")
+    js = (ROOT / "webui" / "js" / "app.js").read_text(encoding="utf-8")
+    app_py = (ROOT / "app.py").read_text(encoding="utf-8")
+    bridge_py = (ROOT / "bridge.py").read_text(encoding="utf-8")
+
+    # Settings switch exists with switch semantics.
+    assert 'id="setOverlays" data-set="overlays_enabled" role="switch"' in html
+    # Seeded on by default and hydrated/rendered.
+    assert "overlays_enabled: true" in js
+    assert "[$('setOverlays'), s.overlays_enabled !== false]" in js
+    # Toggling flips and persists immediately (safety toggle, no Save needed).
+    assert "$('setOverlays').addEventListener('click'" in js
+    assert "save_settings', { overlays_enabled: state.settings.overlays_enabled }" in js
+    # Both overlay controllers are gated on the master switch.
+    assert app_py.count("api.overlays_enabled()") == 2
+    # Backend exposes the setting and the gating helper.
+    assert '"overlays_enabled": s.get("overlays_enabled") is not False' in bridge_py
+    assert "def overlays_enabled(self) -> bool:" in bridge_py

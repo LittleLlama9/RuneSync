@@ -83,6 +83,34 @@ def test_score_v2_defaults_on_and_disable_persists(monkeypatch):
     })
 
 
+def test_overlays_enabled_defaults_on_and_disable_persists(monkeypatch):
+    api = _api()
+    api.overrides = MagicMock()
+    api.overrides.settings = {}
+    api.overrides.save_settings = MagicMock()
+    api.monitor = None
+    monkeypatch.setattr(bridge, "is_autostart_enabled", lambda: False)
+
+    # Default-on: absent setting means overlays are enabled (overlay mode).
+    assert api._settings()["overlays_enabled"] is True
+    assert api.overlays_enabled() is True
+
+    # Explicitly disabled -> window-only mode; the helper the controllers gate
+    # on reports False.
+    api.overrides.settings = {"overlays_enabled": False}
+    assert api._settings()["overlays_enabled"] is False
+    assert api.overlays_enabled() is False
+
+    # Toggling off persists without clobbering unrelated settings.
+    api.overrides.settings = {"interface_style": "classic"}
+    api.overrides.save_settings.reset_mock()
+    assert api.save_settings({"overlays_enabled": False}) == {"ok": True}
+    api.overrides.save_settings.assert_called_once_with({
+        "interface_style": "classic",
+        "overlays_enabled": False,
+    })
+
+
 def test_history_api_delegates_to_service():
     api = _api()
     api.history.summary.return_value = {"overall": {"games": 2}}
