@@ -161,7 +161,7 @@ class Api:
             "rank": s.get("rank", "Platinum+"), "region": s.get("region", "World"),
             "auto_role": s.get("auto_role", True), "trigger": s.get("trigger", "hover"),
             "phosphor": s.get("phosphor", "amber"), "interface_style": interface_style,
-            "overlays_enabled": s.get("overlays_enabled") is not False,
+            "ingame_overlay_enabled": s.get("ingame_overlay_enabled") is True,
             "score_v2_beta": s.get("score_v2_beta") is not False,
             "score_v2_beta_sources": list(
                 getattr(self, "_score_v2_beta_sources", ()),
@@ -170,12 +170,13 @@ class Api:
             "autostart": is_autostart_enabled(),
         }
 
-    def overlays_enabled(self) -> bool:
-        """Master switch for the in-client + in-game overlays. When off,
-        RuneSync runs in window-only mode: nothing is painted over League and
-        the app-window panels stay visible. Use it when an external change
-        (e.g. a Riot Vanguard update) blocks app overlays. Defaults to on."""
-        return self.overrides.settings.get("overlays_enabled") is not False
+    def ingame_overlay_enabled(self) -> bool:
+        """Switch for the in-GAME overlay only (painted over the live game).
+        When off, its live cues fall back to the app window instead. The
+        champion-select overlay is not governed by this and always shows in
+        champ select. Defaults to off while a Riot Vanguard update blocks
+        in-game app overlays; turn it on once overlays work again."""
+        return self.overrides.settings.get("ingame_overlay_enabled") is True
     # ── lifecycle ─────────────────────────────────────────────────────────────
     @staticmethod
     def _win():
@@ -486,8 +487,8 @@ class Api:
                 s[k] = data[k]
         if "score_v2_beta" in data:
             s["score_v2_beta"] = data["score_v2_beta"] is True
-        if "overlays_enabled" in data:
-            s["overlays_enabled"] = data["overlays_enabled"] is not False
+        if "ingame_overlay_enabled" in data:
+            s["ingame_overlay_enabled"] = data["ingame_overlay_enabled"] is True
         interface_style = data.get("interface_style")
         if interface_style in {"standard", "classic"}:
             s["interface_style"] = interface_style

@@ -83,7 +83,7 @@ def test_score_v2_defaults_on_and_disable_persists(monkeypatch):
     })
 
 
-def test_overlays_enabled_defaults_on_and_disable_persists(monkeypatch):
+def test_ingame_overlay_defaults_off_and_enable_persists(monkeypatch):
     api = _api()
     api.overrides = MagicMock()
     api.overrides.settings = {}
@@ -91,23 +91,24 @@ def test_overlays_enabled_defaults_on_and_disable_persists(monkeypatch):
     api.monitor = None
     monkeypatch.setattr(bridge, "is_autostart_enabled", lambda: False)
 
-    # Default-on: absent setting means overlays are enabled (overlay mode).
-    assert api._settings()["overlays_enabled"] is True
-    assert api.overlays_enabled() is True
+    # Default-off: absent setting means the in-game overlay is disabled while a
+    # Vanguard update blocks in-game app overlays (champ-select overlay is not
+    # governed by this switch).
+    assert api._settings()["ingame_overlay_enabled"] is False
+    assert api.ingame_overlay_enabled() is False
 
-    # Explicitly disabled -> window-only mode; the helper the controllers gate
-    # on reports False.
-    api.overrides.settings = {"overlays_enabled": False}
-    assert api._settings()["overlays_enabled"] is False
-    assert api.overlays_enabled() is False
+    # Explicitly enabled -> the controller gate reports True.
+    api.overrides.settings = {"ingame_overlay_enabled": True}
+    assert api._settings()["ingame_overlay_enabled"] is True
+    assert api.ingame_overlay_enabled() is True
 
-    # Toggling off persists without clobbering unrelated settings.
+    # Toggling on persists without clobbering unrelated settings.
     api.overrides.settings = {"interface_style": "classic"}
     api.overrides.save_settings.reset_mock()
-    assert api.save_settings({"overlays_enabled": False}) == {"ok": True}
+    assert api.save_settings({"ingame_overlay_enabled": True}) == {"ok": True}
     api.overrides.save_settings.assert_called_once_with({
         "interface_style": "classic",
-        "overlays_enabled": False,
+        "ingame_overlay_enabled": True,
     })
 
 

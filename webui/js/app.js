@@ -109,7 +109,7 @@
     report: null,
     settings: {
       rank: 'Platinum+', region: 'World', auto_role: true, trigger: 'hover',
-      phosphor: 'amber', interface_style: 'standard', overlays_enabled: true, score_v2_beta: true,
+      phosphor: 'amber', interface_style: 'standard', ingame_overlay_enabled: false, score_v2_beta: true,
       score_v2_beta_sources: [], score_v2_beta_error: '', autostart: false
     }
   };
@@ -419,7 +419,7 @@
     $('setPhosphor').textContent = (standardInterface() ? titleCase(s.phosphor) : s.phosphor) + ' ▾';
     [
       [$('setAutoRole'), !!s.auto_role],
-      [$('setOverlays'), s.overlays_enabled !== false],
+      [$('setIngameOverlay'), s.ingame_overlay_enabled === true],
       [$('setScoreV2Beta'), !!s.score_v2_beta],
       [$('setAutostart'), !!s.autostart]
     ].forEach(([el, enabled]) => {
@@ -428,11 +428,11 @@
       const classic = el.querySelector('.classic-toggle');
       if (classic) classic.textContent = enabled ? '[x]' : '[ ]';
     });
-    const overlaysStatus = $('overlaysStatus');
-    if (overlaysStatus) {
-      overlaysStatus.textContent = (s.overlays_enabled !== false)
-        ? '# on: painted over league · off: window only'
-        : '# window-only mode · recs shown in this window';
+    const ingameOverlayStatus = $('ingameOverlayStatus');
+    if (ingameOverlayStatus) {
+      ingameOverlayStatus.textContent = (s.ingame_overlay_enabled === true)
+        ? '# on: painted over the live game'
+        : '# off: live cues shown in this window instead';
     }
     const betaSources = Array.isArray(s.score_v2_beta_sources)
       ? s.score_v2_beta_sources : [];
@@ -1035,9 +1035,9 @@
       state.settings.score_v2_beta = !state.settings.score_v2_beta;
       renderSettings();
     });
-    $('setOverlays').addEventListener('click', () => {
-      state.settings.overlays_enabled = state.settings.overlays_enabled === false;
-      if (window.API.ready()) window.API.call('save_settings', { overlays_enabled: state.settings.overlays_enabled });
+    $('setIngameOverlay').addEventListener('click', () => {
+      state.settings.ingame_overlay_enabled = state.settings.ingame_overlay_enabled !== true;
+      if (window.API.ready()) window.API.call('save_settings', { ingame_overlay_enabled: state.settings.ingame_overlay_enabled });
       renderSettings();
     });
     $('setAutostart').addEventListener('click', () => {

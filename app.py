@@ -77,8 +77,7 @@ def main():
     overlay_ctl = OverlayController(
         state_provider=api.get_overlay_state,
         should_show=lambda: bool(getattr(api, "running", False)
-                                 and getattr(api, "in_champ_select", False)
-                                 and api.overlays_enabled()),
+                                 and getattr(api, "in_champ_select", False)),
         on_visibility=api._on_overlay_visibility,
     )
     api.overlay_ctl = overlay_ctl
@@ -95,7 +94,7 @@ def main():
         state_provider=api.get_ingame_overlay_state,
         should_show=lambda: bool(getattr(api, "running", False)
                                  and getattr(api, "in_game", False)
-                                 and api.overlays_enabled()),
+                                 and api.ingame_overlay_enabled()),
         shop_detector=shop_detector,
         on_visibility=api._on_ingame_overlay_visibility,
     )

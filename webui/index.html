@@ -229,12 +229,12 @@
               <div class="settings-group">
                 <div class="comment"><span class="classic-copy"># overlays</span><span class="standard-copy">Overlays</span></div>
                 <div class="crow">
-                  <span class="k"><span class="classic-copy">overlays_enabled</span><span class="standard-setting"><strong>In-client overlays</strong><small>Draw recommendations over League. Turn off for window-only mode if overlays get blocked (e.g. after a Riot Vanguard update).</small></span></span>
+                  <span class="k"><span class="classic-copy">ingame_overlay</span><span class="standard-setting"><strong>In-game overlay</strong><small>Draw gold, item, and skill cues over the live game. The champion-select overlay is not affected. Off by default while a Riot Vanguard update is blocking in-game app overlays.</small></span></span>
                   <span class="setting-eq">=</span>
-                  <span class="vlit setting-switch" id="setOverlays" data-set="overlays_enabled" role="switch" aria-checked="true" tabindex="0" aria-label="Show in-client overlays">
+                  <span class="vlit setting-switch" id="setIngameOverlay" data-set="ingame_overlay_enabled" role="switch" aria-checked="false" tabindex="0" aria-label="Show the in-game overlay">
                     <span class="classic-toggle">[ ]</span><span class="standard-toggle" aria-hidden="true"><i></i></span>
                   </span>
-                  <span class="note" id="overlaysStatus"># on: painted over league · off: window only</span>
+                  <span class="note" id="ingameOverlayStatus"># off: live cues shown in this window instead</span>
                 </div>
                 <div class="crow">
                   <span class="k"><span class="classic-copy">shop_detection</span><span class="standard-setting"><strong>Shop detection</strong><small>Item recs show only while the shop is open. Start a game, open the shop, then calibrate. Requires Borderless.</small></span></span>
